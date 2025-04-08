@@ -18,8 +18,8 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  username: postgres
-  password: password
+  username: <%= ENV.fetch("FLUKE_BASE_DATABASE_USERNAME") %>
+  password: <%= ENV.fetch("FLUKE_BASE_DATABASE_PASSWORD") %>
 
 development:
   <<: *default
@@ -83,9 +83,7 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: fluke_base_production
-    username: fluke_base
-    password: <%= ENV["FLUKE_BASE_DATABASE_PASSWORD"] %>
+    DATABASE_URL: <%= ENV["DATABASE_URL"] %>
   cache:
     <<: *primary_production
     database: fluke_base_production_cache
