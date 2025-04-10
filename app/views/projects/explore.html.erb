@@ -1,0 +1,109 @@
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+  <div class="px-4 py-6 sm:px-0">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-semibold text-gray-900">Explore Projects</h1>
+      
+      <%= form_with url: explore_projects_path, method: :get, class: "flex space-x-2" do |f| %>
+        <%= f.text_field :search, value: params[:search], placeholder: "Search projects...", class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        
+        <%= f.select :category, 
+            [["All Categories", ""], 
+             ["Technology", "Technology"], 
+             ["Health", "Health"], 
+             ["Education", "Education"],
+             ["Finance", "Finance"],
+             ["Other", "Other"]],
+            { selected: params[:category] },
+            { class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+            
+        <%= f.select :collaboration_type, 
+            [["All Types", ""], 
+             ["Looking for Mentor", "mentor"], 
+             ["Looking for Co-Founder", "co_founder"]],
+            { selected: params[:collaboration_type] },
+            { class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+        
+        <%= f.submit "Search", class: "inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
+      <% end %>
+    </div>
+    
+    <% if @projects.any? %>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <% @projects.each do |project| %>
+          <div class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+            <div class="min-w-0 flex-1">
+              <div class="flex justify-between items-start">
+                <span class="absolute inset-0" aria-hidden="true"></span>
+                <h3 class="text-sm font-medium text-gray-900"><%= link_to project.name, project_path(project) %></h3>
+                
+                <div class="flex flex-col items-end space-y-1">
+                  <% if project.category.present? %>
+                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                      <%= project.category %>
+                    </span>
+                  <% end %>
+                  
+                  <% if project.collaboration_type.present? %>
+                    <% if project.seeking_mentor? %>
+                      <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-700/10">
+                        Seeking Mentor
+                      </span>
+                    <% end %>
+                    
+                    <% if project.seeking_cofounder? %>
+                      <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                        Seeking Co-Founder
+                      </span>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+              
+              <p class="mt-1 text-sm text-gray-500 line-clamp-2"><%= project.description %></p>
+              
+              <div class="mt-2 flex items-center">
+                <div class="flex-shrink-0">
+                  <span class="inline-block h-8 w-8 overflow-hidden rounded-full bg-gray-100">
+                    <svg class="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </span>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-gray-700">
+                    <%= project.user.full_name %>
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    Created <%= time_ago_in_words(project.created_at) %> ago
+                  </p>
+                </div>
+              </div>
+              
+              <div class="mt-3 flex items-center">
+                <%= link_to project_path(project), class: "text-sm text-indigo-600 hover:text-indigo-900" do %>
+                  View Details <span aria-hidden="true">&rarr;</span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <% if @projects.respond_to?(:total_pages) && @projects.total_pages > 1 %>
+        <div class="mt-6">
+          <%= paginate @projects %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <div class="px-4 py-12 text-center text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No projects found</h3>
+          <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filters.</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div> 

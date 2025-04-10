@@ -1,0 +1,78 @@
+<div class="bg-white shadow sm:rounded-lg mb-6">
+  <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+    <div>
+      <h3 class="text-lg font-medium leading-6 text-gray-900">Profile Information</h3>
+      <p class="mt-1 text-sm text-gray-500">Personal details and roles.</p>
+    </div>
+    <div>
+      <%= link_to "Edit Profile", profile_edit_path, class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+    </div>
+  </div>
+  <div class="border-t border-gray-200">
+    <dl>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Full name</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user.full_name %></dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Email address</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user.email %></dd>
+      </div>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Roles</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <% if @roles.present? %>
+            <div class="flex flex-wrap gap-2">
+              <% @roles.each do |role| %>
+                <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  <%= role.name.humanize %>
+                </span>
+              <% end %>
+            </div>
+            <div class="mt-2">
+              <%= link_to "Manage Roles", roles_path, class: "text-sm text-indigo-600 hover:text-indigo-900" %>
+            </div>
+          <% else %>
+            <span class="text-gray-500">No roles assigned</span>
+            <div class="mt-2">
+              <%= link_to "Request Role", roles_path, class: "text-sm text-indigo-600 hover:text-indigo-900" %>
+            </div>
+          <% end %>
+        </dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<div class="bg-white shadow sm:rounded-lg">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg font-medium leading-6 text-gray-900">Account Statistics</h3>
+    <p class="mt-1 text-sm text-gray-500">Your activity on FlukeBase.</p>
+  </div>
+  <div class="border-t border-gray-200">
+    <dl>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Projects</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <%= @user.projects.count %>
+          <% if @user.projects.any? %>
+            (<%= link_to "View All", projects_path, class: "text-indigo-600 hover:text-indigo-900" %>)
+          <% end %>
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Agreements</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <%= @user.all_agreements.count %>
+          <% if @user.all_agreements.any? %>
+            (<%= link_to "View All", agreements_path, class: "text-indigo-600 hover:text-indigo-900" %>)
+          <% end %>
+        </dd>
+      </div>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Member Since</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user.created_at.strftime("%B %d, %Y") %></dd>
+      </div>
+    </dl>
+  </div>
+</div>

@@ -1,0 +1,99 @@
+<h1>Mentors#show</h1>
+<p>Find me in app/views/mentors/show.html.erb</p>
+
+<div class="bg-white shadow-sm rounded-lg overflow-hidden">
+  <div class="px-4 py-5 sm:px-6 bg-indigo-50">
+    <div class="flex items-center">
+      <div class="flex-shrink-0 h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center">
+        <% if @mentor.avatar.attached? %>
+          <%= image_tag @mentor.avatar, class: "h-16 w-16 rounded-full" %>
+        <% else %>
+          <svg class="h-10 w-10 text-indigo-300" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        <% end %>
+      </div>
+      <div class="ml-4">
+        <h3 class="text-xl font-medium leading-6 text-gray-900"><%= @mentor.full_name %></h3>
+        <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 border border-indigo-200">
+          Mentor
+        </span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="col-span-2">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">About</h3>
+        <p class="text-sm text-gray-500">
+          <%= @mentor.bio || "Experienced professional ready to provide mentorship and guidance." %>
+        </p>
+        
+        <div class="mt-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Expertise</h3>
+          <div class="flex flex-wrap gap-2">
+            <% ["Ruby", "Rails", "JavaScript", "React", "UI/UX", "Marketing"].sample(5).each do |skill| %>
+              <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700">
+                <%= skill %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+        
+        <div class="mt-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Experience</h3>
+          <div class="space-y-4">
+            <div>
+              <h4 class="text-sm font-medium text-gray-900">Lead Developer</h4>
+              <p class="text-sm text-gray-500">Tech Company • 2018 - Present</p>
+              <p class="text-sm text-gray-500 mt-1">Led development of multiple web applications using Ruby on Rails and React.</p>
+            </div>
+            <div>
+              <h4 class="text-sm font-medium text-gray-900">Senior Software Engineer</h4>
+              <p class="text-sm text-gray-500">Tech Startup • 2015 - 2018</p>
+              <p class="text-sm text-gray-500 mt-1">Developed and maintained software applications for clients.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Connect with <%= @mentor.first_name %></h3>
+          
+          <div class="space-y-3">
+            <%= button_to message_mentor_path(@mentor), method: :post, class: "w-full flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z"></path>
+              </svg>
+              Send Message
+            <% end %>
+            
+            <% if @can_propose_agreement %>
+              <%= button_to propose_agreement_mentor_path(@mentor), method: :post, class: "w-full flex items-center justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Propose Agreement
+              <% end %>
+            <% end %>
+          </div>
+          
+          <div class="mt-6">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">Hourly Rate</h4>
+            <p class="text-2xl font-bold text-gray-900">$75-150<span class="text-sm font-normal text-gray-500">/hour</span></p>
+          </div>
+          
+          <div class="mt-4">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">Availability</h4>
+            <div class="flex items-center">
+              <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+              <span class="text-sm text-gray-500">Available for new mentorships</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

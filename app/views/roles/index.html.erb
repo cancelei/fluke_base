@@ -1,0 +1,79 @@
+<div class="bg-white shadow sm:rounded-lg mb-6">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg font-medium leading-6 text-gray-900">Your Roles</h3>
+    <p class="mt-1 text-sm text-gray-500">View and manage your current roles.</p>
+  </div>
+  <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+    <% if @user_roles.present? %>
+      <ul class="divide-y divide-gray-200">
+        <% @user_roles.each do |role| %>
+          <li class="py-4 flex justify-between items-center">
+            <div>
+              <h4 class="text-lg font-medium text-gray-900"><%= role.name.humanize %></h4>
+              <p class="mt-1 text-sm text-gray-500">
+                <% case role.name %>
+                <% when Role::ENTREPRENEUR %>
+                  Create and manage projects, seek mentorship, and find co-founders.
+                <% when Role::MENTOR %>
+                  Provide guidance to entrepreneurs and help them succeed.
+                <% when Role::CO_FOUNDER %>
+                  Partner with entrepreneurs on specific ventures.
+                <% end %>
+              </p>
+            </div>
+            <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Active</span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-gray-500">You don't have any roles assigned yet.</p>
+    <% end %>
+  </div>
+</div>
+
+<div class="bg-white shadow sm:rounded-lg">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg font-medium leading-6 text-gray-900">Available Roles</h3>
+    <p class="mt-1 text-sm text-gray-500">Request additional roles if you meet the requirements.</p>
+  </div>
+  <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+    <% available_roles = @roles.reject { |r| @user_roles.include?(r) } %>
+    
+    <% if available_roles.present? %>
+      <ul class="divide-y divide-gray-200">
+        <% available_roles.each do |role| %>
+          <li class="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
+            <div class="mb-4 md:mb-0 md:pr-4">
+              <h4 class="text-lg font-medium text-gray-900"><%= role.name.humanize %></h4>
+              <p class="mt-1 text-sm text-gray-500">
+                <% case role.name %>
+                <% when Role::ENTREPRENEUR %>
+                  Create and manage projects, seek mentorship, and find co-founders.
+                <% when Role::MENTOR %>
+                  Provide guidance to entrepreneurs and help them succeed.
+                  <br><span class="font-medium">Requirements:</span> Complete at least one project or have a project running for 6+ months.
+                <% when Role::CO_FOUNDER %>
+                  Partner with entrepreneurs on specific ventures.
+                  <br><span class="font-medium">Requirements:</span> Be a mentor with at least one active mentorship running for 3+ months.
+                <% end %>
+              </p>
+            </div>
+            <div>
+              <% if @eligible_roles[role.name] %>
+                <%= button_to request_role_path(role_name: role.name), method: :post, class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" do %>
+                  Request Role
+                <% end %>
+              <% else %>
+                <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
+                  Not Eligible Yet
+                </span>
+              <% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-gray-500">You already have all available roles.</p>
+    <% end %>
+  </div>
+</div>

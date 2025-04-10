@@ -1,0 +1,156 @@
+<%= form_with(model: project, class: "space-y-6") do |form| %>
+  <% if project.errors.any? %>
+    <div class="bg-red-50 p-4 rounded-md">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            <%= pluralize(project.errors.count, "error") %> prohibited this project from being saved:
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <ul class="list-disc pl-5 space-y-1">
+              <% project.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+    <div class="sm:col-span-6">
+      <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <%= form.text_field :name, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+    </div>
+
+    <div class="sm:col-span-3">
+      <%= form.label :stage, class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <%= form.select :stage, 
+            [
+              ["Idea", Project::IDEA], 
+              ["Prototype", Project::PROTOTYPE],
+              ["Launched", Project::LAUNCHED],
+              ["Scaling", Project::SCALING]
+            ],
+            {}, 
+            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+      </div>
+    </div>
+
+    <div class="sm:col-span-3">
+      <%= form.label :category, class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <%= form.select :category, 
+            [
+              ["Technology", "Technology"], 
+              ["Health", "Health"], 
+              ["Education", "Education"],
+              ["Finance", "Finance"],
+              ["Entertainment", "Entertainment"],
+              ["E-commerce", "E-commerce"],
+              ["AI/ML", "AI/ML"],
+              ["Blockchain", "Blockchain"],
+              ["Social", "Social"],
+              ["Other", "Other"]
+            ],
+            { include_blank: "Select a category" }, 
+            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+      </div>
+    </div>
+
+    <div class="sm:col-span-6">
+      <%= form.label :collaboration_type, "Looking For", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <%= form.select :collaboration_type, 
+            [
+              ["Mentor", Project::SEEKING_MENTOR], 
+              ["Co-Founder", Project::SEEKING_COFOUNDER],
+              ["Both Mentor and Co-Founder", Project::SEEKING_BOTH]
+            ],
+            { include_blank: "Select what you're looking for" }, 
+            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">Indicate what type of collaboration you're seeking</p>
+    </div>
+
+    <div class="sm:col-span-6">
+      <%= form.label :description, class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <%= form.text_area :description, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">Give a detailed description of your project idea</p>
+    </div>
+
+    <div class="sm:col-span-6">
+      <h3 class="text-lg font-medium leading-6 text-gray-900 mb-3">Additional Details</h3>
+      <p class="mt-1 text-sm text-gray-500 mb-4">These details help mentors understand your project better</p>
+    </div>
+
+    <div class="sm:col-span-6">
+      <%= form.label :current_stage, "Current Project Stage", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <%= form.text_field :current_stage, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">Describe your project's current development stage in more detail</p>
+    </div>
+
+    <div class="sm:col-span-6">
+      <%= form.label :target_market, "Target Market", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <%= form.text_area :target_market, rows: 3, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">Describe your target audience or customer base</p>
+    </div>
+
+    <div class="sm:col-span-3">
+      <%= form.label :funding_status, "Funding Status", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <%= form.select :funding_status, 
+            [
+              ["Bootstrapped", "Bootstrapped"], 
+              ["Seeking Funding", "Seeking Funding"],
+              ["Pre-seed", "Pre-seed"],
+              ["Seed", "Seed"],
+              ["Series A", "Series A"],
+              ["Series B+", "Series B+"],
+              ["Profitable", "Profitable"]
+            ],
+            { include_blank: "Select funding status" }, 
+            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+      </div>
+    </div>
+
+    <div class="sm:col-span-3">
+      <%= form.label :team_size, "Team Size", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <%= form.select :team_size, 
+            [
+              ["Solo Founder", "Solo Founder"], 
+              ["2-5 people", "2-5 people"],
+              ["6-10 people", "6-10 people"],
+              ["11-25 people", "11-25 people"],
+              ["26-50 people", "26-50 people"],
+              ["50+ people", "50+ people"]
+            ],
+            { include_blank: "Select team size" }, 
+            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="pt-5">
+    <div class="flex justify-end">
+      <%= link_to "Cancel", projects_path, class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      <%= form.submit class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+  </div>
+<% end %> 

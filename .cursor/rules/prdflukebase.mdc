@@ -1,0 +1,613 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# FlukeBase Platform
+
+## Overview
+
+FlukeBase is a platform designed to facilitate interactions between entrepreneurs, mentors, and co-founders. It creates a structured environment where users can seamlessly transition between roles, formalize work agreements, and establish both short and long-term professional relationships.
+
+The platform mediates co-founder agreements, retaining a small percentage of transactions as compensation for tracking and managing projects. This tracking includes periodic communication with all parties, data collection, and the creation of visual progress dashboards with actionable insights and projected deadlines.
+
+## Contents
+
+1. [Product Roadmap Description](#product-roadmap-description)
+2. [UI/UX Wireframes](#uiux-wireframes)
+3. [Database Schema](#database-schema)
+
+## Product Roadmap Description
+
+### 1. Executive Summary
+
+This document outlines the comprehensive product roadmap for FlukeBase, a platform designed to facilitate interactions between entrepreneurs, mentors, and co-founders. The platform aims to create a structured environment where users can seamlessly transition between roles, formalize work agreements, and establish both short and long-term professional relationships. 
+
+The core value proposition is enabling entrepreneurs to find guidance, mentors to offer their expertise at appropriate rates, and facilitating the natural progression from mentorship to co-founding relationships when appropriate. FlukeBase will focus primarily on governing work agreements and tracking performance metrics rather than serving as a productivity suite.
+
+FlukeBase will mediate co-founder agreements, retaining a small percentage of transactions as compensation for tracking and managing projects. This tracking includes periodic communication with all parties, data collection, and the creation of visual progress dashboards with actionable insights and projected deadlines.
+
+### 2. User Roles & Permissions
+
+#### 2.1 Core User Roles
+
+| Role | Primary Functions | Progression Possibilities |
+|------|------------------|--------------------------|
+| **Entrepreneur** | Create projects, seek mentorship, propose collaborations | Can become a mentor once certain criteria are met (e.g., successful project completion, platform tenure > 1 year) |
+| **Mentor** | Provide guidance, set hourly rates, accept/decline mentorship requests | Can transition to co-founder status or maintain long-term mentorships |
+| **Co-Founder** | Deep collaboration with entrepreneurs on specific ventures | Can maintain separate mentor relationships with other entrepreneurs |
+
+#### 2.2 Multi-Role Capabilities
+
+- Users can hold multiple roles simultaneously (e.g., be a mentor in one project while seeking mentorship as an entrepreneur in another)
+- Role selection during signup determines initial dashboard view and available functions
+- Role switching will be available via the main navigation interface
+- Activity history and reputation metrics will be role-specific but visible across user profiles
+- Each role has its own profile section with relevant metrics and qualification indicators
+- Users can manage multiple active agreements across different roles from a unified dashboard
+
+#### 2.3 Role Transition Requirements
+
+| Transition | Requirements | System Changes |
+|------------|--------------|---------------|
+| Entrepreneur → Mentor | • Complete at least 1 project as entrepreneur<br>• Verify professional credentials<br>• Create mentor profile with expertise areas<br>• Set availability and rates | • New dashboard view option<br>• Access to mentor-specific features<br>• Appears in mentor search results |
+| Mentor → Co-Founder | • Existing mentorship relationship<br>• Mutual agreement with entrepreneur<br>• Completion of co-founder questionnaire<br>• Legal documentation | • Co-founder dashboard access<br>• Equity tracking tools<br>• Partnership analytics<br>• Shared business metrics |
+| Co-Founder → Mentor (new relationship) | • Active co-founder status<br>• Available capacity<br>• Define separate mentorship terms | • Segmented dashboard views<br>• Separate agreement tracking<br>• Clear relationship boundaries |
+
+### 3. User Journey & Core Flows
+
+#### 3.1 Onboarding Process
+
+##### Entrepreneur Onboarding
+1. Sign up and select "Entrepreneur" as primary role
+2. Complete profile with focus on:
+   - Business ideas and current stage (concept, prototype, revenue-generating)
+   - Industry and market sector
+   - Specific mentorship needs (business planning, technical, marketing, funding)
+   - Timeline and budget constraints
+3. Guided tour of project creation interface
+4. Recommendation of potential mentors based on needs and industry
+5. Access to entrepreneur-specific resources and agreement templates
+
+##### Mentor Onboarding
+1. Sign up and select "Mentor" as primary role
+2. Complete detailed profile with:
+   - Expertise areas with proficiency levels
+   - Professional experience and achievements
+   - Industry specializations
+   - Mentorship philosophy and approach
+3. Set availability calendar and hourly rate (with option for tiered service packages)
+4. Option to apply for verification/certification (increases visibility and trust)
+5. Access to mentor-specific resources and best practices
+6. Opportunity to join mentor communities within the platform
+
+##### Transitioning from Entrepreneur to Mentor
+1. Access "Become a Mentor" option from entrepreneur dashboard
+2. Complete additional profile sections focused on expertise areas
+3. Verification of qualifications and experience
+4. Setting of availability and service rates
+5. Review and approval process by platform (if applicable)
+6. Access to mentor dashboard and features
+
+##### Co-Founder Onboarding (from Mentor Status)
+1. Access "Co-Founder Transition" option within an existing mentorship
+2. Complete additional profile fields focused on:
+   - Investment capacity (time, financial, network)
+   - Long-term commitment expectations
+   - Equity requirements and contribution valuation
+   - Business vision alignment with entrepreneur
+3. Legal agreement templates made available
+4. Equity arrangement questionnaire and documentation tools
+5. Transition meetings scheduling tools
+6. Access to co-founder-specific dashboard features upon agreement finalization
+
+#### 3.2 Mentorship Establishment Flow
+
+1. Entrepreneur creates project with clear objectives:
+   - Project name and description
+   - Business stage (idea, MVP, growth, scaling)
+   - Primary goals and expected outcomes
+   - Timeline expectations
+   - Budget parameters
+   
+2. Entrepreneur searches for mentors or receives system recommendations based on:
+   - Industry alignment
+   - Expertise requirements
+   - Budget compatibility
+   - Availability matching
+   - Rating thresholds
+   
+3. Entrepreneur sends mentorship request specifying:
+   - Project context and background
+   - Mentorship type:
+     - Short-term consultation (1-3 sessions)
+     - Fixed-term project (specific deliverables)
+     - Long-term relationship (ongoing guidance)
+   - Proposed compensation structure:
+     - Hourly rate (with estimated hours)
+     - Fixed project fee
+     - Milestone-based payments
+     - Equity consideration (for specific scenarios)
+   
+4. Mentor receives request with ability to:
+   - Accept as proposed
+   - Counter-propose with modifications to:
+     - Rate or compensation structure
+     - Timeline or commitment level
+     - Scope of work
+     - Meeting frequency
+   - Decline with reason (for platform analytics)
+   
+5. Negotiation process continues until:
+   - Both parties agree to terms
+   - Maximum negotiation rounds reached (platform defined)
+   - Either party terminates discussion
+   
+6. Upon agreement:
+   - System creates shared project workspace
+   - Agreement terms are formalized
+   - Calendar invites for initial meetings are generated
+   - Payment method is confirmed
+   - Metrics tracking begins
+
+#### 3.3 Mentor to Co-Founder Transition Flow
+
+1. Either party can initiate co-founder discussion within existing mentorship
+   - Mentor can indicate interest through "Propose Co-Founder Relationship" option
+   - Entrepreneur can send a co-founder invitation via project dashboard
+2. System provides transition checklist and documentation requirements:
+   - Business plan review
+   - Equity distribution proposal
+   - Roles and responsibilities definition
+   - Financial commitment expectations
+   - Exit strategy considerations
+3. Both parties complete co-founding intention questionnaire covering:
+   - Vision alignment
+   - Time commitment
+   - Financial contribution
+   - Expertise contribution
+   - Decision-making preferences
+   - Conflict resolution approach
+4. Legal template suggestions based on questionnaire results
+   - Standard co-founder agreement
+   - Vesting schedule options
+   - IP assignment provisions
+   - Non-compete considerations
+5. Formal co-founder agreement signing (integrated with digital signature)
+6. Project workspace transforms to include co-founder specific tools:
+   - Equity tracking dashboard
+   - Business metrics visualization
+   - Shared resource allocation tools
+   - Long-term roadmap planning features
+
+#### 3.4 Maintaining Multiple Roles Flow
+
+1. User accesses "Role Manager" from main dashboard
+2. Views all active roles and associated projects/relationships
+3. Can toggle between role-specific views:
+   - Entrepreneur view shows mentors and co-founders
+   - Mentor view shows entrepreneurs being mentored
+   - Co-founder view shows business partnerships
+4. System provides clear separation between different relationship types
+5. Notification preferences can be set per role
+6. Calendar integration shows role-specific commitments with clear distinction
+7. Financial dashboards segment earnings and expenses by role
+8. Performance metrics are tracked separately but visible holistically
+
+### 4. Core Platform Features
+
+#### 4.1 User Dashboard
+
+**Entrepreneur View:**
+- Active and past mentorship relationships with status indicators
+- Project status overview with milestone tracking
+- Mentor recommendations based on profile and project needs
+- Pending requests and proposals with negotiation status
+- Payment history and upcoming obligations
+- Progress metrics toward business goals
+- Path to mentor qualification (if applicable)
+
+**Mentor View:**
+- Active mentorship commitments with agreement terms
+- Pending requests from entrepreneurs with priority indicators
+- Availability calendar with booking status
+- Earnings overview and projections by project
+- Client feedback and ratings with response options
+- Performance metrics compared to platform averages
+- Co-founder opportunities within active mentorships
+
+**Co-Founder View:**
+- Venture performance metrics with historical trends
+- Partnership agreement details with milestone tracking
+- Equity distribution visualization and vesting status
+- Shared resource management tools
+- Business development KPIs
+- Relationship health indicators
+- Mentorship opportunities with other entrepreneurs
+
+**Multi-Role Dashboard:**
+- Role switcher with notification indicators for each role
+- Aggregated calendar showing all commitments across roles
+- Combined financial overview (earnings as mentor, expenses as entrepreneur)
+- Activity stream filtered by active role
+- Quick access to all active agreements
+- Relationship network visualization
+
+#### 4.2 Projects Management
+
+- **Projects Tab:** Central hub for tracking mentorship agreements and milestones
+- **Activity Timeline:** Chronological view of all project-related actions
+- **Agreement History:** Tracking of all work agreements and their status
+- **Milestone Tracking:** Setting and monitoring of key project milestones
+- **Document Repository:** Storage for all agreement-related documents
+- **Meeting Scheduler:** Basic calendar for scheduling sessions
+- **Performance Metrics:** Data visualization of key mentorship outcomes
+
+#### 4.3 Negotiation & Compensation System
+
+- **Rate Display:** Transparent presentation of mentor's hourly rates
+- **Counter-Proposal System:** Structured interface for negotiating terms
+- **Rate Comparison Tool:** Market rate data for informed negotiations
+- **Payment Integration:** Secure payment processing system
+- **Escrow Option:** For larger engagements or milestone-based payment
+- **Automated Invoicing:** Generation of professional invoices
+- **Payment History:** Complete record of all financial transactions
+- **Fee Structure:** Transparent display of FlukeBase's mediation fees for different agreement types
+- **Revenue Distribution:** Automated system for handling payment splits according to agreement terms
+
+#### 4.4 Communication Tools
+
+- **Messaging System:** Direct messaging between connected users
+- **Video Call Links:** Integration with external video conferencing tools
+- **Notification System:** Customizable alerts for important activities
+- **Agreement Updates:** Automated notifications for changes in work status
+- **Rate Change Alerts:** Notifications for any fee structure modifications
+- **Calendar Integration:** Seamless synchronization of project-related events across participants' calendars while maintaining privacy controls
+
+#### 4.5 Reputation & Trust Mechanisms
+
+- **Verification System:** Identity and credential verification
+- **Rating & Review:** Post-engagement feedback collection
+- **Success Stories:** Showcasing of successful collaborations
+- **Endorsements:** Skill-specific endorsements from previous collaborations
+- **Activity Metrics:** Transparency on response times and engagement levels
+
+#### 4.6 Calendar Synchronization System
+
+- **Multi-Platform Integration:** Seamless synchronization with major calendar providers (Google, Outlook, Apple)
+- **Bidirectional Updates:** Changes made in either the platform or external calendars automatically sync
+- **Privacy Controls:** Granular settings for what information is shared when events are synced:
+  - Project name visibility options (full, abbreviated, or coded)
+  - Participant information control (which contact details are shared)
+  - Notes and attachment privacy settings
+- **Transparency Settings:**
+  - Clear indicators of which events are visible to which participants
+  - Audit logs of calendar changes and synchronization events
+  - Notifications when participants modify shared calendar items
+- **Integrity Preservation:**
+  - Version control for meeting details and agendas
+  - Participant confirmation requirements for significant changes
+  - Protected time blocks for committed mentorship sessions
+- **Scheduling Features:**
+  - Availability matching across participants' calendars
+  - Suggested meeting times based on historical patterns
+  - Buffer time settings between consecutive meetings
+  - Time zone intelligent scheduling
+- **Integration with Agreements:**
+  - Automatic scheduling based on agreement terms (e.g., weekly sessions)
+  - Meeting frequency enforcement based on agreement type
+  - Visual indicators for sessions that fulfill agreement requirements
+
+#### 4.7 Agreement Mediation & Project Tracking
+
+- **Agreement Mediation:**
+  - FlukeBase serves as official mediator for all co-founder agreements
+  - Platform retains a small percentage fee from transactions for mediation services
+  - Digital contract repository with legal compliance verification
+  - Amendment process with mutual consent requirements
+  - Dispute resolution framework with escalation options
+
+- **Automated Tracking System:**
+  - Scheduled email communications to all parties at key milestones and intervals
+  - Custom data collection forms tailored to agreement type and project stage
+  - Response rate monitoring with automatic reminders
+  - Historical data preservation for accountability
+  - Structured status updates with validation mechanisms
+
+- **Progress Visualization:**
+  - Real-time dashboards showing project status and health
+  - Customizable KPI tracking specific to project goals
+  - Milestone completion visualization with trend analysis
+  - Comparative metrics against baseline projections
+  - Early warning indicators for at-risk projects
+
+- **Action Management:**
+  - Recommended next steps based on current project status
+  - Assignment of responsibility for pending actions
+  - Due date tracking with escalating notifications
+  - Action completion verification process
+  - Impact assessment of completed actions
+
+- **Timeline Projections:**
+  - AI-assisted deadline forecasting based on current progress
+  - Scenario planning for different execution paths
+  - Critical path visualization for interdependent milestones
+  - Buffer management for timeline adjustments
+  - Historical accuracy tracking of previous projections
+
+### 5. Technical Requirements
+
+#### 5.1 Platform Architecture
+
+- Responsive web application with mobile optimization built with:
+  - Ruby on Rails backend
+  - Tailwind CSS for responsive UI
+  - PostgreSQL database
+- Cloud-based infrastructure with emphasis on security and scalability
+- Focus on work agreement governance and metrics tracking
+- API-first approach to enable future integrations
+- Automated email system for project tracking and user engagement
+- Data analytics pipeline for dashboard visualization
+
+#### 5.2 Security Requirements
+
+- End-to-end encryption for all communications
+- Multi-factor authentication
+- Role-based access controls
+- Regular security audits and penetration testing
+- GDPR and other relevant compliance measures
+- Secure document storage with versioning
+- Secure handling of sensitive agreement terms and financial data
+
+#### 5.3 Integration Requirements
+
+- Calendar systems (Google, Outlook, Apple) with bidirectional synchronization
+- Video conferencing tools (Zoom, Meet, Teams)
+- Digital signature services
+- Payment processors
+- Document cloud storage services
+- CRM systems for enterprise users
+
+### 6. Development Roadmap
+
+#### 6.1 Phase 1: Core Platform Launch (Q3 2025)
+
+- Basic user accounts with multi-role capability
+- Profile creation and management
+- Mentor discovery and connection
+- Simple project workspace
+- Direct messaging
+- Basic payment processing
+
+#### 6.2 Phase 2: Enhanced Collaboration (Q1 2026)
+
+- Advanced agreement management tools
+- External tool integrations
+- Improved metrics and reporting
+- Expanded mentor matching algorithm
+- Enhanced negotiation interface
+- Progressive Web App capabilities for better mobile experience
+
+#### 6.3 Phase 3: Co-Founder Transition (Q3 2026)
+
+- Legal document templates and workflows
+- Equity management tools
+- Partnership analytics dashboard
+- Advanced success tracking metrics
+- Integration with external business services
+
+#### 6.4 Phase 4: Enterprise & Scaling (Q1 2027)
+
+- Enterprise accounts for accelerators and incubators
+- Group mentorship capabilities
+- Advanced analytics and reporting
+- API for third-party integrations
+- White-label options
+
+### 7. Success Metrics
+
+#### 7.1 User Engagement Metrics
+
+- User growth rate by role category
+- Active mentorship relationships
+- Agreement compliance rate
+- Project tracking response rate
+- Feature utilization statistics
+- Email communication open and response rates
+- Dashboard engagement frequency
+
+#### 7.2 Business Metrics
+
+- Mentor retention rate
+- Successful mentor-to-co-founder transitions
+- Transaction volume
+- Platform fee revenue
+- Revenue by agreement type (mentorship vs. co-founding)
+- Mediation service utilization
+- Premium feature adoption
+
+#### 7.3 Satisfaction Metrics
+
+- Net Promoter Score by user role
+- Post-mentorship satisfaction ratings
+- Feature-specific feedback scores
+- Support ticket resolution metrics
+- User churn analysis
+
+### 8. Open Questions & Considerations
+
+1. **Equity Handling:** How deeply should the platform be involved in equity arrangements between co-founders?
+   
+2. **Dispute Resolution:** What mechanisms should be in place to handle disputes between mentors and entrepreneurs?
+   
+3. **Service Tiers:** Should premium features be available for higher subscription tiers or on a pay-per-use basis?
+   
+4. **Geographic Considerations:** How will the platform address different legal requirements across jurisdictions?
+   
+5. **Knowledge Base Integration:** Should the platform offer educational resources alongside the mentorship capabilities?
+
+### 9. Appendix
+
+#### 9.1 User Persona Examples
+
+##### Entrepreneur Persona: "Sara the Startup Founder"
+- First-time founder with technical background
+- Seeking guidance on business model validation and fundraising
+- Limited budget but willing to consider equity arrangements
+- Needs structured mentorship with clear milestones
+
+##### Mentor Persona: "Michael the Marketing Expert"
+- 15+ years in digital marketing for startups
+- Specific expertise in go-to-market strategy
+- Currently mentoring 3-5 entrepreneurs
+- Charges $150-200/hour for consultations
+
+##### Co-Founder Persona: "David the Business Developer"
+- Previously mentored 10+ startups
+- Looking for opportunities to join promising ventures
+- Brings networking and sales expertise
+- Typically seeks 15-20% equity in early-stage startups
+
+#### 9.2 UI/UX Wireframes
+
+The following wireframes illustrate key user interfaces of the FlukeBase platform:
+
+1. **Signup Screen** - The entry point where users select their initial role
+2. **Entrepreneur Dashboard** - Primary view for entrepreneurs showing mentorships and recommendations
+3. **Project Details** - Detailed view of a project with progress tracking
+4. **Rate Negotiation Interface** - Tool for entrepreneurs to propose terms to mentors
+5. **Co-Founder Transition Flow** - Step-by-step process for evolving a mentorship into a co-founding relationship
+
+#### 9.3 Database Entity Relationship Diagram
+
+A comprehensive entity relationship diagram showing the extensible database design that will support FlukeBase through all phases of development.
+
+## UI/UX Wireframes
+
+### Signup Screen Wireframe
+
+The signup screen serves as the entry point to FlukeBase, featuring:
+
+- Clean, minimalist design with the FlukeBase logo prominently displayed in the header
+- Form fields for essential user information (full name, email address, password)
+- A role selector allowing users to choose their primary role (entrepreneur, mentor, or co-founder)
+- Clear call-to-action button ("Create Account") to complete the registration process
+- The design uses ample white space and a focused layout to minimize cognitive load during onboarding
+
+This interface establishes the foundation for the multi-role system, as users will select their initial role here but can add additional roles later.
+
+### Entrepreneur Dashboard Wireframe
+
+The entrepreneur dashboard provides a comprehensive overview of the user's mentorship activities:
+
+- Persistent sidebar navigation with quick access to core platform sections
+- Role switcher in the header allowing users to toggle between their active roles
+- Welcome message with personalization
+- "Active Mentorships" section displaying cards for current mentorship relationships, each showing:
+  - Project name
+  - Mentor name
+  - Next scheduled session
+  - Visual progress indicator
+- "Upcoming Sessions" section with a calendar preview showing the next scheduled meetings
+- "Recommended Mentors" section suggesting potential mentors based on the entrepreneur's profile and needs
+
+This dashboard centralizes all critical information entrepreneurs need to manage their mentorship relationships and discover new opportunities.
+
+### Project Details Wireframe
+
+The project details screen provides in-depth information about a specific mentorship project:
+
+- Clear project title and navigation tabs (Overview, Agreement, Milestones, Meetings, Documents)
+- Project status card showing overall progress and current status tag
+- Project details card displaying key information (start date, projected end date)
+- Mentor information card with profile picture and expertise area
+- Next milestone section highlighting the upcoming deliverable with:
+  - Title and description
+  - Due date
+  - Completion percentage
+  - Action button to update progress
+- Recent activity feed showing the latest interactions related to the project
+
+This interface gives entrepreneurs a comprehensive view of their project's status and facilitates ongoing management of mentorship activities.
+
+### Rate Negotiation Wireframe
+
+The rate negotiation screen facilitates the proposal of mentorship terms:
+
+- Mentor card displaying the potential mentor's profile information and standard hourly rate
+- Project selection dropdown to associate the proposal with a specific project
+- Mentorship type selection with radio buttons for different engagement models:
+  - Short-term consultation
+  - Fixed-term project
+  - Long-term relationship
+- Proposed hourly rate input field with comparison to the mentor's standard rate
+- Market rate reference panel showing average rates for similar mentorship arrangements
+- Action buttons to send the proposal or cancel the process
+
+This interface streamlines the negotiation process and provides contextual information to help entrepreneurs make informed proposals.
+
+### Co-Founder Transition Wireframe
+
+The co-founder transition screen guides users through the process of evolving a mentorship into a co-founding relationship:
+
+- Progress indicator showing the four-step process (Intent, Terms, Agreement, Finalize)
+- Current step highlighted to orient the user in the workflow
+- Co-founder terms form with:
+  - Equity distribution input field with suggested range
+  - Vesting schedule selection
+  - Roles and responsibilities section
+- Navigation buttons to move forward or backward in the process
+- Clear instructions and contextual help throughout the flow
+
+This interface ensures that the transition from mentor to co-founder follows a structured process with appropriate documentation and mutual understanding.
+
+## Database Schema
+
+The database schema for FlukeBase is designed to be extensible and scalable, supporting the platform's evolution through all development phases. The entity relationship diagram illustrates the following key aspects:
+
+### Core User Management
+
+- **USERS**: Central table storing basic user information independent of roles
+- **USER_ROLES**: Supports multiple roles per user with role-specific relationships
+- **PROFILES**: Base profile information with extensions for specific roles:
+  - **ENTREPRENEUR_PROFILES**: Entrepreneur-specific profile information
+  - **MENTOR_PROFILES**: Mentor-specific data including rates and verification status
+  - **COFOUNDER_PROFILES**: Co-founder-specific details like investment capacity
+
+### Project & Agreement Structure
+
+- **PROJECTS**: Created by entrepreneurs to organize mentorship activities
+- **AGREEMENTS**: Base agreement structure with specialized types:
+  - **MENTORSHIPS**: Details specific to mentorship agreements
+  - **COFOUNDING_AGREEMENTS**: Terms specific to co-founder relationships
+- **MILESTONES**: Trackable objectives within projects with completion metrics
+- **PROJECT_PARTICIPANTS**: Tracks all users involved in a project and their roles
+
+### Communication & Collaboration
+
+- **MEETINGS**: Scheduled interactions between project participants
+- **MEETING_PARTICIPANTS**: Junction table connecting users to meetings
+- **MESSAGES**: Direct communication between users in the context of projects
+- **NOTIFICATIONS**: System and user-generated alerts
+- **CALENDAR_EVENTS**: Supports calendar synchronization with privacy controls
+
+### Financial Management
+
+- **PAYMENT_TRANSACTIONS**: Records all financial exchanges including platform fees
+- **RATE_NEGOTIATIONS**: Tracks the proposal and counter-proposal process
+
+### Tracking & Analytics
+
+- **PROJECT_TRACKING**: Stores periodic project status updates and metrics
+- **AUDIT_LOGS**: Records system actions for accountability and compliance
+- **SYSTEM_SETTINGS**: Platform-wide configuration parameters
+
+The schema employs several design patterns to ensure extensibility:
+
+1. **Table Inheritance Pattern**: Base tables like AGREEMENTS with specialized extensions
+2. **Junction Tables**: For many-to-many relationships like PROJECT_PARTICIPANTS
+3. **Flexible Data Structures**: Strategic use of jsonb fields for evolving data requirements
+4. **Temporal Tracking**: Created_at/updated_at fields across all tables for historical analysis
+5. **Status-Based Workflows**: Status fields to track progression through business processes
+
+This database design provides a solid foundation that can evolve alongside the platform's feature set while maintaining data integrity and performance.

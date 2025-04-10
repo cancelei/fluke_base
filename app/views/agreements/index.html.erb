@@ -1,0 +1,249 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <div class="sm:flex sm:items-center mb-8">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold leading-6 text-gray-900">Agreements</h1>
+      <p class="mt-2 text-sm text-gray-700">
+        View and manage your mentorship and co-founder agreements.
+      </p>
+    </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <%= link_to "Back to Projects", projects_path, class: "inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    </div>
+  </div>
+  
+  <!-- Entrepreneur Agreements -->
+  <div class="bg-white shadow sm:rounded-lg mb-8">
+    <div class="px-4 py-5 sm:px-6 flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-medium text-gray-900">Your Projects</h2>
+        <p class="mt-1 text-sm text-gray-500">Agreements where you are the entrepreneur</p>
+      </div>
+      <% if current_user.projects.any? %>
+        <div class="dropdown">
+          <button class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            <span>New Agreement</span>
+            <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          <div class="dropdown-menu hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100">
+            <div class="py-1">
+              <% current_user.projects.each do |project| %>
+                <%= link_to "For #{project.name}", new_agreement_path(project_id: project.id), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <%= link_to "Create Project First", new_project_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+      <% end %>
+    </div>
+    
+    <% if @entrepreneur_agreements.any? %>
+      <div class="overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mentor</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+              <th scope="col" class="relative px-6 py-3">
+                <span class="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @entrepreneur_agreements.each do |agreement| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= link_to agreement.project.name, agreement.project, class: "text-indigo-600 hover:text-indigo-900" %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900"><%= agreement.agreement_type %></div>
+                  <% if agreement.payment_type %>
+                    <div class="text-xs text-gray-500"><%= agreement.payment_type %></div>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900"><%= agreement.mentor.full_name %></div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% case agreement.status %>
+                  <% when Agreement::PENDING %>
+                    <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
+                      Pending
+                    </span>
+                  <% when Agreement::ACTIVE %>
+                    <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                      Active
+                    </span>
+                  <% when Agreement::COMPLETED %>
+                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                      Completed
+                    </span>
+                  <% when Agreement::REJECTED %>
+                    <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+                      Rejected
+                    </span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= agreement.start_date.strftime("%b %d, %Y") %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <%= link_to "View", agreement, class: "text-indigo-600 hover:text-indigo-900" %>
+                  
+                  <% if agreement.pending? %>
+                    <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 text-indigo-600 hover:text-indigo-900" %>
+                    <%= link_to "Cancel", agreement_path(agreement), method: :delete, data: { confirm: "Are you sure you want to cancel this agreement?" }, class: "ml-3 text-red-600 hover:text-red-900" %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-12 bg-white">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No agreements</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by creating a new agreement for one of your projects.</p>
+        <% if current_user.projects.any? %>
+          <div class="mt-6">
+            <%= link_to "New Agreement", new_agreement_path(project_id: current_user.projects.first.id), class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          </div>
+        <% else %>
+          <div class="mt-6">
+            <%= link_to "Create Project First", new_project_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Mentor Agreements -->
+  <div class="bg-white shadow sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h2 class="text-lg font-medium text-gray-900">Your Mentorships</h2>
+      <p class="mt-1 text-sm text-gray-500">Agreements where you are the mentor or co-founder</p>
+    </div>
+    
+    <% if @mentor_agreements.any? %>
+      <div class="overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrepreneur</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+              <th scope="col" class="relative px-6 py-3">
+                <span class="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @mentor_agreements.each do |agreement| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    <% if agreement.active? || agreement.completed? %>
+                      <%= link_to agreement.project.name, agreement.project, class: "text-indigo-600 hover:text-indigo-900" %>
+                    <% else %>
+                      <span class="text-gray-500"><%= agreement.project.name %></span>
+                      <span class="text-xs text-gray-400">(limited access)</span>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900"><%= agreement.agreement_type %></div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900"><%= agreement.entrepreneur.full_name %></div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% case agreement.status %>
+                  <% when Agreement::PENDING %>
+                    <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
+                      Pending
+                    </span>
+                  <% when Agreement::ACTIVE %>
+                    <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                      Active
+                    </span>
+                  <% when Agreement::COMPLETED %>
+                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                      Completed
+                    </span>
+                  <% when Agreement::REJECTED %>
+                    <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+                      Rejected
+                    </span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if agreement.payment_type.present? %>
+                    <div class="text-sm text-gray-900">
+                      <%= agreement.payment_type %>
+                      <% if agreement.payment_type == Agreement::HOURLY || agreement.payment_type == Agreement::HYBRID %>
+                        <span class="text-xs text-gray-500">($<%= number_with_precision(agreement.hourly_rate, precision: 2) %>/hr)</span>
+                      <% end %>
+                      <% if agreement.payment_type == Agreement::EQUITY || agreement.payment_type == Agreement::HYBRID %>
+                        <span class="text-xs text-gray-500">(<%= number_with_precision(agreement.equity_percentage, precision: 2) %>% equity)</span>
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <span class="text-xs text-gray-500">Not specified</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <%= link_to "View", agreement, class: "text-indigo-600 hover:text-indigo-900" %>
+                  
+                  <% if agreement.pending? %>
+                    <%= button_to "Accept", accept_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+                    <%= button_to "Decline", reject_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="text-center py-12 bg-white">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No mentorships</h3>
+        <p class="mt-1 text-sm text-gray-500">You haven't been invited to mentor any projects yet.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function() {
+    // Simple dropdown toggle
+    document.querySelector('.dropdown button')?.addEventListener('click', function() {
+      const menu = document.querySelector('.dropdown-menu');
+      menu.classList.toggle('hidden');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const dropdown = document.querySelector('.dropdown');
+      const isClickInside = dropdown?.contains(event.target);
+      
+      if (!isClickInside) {
+        document.querySelector('.dropdown-menu')?.classList.add('hidden');
+      }
+    });
+  });
+</script>
