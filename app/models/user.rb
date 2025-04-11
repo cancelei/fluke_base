@@ -30,6 +30,9 @@ class User < ApplicationRecord
   has_many :received_conversations, class_name: "Conversation", foreign_key: "recipient_id", dependent: :destroy
   has_many :messages, dependent: :destroy
 
+  # Avatar
+  has_one_attached :avatar
+
   # Validations
   validates :first_name, :last_name, presence: true
 
@@ -117,6 +120,20 @@ class User < ApplicationRecord
   # Return all agreements (both as entrepreneur and mentor)
   def all_agreements
     Agreement.where("entrepreneur_id = ? OR mentor_id = ?", id, id)
+  end
+
+  def avatar_url
+    if avatar.attached?
+      avatar
+    else
+      # Generate initials avatar and convert to base64 data URL
+      avatar = LetterAvatar.generate("#{first_name} #{last_name}", 200)
+      "data:image/png;base64,#{Base64.strict_encode64(File.read(avatar))}"
+    end
+  end
+
+  def initials
+    "#{first_name&.first}#{last_name&.first}".upcase
   end
 
   private

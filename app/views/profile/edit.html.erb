@@ -4,7 +4,7 @@
     <p class="mt-1 text-sm text-gray-500">Update your personal information.</p>
   </div>
   
-  <%= form_with(model: @user, url: profile_update_path, method: :patch, class: "mx-auto mt-4") do |form| %>
+  <%= form_with(model: @user, url: profile_update_path, method: :patch, class: "mx-auto mt-4", multipart: true) do |form| %>
     <% if @user.errors.any? %>
       <div class="bg-red-50 p-4 rounded-md mb-6">
         <div class="flex">
@@ -28,6 +28,23 @@
     <% end %>
 
     <div class="space-y-6">
+      <div class="flex items-center space-x-4">
+        <div class="flex-shrink-0">
+          <% if @user.avatar.attached? %>
+            <%= image_tag @user.avatar, class: "h-16 w-16 rounded-full" %>
+          <% else %>
+            <img src="<%= @user.avatar_url %>" class="h-16 w-16 rounded-full" />
+          <% end %>
+        </div>
+        <div class="flex-1">
+          <%= form.label :avatar, "Profile Picture", class: "block text-sm font-medium leading-6 text-gray-900" %>
+          <div class="mt-2">
+            <%= form.file_field :avatar, accept: "image/*", class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" %>
+          </div>
+          <p class="mt-1 text-sm text-gray-500">Upload a profile picture or we'll use your initials</p>
+        </div>
+      </div>
+
       <div>
         <%= form.label :first_name, class: "block text-sm font-medium leading-6 text-gray-900" %>
         <div class="mt-2">

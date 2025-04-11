@@ -11,10 +11,20 @@
   <div class="border-t border-gray-200">
     <dl>
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Profile Picture</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <% if @user.avatar.attached? %>
+            <%= image_tag @user.avatar, class: "h-16 w-16 rounded-full" %>
+          <% else %>
+            <img src="<%= @user.avatar_url %>" class="h-16 w-16 rounded-full" />
+          <% end %>
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Full name</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user.full_name %></dd>
       </div>
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Email address</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user.email %></dd>
       </div>

@@ -90,3 +90,5 @@ gem "kaminari", "~> 1.2"
 gem "cancancan", "~> 3.6"
 
 gem "tailwindcss-ruby", "~> 4.1"
+
+gem "letter_avatar"
