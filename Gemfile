@@ -16,6 +16,8 @@ gem "turbo-rails"
 gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
+# Use Tailwind CSS for styling
+gem "tailwindcss-rails"
 
 # Authentication
 gem "devise"
@@ -86,3 +88,5 @@ gem "cssbundling-rails", "~> 1.4"
 gem "kaminari", "~> 1.2"
 
 gem "cancancan", "~> 3.6"
+
+gem "tailwindcss-ruby", "~> 4.1"
