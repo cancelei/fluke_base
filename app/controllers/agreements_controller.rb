@@ -37,8 +37,19 @@ class AgreementsController < ApplicationController
   end
 
   def new
-    @project = Project.find(params[:project_id])
-    @agreement = Agreement.new(project: @project)
+    @agreement = Agreement.new
+    @agreement.mentor_id = params[:mentor_id] if params[:mentor_id].present?
+
+    # Set the selected project if project_id is provided
+    if params[:project_id].present?
+      @project = current_user.projects.find_by(id: params[:project_id])
+      session[:selected_project_id] = @project.id if @project
+    end
+
+    # Set the mentor if mentor_id is provided
+    if params[:mentor_id].present?
+      @mentor = User.find(params[:mentor_id])
+    end
 
     # Handle counter offers
     if params[:counter_to_id].present?
@@ -78,27 +89,58 @@ class AgreementsController < ApplicationController
       @agreement.entrepreneur_id = current_user.id
       @mentor_initiated = false
 
-      # Get potential mentors (users with mentor role that are not already in an agreement for this project)
-      @potential_mentors = User.with_role(:mentor)
-                              .where.not(id: @project.agreements.pluck(:mentor_id))
+      # Only check for potential mentors if no specific mentor is selected
+      unless @agreement.mentor_id.present?
+        # Get potential mentors (users with mentor role that are not already in an agreement for this project)
+        @potential_mentors = User.with_role(:mentor)
+                                .where.not(id: @project.agreements.pluck(:mentor_id))
 
-      if @potential_mentors.empty? && !@is_counter_offer
-        # If no mentors are available, redirect with a flash message
-        redirect_to projects_path, alert: "No mentors are currently available for this project. Please try again later or invite someone to join as a mentor."
-        return
+        if @potential_mentors.empty? && !@is_counter_offer
+          # If no mentors are available, redirect with a flash message
+          redirect_to projects_path, alert: "No mentors are currently available for this project. Please try again later or invite someone to join as a mentor."
+          nil
+        end
       end
-    end
-
-    # If mentor_id is provided in URL params, pre-select that mentor
-    if params[:mentor_id].present?
-      @agreement.mentor_id = params[:mentor_id]
     end
   end
 
   def edit
+    # Set the project and mentor for the view
     @project = @agreement.project
-    @potential_mentors = User.with_role(:mentor)
-                            .where.not(id: @project.agreements.where.not(id: @agreement.id).pluck(:mentor_id))
+    @mentor = @agreement.mentor
+    session[:selected_project_id] = @project.id
+
+    # Handle counter offers
+    if params[:counter_to_id].present?
+      @original_agreement = Agreement.find(params[:counter_to_id])
+
+      # Only allow counter offers for pending agreements
+      unless @original_agreement.pending?
+        redirect_to agreement_path(@original_agreement), alert: "You can only make counter offers to pending agreements."
+        return
+      end
+
+      # Pre-fill data from the original agreement
+      @agreement.project_id = @original_agreement.project_id
+      @agreement.mentor_id = @original_agreement.mentor_id
+      @agreement.entrepreneur_id = @original_agreement.entrepreneur_id
+      @agreement.agreement_type = @original_agreement.agreement_type
+      @agreement.payment_type = @original_agreement.payment_type
+      @agreement.start_date = @original_agreement.start_date
+      @agreement.end_date = @original_agreement.end_date
+      @agreement.weekly_hours = @original_agreement.weekly_hours
+      @agreement.hourly_rate = @original_agreement.hourly_rate
+      @agreement.equity_percentage = @original_agreement.equity_percentage
+      @agreement.tasks = @original_agreement.tasks
+      @agreement.terms = @original_agreement.terms
+
+      @is_counter_offer = true
+    else
+      @is_counter_offer = false
+    end
+
+    # Ensure mentor is loaded even if it's a counter offer
+    @mentor = @agreement.mentor if @mentor.nil?
   end
 
   def create
@@ -186,6 +228,11 @@ class AgreementsController < ApplicationController
     # Store the old payment type to check if it changed
     old_payment_type = @agreement.payment_type
 
+    # Set the project and mentor for the view
+    @project = @agreement.project
+    @mentor = @agreement.mentor
+    session[:selected_project_id] = @project.id
+
     respond_to do |format|
       # Set default values based on payment type if needed
       agreement_attributes = agreement_params
@@ -216,9 +263,6 @@ class AgreementsController < ApplicationController
         format.html { redirect_to @agreement, notice: "Agreement was successfully updated." }
         format.json { render :show, status: :ok, location: @agreement }
       else
-        @project = @agreement.project
-        @potential_mentors = User.with_role(:mentor)
-                                .where.not(id: @project.agreements.where.not(id: @agreement.id).pluck(:mentor_id))
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @agreement.errors, status: :unprocessable_entity }
       end

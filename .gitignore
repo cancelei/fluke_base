@@ -31,8 +31,6 @@
 
 # Ignore public folder except for system directory
 /public/*
-!/public/system
-!/public/system/.keep
 
 /public/assets
 /public/packs
@@ -65,3 +63,6 @@ yarn-debug.log*
 
 # Ignore Spring files
 /spring/*.pid
+
+/app/assets/builds/*
+!/app/assets/builds/.keep

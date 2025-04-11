@@ -2,5 +2,4 @@
 //= link_directory ../stylesheets .css
 //= link_tree ../../javascript .js
 //= link_tree ../../../vendor/javascript .js
-//= link application.css
-//= link tailwind.css 
+//= link application.tailwind.css //= link_tree ../builds

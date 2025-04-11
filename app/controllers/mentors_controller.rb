@@ -26,6 +26,12 @@ class MentorsController < ApplicationController
     # Find projects owned by the current user
     @projects = current_user.projects
 
+    # Check if a project is selected
+    unless selected_project
+      redirect_to projects_path, alert: "Please select a project before proposing an agreement."
+      return
+    end
+
     # Create a new agreement with the mentor
     @agreement = Agreement.new(
       mentor_id: @mentor.id,
@@ -34,7 +40,10 @@ class MentorsController < ApplicationController
     )
 
     # Redirect to the new agreement form with mentor pre-filled
-    redirect_to new_agreement_path(mentor_id: @mentor.id)
+    redirect_to new_agreement_path(
+      mentor_id: @mentor.id,
+      project_id: selected_project.id
+    )
   end
 
   private

@@ -23,7 +23,7 @@
     </div>
   <% end %>
 
-  <%= form.hidden_field :project_id %>
+  <%= form.hidden_field :project_id, value: @project.id %>
   <%= hidden_field_tag :mentor_initiated, @mentor_initiated if @mentor_initiated %>
   
   <% if @mentor_initiated %>
@@ -106,23 +106,38 @@
       <p class="mt-1 text-sm text-gray-500">Estimated hours of work per week</p>
     </div>
 
-    <div class="sm:col-span-6">
+    <div class="sm:col-span-6" data-controller="agreement-form">
       <%= form.label :payment_type, "Payment Type", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1 space-y-2">
         <div class="flex items-center">
-          <%= form.radio_button :payment_type, Agreement::HOURLY, data: { action: "click->agreement#togglePaymentFields" }, class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
+          <%= form.radio_button :payment_type, Agreement::HOURLY, 
+              data: { 
+                action: "change->agreement-form#togglePaymentFields",
+                agreement_form_target: "paymentType"
+              }, 
+              class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
           <label for="agreement_payment_type_hourly" class="ml-3 block text-sm font-medium text-gray-700">
             Hourly Rate
           </label>
         </div>
         <div class="flex items-center">
-          <%= form.radio_button :payment_type, Agreement::EQUITY, data: { action: "click->agreement#togglePaymentFields" }, class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
+          <%= form.radio_button :payment_type, Agreement::EQUITY, 
+              data: { 
+                action: "change->agreement-form#togglePaymentFields",
+                agreement_form_target: "paymentType"
+              }, 
+              class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
           <label for="agreement_payment_type_equity" class="ml-3 block text-sm font-medium text-gray-700">
             Equity Only
           </label>
         </div>
         <div class="flex items-center">
-          <%= form.radio_button :payment_type, Agreement::HYBRID, data: { action: "click->agreement#togglePaymentFields" }, class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
+          <%= form.radio_button :payment_type, Agreement::HYBRID, 
+              data: { 
+                action: "change->agreement-form#togglePaymentFields",
+                agreement_form_target: "paymentType"
+              }, 
+              class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
           <label for="agreement_payment_type_hybrid" class="ml-3 block text-sm font-medium text-gray-700">
             Hybrid (Hourly + Equity)
           </label>
@@ -130,14 +145,14 @@
       </div>
     </div>
 
-    <div class="sm:col-span-3 hourly-field">
+    <div class="sm:col-span-3 hourly-field" data-agreement-form-target="hourlyField">
       <%= form.label :hourly_rate, "Hourly Rate (USD)", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1">
         <%= form.number_field :hourly_rate, min: 0, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
       </div>
     </div>
 
-    <div class="sm:col-span-3 equity-field">
+    <div class="sm:col-span-3 equity-field" data-agreement-form-target="equityField">
       <%= form.label :equity_percentage, "Equity Percentage (%)", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1">
         <%= form.number_field :equity_percentage, min: 0.01, max: 99.99, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
@@ -167,37 +182,4 @@
       <%= form.submit class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
     </div>
   </div>
-<% end %>
-
-<script>
-  document.addEventListener('turbo:load', function() {
-    function togglePaymentFields() {
-      var paymentType = document.querySelector('input[name="agreement[payment_type]"]:checked')?.value;
-      var hourlyFields = document.querySelectorAll('.hourly-field');
-      var equityFields = document.querySelectorAll('.equity-field');
-      
-      if (paymentType === '<%= Agreement::HOURLY %>') {
-        hourlyFields.forEach(field => field.style.display = 'block');
-        equityFields.forEach(field => field.style.display = 'none');
-      } else if (paymentType === '<%= Agreement::EQUITY %>') {
-        hourlyFields.forEach(field => field.style.display = 'none');
-        equityFields.forEach(field => field.style.display = 'block');
-      } else if (paymentType === '<%= Agreement::HYBRID %>') {
-        hourlyFields.forEach(field => field.style.display = 'block');
-        equityFields.forEach(field => field.style.display = 'block');
-      } else {
-        // Default: hide all payment fields until user selects a payment type
-        hourlyFields.forEach(field => field.style.display = 'none');
-        equityFields.forEach(field => field.style.display = 'none');
-      }
-    }
-    
-    // Set initial state
-    togglePaymentFields();
-    
-    // Add event listeners to payment type radio buttons
-    document.querySelectorAll('input[name="agreement[payment_type]"]').forEach(function(radio) {
-      radio.addEventListener('change', togglePaymentFields);
-    });
-  });
-</script> 
+<% end %> 

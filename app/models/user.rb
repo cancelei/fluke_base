@@ -136,20 +136,25 @@ class User < ApplicationRecord
     "#{first_name&.first}#{last_name&.first}".upcase
   end
 
+  def selected_project
+    # This method is used by the navbar and other views to get the currently selected project
+    # The actual project selection is managed by ApplicationController#set_selected_project
+    # which stores the project_id in the session
+    nil # The actual project is set by the controller
+  end
+
   private
 
   def normalize_role_name(role_name)
-    role_name = role_name.to_s
-
-    # Check if matches one of our standard role names
-    if role_name.downcase == Role::ENTREPRENEUR.downcase
+    case role_name.to_s.downcase
+    when "entrepreneur", "founder"
       Role::ENTREPRENEUR
-    elsif role_name.downcase == Role::MENTOR.downcase
+    when "mentor", "advisor"
       Role::MENTOR
-    elsif role_name.downcase == Role::CO_FOUNDER.downcase
+    when "co-founder", "cofounder"
       Role::CO_FOUNDER
     else
-      role_name
+      role_name.to_s
     end
   end
 end
