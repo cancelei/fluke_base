@@ -1,0 +1,7 @@
+<% if notice %>
+  <%= render 'shared/flash_message', type: :notice, message: notice %>
+<% end %>
+
+<% if alert %>
+  <%= render 'shared/flash_message', type: :alert, message: alert %>
+<% end %> 

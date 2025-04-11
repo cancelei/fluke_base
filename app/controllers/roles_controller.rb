@@ -19,10 +19,13 @@ class RolesController < ApplicationController
     if Role.exists?(name: role_name)
       role_manager = RoleManager.new(current_user)
 
-      if role_manager.add_role(role_name)
-        redirect_to roles_path, notice: "You now have the #{role_name.humanize} role."
+      if role_manager.eligible_for_role?(role_name)
+        current_user.add_role(role_name)
+        redirect_to role_manager.onboarding_path_for_role(role_name),
+                    notice: "You now have the #{role_name.humanize} role."
       else
-        redirect_to roles_path, alert: "You don't meet the requirements for the #{role_name.humanize} role yet."
+        redirect_to roles_path,
+                    alert: "You don't meet the requirements for the #{role_name.humanize} role yet."
       end
     else
       redirect_to roles_path, alert: "Invalid role requested."

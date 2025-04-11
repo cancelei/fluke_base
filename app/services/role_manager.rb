@@ -7,26 +7,15 @@ class RoleManager
 
   # Add a role to the user if they meet the requirements
   def add_role(role_name)
-    case role_name
-    when Role::ENTREPRENEUR
-      # Anyone can become an entrepreneur
-      add_entrepreneur_role
-    when Role::MENTOR
-      # To become a mentor, a user must be an entrepreneur with at least one completed project
-      add_mentor_role
-    when Role::CO_FOUNDER
-      # To become a co-founder, a user must be in a mentor relationship
-      add_co_founder_role
-    else
-      false
-    end
+    return false unless eligible_for_role?(role_name)
+    @user.add_role(role_name)
   end
 
   # Check if a user is eligible for a specific role
   def eligible_for_role?(role_name)
     case role_name
     when Role::ENTREPRENEUR
-      true # Anyone can be an entrepreneur
+      eligible_for_entrepreneur_role?
     when Role::MENTOR
       eligible_for_mentor_role?
     when Role::CO_FOUNDER
@@ -36,20 +25,22 @@ class RoleManager
     end
   end
 
+  def onboarding_path_for_role(role_name)
+    case role_name
+    when Role::ENTREPRENEUR, Role::CO_FOUNDER
+      onboarding_entrepreneur_path
+    when Role::MENTOR
+      onboarding_mentor_path
+    else
+      dashboard_path
+    end
+  end
+
   private
 
-  def add_entrepreneur_role
-    user.add_role(Role::ENTREPRENEUR)
-  end
-
-  def add_mentor_role
-    return false unless eligible_for_mentor_role?
-    user.add_role(Role::MENTOR)
-  end
-
-  def add_co_founder_role
-    return false unless eligible_for_co_founder_role?
-    user.add_role(Role::CO_FOUNDER)
+  def eligible_for_entrepreneur_role?
+    # Anyone can be an entrepreneur
+    true
   end
 
   def eligible_for_mentor_role?
@@ -57,7 +48,6 @@ class RoleManager
     # 1. User is an entrepreneur
     # 2. Has at least one project that's been active for more than 6 months
     # OR has completed a project
-
     return false unless user.has_role?(Role::ENTREPRENEUR)
 
     six_months_ago = 6.months.ago.to_date
@@ -77,7 +67,6 @@ class RoleManager
     # Eligible if:
     # 1. User is a mentor
     # 2. Has at least one active mentorship agreement that's been active for more than 3 months
-
     return false unless user.has_role?(Role::MENTOR)
 
     three_months_ago = 3.months.ago.to_date

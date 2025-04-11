@@ -14,27 +14,26 @@ class NotificationService
 
     return false unless notification.save
 
-    # You could add real-time notification delivery here, e.g., with ActionCable
-    # This would be a good place to broadcast to a notification channel
-    # broadcast_notification(notification) if notification.persisted?
-
+    broadcast_notification(notification)
     notification
   end
 
   private
 
   def broadcast_notification(notification)
-    # Example of potential ActionCable implementation:
-    # ActionCable.server.broadcast("notifications_#{user.id}",
-    #   notification: render_notification(notification)
-    # )
+    ActionCable.server.broadcast(
+      "notifications_#{user.id}",
+      {
+        html: render_notification(notification),
+        unread_count: user.notifications.unread.count
+      }
+    )
   end
 
   def render_notification(notification)
-    # This could render a partial with ApplicationController.renderer
-    # ApplicationController.renderer.render(
-    #   partial: 'notifications/notification',
-    #   locals: { notification: notification }
-    # )
+    ApplicationController.renderer.render(
+      partial: "notifications/notification",
+      locals: { notification: notification }
+    )
   end
 end

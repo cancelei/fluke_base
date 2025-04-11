@@ -167,7 +167,7 @@
           <% end %>
         </div>
         
-        <% if @milestones.any? %>
+        <% if @milestones&.any? %>
           <div class="bg-white shadow overflow-hidden sm:rounded-md">
             <ul class="divide-y divide-gray-200">
               <% @milestones.each do |milestone| %>
@@ -203,10 +203,8 @@
             </ul>
           </div>
         <% else %>
-          <div class="bg-white shadow overflow-hidden sm:rounded-md">
-            <div class="px-4 py-5 sm:p-6 text-center text-gray-500">
-              <p>No milestones have been added to this project yet.</p>
-            </div>
+          <div class="bg-white shadow overflow-hidden sm:rounded-md p-4">
+            <p class="text-gray-500 text-center">No milestones have been added yet.</p>
           </div>
         <% end %>
       </div>

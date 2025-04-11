@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  include Roleable
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -11,9 +13,6 @@ class User < ApplicationRecord
   attr_accessor :role_id
 
   # Relationships
-  has_many :user_roles, dependent: :destroy
-  has_many :roles, through: :user_roles
-
   has_many :projects, dependent: :destroy
   has_many :notifications, dependent: :destroy
 
@@ -50,74 +49,6 @@ class User < ApplicationRecord
     notifications.unread.count
   end
 
-  def has_role?(role_name)
-    # Normalize the role name to match one of our standard roles
-    normalized_name = normalize_role_name(role_name)
-    roles.exists?(name: normalized_name)
-  end
-
-  def add_role(role_name)
-    # Normalize the role name to match one of our standard roles
-    normalized_name = normalize_role_name(role_name)
-    role = Role.find_or_create_by(name: normalized_name)
-    user_roles.find_or_create_by(role: role)
-    true
-  end
-
-  def remove_role(role_name)
-    # Normalize the role name to match one of our standard roles
-    normalized_name = normalize_role_name(role_name)
-    role = Role.find_by(name: normalized_name)
-    user_roles.where(role: role).destroy_all if role
-  end
-
-  def onboarded_for?(role_name)
-    # Normalize the role name to match one of our standard roles
-    normalized_name = normalize_role_name(role_name)
-    role = Role.find_by(name: normalized_name)
-    return false unless role
-    user_roles.where(role: role, onboarded: true).exists?
-  end
-
-  def mark_onboarded_for(role_name)
-    # Normalize the role name to match one of our standard roles
-    normalized_name = normalize_role_name(role_name)
-    role = Role.find_by(name: normalized_name)
-    return false unless role
-    user_role = user_roles.find_by(role: role)
-    return false unless user_role
-    user_role.update(onboarded: true)
-  end
-
-  def requires_onboarding?
-    # Check if any role needs onboarding
-    roles.any? do |role|
-      !user_roles.find_by(role: role).onboarded
-    end
-  end
-
-  def current_onboarding_path
-    # Return the path for the first non-onboarded role
-    entrepreneur_roles = [ Role::ENTREPRENEUR, Role::CO_FOUNDER ]
-    mentor_role = Role::MENTOR
-
-    # First check entrepreneur roles
-    entrepreneur_roles.each do |role_name|
-      if has_role?(role_name) && !onboarded_for?(role_name)
-        return :entrepreneur
-      end
-    end
-
-    # Then check mentor role
-    if has_role?(mentor_role) && !onboarded_for?(mentor_role)
-      return :mentor
-    end
-
-    # Default to nil if all roles onboarded
-    nil
-  end
-
-  # Return all agreements (both as entrepreneur and mentor)
   def all_agreements
     Agreement.where("entrepreneur_id = ? OR mentor_id = ?", id, id)
   end
@@ -141,20 +72,5 @@ class User < ApplicationRecord
     # The actual project selection is managed by ApplicationController#set_selected_project
     # which stores the project_id in the session
     nil # The actual project is set by the controller
-  end
-
-  private
-
-  def normalize_role_name(role_name)
-    case role_name.to_s.downcase
-    when "entrepreneur", "founder"
-      Role::ENTREPRENEUR
-    when "mentor", "advisor"
-      Role::MENTOR
-    when "co-founder", "cofounder"
-      Role::CO_FOUNDER
-    else
-      role_name.to_s
-    end
   end
 end

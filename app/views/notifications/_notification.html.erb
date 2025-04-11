@@ -1,0 +1,27 @@
+<div class="notification <%= notification.read? ? 'bg-white' : 'bg-blue-50' %> p-4 rounded-lg shadow-sm mb-2">
+  <div class="flex items-start justify-between">
+    <div class="flex-1">
+      <div class="flex items-center">
+        <% unless notification.read? %>
+          <div class="flex-shrink-0 h-2 w-2 rounded-full bg-indigo-600 mr-2"></div>
+        <% end %>
+        <h3 class="text-sm font-medium text-gray-900">
+          <%= notification.title %>
+        </h3>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">
+        <%= notification.message %>
+      </p>
+    </div>
+    <div class="ml-4 flex-shrink-0">
+      <p class="text-xs text-gray-500">
+        <%= time_ago_in_words(notification.created_at) %> ago
+      </p>
+    </div>
+  </div>
+  <% if notification.url.present? %>
+    <div class="mt-2">
+      <%= link_to "View", notification.url, class: "text-sm text-indigo-600 hover:text-indigo-900" %>
+    </div>
+  <% end %>
+</div> 

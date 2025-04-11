@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include CanCan::ControllerAdditions
+  include Pundit::Authorization
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
   protect_from_forgery with: :exception
@@ -7,9 +8,8 @@ class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :set_selected_project
 
-  rescue_from CanCan::AccessDenied do |exception|
-    redirect_to root_path, alert: exception.message
-  end
+  rescue_from CanCan::AccessDenied, with: :user_not_authorized
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
   protected
 
@@ -46,5 +46,10 @@ class ApplicationController < ActionController::Base
   helper_method :selected_project
   def selected_project
     @selected_project
+  end
+
+  def user_not_authorized
+    flash[:alert] = "You are not authorized to perform this action."
+    redirect_back(fallback_location: root_path)
   end
 end
