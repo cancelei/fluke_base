@@ -4,6 +4,7 @@ class AgreementsController < ApplicationController
   before_action :authorize_agreement, only: [ :show, :edit, :update, :destroy ]
   before_action :check_project_ownership, only: [ :new, :create ]
   before_action :ensure_can_modify, only: [ :edit, :update, :destroy ]
+  before_action :authorize_agreement_action, only: [ :accept, :reject, :counter_offer, :cancel ]
 
   def index
     # Separate agreements based on user role
@@ -38,17 +39,19 @@ class AgreementsController < ApplicationController
 
   def new
     @agreement = Agreement.new
-    @agreement.mentor_id = params[:mentor_id] if params[:mentor_id].present?
+    @agreement.entrepreneur = current_user
+    @agreement.status = Agreement::PENDING
 
     # Set the selected project if project_id is provided
     if params[:project_id].present?
-      @project = current_user.projects.find_by(id: params[:project_id])
+      @project = Project.find(params[:project_id])
       session[:selected_project_id] = @project.id if @project
     end
 
     # Set the mentor if mentor_id is provided
     if params[:mentor_id].present?
       @mentor = User.find(params[:mentor_id])
+      @agreement.mentor_id = @mentor.id
     end
 
     # Handle counter offers
@@ -83,28 +86,17 @@ class AgreementsController < ApplicationController
     # Handle mentor initiated agreements
     if params[:mentor_initiated] && current_user.has_role?(:mentor)
       @agreement.mentor_id = current_user.id
-      @agreement.entrepreneur_id = @project.user_id
+      @agreement.entrepreneur_id = @project.user_id if @project
       @mentor_initiated = true
-    else
-      @agreement.entrepreneur_id = current_user.id
-      @mentor_initiated = false
-
-      # Only check for potential mentors if no specific mentor is selected
-      unless @agreement.mentor_id.present?
-        # Get potential mentors (users with mentor role that are not already in an agreement for this project)
-        @potential_mentors = User.with_role(:mentor)
-                                .where.not(id: @project.agreements.pluck(:mentor_id))
-
-        if @potential_mentors.empty? && !@is_counter_offer
-          # If no mentors are available, redirect with a flash message
-          redirect_to projects_path, alert: "No mentors are currently available for this project. Please try again later or invite someone to join as a mentor."
-          nil
-        end
-      end
     end
+
+    # Ensure mentor is loaded even if it's a counter offer
+    @mentor = @agreement.mentor if @mentor.nil?
   end
 
   def edit
+    authorize! :edit, @agreement
+
     # Set the project and mentor for the view
     @project = @agreement.project
     @mentor = @agreement.mentor
@@ -144,179 +136,67 @@ class AgreementsController < ApplicationController
   end
 
   def create
-    begin
-      @project = Project.find(params[:agreement][:project_id])
-      @agreement = Agreement.new(agreement_params)
+    @agreement = Agreement.new(agreement_params)
+    @agreement.entrepreneur = current_user
+    @agreement.status = Agreement::PENDING
 
-      # Handle mentor initiated agreements
-      if params[:mentor_initiated] && current_user.has_role?(:mentor)
-        @agreement.mentor = current_user
-        @agreement.entrepreneur_id = @project.user_id
-        notify_party = @agreement.entrepreneur
-        notification_message = "#{current_user.full_name} has proposed an agreement to collaborate on your project #{@project.name}"
-        @mentor_initiated = true
-      else
-        @agreement.entrepreneur = current_user
-        notify_party = @agreement.mentor
-        notification_message = "#{current_user.full_name} has proposed an agreement for you on project #{@project.name}"
-        @mentor_initiated = false
+    # Handle counter offers
+    if params[:counter_to_id].present?
+      @original_agreement = Agreement.find(params[:counter_to_id])
+      @agreement.counter_to_id = @original_agreement.id
+    end
 
-        # Get potential mentors
-        @potential_mentors = User.with_role(:mentor)
-                                .where.not(id: @project.agreements.pluck(:mentor_id))
+    if @agreement.save
+      # If this is a counter offer, update the original agreement status
+      if @original_agreement.present?
+        @original_agreement.update(status: Agreement::COUNTERED)
       end
 
-      # Handle counter offers
-      if params[:counter_to_id].present?
-        @original_agreement = Agreement.find(params[:counter_to_id])
-        is_counter_offer = true
-      else
-        is_counter_offer = false
-      end
+      # Notify the mentor about the new agreement
+      NotificationService.new(@agreement.mentor).notify(
+        title: "New Agreement Proposal",
+        message: "#{current_user.full_name} has proposed an agreement for project #{@agreement.project.name}",
+        url: agreement_path(@agreement)
+      )
 
-      # Modify notification if it's a counter offer
-      if is_counter_offer
-        notification_message = "#{current_user.full_name} has made a counter offer for project #{@project.name}"
-      end
-
-      @agreement.status = Agreement::PENDING
-
-      # Set default values based on payment type if needed
-      case @agreement.payment_type
-      when Agreement::EQUITY
-        @agreement.hourly_rate = 0 unless @agreement.hourly_rate.present?
-      when Agreement::HOURLY
-        @agreement.equity_percentage = 0 unless @agreement.equity_percentage.present?
-      end
-
-      respond_to do |format|
-        if @agreement.save
-          # If this is a counter offer, update the original agreement status
-          if is_counter_offer
-            @original_agreement.counter_offer!(@agreement)
-          end
-
-          # Notify the other party about the new agreement
-          NotificationService.new(notify_party).notify(
-            title: is_counter_offer ? "Counter Offer Received" : "New Agreement Proposal",
-            message: notification_message,
-            url: agreement_path(@agreement)
-          )
-
-          format.html { redirect_to agreements_path, notice: "#{is_counter_offer ? 'Counter offer' : 'Agreement proposal'} was successfully created and sent to #{notify_party.full_name}." }
-          format.json { render :show, status: :created, location: @agreement }
-        else
-          # When re-rendering the form after validation errors, ensure @potential_mentors is set
-          if !@mentor_initiated && @potential_mentors.nil?
-            @potential_mentors = User.with_role(:mentor)
-                                    .where.not(id: @project.agreements.pluck(:mentor_id))
-          end
-          format.html { render :new, status: :unprocessable_entity }
-          format.json { render json: @agreement.errors, status: :unprocessable_entity }
-        end
-      end
-    rescue ActiveRecord::RecordNotFound
-      respond_to do |format|
-        flash[:alert] = "Project not found. Please select a valid project."
-        format.html { redirect_to projects_path }
-        format.json { render json: { error: "Project not found" }, status: :not_found }
-      end
+      redirect_to @agreement, notice: "Agreement was successfully created."
+    else
+      # When re-rendering the form after validation errors, ensure @project and @mentor are set
+      @project = @agreement.project
+      @mentor = @agreement.mentor
+      render :new
     end
   end
 
   def update
-    # Store the old payment type to check if it changed
-    old_payment_type = @agreement.payment_type
+    authorize! :edit, @agreement
 
-    # Set the project and mentor for the view
-    @project = @agreement.project
-    @mentor = @agreement.mentor
-    session[:selected_project_id] = @project.id
-
-    respond_to do |format|
-      # Set default values based on payment type if needed
-      agreement_attributes = agreement_params
-      if agreement_attributes[:payment_type] == Agreement::EQUITY && !agreement_attributes[:hourly_rate].present?
-        agreement_attributes[:hourly_rate] = 0
-      elsif agreement_attributes[:payment_type] == Agreement::HOURLY && !agreement_attributes[:equity_percentage].present?
-        agreement_attributes[:equity_percentage] = 0
-      end
-
-      if @agreement.update(agreement_attributes)
-        # Notify the other party about the update
-        notify_party = current_user == @agreement.entrepreneur ? @agreement.mentor : @agreement.entrepreneur
-
-        notification_title = "Agreement Updated"
-        notification_message = "#{current_user.full_name} has updated the agreement for project #{@agreement.project.name}"
-
-        # Add specific details if payment type was changed
-        if old_payment_type != @agreement.payment_type
-          notification_message += ". Payment type changed from #{old_payment_type} to #{@agreement.payment_type}."
-        end
-
-        NotificationService.new(notify_party).notify(
-          title: notification_title,
-          message: notification_message,
-          url: agreement_path(@agreement)
-        )
-
-        format.html { redirect_to @agreement, notice: "Agreement was successfully updated." }
-        format.json { render :show, status: :ok, location: @agreement }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @agreement.errors, status: :unprocessable_entity }
-      end
+    if @agreement.update(agreement_params)
+      redirect_to @agreement, notice: "Agreement was successfully updated."
+    else
+      render :edit
     end
   end
 
   def destroy
+    authorize! :destroy, @agreement
     @agreement.destroy
-
-    # Notify the other party about the cancellation
-    notify_party = current_user == @agreement.entrepreneur ? @agreement.mentor : @agreement.entrepreneur
-    NotificationService.new(notify_party).notify(
-      title: "Agreement Cancelled",
-      message: "#{current_user.full_name} has cancelled the agreement for project #{@agreement.project.name}",
-      url: projects_path
-    )
-
-    respond_to do |format|
-      format.html { redirect_to agreements_url, notice: "Agreement was successfully cancelled." }
-      format.json { head :no_content }
-    end
+    redirect_to agreements_url, notice: "Agreement was successfully destroyed."
   end
 
   def accept
-    authorize! :accept, @agreement
-
     if @agreement.accept!
-      # Notify the entrepreneur
-      NotificationService.new(@agreement.entrepreneur).notify(
-        title: "Agreement Accepted",
-        message: "#{current_user.full_name} has accepted your agreement proposal for project #{@agreement.project.name}",
-        url: agreement_path(@agreement)
-      )
-
-      redirect_to @agreement, notice: "You have accepted this agreement. You now have access to the project details."
+      redirect_to @agreement, notice: "Agreement was successfully accepted."
     else
-      redirect_to @agreement, alert: "This agreement cannot be accepted."
+      redirect_to @agreement, alert: "Unable to accept agreement."
     end
   end
 
   def reject
-    authorize! :reject, @agreement
-
     if @agreement.reject!
-      # Notify the entrepreneur
-      NotificationService.new(@agreement.entrepreneur).notify(
-        title: "Agreement Rejected",
-        message: "#{current_user.full_name} has declined your agreement proposal for project #{@agreement.project.name}",
-        url: agreement_path(@agreement)
-      )
-
-      redirect_to @agreement, notice: "You have declined this agreement."
+      redirect_to @agreement, notice: "Agreement was successfully rejected."
     else
-      redirect_to @agreement, alert: "This agreement cannot be rejected."
+      redirect_to @agreement, alert: "Unable to reject agreement."
     end
   end
 
@@ -339,26 +219,14 @@ class AgreementsController < ApplicationController
   end
 
   def cancel
-    authorize! :cancel, @agreement
-
     if @agreement.cancel!
-      # Notify the other party
-      notify_party = current_user == @agreement.entrepreneur ? @agreement.mentor : @agreement.entrepreneur
-      NotificationService.new(notify_party).notify(
-        title: "Agreement Cancelled",
-        message: "#{current_user.full_name} has cancelled the agreement for project #{@agreement.project.name}",
-        url: agreement_path(@agreement)
-      )
-
-      redirect_to @agreement, notice: "This agreement has been cancelled."
+      redirect_to @agreement, notice: "Agreement was successfully cancelled."
     else
-      redirect_to @agreement, alert: "This agreement cannot be cancelled."
+      redirect_to @agreement, alert: "Unable to cancel agreement."
     end
   end
 
   def counter_offer
-    authorize! :counter_offer, @agreement
-
     # Create a new agreement form based on the current one
     redirect_to new_agreement_path(
       project_id: @agreement.project_id,
@@ -430,5 +298,10 @@ class AgreementsController < ApplicationController
         :tasks,
         :terms
       )
+    end
+
+    def authorize_agreement_action
+      action = params[:action].to_sym
+      authorize! action, @agreement
     end
 end

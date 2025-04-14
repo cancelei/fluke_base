@@ -3,6 +3,7 @@ class Project < ApplicationRecord
   belongs_to :user
   has_many :agreements, dependent: :destroy
   has_many :milestones, dependent: :destroy
+  has_many :mentors, through: :agreements, source: :mentor
 
   # Validations
   validates :name, presence: true

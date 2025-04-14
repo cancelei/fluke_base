@@ -4,8 +4,31 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def show?
-    # Users can view projects they own or are associated with
-    record.user == user || record.mentors.include?(user) || record.co_founders.include?(user)
+    # Users can view projects they own
+    return true if record.user == user
+
+    # Users with active agreements can view full project details
+    if record.agreements.exists?([
+      "(entrepreneur_id = :user_id OR mentor_id = :user_id) AND status = :status",
+      { user_id: user.id, status: Agreement::ACTIVE }
+    ])
+      return true
+    end
+
+    # Mentors can view basic project info if they have a pending agreement
+    if user.has_role?(:mentor) && record.agreements.exists?([
+      "mentor_id = :user_id AND status = :status",
+      { user_id: user.id, status: Agreement::PENDING }
+    ])
+      return true
+    end
+
+    # Mentors can view basic project info if the project is seeking a mentor
+    if user.has_role?(:mentor) && record.seeking_mentor?
+      return true
+    end
+
+    false
   end
 
   def create?

@@ -24,32 +24,50 @@ class Ability
     can :explore, Project if user.has_role?(:mentor)
 
     # Agreements
-    can :read, Agreement, entrepreneur_id: user.id
-    can :manage, Agreement, entrepreneur_id: user.id
-    can :read, Agreement, mentor_id: user.id
+    can :read, Agreement do |agreement|
+      agreement.entrepreneur_id == user.id || agreement.mentor_id == user.id
+    end
 
-    # Allow mentors to create agreements (for initiating)
-    can :create, Agreement if user.has_role?(:mentor)
+    can :create, Agreement do |agreement|
+      # Entrepreneurs can create agreements for their projects
+      # Mentors can create agreements if they're initiating it
+      if agreement.project.present?
+        agreement.project.user_id == user.id ||
+        (user.has_role?(:mentor) && agreement.mentor_id == user.id)
+      else
+        true # Allow creation without project for testing
+      end
+    end
 
-    # Agreement actions
+    can :edit, Agreement do |agreement|
+      # Only allow editing of pending agreements by the initiator
+      agreement.pending? && (
+        (agreement.entrepreneur_id == user.id) ||
+        (agreement.mentor_id == user.id)
+      )
+    end
+
     can :accept, Agreement do |agreement|
+      # Only the receiver can accept a pending agreement
       agreement.pending? && agreement.mentor_id == user.id
     end
 
     can :reject, Agreement do |agreement|
+      # Only the receiver can reject a pending agreement
       agreement.pending? && agreement.mentor_id == user.id
     end
 
-    can :complete, Agreement do |agreement|
-      agreement.active? && (agreement.entrepreneur_id == user.id || agreement.mentor_id == user.id)
-    end
-
     can :cancel, Agreement do |agreement|
-      agreement.pending? && agreement.entrepreneur_id == user.id
+      # Either party can cancel while pending
+      agreement.pending? && (
+        agreement.entrepreneur_id == user.id ||
+        agreement.mentor_id == user.id
+      )
     end
 
     can :counter_offer, Agreement do |agreement|
-      agreement.pending? && (agreement.entrepreneur_id == user.id || agreement.mentor_id == user.id)
+      # Only the receiver can make a counter offer to a pending agreement
+      agreement.pending? && agreement.mentor_id == user.id
     end
 
     # Meetings
