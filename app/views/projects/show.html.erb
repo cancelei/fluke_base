@@ -113,7 +113,7 @@
             </div>
           <% elsif @has_agreement && @project.agreements.exists?([
             "(entrepreneur_id = :user_id OR mentor_id = :user_id) AND status = :status",
-            { user_id: current_user.id, status: Agreement::ACTIVE }
+            { user_id: current_user.id, status: Agreement::ACCEPTED }
           ]) %>
             <!-- Full project details visible to users with active agreements -->
             <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

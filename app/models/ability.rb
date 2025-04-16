@@ -70,6 +70,11 @@ class Ability
       agreement.pending? && agreement.mentor_id == user.id
     end
 
+    can :complete, Agreement do |agreement|
+      # Allow both entrepreneur and mentor to complete
+      agreement.entrepreneur_id == user.id || agreement.mentor_id == user.id
+    end
+
     # Meetings
     can :manage, Meeting do |meeting|
       meeting.agreement.entrepreneur_id == user.id || meeting.agreement.mentor_id == user.id

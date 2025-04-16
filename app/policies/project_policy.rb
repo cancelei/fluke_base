@@ -10,7 +10,7 @@ class ProjectPolicy < ApplicationPolicy
     # Users with active agreements can view full project details
     if record.agreements.exists?([
       "(entrepreneur_id = :user_id OR mentor_id = :user_id) AND status = :status",
-      { user_id: user.id, status: Agreement::ACTIVE }
+      { user_id: user.id, status: Agreement::ACCEPTED }
     ])
       return true
     end

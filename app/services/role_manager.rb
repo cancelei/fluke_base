@@ -72,7 +72,7 @@ class RoleManager
     three_months_ago = 3.months.ago.to_date
 
     active_long_mentorships = user.mentor_agreements
-                                 .where(status: Agreement::ACTIVE, agreement_type: Agreement::MENTORSHIP)
+                                 .where(status: Agreement::ACCEPTED, agreement_type: Agreement::MENTORSHIP)
                                  .where("created_at <= ?", three_months_ago)
                                  .count
 

@@ -23,7 +23,7 @@ class ProjectsController < ApplicationController
     # Check if the current user has an agreement with the project
     @has_agreement = @project.agreements.exists?([
       "(entrepreneur_id = :user_id OR mentor_id = :user_id) AND status IN (:statuses)",
-      { user_id: current_user.id, statuses: [ Agreement::ACTIVE, Agreement::PENDING ] }
+      { user_id: current_user.id, statuses: [ Agreement::ACCEPTED, Agreement::PENDING ] }
     ])
 
     # Load suggested mentors only for project owner
