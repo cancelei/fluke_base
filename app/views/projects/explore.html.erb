@@ -30,11 +30,11 @@
     <% if @projects.any? %>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <% @projects.each do |project| %>
-          <div class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+          <%= link_to project_path(project), class: "relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400 transition cursor-pointer group", style: "text-decoration: none; color: inherit; display: block;" do %>
             <div class="min-w-0 flex-1">
               <div class="flex justify-between items-start">
                 <span class="absolute inset-0" aria-hidden="true"></span>
-                <h3 class="text-sm font-medium text-gray-900"><%= link_to project.name, project_path(project) %></h3>
+                <h3 class="text-sm font-medium text-gray-900 group-hover:underline"> <%= project.name %> </h3>
                 
                 <div class="flex flex-col items-end space-y-1">
                   <% if project.category.present? %>
@@ -80,12 +80,10 @@
               </div>
               
               <div class="mt-3 flex items-center">
-                <%= link_to project_path(project), class: "text-sm text-indigo-600 hover:text-indigo-900" do %>
-                  View Details <span aria-hidden="true">&rarr;</span>
-                <% end %>
+                <span class="text-sm text-indigo-600 group-hover:text-indigo-900 font-medium">View Details <span aria-hidden="true">&rarr;</span></span>
               </div>
             </div>
-          </div>
+          <% end %>
         <% end %>
       </div>
       
