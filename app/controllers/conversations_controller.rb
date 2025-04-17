@@ -5,11 +5,12 @@ class ConversationsController < ApplicationController
   def index
     @conversations = Conversation.involving(current_user).includes(:sender, :recipient, messages: :user)
     @conversation = @conversations.first if @conversations.any?
+    @message = Message.new if @conversation
   end
 
   def show
     @conversations = Conversation.involving(current_user).includes(:sender, :recipient, messages: :user)
-    @messages = @conversation.messages
+    @messages = @conversation.messages.to_a
     @message = Message.new
 
     # Mark messages as read

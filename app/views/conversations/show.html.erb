@@ -37,13 +37,18 @@
   <!-- Messages container -->
   <div class="flex-1 p-4 overflow-y-auto" style="height: calc(75vh - 180px)">
     <div id="conversation_<%= @conversation.id %>_messages" class="space-y-2" data-controller="scroll-into-view">
-      <% @messages.each do |message| %>
-        <%= render "messages/message", message: message, current_user: current_user %>
-      <% end %>
-      
-      <% if @messages.empty? %>
+      <% if @messages.present? %>
+        <% @messages.each do |message| %>
+          <%= render "messages/message", message: message, current_user: current_user %>
+        <% end %>
+        <% if @messages.empty? %>
+          <div class="flex justify-center text-gray-500 my-8">
+            <p>No messages yet. Start the conversation!</p>
+          </div>
+        <% end %>
+      <% else %>
         <div class="flex justify-center text-gray-500 my-8">
-          <p>No messages yet. Start the conversation!</p>
+          <p>No messages found.</p>
         </div>
       <% end %>
     </div>
