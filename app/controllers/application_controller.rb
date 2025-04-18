@@ -11,6 +11,7 @@ class ApplicationController < ActionController::Base
   rescue_from CanCan::AccessDenied, with: :user_not_authorized
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
+  helper_method :selected_project
   protected
 
   def configure_permitted_parameters
@@ -43,7 +44,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  helper_method :selected_project
   def selected_project
     @selected_project
   end

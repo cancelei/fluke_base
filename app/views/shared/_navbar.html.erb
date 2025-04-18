@@ -1,5 +1,6 @@
 <nav class="sticky top-0 z-50 bg-white border-b border-gray-200" data-controller="navbar">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
     <div class="flex h-16 justify-between">
       <div class="flex">
         <div class="flex flex-shrink-0 items-center">
@@ -29,11 +30,9 @@
                   </svg>
                 </button>
                 <div class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
-                  <div class="py-1" role="menu" aria-orientation="vertical">
-                    <% current_user.projects.each do |project| %>
-                      <%= link_to project.name, root_path(project_id: project.id), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100", role: "menuitem" %>
-                    <% end %>
-                  </div>
+                  <%= turbo_frame_tag 'navbar-projects' do %>
+                    <%= render 'shared/navbar_projects', current_user: current_user %>
+                  <% end %>
                 </div>
               </div>
             <% end %>

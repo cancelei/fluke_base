@@ -13,4 +13,24 @@ class UsersController < ApplicationController
       redirect_to update_role_users_path, alert: "Unable to update your role."
     end
   end
+
+  def update_selected_project
+    project = current_user.projects.find_by(id: params[:project_id])
+    if project
+      current_user.update(selected_project_id: project.id)
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("navbar-projects", partial: "shared/navbar_projects", locals: { current_user: current_user })
+          ]
+        end
+        format.html { redirect_back fallback_location: root_path, notice: "Project selected." }
+      end
+    else
+      respond_to do |format|
+        format.turbo_stream { head :unprocessable_entity }
+        format.html { redirect_back fallback_location: root_path, alert: "Project not found." }
+      end
+    end
+  end
 end

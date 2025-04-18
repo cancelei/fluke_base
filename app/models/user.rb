@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  belongs_to :selected_project, class_name: "Project", optional: true
+
   include Roleable
 
   # Include default devise modules. Others available are:

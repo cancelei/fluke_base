@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  patch "/users/selected_project", to: "users#update_selected_project", as: :update_selected_project
+
   get "mentors/explore"
   get "mentors/show"
   get "messages/create"
