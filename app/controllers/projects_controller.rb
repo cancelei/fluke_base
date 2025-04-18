@@ -17,7 +17,7 @@ class ProjectsController < ApplicationController
   end
 
   def show
-    authorize @project
+    authorize! :read, @project
     @milestones = @project.milestones.order(created_at: :desc)
 
     # Check if the current user has an agreement with the project
@@ -51,11 +51,11 @@ class ProjectsController < ApplicationController
   end
 
   def edit
-    authorize @project
+    authorize! :update, @project
   end
 
   def update
-    authorize @project
+    authorize! :update, @project
     if @project.update(project_params)
       redirect_to @project, notice: "Project was successfully updated."
     else
@@ -64,7 +64,7 @@ class ProjectsController < ApplicationController
   end
 
   def destroy
-    authorize @project
+    authorize! :destroy, @project
     @project.destroy
     redirect_to projects_path, notice: "Project was successfully deleted."
   end

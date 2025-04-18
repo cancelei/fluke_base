@@ -25,6 +25,9 @@
 
   <%= form.hidden_field :project_id, value: @project.id %>
   <%= hidden_field_tag :mentor_initiated, @mentor_initiated if @mentor_initiated %>
+  <% if @is_counter_offer && @original_agreement %>
+    <%= form.hidden_field :counter_to_id, value: @original_agreement.id %>
+  <% end %>
   
   <% if @mentor_initiated %>
     <%= form.hidden_field :entrepreneur_id %>

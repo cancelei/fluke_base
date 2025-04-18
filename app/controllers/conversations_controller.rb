@@ -30,8 +30,9 @@ class ConversationsController < ApplicationController
   private
 
   def set_conversation
-    @conversation = Conversation.involving(current_user).find(params[:id])
-  rescue ActiveRecord::RecordNotFound
-    redirect_to conversations_path, alert: "Conversation not found"
+    @conversation = Conversation.involving(current_user).find_by(id: params[:id])
+    unless @conversation
+      redirect_to conversations_path, alert: "Conversation not found" and return
+    end
   end
 end

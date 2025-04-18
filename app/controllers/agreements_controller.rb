@@ -141,8 +141,9 @@ class AgreementsController < ApplicationController
     @agreement.status = Agreement::PENDING
 
     # Handle counter offers
-    if params[:counter_to_id].present?
-      @original_agreement = Agreement.find(params[:counter_to_id])
+    counter_to_id = params[:counter_to_id] || (params[:agreement] && params[:agreement][:counter_to_id])
+    if counter_to_id.present?
+      @original_agreement = Agreement.find(counter_to_id)
       @agreement.counter_to_id = @original_agreement.id
     end
 
@@ -150,14 +151,36 @@ class AgreementsController < ApplicationController
       # If this is a counter offer, update the original agreement status
       if @original_agreement.present?
         @original_agreement.update(status: Agreement::COUNTERED)
-      end
 
-      # Notify the mentor about the new agreement
-      NotificationService.new(@agreement.mentor).notify(
-        title: "New Agreement Proposal",
-        message: "#{current_user.full_name} has proposed an agreement for project #{@agreement.project.name}",
-        url: agreement_path(@agreement)
-      )
+        # Identify the other party (the recipient of the counter offer)
+        other_party = if current_user.id == @original_agreement.mentor_id
+          @original_agreement.entrepreneur
+        else
+          @original_agreement.mentor
+        end
+
+        # Send notification to the other party
+        NotificationService.new(other_party).notify(
+          title: "New Counter Offer",
+          message: "#{current_user.full_name} has made a counter offer for project #{@agreement.project.name}",
+          url: agreement_path(@agreement)
+        )
+
+        # Send automated message in the conversation
+        conversation = Conversation.between(current_user.id, other_party.id)
+        Message.create!(
+          conversation: conversation,
+          user: current_user, # You may want to use a system user if available
+          body: "[Automated] #{current_user.full_name} has made a counter offer for project '#{@agreement.project.name}'. Please review the new terms."
+        )
+      else
+        # Notify the mentor about the new agreement (original behavior)
+        NotificationService.new(@agreement.mentor).notify(
+          title: "New Agreement Proposal",
+          message: "#{current_user.full_name} has proposed an agreement for project #{@agreement.project.name}",
+          url: agreement_path(@agreement)
+        )
+      end
 
       redirect_to @agreement, notice: "Agreement was successfully created."
     else
@@ -240,15 +263,33 @@ class AgreementsController < ApplicationController
     end
 
     def authorize_agreement
-      # If the user is not part of this agreement and not an admin
-      unless current_user.id == @agreement.entrepreneur_id ||
-             current_user.id == @agreement.mentor_id ||
-             current_user.has_role?(:admin)
+      authorized = (
+        current_user.id == @agreement.entrepreneur_id ||
+        current_user.id == @agreement.mentor_id ||
+        current_user.has_role?(:admin)
+      )
+
+      # If not directly involved, check if user is involved in the original agreement (for counter offers)
+      if !authorized && @agreement.counter_to_id.present?
+        original = @agreement.counter_to
+        authorized = (
+          original.present? &&
+          (current_user.id == original.entrepreneur_id || current_user.id == original.mentor_id)
+        )
+      end
+
+      unless authorized
         redirect_to agreements_path, alert: "You are not authorized to view this agreement."
       end
     end
 
     def check_project_ownership
+      # Robustly skip project ownership check for counter offers (at any param nesting)
+      counter_to_id = params[:counter_to_id] || (params[:agreement] && params[:agreement][:counter_to_id])
+      if counter_to_id.present?
+        return
+      end
+
       project_id = params[:project_id]
       project_id ||= params[:agreement][:project_id] if params[:agreement].present?
 
