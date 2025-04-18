@@ -60,7 +60,7 @@
           <h3 class="text-lg font-medium text-gray-900 mb-4">Connect with <%= @mentor.first_name %></h3>
           
           <div class="space-y-3">
-            <%= button_to message_mentor_path(@mentor), method: :post, class: "w-full flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" do %>
+            <%= button_to message_mentor_path(@mentor), method: :post, class: "cta-btn w-full flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50", form: {onsubmit: 'event.stopPropagation();'} do %>
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z"></path>
               </svg>
