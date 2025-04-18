@@ -39,19 +39,12 @@
         </div>
         
         <div class="mt-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-2">Experience</h3>
-          <div class="space-y-4">
-            <div>
-              <h4 class="text-sm font-medium text-gray-900">Lead Developer</h4>
-              <p class="text-sm text-gray-500">Tech Company • 2018 - Present</p>
-              <p class="text-sm text-gray-500 mt-1">Led development of multiple web applications using Ruby on Rails and React.</p>
-            </div>
-            <div>
-              <h4 class="text-sm font-medium text-gray-900">Senior Software Engineer</h4>
-              <p class="text-sm text-gray-500">Tech Startup • 2015 - 2018</p>
-              <p class="text-sm text-gray-500 mt-1">Developed and maintained software applications for clients.</p>
-            </div>
-          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Achievements</h3>
+          <%= render partial: 'shared/achievements', locals: { user: @mentor, user_role: :mentor } %>
+        </div>
+        <div class="mt-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Track Record</h3>
+          <%= render partial: 'shared/track_record', locals: { user: @mentor, user_role: :mentor } %>
         </div>
       </div>
       

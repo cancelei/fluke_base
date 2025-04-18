@@ -14,9 +14,8 @@
             <% if current_user.has_role?(:mentor) %>
               <%= link_to "Explore Projects", explore_projects_path, class: "inline-flex items-center border-b-2 #{controller_name == 'projects' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             <% end %>
-            <% if current_user.has_role?(:entrepreneur) %>
-              <%= link_to "Explore Mentors", explore_mentors_path, class: "inline-flex items-center border-b-2 #{controller_name == 'mentors' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <% end %>
+            <%= link_to "Explore Mentors", explore_mentors_path, class: "inline-flex items-center border-b-2 #{controller_name == 'mentors' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
+            <%= link_to "Explore Entrepreneurs", explore_entrepreneurs_path, class: "inline-flex items-center border-b-2 #{controller_name == 'entrepreneurs' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             <%= link_to "Agreements", agreements_path, class: "inline-flex items-center border-b-2 #{controller_name == 'agreements' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             <%= link_to "Messages", conversations_path, class: "inline-flex items-center border-b-2 #{controller_name == 'conversations' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             <%= link_to "Roles", roles_path, class: "inline-flex items-center border-b-2 #{controller_name == 'roles' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
