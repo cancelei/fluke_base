@@ -76,7 +76,7 @@
       <div class="px-4 py-5 sm:px-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900">Project Details</h3>
         <p class="mt-1 max-w-2xl text-sm text-gray-500">
-          Created by <%= @project.user.full_name %> on <%= @project.created_at.strftime("%B %d, %Y") %>
+          Created by <%= link_to @project.user.full_name, entrepreneur_path(@project.user), class: "text-indigo-600 hover:text-indigo-900 underline" %> on <%= @project.created_at.strftime("%B %d, %Y") %>
         </p>
       </div>
       
