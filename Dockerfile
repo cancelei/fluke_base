@@ -41,8 +41,9 @@ RUN bundle exec bootsnap precompile app/ lib/
 # Precompile assets with dummy vars to avoid KeyError
 RUN SECRET_KEY_BASE_DUMMY=1 \
     FLUKE_BASE_DATABASE_USERNAME=dummy \
-    FLUKE_BASE_DATABASE_PASSWORD=dummy \
-    ./bin/rails assets:precompile
+    FLUKE_BASE_DATABASE_PASSWORD=dummy\
+    SKIP_DB_INITIALIZER=true \
+    ./bin/rails assets:precompile 
 
 # Final stage
 FROM base
