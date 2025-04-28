@@ -1,4 +1,6 @@
 # syntax=docker/dockerfile:1
+# check=error=true
+
 ARG RUBY_VERSION=3.2.1
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
@@ -7,7 +9,7 @@ WORKDIR /rails
 # Install runtime dependencies
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      curl libjemalloc2 libvips postgresql-client && \
+    curl libjemalloc2 libvips postgresql-client && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 ENV RAILS_ENV="production" \
@@ -17,30 +19,32 @@ ENV RAILS_ENV="production" \
 
 FROM base AS build
 
-# Install build-time dependencies (including Node.js and Yarn)
-RUN apt-get update -qq && \
+# Install build-time dependencies including Node.js 20.x and Yarn
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+    apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-      build-essential git libpq-dev libyaml-dev pkg-config \
-      nodejs npm && \
-    npm install -g yarn && \
+    build-essential git libpq-dev libyaml-dev pkg-config nodejs yarn && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-# Install gems
+# Install Ruby gems
 COPY Gemfile Gemfile.lock ./
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}/ruby/*/cache" "${BUNDLE_PATH}/ruby/*/bundler/gems/*/.git" && \
     bundle exec bootsnap precompile --gemfile
 
-# Copy all app files
-COPY . .
+# Install JS packages
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
-# Install Yarn dependencies
-RUN yarn install
+# Copy app code
+COPY . .
 
 # Precompile bootsnap
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Precompile assets with dummy credentials
+# Precompile assets with dummy ENV vars to avoid KeyError
 RUN SECRET_KEY_BASE_DUMMY=1 \
     FLUKE_BASE_DATABASE_USERNAME=dummy \
     FLUKE_BASE_DATABASE_PASSWORD=dummy \
@@ -53,7 +57,7 @@ FROM base
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
-# Set permissions and user
+# Create non-root user
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
