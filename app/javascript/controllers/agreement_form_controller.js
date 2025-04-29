@@ -11,14 +11,14 @@ export default class extends Controller {
     const paymentType = this.paymentTypeTargets.find(radio => radio.checked)?.value
     const hourlyFields = this.hourlyFieldTargets
     const equityFields = this.equityFieldTargets
-
-    if (paymentType === 'hourly') {
+console.log(`Payment Type: ${paymentType}`)
+    if (paymentType === 'Hourly') {
       hourlyFields.forEach(field => field.style.display = 'block')
       equityFields.forEach(field => field.style.display = 'none')
-    } else if (paymentType === 'equity') {
+    } else if (paymentType === 'Equity') {
       hourlyFields.forEach(field => field.style.display = 'none')
       equityFields.forEach(field => field.style.display = 'block')
-    } else if (paymentType === 'hybrid') {
+    } else if (paymentType === 'Hybrid') {
       hourlyFields.forEach(field => field.style.display = 'block')
       equityFields.forEach(field => field.style.display = 'block')
     } else {

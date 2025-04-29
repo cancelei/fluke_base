@@ -1,29 +1,8 @@
-<%= form_with(model: agreement, class: "space-y-6") do |form| %>
-  <% if agreement.errors.any? %>
-    <div class="bg-red-50 p-4 rounded-md">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <div class="ml-3">
-          <h3 class="text-sm font-medium text-red-800">
-            <%= pluralize(agreement.errors.count, "error") %> prohibited this agreement from being saved:
-          </h3>
-          <div class="mt-2 text-sm text-red-700">
-            <ul class="list-disc pl-5 space-y-1">
-              <% agreement.errors.full_messages.each do |message| %>
-                <li><%= message %></li>
-              <% end %>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  <% end %>
+<%= form_with(model: @agreement, class: "space-y-6") do |form| %>
 
   <%= form.hidden_field :project_id, value: @project.id %>
+  <%= form.hidden_field :mentor_id, value: @mentor.id %>
+
   <%= hidden_field_tag :mentor_initiated, @mentor_initiated if @mentor_initiated %>
   <% if @is_counter_offer && @original_agreement %>
     <%= form.hidden_field :counter_to_id, value: @original_agreement.id %>
@@ -42,7 +21,7 @@
         </div>
         <div class="ml-3">
           <h3 class="text-sm font-medium text-blue-800">
-            You're initiating an agreement with <%= User.find(agreement.entrepreneur_id).full_name %>
+            You're initiating an agreement with <%= User.find(@agreement.entrepreneur_id).full_name %>
           </h3>
           <div class="mt-2 text-sm text-blue-700">
             <p>
@@ -68,25 +47,6 @@
       </div>
     </div>
 
-    <% unless @mentor_initiated %>
-      <div class="sm:col-span-3">
-        <%= form.label :mentor_id, "Select Mentor/Co-Founder", class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <% if @potential_mentors.present? %>
-            <%= form.collection_select :mentor_id, 
-                @potential_mentors,
-                :id, 
-                :full_name,
-                { include_blank: "Select a mentor" }, 
-                { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
-          <% else %>
-            <p class="text-sm text-red-500">No mentors available at this time. Please try again later.</p>
-            <%= form.hidden_field :mentor_id %>
-          <% end %>
-        </div>
-      </div>
-    <% end %>
-
     <div class="sm:col-span-3">
       <%= form.label :start_date, class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1">
@@ -110,7 +70,8 @@
     </div>
 
     <div class="sm:col-span-6" data-controller="agreement-form">
-      <%= form.label :payment_type, "Payment Type", class: "block text-sm font-medium text-gray-700" %>
+      <!-- <%= form.label :payment_type, "Payment Type", class: "block text-sm font-medium text-gray-700" %> -->
+       <label class="block text-sm font-medium text-gray-700">Payment Type</label>
       <div class="mt-1 space-y-2">
         <div class="flex items-center">
           <%= form.radio_button :payment_type, Agreement::HOURLY, 
@@ -151,14 +112,14 @@
     <div class="sm:col-span-3 hourly-field" data-agreement-form-target="hourlyField">
       <%= form.label :hourly_rate, "Hourly Rate (USD)", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1">
-        <%= form.number_field :hourly_rate, min: 0, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        <%= form.number_field :hourly_rate, min: 0, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", style: "display: block;" %>
       </div>
     </div>
 
     <div class="sm:col-span-3 equity-field" data-agreement-form-target="equityField">
       <%= form.label :equity_percentage, "Equity Percentage (%)", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1">
-        <%= form.number_field :equity_percentage, min: 0.01, max: 99.99, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        <%= form.number_field :equity_percentage, min: 0.01, max: 99.99, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", style: "display: block;" %>
       </div>
     </div>
 
@@ -217,3 +178,34 @@
     <% end %>
   </div>
 <% end %> 
+
+<script>
+  document.addEventListener("turbo:load", function () {
+    document.querySelector('#agreement_payment_type_hourly').checked = true;
+    hideShowPaymentFields("Hourly");
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    let selectedValue = this.value;
+    console.log(selectedValue);
+    hideShowPaymentFields(selectedValue);
+    
+  });
+});
+  });
+
+  function hideShowPaymentFields(selectedValue){
+    let hourlyField = document.querySelector('.hourly-field');
+    let equityField = document.querySelector('.equity-field');
+
+    if (selectedValue === 'Hourly') {
+      if (hourlyField) hourlyField.style.display = 'block';
+      if (equityField) equityField.style.display = 'none';
+    } else if (selectedValue === 'Equity') {
+      if (hourlyField) hourlyField.style.display = 'none';
+      if (equityField) equityField.style.display = 'block';
+    } else if (selectedValue === 'Hybrid') {
+      if (hourlyField) hourlyField.style.display = 'block';
+      if (equityField) equityField.style.display = 'block';
+    }
+  }
+</script>

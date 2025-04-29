@@ -147,6 +147,8 @@ class AgreementsController < ApplicationController
       @agreement.counter_to_id = @original_agreement.id
     end
 
+    # @agreement.weekly_hours = unless agreement_params[:weekly_hours].present?
+
     if @agreement.save
       # If this is a counter offer, update the original agreement status
       if @original_agreement.present?
@@ -185,9 +187,14 @@ class AgreementsController < ApplicationController
       redirect_to @agreement, notice: "Agreement was successfully created."
     else
       # When re-rendering the form after validation errors, ensure @project and @mentor are set
+      Rails.logger.debug @agreement.errors.full_messages.inspect
+      if @agreement.errors.full_messages.each do |error|
+        flash[:alert] =  error
+      end
+      end
       @project = @agreement.project
       @mentor = @agreement.mentor
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 
