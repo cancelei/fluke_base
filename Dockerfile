@@ -56,8 +56,7 @@ RUN bundle exec bootsnap precompile app/ lib/
 
 # Precompile assets with dummy ENV vars to avoid KeyError
 RUN SECRET_KEY_BASE_DUMMY=1 \
-    FLUKE_BASE_DATABASE_USERNAME=postgres \
-    FLUKE_BASE_DATABASE_PASSWORD=postgres \
+    DATABASE_URL="postgresql://postgres:postgres@localhost/fluke_base_development" \
     SKIP_DB_INITIALIZER=true \
     ./bin/rails assets:precompile
 
@@ -72,8 +71,14 @@ COPY --from=build /rails /rails
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
+# Extract connection details from DATABASE_URL\n\
+DB_USER=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/([^:]+):.*/\\1/")\n\
+DB_PASS=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/[^:]+:([^@]+)@.*/\\1/")\n\
+DB_HOST=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/[^@]+@([^\\/]+)\\/.*/\\1/")\n\
+DB_NAME=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/[^@]+@[^\\/]+\\/(.*)/\\1/")\n\
+\n\
 # Wait for PostgreSQL to be ready\n\
-until PGPASSWORD=$FLUKE_BASE_DATABASE_PASSWORD psql -h "$FLUKE_BASE_DATABASE_HOST" -U "$FLUKE_BASE_DATABASE_USERNAME" -d "$FLUKE_BASE_DATABASE_NAME" -c "SELECT 1" > /dev/null 2>&1; do\n\
+until PGPASSWORD=$DB_PASS psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1" > /dev/null 2>&1; do\n\
   echo "Waiting for PostgreSQL to be ready..."\n\
   sleep 2\n\
 done\n\
