@@ -46,8 +46,7 @@ RUN bundle exec bootsnap precompile app/ lib/
 
 # Precompile assets with dummy ENV vars to avoid KeyError
 RUN SECRET_KEY_BASE_DUMMY=1 \
-    FLUKE_BASE_DATABASE_USERNAME=dummy \
-    FLUKE_BASE_DATABASE_PASSWORD=dummy \
+    DATABASE_URL="postgresql://dummy:dummy@localhost/dummy" \
     SKIP_DB_INITIALIZER=true \
     ./bin/rails assets:precompile
 
@@ -64,7 +63,24 @@ RUN groupadd --system --gid 1000 rails && \
 
 USER rails:rails
 
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+# Create a script to wait for PostgreSQL and run migrations
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+# Wait for PostgreSQL to be ready\n\
+until PGPASSWORD=$(echo $DATABASE_URL | cut -d@ -f1 | cut -d: -f3) psql -h $(echo $DATABASE_URL | cut -d@ -f2 | cut -d/ -f1) -U $(echo $DATABASE_URL | cut -d@ -f1 | cut -d: -f2) -d $(echo $DATABASE_URL | cut -d/ -f4) -c "SELECT 1" > /dev/null 2>&1; do\n\
+  echo "Waiting for PostgreSQL to be ready..."\n\
+  sleep 2\n\
+done\n\
+\n\
+# Run database migrations\n\
+./bin/rails db:prepare\n\
+\n\
+# Start the application\n\
+exec "$@"' > /rails/bin/start.sh && \
+chmod +x /rails/bin/start.sh
+
+ENTRYPOINT ["/rails/bin/start.sh"]
 
 EXPOSE 80
 CMD ["./bin/thrust", "./bin/rails", "server"]
