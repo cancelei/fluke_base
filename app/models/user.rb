@@ -60,8 +60,15 @@ class User < ApplicationRecord
       avatar
     else
       # Generate initials avatar and convert to base64 data URL
-      avatar = LetterAvatar.generate("#{first_name} #{last_name}", 200)
-      "data:image/png;base64,#{Base64.strict_encode64(File.read(avatar))}"
+      initials = "#{first_name&.first}#{last_name&.first}".upcase
+      color = Digest::MD5.hexdigest(initials)[0..5]
+      svg = <<~SVG
+        <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" fill="##{color}"/>
+          <text x="50%" y="50%" font-family="Arial" font-size="80" fill="white" text-anchor="middle" dominant-baseline="middle">#{initials}</text>
+        </svg>
+      SVG
+      "data:image/svg+xml;base64,#{Base64.strict_encode64(svg)}"
     end
   end
 
