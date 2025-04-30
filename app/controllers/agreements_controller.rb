@@ -188,13 +188,13 @@ class AgreementsController < ApplicationController
     else
       # When re-rendering the form after validation errors, ensure @project and @mentor are set
       Rails.logger.debug @agreement.errors.full_messages.inspect
-      if @agreement.errors.full_messages.each do |error|
-        flash[:alert] =  error
-      end
-      end
+        if @agreement.errors.full_messages.each do |error|
+          flash[:alert] =  error
+        end
+        end
       @project = @agreement.project
       @mentor = @agreement.mentor
-      render :new, status: :unprocessable_entity
+      redirect_to request.referer
     end
   end
 
