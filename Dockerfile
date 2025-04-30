@@ -68,13 +68,7 @@ FROM base
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
-# Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
-USER rails:rails
-
-# Create a script to wait for PostgreSQL and run migrations
+# Create start script before switching users
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
@@ -90,6 +84,12 @@ done\n\
 # Start the application\n\
 exec "$@"' > /rails/bin/start.sh && \
 chmod +x /rails/bin/start.sh
+
+# Run and own only the runtime files as a non-root user for security
+RUN groupadd --system --gid 1000 rails && \
+    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
+    chown -R rails:rails db log storage tmp
+USER rails:rails
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/start.sh"]
