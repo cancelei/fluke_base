@@ -1,4 +1,10 @@
-<%= form_with(model: @agreement, class: "space-y-6") do |form| %>
+<% 
+  @milestones = Milestone.where(project_id: @project.id)
+  @milestone_ids = @agreement.milestone_ids || []
+%>
+
+<div data-controller="agreement-form">
+  <%= form_with(model: @agreement, class: "space-y-6") do |form| %>
 
   <%= form.hidden_field :project_id, value: @project.id %>
   <%= form.hidden_field :mentor_id, value: @mentor.id %>
@@ -7,7 +13,7 @@
   <% if @is_counter_offer && @original_agreement %>
     <%= form.hidden_field :counter_to_id, value: @original_agreement.id %>
   <% end %>
-  
+  milestones
   <% if @mentor_initiated %>
     <%= form.hidden_field :entrepreneur_id %>
     <%= form.hidden_field :mentor_id %>
@@ -69,7 +75,7 @@
       <p class="mt-1 text-sm text-gray-500">Estimated hours of work per week</p>
     </div>
 
-    <div class="sm:col-span-6" data-controller="agreement-form">
+    <div class="sm:col-span-6">
       <!-- <%= form.label :payment_type, "Payment Type", class: "block text-sm font-medium text-gray-700" %> -->
        <label class="block text-sm font-medium text-gray-700">Payment Type</label>
       <div class="mt-1 space-y-2">
@@ -132,6 +138,23 @@
     </div>
 
     <div class="sm:col-span-6">
+      <%= form.hidden_field :milestone_ids, value: @milestone_ids, data: { agreement_form_target: "milestoneField" } %>
+
+      <%= form.label :milestones, "Milestones", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1">
+        <% @milestones.each_with_index do |milestone, index| %>
+          <%= check_box_tag "milestone_ids[]", milestone.id, @milestone_ids.include?(milestone.id), 
+              id: "milestone_#{index}", 
+              class: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500", 
+              data: { 
+                action: "change->agreement-form#updateMilestoneField",
+                agreement_form_target: "milestoneIds"
+              }
+              %>
+          <%= form.hidden_field "milestone_ids[]", value: milestone.id %>
+        <%= form.label "milestone_#{index}", milestone.title, class: "inline-block text-sm font-medium text-gray-700" %>
+        <% end %>
+    <div class="sm:col-span-6">
       <%= form.label :terms, "Additional Terms", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1">
         <%= form.text_area :terms, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
@@ -178,34 +201,4 @@
     <% end %>
   </div>
 <% end %> 
-
-<script>
-  document.addEventListener("turbo:load", function () {
-    document.querySelector('#agreement_payment_type_hourly').checked = true;
-    hideShowPaymentFields("Hourly");
-    document.querySelectorAll('input[type="radio"]').forEach(radio => {
-  radio.addEventListener('change', function() {
-    let selectedValue = this.value;
-    console.log(selectedValue);
-    hideShowPaymentFields(selectedValue);
-    
-  });
-});
-  });
-
-  function hideShowPaymentFields(selectedValue){
-    let hourlyField = document.querySelector('.hourly-field');
-    let equityField = document.querySelector('.equity-field');
-
-    if (selectedValue === 'Hourly') {
-      if (hourlyField) hourlyField.style.display = 'block';
-      if (equityField) equityField.style.display = 'none';
-    } else if (selectedValue === 'Equity') {
-      if (hourlyField) hourlyField.style.display = 'none';
-      if (equityField) equityField.style.display = 'block';
-    } else if (selectedValue === 'Hybrid') {
-      if (hourlyField) hourlyField.style.display = 'block';
-      if (equityField) equityField.style.display = 'block';
-    }
-  }
-</script>
+</div>

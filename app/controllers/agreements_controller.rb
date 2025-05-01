@@ -38,6 +38,7 @@ class AgreementsController < ApplicationController
   end
 
   def new
+    @milestone_ids = []
     @agreement = Agreement.new
     @agreement.entrepreneur = current_user
     @agreement.status = Agreement::PENDING
@@ -96,9 +97,12 @@ class AgreementsController < ApplicationController
 
   def edit
     authorize! :edit, @agreement
+    @milestone_ids = []
+
 
     # Set the project and mentor for the view
     @project = @agreement.project
+    @milestones =  Milestone.where(project_id: @project.id)
     @mentor = @agreement.mentor
     session[:selected_project_id] = @project.id
 
@@ -194,7 +198,7 @@ class AgreementsController < ApplicationController
         end
       @project = @agreement.project
       @mentor = @agreement.mentor
-      redirect_to request.referer
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -344,7 +348,8 @@ class AgreementsController < ApplicationController
         :equity_percentage,
         :weekly_hours,
         :tasks,
-        :terms
+        :terms,
+        :milestone_ids
       )
     end
 
