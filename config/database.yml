@@ -21,7 +21,7 @@ default: &default
 
 development:
   <<: *default
-  url: <%= ENV.fetch("DATABASE_URL", "postgresql://postgres:postgres@localhost/fluke_base_development") %>
+  url: <%= ENV.fetch("DATABASE_URL") %>
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.

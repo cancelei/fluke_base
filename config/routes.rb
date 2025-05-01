@@ -30,8 +30,8 @@ Rails.application.routes.draw do
 
   # Onboarding routes
   namespace :onboarding do
-    get "entrepreneur"
-    get "mentor"
+    get "entrepreneur", as: :entrepreneur
+    get "mentor", as: :mentor
     get "co_founder", to: "entrepreneur#index"
   end
   post "complete_onboarding", to: "onboarding#complete_onboarding"
