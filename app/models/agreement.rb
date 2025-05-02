@@ -39,6 +39,7 @@ class Agreement < ApplicationRecord
   validates :equity_percentage, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }, if: -> { payment_type == EQUITY || payment_type == HYBRID }
   validate :end_date_after_start_date
   validate :valid_payment_terms
+  validate :different_entrepreneur_and_mentor
 
   # Scopes
   scope :mentorships, -> { where(agreement_type: MENTORSHIP) }
@@ -53,8 +54,17 @@ class Agreement < ApplicationRecord
 
   # Custom validation: ensure end date is after start date
   def end_date_after_start_date
-    if start_date.present? && end_date.present? && end_date <= start_date
+    return if end_date.blank? || start_date.blank?
+
+    if end_date < start_date
       errors.add(:end_date, "must be after the start date")
+    end
+  end
+
+  # Custom validation: ensure entrepreneur and mentor are different users
+  def different_entrepreneur_and_mentor
+    if entrepreneur_id.present? && mentor_id.present? && entrepreneur_id == mentor_id
+      errors.add(:base, "Entrepreneur and mentor cannot be the same person")
     end
   end
 
