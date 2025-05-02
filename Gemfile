@@ -23,7 +23,7 @@ gem "tailwindcss-rails"
 gem "devise"
 
 # Payments
-gem "pay", "~> 6.8"
+gem "pay", "~> 10.1"
 gem "stripe", "~> 9.0"
 
 # Calendar integration
