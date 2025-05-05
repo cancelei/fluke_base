@@ -3,67 +3,13 @@
   
   <div class="flex h-[75vh]">
     <!-- Sidebar with conversation list -->
-    <div class="w-1/3 border-r overflow-y-auto">
-      <% if @conversations.any? %>
-        <ul class="divide-y">
-          <% @conversations.each do |conversation| %>
-            <% other_user = conversation.other_user(current_user) %>
-            <%= link_to conversation_path(conversation), class: "block hover:bg-gray-50 #{'bg-indigo-50' if @conversation == conversation}" do %>
-              <li class="p-4">
-                <div class="flex items-center space-x-3">
-                  <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                    <% if other_user.avatar.attached? %>
-                      <%= image_tag other_user.avatar, class: "h-10 w-10 rounded-full" %>
-                    <% else %>
-                      <svg class="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                    <% end %>
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <p class="text-sm font-medium text-gray-900 truncate"><%= other_user.full_name %></p>
-                    <% if conversation.last_message.present? %>
-                      <p class="text-sm text-gray-500 truncate">
-                        <%= conversation.last_message.body.truncate(30) %>
-                      </p>
-                      <p class="text-xs text-gray-400">
-                        <%= time_ago_in_words(conversation.last_message.created_at) %> ago
-                      </p>
-                    <% end %>
-                  </div>
-                  <% if conversation.unread_messages_for?(current_user) %>
-                    <div class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600">
-                      <span class="text-xs font-medium text-white"></span>
-                    </div>
-                  <% end %>
-                </div>
-              </li>
-            <% end %>
-          <% end %>
-        </ul>
-      <% else %>
-        <div class="p-4 text-center text-gray-500">
-          <p>No conversations yet.</p>
-          <p class="mt-2">Start by exploring mentors or projects!</p>
-        </div>
-      <% end %>
-    </div>
+    <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: current_user %>
     
     <!-- Conversation content -->
-    <div class="w-2/3 flex flex-col">
-      <% if @conversation %>
-        <%= render template: "conversations/show" %>
-      <% else %>
-        <div class="flex-1 flex items-center justify-center p-6">
-          <div class="text-center">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z" />
-            </svg>
-            <h3 class="mt-2 text-lg font-medium text-gray-900">No conversation selected</h3>
-            <p class="mt-1 text-sm text-gray-500">Select a conversation from the sidebar to view messages.</p>
-          </div>
-        </div>
-      <% end %>
+    <div id="conversation_content" class="w-2/3 flex flex-col">
+      <%= render "conversations/conversation_content", conversation: @conversation, messages: @conversation&.messages&.to_a || [], message: @message || Message.new %>
     </div>
   </div>
 </div>
+
+<%= turbo_stream_from current_user %>

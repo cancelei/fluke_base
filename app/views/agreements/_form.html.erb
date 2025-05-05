@@ -21,35 +21,62 @@
     <div class="bg-blue-50 p-4 rounded-md mb-6">
       <div class="flex">
         <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
           </svg>
         </div>
         <div class="ml-3">
-          <h3 class="text-sm font-medium text-blue-800">
-            You're initiating an agreement with <%= User.find(@agreement.entrepreneur_id).full_name %>
+          <h3 class="text-sm font-medium text-yellow-800">
+            You're acting as a mentor
           </h3>
-          <div class="mt-2 text-sm text-blue-700">
+          <div class="mt-2 text-sm text-yellow-700">
             <p>
-              You'll be proposing to collaborate on project "<%= @project.name %>". The entrepreneur will need to accept this agreement before collaboration can begin.
+              You need to select an entrepreneur and project before creating an agreement.
             </p>
+            <div class="mt-3">
+              <%= link_to "Browse Entrepreneurs", entrepreneurs_path, class: "btn-primary text-sm" %>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  <% end %>
-
-  <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-    <div class="sm:col-span-3">
-      <%= form.label :agreement_type, class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
-        <%= form.select :agreement_type, 
-            [
-              [Agreement::MENTORSHIP, Agreement::MENTORSHIP], 
-              [Agreement::CO_FOUNDER, Agreement::CO_FOUNDER]
-            ],
-            {}, 
-            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+  <% else %>
+    <%= form.hidden_field :project_id, value: @project.id if @project %>
+    <%= hidden_field_tag :mentor_initiated, @mentor_initiated if @mentor_initiated %>
+    
+    <% if @is_counter_offer && @original_agreement %>
+      <%= form.hidden_field :counter_to_id, value: @original_agreement.id %>
+      <%= form.hidden_field :entrepreneur_id, value: @original_agreement.entrepreneur_id %>
+      <%= form.hidden_field :mentor_id, value: @original_agreement.mentor_id %>
+    <% elsif @mentor_initiated || @acting_as_mentor %>
+      <%= form.hidden_field :entrepreneur_id, value: @project.user_id if @project %>
+      <%= form.hidden_field :mentor_id, value: current_user.id %>
+    <% else %>
+      <%= form.hidden_field :entrepreneur_id, value: current_user.id %>
+      <% if @mentor %>
+        <%= form.hidden_field :mentor_id, value: @mentor.id %>
+      <% end %>
+    <% end %>
+    
+    <% if @mentor_initiated || @acting_as_mentor %>
+      <div class="bg-blue-50 p-4 rounded-md mb-6">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-blue-800">
+              You're initiating an agreement with <%= @project ? User.find(@project.user_id).full_name : "an entrepreneur" %>
+            </h3>
+            <div class="mt-2 text-sm text-blue-700">
+              <p>
+                You'll be proposing to collaborate on project "<%= @project ? @project.name : "to be determined" %>". The entrepreneur will need to accept this agreement before collaboration can begin.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -58,22 +85,21 @@
       <div class="mt-1">
         <%= form.date_field :start_date, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
       </div>
-    </div>
 
-    <div class="sm:col-span-3">
-      <%= form.label :end_date, class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
-        <%= form.date_field :end_date, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      <div class="sm:col-span-3">
+        <%= form.label :end_date, class: "block text-sm font-medium text-gray-700" %>
+        <div class="mt-1">
+          <%= form.date_field :end_date, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        </div>
       </div>
-    </div>
 
-    <div class="sm:col-span-3">
-      <%= form.label :weekly_hours, "Weekly Hours Commitment", class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
-        <%= form.number_field :weekly_hours, min: 1, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      <div class="sm:col-span-3">
+        <%= form.label :weekly_hours, "Weekly Hours Commitment", class: "block text-sm font-medium text-gray-700" %>
+        <div class="mt-1">
+          <%= form.number_field :weekly_hours, min: 1, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        </div>
+        <p class="mt-1 text-sm text-gray-500">Estimated hours of work per week</p>
       </div>
-      <p class="mt-1 text-sm text-gray-500">Estimated hours of work per week</p>
-    </div>
 
     <div class="sm:col-span-6">
       <!-- <%= form.label :payment_type, "Payment Type", class: "block text-sm font-medium text-gray-700" %> -->
@@ -113,29 +139,26 @@
           </label>
         </div>
       </div>
-    </div>
 
     <div class="sm:col-span-3 hourly-field" data-agreement-form-target="hourlyField">
       <%= form.label :hourly_rate, "Hourly Rate (USD)", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1">
         <%= form.number_field :hourly_rate, min: 0, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", style: "display: block;" %>
       </div>
-    </div>
 
     <div class="sm:col-span-3 equity-field" data-agreement-form-target="equityField">
       <%= form.label :equity_percentage, "Equity Percentage (%)", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1">
         <%= form.number_field :equity_percentage, min: 0.01, max: 99.99, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", style: "display: block;" %>
       </div>
-    </div>
 
-    <div class="sm:col-span-6">
-      <%= form.label :tasks, "Tasks and Responsibilities", class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
-        <%= form.text_area :tasks, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      <div class="sm:col-span-6">
+        <%= form.label :tasks, "Tasks and Responsibilities", class: "block text-sm font-medium text-gray-700" %>
+        <div class="mt-1">
+          <%= form.text_area :tasks, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        </div>
+        <p class="mt-1 text-sm text-gray-500">Describe the specific tasks and responsibilities for this agreement</p>
       </div>
-      <p class="mt-1 text-sm text-gray-500">Describe the specific tasks and responsibilities for this agreement</p>
-    </div>
 
     <div class="sm:col-span-6">
       <%= form.hidden_field :milestone_ids, value: @milestone_ids, data: { agreement_form_target: "milestoneField" } %>
@@ -159,15 +182,14 @@
       <div class="mt-1">
         <%= form.text_area :terms, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
       </div>
-      <p class="mt-1 text-sm text-gray-500">Any additional terms or conditions for this agreement</p>
     </div>
-  </div>
+  <% end %>
 
   <div class="mt-6 flex justify-end space-x-3">
-    <% if @agreement.new_record? %>
+    <% if @agreement.new_record? && (!@acting_as_mentor || @project) %>
       <%= form.submit "Create Agreement", class: "btn-primary" %>
-    <% else %>
-      <% if can?(:edit, @agreement) %>
+    <% elsif !@agreement.new_record? %>
+      <% if can?(:edit, @agreement) && !@agreement.countered? %>
         <%= form.submit "Update Agreement", class: "btn-primary" %>
       <% end %>
       
@@ -192,7 +214,7 @@
             data: { turbo_confirm: "Are you sure you want to make a counter offer?" } %>
       <% end %>
       
-      <% if can?(:cancel, @agreement) %>
+      <% if can?(:cancel, @agreement) && !@agreement.countered? %>
         <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement), 
             method: :post, 
             class: "btn-danger",

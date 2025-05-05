@@ -2,29 +2,22 @@ import consumer from "./consumer"
 
 consumer.subscriptions.create("NotificationsChannel", {
   connected() {
-    // Called when the subscription is ready for use on the server
+    console.log("Connected to notifications channel")
   },
 
   disconnected() {
-    // Called when the subscription has been terminated by the server
+    console.log("Disconnected from notifications channel")
   },
 
   received(data) {
-    // Called when there's incoming data on the websocket for this channel
-    const notificationsContainer = document.getElementById('notifications_container')
-    const notificationIndicator = document.querySelector('.notification-indicator')
+    const notification = document.createElement('div')
+    notification.className = `notification ${data.type}`
+    notification.textContent = data.message
+    document.getElementById('notifications').appendChild(notification)
     
-    if (notificationsContainer) {
-      // Prepend the new notification
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = data.html
-      notificationsContainer.insertBefore(tempDiv.firstChild, notificationsContainer.firstChild)
-    }
-
-    if (notificationIndicator) {
-      // Update the unread count
-      notificationIndicator.textContent = data.unread_count
-      notificationIndicator.classList.remove('hidden')
-    }
+    // Auto-remove notification after 5 seconds
+    setTimeout(() => {
+      notification.remove()
+    }, 5000)
   }
 }) 

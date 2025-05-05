@@ -39,10 +39,7 @@ module Roleable
   end
 
   def requires_onboarding?
-    # Check if any role needs onboarding
-    roles.any? do |role|
-      !user_roles.find_by(role: role).onboarded
-    end
+    roles.any? { |role| !user_roles.find_by(role: role).onboarded }
   end
 
   def current_onboarding_path
@@ -52,17 +49,12 @@ module Roleable
 
     # First check entrepreneur roles
     entrepreneur_roles.each do |role_name|
-      if has_role?(role_name) && !onboarded_for?(role_name)
-        return :entrepreneur
-      end
+      return :entrepreneur if has_role?(role_name) && !onboarded_for?(role_name)
     end
 
     # Then check mentor role
-    if has_role?(mentor_role) && !onboarded_for?(mentor_role)
-      return :mentor
-    end
+    return :mentor if has_role?(mentor_role) && !onboarded_for?(mentor_role)
 
-    # Default to nil if all roles onboarded
     nil
   end
 

@@ -40,13 +40,17 @@ class AgreementsController < ApplicationController
   def new
     @milestone_ids = []
     @agreement = Agreement.new
-    @agreement.entrepreneur = current_user
     @agreement.status = Agreement::PENDING
 
-    # Set the selected project if project_id is provided
+    # Check if user is acting as mentor
+    @acting_as_mentor = session[:acting_as_mentor].present? && current_user.has_role?(:mentor)
+
+    # Set the selected project if project_id is provided or use current user's selected project
     if params[:project_id].present?
       @project = Project.find(params[:project_id])
       session[:selected_project_id] = @project.id if @project
+    elsif !@acting_as_mentor && current_user.selected_project.present?
+      @project = current_user.selected_project
     end
 
     # Set the mentor if mentor_id is provided
@@ -55,20 +59,52 @@ class AgreementsController < ApplicationController
       @agreement.mentor_id = @mentor.id
     end
 
+    # Handle mentor initiated agreements
+    if @acting_as_mentor || (params[:mentor_initiated] && current_user.has_role?(:mentor))
+      @agreement.mentor_id = current_user.id
+      if @project
+        @agreement.entrepreneur_id = @project.user_id
+      elsif params[:entrepreneur_id].present?
+        @agreement.entrepreneur_id = params[:entrepreneur_id].to_i
+        # Fetch the entrepreneur's project if available
+        entrepreneur = User.find(@agreement.entrepreneur_id)
+        if entrepreneur.selected_project.present?
+          @project = entrepreneur.selected_project
+          @agreement.project_id = @project.id
+        end
+      end
+      @mentor_initiated = true
+    elsif current_user.has_role?(:entrepreneur)
+      # For entrepreneur-initiated agreements
+      @agreement.entrepreneur_id = current_user.id
+    end
+
     # Handle counter offers
     if params[:counter_to_id].present?
       @original_agreement = Agreement.find(params[:counter_to_id])
 
       # Only allow counter offers for pending agreements
-      unless @original_agreement.pending?
-        redirect_to agreement_path(@original_agreement), alert: "You can only make counter offers to pending agreements."
+      unless @original_agreement.pending? || @original_agreement.countered?
+        redirect_to agreement_path(@original_agreement), alert: "You can only make counter offers to pending or countered agreements."
         return
       end
 
       # Pre-fill data from the original agreement
       @agreement.project_id = @original_agreement.project_id
-      @agreement.mentor_id = @original_agreement.mentor_id
-      @agreement.entrepreneur_id = @original_agreement.entrepreneur_id
+      @agreement.counter_to_id = @original_agreement.id
+
+      # Set entrepreneur and mentor IDs based on the user's role
+      if current_user.id == @original_agreement.entrepreneur_id
+        @agreement.entrepreneur_id = @original_agreement.entrepreneur_id
+        @agreement.mentor_id = @original_agreement.mentor_id
+      elsif current_user.id == @original_agreement.mentor_id
+        @agreement.entrepreneur_id = @original_agreement.entrepreneur_id
+        @agreement.mentor_id = @original_agreement.mentor_id
+      else
+        redirect_to agreement_path(@original_agreement), alert: "You can only make counter offers to your own agreements."
+        return
+      end
+
       @agreement.agreement_type = @original_agreement.agreement_type
       @agreement.payment_type = @original_agreement.payment_type
       @agreement.start_date = @original_agreement.start_date
@@ -80,15 +116,9 @@ class AgreementsController < ApplicationController
       @agreement.terms = @original_agreement.terms
 
       @is_counter_offer = true
+      @project = @original_agreement.project
     else
       @is_counter_offer = false
-    end
-
-    # Handle mentor initiated agreements
-    if params[:mentor_initiated] && current_user.has_role?(:mentor)
-      @agreement.mentor_id = current_user.id
-      @agreement.entrepreneur_id = @project.user_id if @project
-      @mentor_initiated = true
     end
 
     # Ensure mentor is loaded even if it's a counter offer
@@ -99,6 +129,12 @@ class AgreementsController < ApplicationController
     authorize! :edit, @agreement
     @milestone_ids = []
 
+
+    # Prevent editing of countered agreements
+    if @agreement.countered?
+      redirect_to @agreement, alert: "This agreement has been countered. Please create a new counter offer instead of editing."
+      return
+    end
 
     # Set the project and mentor for the view
     @project = @agreement.project
@@ -141,14 +177,25 @@ class AgreementsController < ApplicationController
 
   def create
     @agreement = Agreement.new(agreement_params)
-    @agreement.entrepreneur = current_user
+    @acting_as_mentor = session[:acting_as_mentor] && current_user.has_role?(:mentor)
+
+    # Set entrepreneur_id for mentor-initiated agreements if not already set
+    if (params[:mentor_initiated] || @acting_as_mentor) && current_user.has_role?(:mentor)
+      if @agreement.project_id.present?
+        @project = Project.find(@agreement.project_id)
+        @agreement.entrepreneur_id = @project.user_id if @agreement.entrepreneur_id.blank?
+      elsif @acting_as_mentor
+        # If acting as mentor but no project or entrepreneur is selected
+        redirect_to entrepreneurs_path, alert: "Please select an entrepreneur before creating an agreement."
+        return
+      end
+    end
+
     @agreement.status = Agreement::PENDING
 
-    # Handle counter offers
-    counter_to_id = params[:counter_to_id] || (params[:agreement] && params[:agreement][:counter_to_id])
-    if counter_to_id.present?
-      @original_agreement = Agreement.find(counter_to_id)
-      @agreement.counter_to_id = @original_agreement.id
+    # Get the original agreement for counter offers if it exists
+    if @agreement.counter_to_id.present?
+      @original_agreement = Agreement.find(@agreement.counter_to_id)
     end
 
     # @agreement.weekly_hours = unless agreement_params[:weekly_hours].present?
@@ -296,14 +343,24 @@ class AgreementsController < ApplicationController
 
     def check_project_ownership
       # Robustly skip project ownership check for counter offers (at any param nesting)
-      counter_to_id = params[:counter_to_id] || (params[:agreement] && params[:agreement][:counter_to_id])
+      counter_to_id = params[:counter_to_id]
+      counter_to_id ||= params[:agreement][:counter_to_id] if params[:agreement] && params[:agreement][:counter_to_id].present?
+
+      # Skip project ownership check for counter offers
       if counter_to_id.present?
         return
       end
 
+      # Skip project ownership check when acting as a mentor
+      if session[:acting_as_mentor] && current_user.has_role?(:mentor)
+        return
+      end
+
+      # Get project_id from params
       project_id = params[:project_id]
       project_id ||= params[:agreement][:project_id] if params[:agreement].present?
 
+      # Require a project when not acting as a mentor
       unless project_id.present?
         redirect_to projects_path, alert: "No project selected. Please select a project before creating an agreement."
         return
@@ -311,18 +368,9 @@ class AgreementsController < ApplicationController
 
       @project = Project.find(project_id)
 
-      # Allow mentors to create agreements if they're initiating it
-      if params[:mentor_initiated] && current_user.has_role?(:mentor)
-        # Mentors can create agreements for any project they don't already have an agreement for
-        if @project.agreements.where(mentor_id: current_user.id).exists?
-          redirect_to project_path(@project), alert: "You already have an agreement for this project."
-          return
-        end
-        return # Allow mentor to proceed
-      end
-
       # For entrepreneur-initiated agreements, check ownership
-      unless current_user.id == @project.user_id
+      # Skip this check for mentor-initiated agreements
+      unless params[:mentor_initiated] || (current_user.id == @project.user_id)
         redirect_to projects_path, alert: "You can only create agreements for your own projects."
       end
     end
@@ -330,6 +378,11 @@ class AgreementsController < ApplicationController
     def ensure_can_modify
       # Only allow modification of pending agreements by the entrepreneur
       # or the mentor if they initiated the agreement
+      if @agreement.countered?
+        redirect_to @agreement, alert: "This agreement has been countered. Please create a new counter offer instead of editing."
+        return
+      end
+
       unless (@agreement.pending? && current_user.id == @agreement.entrepreneur_id) ||
              (@agreement.pending? && current_user.id == @agreement.mentor_id && @agreement.is_counter_offer?)
         redirect_to @agreement, alert: "You cannot modify this agreement."
@@ -340,6 +393,8 @@ class AgreementsController < ApplicationController
       params.require(:agreement).permit(
         :project_id,
         :mentor_id,
+        :entrepreneur_id,
+        :counter_to_id,
         :agreement_type,
         :start_date,
         :end_date,
