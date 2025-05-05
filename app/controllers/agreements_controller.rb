@@ -38,6 +38,7 @@ class AgreementsController < ApplicationController
   end
 
   def new
+    @milestone_ids = []
     @agreement = Agreement.new
     @agreement.status = Agreement::PENDING
 
@@ -126,6 +127,8 @@ class AgreementsController < ApplicationController
 
   def edit
     authorize! :edit, @agreement
+    @milestone_ids = []
+
 
     # Prevent editing of countered agreements
     if @agreement.countered?
@@ -135,6 +138,7 @@ class AgreementsController < ApplicationController
 
     # Set the project and mentor for the view
     @project = @agreement.project
+    @milestones =  Milestone.where(project_id: @project.id)
     @mentor = @agreement.mentor
     session[:selected_project_id] = @project.id
 
@@ -194,6 +198,8 @@ class AgreementsController < ApplicationController
       @original_agreement = Agreement.find(@agreement.counter_to_id)
     end
 
+    # @agreement.weekly_hours = unless agreement_params[:weekly_hours].present?
+
     if @agreement.save
       # If this is a counter offer, update the original agreement status
       if @original_agreement.present?
@@ -232,9 +238,14 @@ class AgreementsController < ApplicationController
       redirect_to @agreement, notice: "Agreement was successfully created."
     else
       # When re-rendering the form after validation errors, ensure @project and @mentor are set
+      Rails.logger.debug @agreement.errors.full_messages.inspect
+        if @agreement.errors.full_messages.each do |error|
+          flash[:alert] =  error
+        end
+        end
       @project = @agreement.project
       @mentor = @agreement.mentor
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -392,7 +403,8 @@ class AgreementsController < ApplicationController
         :equity_percentage,
         :weekly_hours,
         :tasks,
-        :terms
+        :terms,
+        :milestone_ids
       )
     end
 
