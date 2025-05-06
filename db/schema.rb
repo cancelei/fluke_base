@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_23_163532) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_30_172529) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -59,6 +59,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_23_163532) do
     t.integer "weekly_hours"
     t.text "tasks"
     t.integer "counter_to_id"
+    t.integer "milestone_ids", default: [], array: true
     t.index ["counter_to_id"], name: "index_agreements_on_counter_to_id"
     t.index ["payment_type"], name: "index_agreements_on_payment_type"
     t.index ["project_id"], name: "index_agreements_on_project_id"

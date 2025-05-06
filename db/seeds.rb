@@ -101,7 +101,7 @@ if Rails.env.development?
       # Create a mentorship agreement
       agreement = Agreement.create!(
         agreement_type: Agreement::MENTORSHIP,
-        status: [ Agreement::PENDING, Agreement::ACTIVE, Agreement::COMPLETED ].sample,
+        status: [ Agreement::PENDING, Agreement::ACCEPTED, Agreement::COMPLETED ].sample,
         start_date: Date.today,
         end_date: 3.months.from_now,
         entrepreneur_id: entrepreneur.id,
@@ -116,7 +116,7 @@ if Rails.env.development?
       )
 
       # Create meetings for each agreement
-      if agreement.status == Agreement::ACTIVE
+      if agreement.status == Agreement::ACCEPTED
         rand(2..4).times do |i|
           start_time = rand(1..30).days.from_now.change(hour: rand(9..16))
           Meeting.create!(
@@ -160,7 +160,7 @@ if Rails.env.development?
   project = multi_role_projects.first
   agreement = Agreement.create!(
     agreement_type: Agreement::CO_FOUNDER,
-    status: Agreement::ACTIVE,
+    status: Agreement::ACCEPTED,
     start_date: Date.today,
     end_date: 1.year.from_now,
     entrepreneur_id: entrepreneurs.first.id,
