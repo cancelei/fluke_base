@@ -38,6 +38,9 @@ class AgreementsController < ApplicationController
   end
 
   def new
+    if Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).exists?
+       redirect_to agreements_path, alert: "You can't counter offer your own agreement."
+    end
     @milestone_ids = []
     @agreement = Agreement.new
     @agreement.status = Agreement::PENDING
@@ -198,7 +201,11 @@ class AgreementsController < ApplicationController
       @original_agreement = Agreement.find(@agreement.counter_to_id)
     end
 
-    # @agreement.weekly_hours = unless agreement_params[:weekly_hours].present?
+    if agreement_params[:weekly_hours].present?
+     @agreement.agreement_type =  Agreement::MENTORSHIP
+    else
+      @agreement.agreement_type =  Agreement::CO_FOUNDER
+    end
 
     if @agreement.save
       # If this is a counter offer, update the original agreement status
@@ -311,7 +318,8 @@ class AgreementsController < ApplicationController
     # Create a new agreement form based on the current one
     redirect_to new_agreement_path(
       project_id: @agreement.project_id,
-      counter_to_id: @agreement.id
+      counter_to_id: @agreement.id,
+      mentor_id: @agreement.mentor_id
     )
   end
 
