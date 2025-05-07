@@ -8,4 +8,12 @@ module ApplicationHelper
       "No projects found"
     end
   end
+
+  def sanitize_url(url)
+    return nil unless url.present?
+    # Only allow http and https protocols
+    sanitized = url.strip
+    return nil unless sanitized.match?(%r{\Ahttps?://})
+    sanitized
+  end
 end

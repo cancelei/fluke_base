@@ -1,0 +1,4 @@
+<%= link_to "View on Google Maps", 
+            sanitize_url(Ride.new(ride_params).google_maps_url), 
+            target: "_blank", 
+            class: "px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-500" %> 
