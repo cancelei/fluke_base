@@ -1,0 +1,29 @@
+<div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden cursor-pointer group relative" data-url="<%= entrepreneur_path(entrepreneur) %>" onclick="if(event.target.closest('.cta-btn')){return;} window.location=this.dataset.url;">
+  <div class="h-48 bg-indigo-100 flex items-center justify-center">
+    <% if entrepreneur.avatar.attached? %>
+      <%= image_tag entrepreneur.avatar, class: "h-full w-full object-cover" %>
+    <% else %>
+      <svg class="h-24 w-24 text-indigo-300" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    <% end %>
+  </div>
+  <div class="p-4">
+    <h3 class="text-lg font-medium text-gray-900 truncate"><%= entrepreneur.full_name %></h3>
+    <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 border border-indigo-200">
+      Entrepreneur
+    </span>
+    <p class="text-sm text-gray-500 truncate mt-1">
+      <%= entrepreneur.bio || "Aspiring entrepreneur building the future" %>
+    </p>
+    <div class="mt-2 text-xs text-gray-600">
+      <strong>Active Projects:</strong> <%= entrepreneur.entrepreneur_agreements.active.count %>
+    </div>
+    <div class="mt-2">
+      <%= render partial: 'entrepreneurs/achievements', locals: { entrepreneur: entrepreneur } %>
+    </div>
+  </div>
+  <div class="border-t border-gray-200 px-4 py-3 flex items-center justify-between">
+    <span class="text-sm font-medium text-indigo-600 transition group-hover:underline group-hover:text-indigo-800 select-none">View Profile</span>
+  </div>
+</div>

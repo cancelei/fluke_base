@@ -25,6 +25,12 @@ class Project < ApplicationRecord
   SEEKING_COFOUNDER = "co_founder"
   SEEKING_BOTH = "both"
 
+  # Public field options
+  PUBLIC_FIELD_OPTIONS = %w[
+    name description stage category current_stage
+    target_market funding_status team_size collaboration_type
+  ]
+
   # Scopes
   scope :ideas, -> { where(stage: IDEA) }
   scope :prototypes, -> { where(stage: PROTOTYPE) }
@@ -41,6 +47,19 @@ class Project < ApplicationRecord
 
   def seeking_cofounder?
     collaboration_type == SEEKING_COFOUNDER || collaboration_type == SEEKING_BOTH
+  end
+
+  # Public field methods - data access only, presentation logic moved to helper
+  def field_public?(field_name)
+    return false unless public_fields.is_a?(Array)
+    public_fields.include?(field_name.to_s)
+  end
+
+  def visible_to_user?(field_name, user)
+    return true if user && (user_id == user.id)
+    return true if field_public?(field_name)
+    return true if user && agreements.exists?(mentor_id: user.id)
+    false
   end
 
   # Methods
@@ -74,5 +93,6 @@ class Project < ApplicationRecord
     self.stage ||= IDEA
     self.current_stage ||= stage.humanize if stage.present?
     self.collaboration_type ||= SEEKING_MENTOR
+    self.public_fields ||= []
   end
 end

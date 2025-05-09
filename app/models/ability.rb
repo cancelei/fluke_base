@@ -22,6 +22,7 @@ class Ability
 
     # Allow mentors to explore all projects
     can :explore, Project if user.has_role?(:mentor)
+    can :read, Project if user.has_role?(:mentor)
 
     # Agreements
     can :read, Agreement do |agreement|
@@ -29,11 +30,17 @@ class Ability
     end
 
     can :create, Agreement do |agreement|
-      # Entrepreneurs can create agreements for their projects
+      # Entrepreneurs can create agreements for their projects or with other entrepreneurs
       # Mentors can create agreements if they're initiating it
       if agreement.project.present?
         agreement.project.user_id == user.id ||
-        (user.has_role?(:mentor) && agreement.mentor_id == user.id)
+        (user.has_role?(:mentor) && agreement.mentor_id == user.id) ||
+        (
+          user.has_role?(:entrepreneur) &&
+          agreement.entrepreneur_id == user.id &&
+          agreement.mentor_id.present? &&
+          User.find_by(id: agreement.mentor_id)&.has_role?(:entrepreneur)
+        )
       else
         true # Allow creation without project for testing
       end
@@ -66,8 +73,11 @@ class Ability
     end
 
     can :counter_offer, Agreement do |agreement|
-      # Only the receiver can make a counter offer to a pending agreement
-      agreement.pending? && agreement.mentor_id == user.id
+      # Only the receiver (mentor or entrepreneur) can make a counter offer to a pending agreement
+      agreement.pending? && (
+        (agreement.mentor_id == user.id && agreement.entrepreneur_id != user.id) ||
+        (agreement.entrepreneur_id == user.id && agreement.mentor_id != user.id)
+      )
     end
 
     can :complete, Agreement do |agreement|

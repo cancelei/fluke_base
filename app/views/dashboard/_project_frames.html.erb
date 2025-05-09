@@ -1,0 +1,16 @@
+<%= turbo_frame_tag 'current-project-header' do %>
+  <div class="font-bold text-lg text-indigo-700">
+    <%= current_user.selected_project&.name || "No project selected" %>
+  </div>
+<% end %>
+
+<%= turbo_frame_tag 'dashboard-content' do %>
+  <% if current_user.selected_project %>
+    <div>
+      <h2 class="text-xl font-semibold mb-2">Dashboard for <%= current_user.selected_project.name %></h2>
+      <!-- Add more project-specific dashboard content here -->
+    </div>
+  <% else %>
+    <div class="text-gray-500">Select a project to view dashboard content.</div>
+  <% end %>
+<% end %>

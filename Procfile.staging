@@ -1,0 +1,3 @@
+web: RAILS_ENV=staging bin/rails server -e staging
+css: RAILS_ENV=staging bin/rails tailwindcss:build
+worker: RAILS_ENV=staging bundle exec solid_queue 

@@ -18,13 +18,10 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  username: <%= ENV.fetch("FLUKE_BASE_DATABASE_USERNAME") %>
-  password: <%= ENV.fetch("FLUKE_BASE_DATABASE_PASSWORD") %>
 
 development:
   <<: *default
-  database: fluke_base_development
-
+  url: <%= ENV.fetch("DATABASE_URL") %>
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
@@ -58,7 +55,7 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: fluke_base_test
+  url: <%= ENV.fetch("DATABASE_URL", "postgresql://postgres:postgres@localhost/fluke_base_test") %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -80,10 +77,27 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
+staging:
+  primary: &primary_staging
+    <<: *default
+    url: <%= ENV.fetch("DATABASE_URL") %>
+  cache:
+    <<: *primary_staging
+    database: fluke_base_staging_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *primary_staging
+    database: fluke_base_staging_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *primary_staging
+    database: fluke_base_staging_cable
+    migrations_paths: db/cable_migrate
+
 production:
   primary: &primary_production
     <<: *default
-    DATABASE_URL: <%= ENV["DATABASE_URL"] %>
+    url: <%= ENV.fetch("DATABASE_URL") %>
   cache:
     <<: *primary_production
     database: fluke_base_production_cache

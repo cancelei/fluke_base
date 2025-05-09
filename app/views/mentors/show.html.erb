@@ -39,19 +39,12 @@
         </div>
         
         <div class="mt-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-2">Experience</h3>
-          <div class="space-y-4">
-            <div>
-              <h4 class="text-sm font-medium text-gray-900">Lead Developer</h4>
-              <p class="text-sm text-gray-500">Tech Company • 2018 - Present</p>
-              <p class="text-sm text-gray-500 mt-1">Led development of multiple web applications using Ruby on Rails and React.</p>
-            </div>
-            <div>
-              <h4 class="text-sm font-medium text-gray-900">Senior Software Engineer</h4>
-              <p class="text-sm text-gray-500">Tech Startup • 2015 - 2018</p>
-              <p class="text-sm text-gray-500 mt-1">Developed and maintained software applications for clients.</p>
-            </div>
-          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Achievements</h3>
+          <%= render partial: 'shared/achievements', locals: { user: @mentor, user_role: :mentor } %>
+        </div>
+        <div class="mt-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Track Record</h3>
+          <%= render partial: 'shared/track_record', locals: { user: @mentor, user_role: :mentor } %>
         </div>
       </div>
       
@@ -60,7 +53,7 @@
           <h3 class="text-lg font-medium text-gray-900 mb-4">Connect with <%= @mentor.first_name %></h3>
           
           <div class="space-y-3">
-            <%= button_to message_mentor_path(@mentor), method: :post, class: "w-full flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" do %>
+            <%= button_to message_mentor_path(@mentor), method: :post, class: "cta-btn w-full flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50", form: {onsubmit: 'event.stopPropagation();'} do %>
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z"></path>
               </svg>

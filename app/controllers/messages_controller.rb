@@ -8,6 +8,25 @@ class MessagesController < ApplicationController
 
     respond_to do |format|
       if @message.save
+        # Broadcast the message to the other user
+        if @conversation.sender != current_user
+          Turbo::StreamsChannel.broadcast_append_to(
+            @conversation.sender,
+            target: "conversation_#{@conversation.id}_messages",
+            partial: "messages/message",
+            locals: { message: @message, current_user: @conversation.sender }
+          )
+        end
+
+        if @conversation.recipient != current_user
+          Turbo::StreamsChannel.broadcast_append_to(
+            @conversation.recipient,
+            target: "conversation_#{@conversation.id}_messages",
+            partial: "messages/message",
+            locals: { message: @message, current_user: @conversation.recipient }
+          )
+        end
+
         format.turbo_stream
         format.html { redirect_to conversation_path(@conversation) }
       else

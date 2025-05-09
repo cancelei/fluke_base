@@ -1,6 +1,5 @@
 class ApplicationController < ActionController::Base
   include CanCan::ControllerAdditions
-  include Pundit::Authorization
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
   protect_from_forgery with: :exception
@@ -8,9 +7,25 @@ class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :set_selected_project
 
-  rescue_from CanCan::AccessDenied, with: :user_not_authorized
-  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  # DRY helper: Find resource by klass and param, or redirect with alert
+  def find_resource_or_redirect(klass, param_key, redirect_path, alert_message)
+    resource = klass.find_by(id: params[param_key])
+    unless resource
+      redirect_to redirect_path, alert: alert_message and return
+    end
+    resource
+  end
 
+  # DRY helper: Require role or redirect
+  def require_role!(role_name, redirect_path, alert_message)
+    unless current_user.has_role?(role_name)
+      redirect_to redirect_path, alert: alert_message and return
+    end
+  end
+
+  rescue_from CanCan::AccessDenied, with: :user_not_authorized
+
+  helper_method :selected_project
   protected
 
   def configure_permitted_parameters
@@ -43,7 +58,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  helper_method :selected_project
   def selected_project
     @selected_project
   end
