@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  patch "/users/selected_project", to: "users#update_selected_project", as: :update_selected_project
+
   get "mentors/explore"
   get "mentors/show"
   get "messages/create"
@@ -28,8 +30,8 @@ Rails.application.routes.draw do
 
   # Onboarding routes
   namespace :onboarding do
-    get "entrepreneur"
-    get "mentor"
+    get "entrepreneur", as: :entrepreneur
+    get "mentor", as: :mentor
     get "co_founder", to: "entrepreneur#index"
   end
   post "complete_onboarding", to: "onboarding#complete_onboarding"
@@ -70,6 +72,17 @@ Rails.application.routes.draw do
   resources :mentors, only: [ :show ] do
     collection do
       get :explore
+    end
+    member do
+      post :message
+      post :propose_agreement
+    end
+  end
+
+  # Entrepreneurs
+  resources :entrepreneurs, only: [ :index, :show ] do
+    collection do
+      get :explore, action: :index
     end
     member do
       post :message

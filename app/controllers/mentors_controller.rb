@@ -55,8 +55,6 @@ class MentorsController < ApplicationController
   end
 
   def ensure_entrepreneur_for_agreement
-    unless current_user.has_role?(Role::ENTREPRENEUR)
-      redirect_to mentor_path(@mentor), alert: "You must be an entrepreneur to propose agreements"
-    end
+    require_role!(Role::ENTREPRENEUR, mentor_path(@mentor), "You must be an entrepreneur to propose agreements")
   end
 end

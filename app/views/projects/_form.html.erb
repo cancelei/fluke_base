@@ -23,17 +23,20 @@
     </div>
   <% end %>
 
+  <%= render 'privacy_info' %>
+
   <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
     <div class="sm:col-span-6">
       <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
+      <div class="mt-1 flex items-center">
         <%= form.text_field :name, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        <%= render_public_field_checkbox(form, :name, project) %>
       </div>
     </div>
 
     <div class="sm:col-span-3">
       <%= form.label :stage, class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
+      <div class="mt-1 flex items-center">
         <%= form.select :stage, 
             [
               ["Idea", Project::IDEA], 
@@ -43,12 +46,13 @@
             ],
             {}, 
             { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+        <%= render_public_field_checkbox(form, :stage, project) %>
       </div>
     </div>
 
     <div class="sm:col-span-3">
       <%= form.label :category, class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
+      <div class="mt-1 flex items-center">
         <%= form.select :category, 
             [
               ["Technology", "Technology"], 
@@ -64,12 +68,13 @@
             ],
             { include_blank: "Select a category" }, 
             { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+        <%= render_public_field_checkbox(form, :category, project) %>
       </div>
     </div>
 
     <div class="sm:col-span-6">
       <%= form.label :collaboration_type, "Looking For", class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
+      <div class="mt-1 flex items-center">
         <%= form.select :collaboration_type, 
             [
               ["Mentor", Project::SEEKING_MENTOR], 
@@ -78,14 +83,16 @@
             ],
             { include_blank: "Select what you're looking for" }, 
             { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+        <%= render_public_field_checkbox(form, :collaboration_type, project) %>
       </div>
       <p class="mt-1 text-sm text-gray-500">Indicate what type of collaboration you're seeking</p>
     </div>
 
     <div class="sm:col-span-6">
       <%= form.label :description, class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
+      <div class="mt-1 flex items-start">
         <%= form.text_area :description, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        <%= render_public_field_checkbox(form, :description, project) %>
       </div>
       <p class="mt-1 text-sm text-gray-500">Give a detailed description of your project idea</p>
     </div>
@@ -97,23 +104,25 @@
 
     <div class="sm:col-span-6">
       <%= form.label :current_stage, "Current Project Stage", class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
+      <div class="mt-1 flex items-center">
         <%= form.text_field :current_stage, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        <%= render_public_field_checkbox(form, :current_stage, project) %>
       </div>
       <p class="mt-1 text-sm text-gray-500">Describe your project's current development stage in more detail</p>
     </div>
 
     <div class="sm:col-span-6">
       <%= form.label :target_market, "Target Market", class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
+      <div class="mt-1 flex items-start">
         <%= form.text_area :target_market, rows: 3, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        <%= render_public_field_checkbox(form, :target_market, project) %>
       </div>
       <p class="mt-1 text-sm text-gray-500">Describe your target audience or customer base</p>
     </div>
 
     <div class="sm:col-span-3">
       <%= form.label :funding_status, "Funding Status", class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
+      <div class="mt-1 flex items-center">
         <%= form.select :funding_status, 
             [
               ["Bootstrapped", "Bootstrapped"], 
@@ -126,12 +135,13 @@
             ],
             { include_blank: "Select funding status" }, 
             { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+        <%= render_public_field_checkbox(form, :funding_status, project) %>
       </div>
     </div>
 
     <div class="sm:col-span-3">
       <%= form.label :team_size, "Team Size", class: "block text-sm font-medium text-gray-700" %>
-      <div class="mt-1">
+      <div class="mt-1 flex items-center">
         <%= form.select :team_size, 
             [
               ["Solo Founder", "Solo Founder"], 
@@ -143,8 +153,12 @@
             ],
             { include_blank: "Select team size" }, 
             { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+        <%= render_public_field_checkbox(form, :team_size, project) %>
       </div>
     </div>
+    
+    <!-- Hidden field to handle unchecked checkboxes -->
+    <%= hidden_field_tag 'project[public_fields][]', '' %>
   </div>
 
   <div class="pt-5">

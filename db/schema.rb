@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_11_130321) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_30_172529) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -59,6 +59,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_11_130321) do
     t.integer "weekly_hours"
     t.text "tasks"
     t.integer "counter_to_id"
+    t.integer "milestone_ids", default: [], array: true
     t.index ["counter_to_id"], name: "index_agreements_on_counter_to_id"
     t.index ["payment_type"], name: "index_agreements_on_payment_type"
     t.index ["project_id"], name: "index_agreements_on_project_id"
@@ -131,6 +132,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_11_130321) do
     t.string "funding_status"
     t.string "team_size"
     t.string "collaboration_type"
+    t.string "public_fields", default: [], null: false, array: true
     t.index ["user_id"], name: "index_projects_on_user_id"
   end
 
@@ -163,6 +165,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_11_130321) do
     t.boolean "onboarded", default: false
     t.text "bio"
     t.string "avatar"
+    t.integer "selected_project_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

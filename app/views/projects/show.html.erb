@@ -2,27 +2,15 @@
   <div class="px-4 py-6 sm:px-0">
     <div class="mb-6 flex justify-between items-center">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900"><%= @project.name %></h1>
+        <h1 class="text-2xl font-bold text-gray-900"><%= display_project_name(@project, current_user) %></h1>
         <div class="flex flex-wrap gap-2 mt-1">
-          <% if @project.category.present? %>
+          <% if @project.category.present? && field_visible_to_user?(@project, :category, current_user) %>
             <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
               <%= @project.category %>
             </span>
           <% end %>
           
-          <% if @project.collaboration_type.present? %>
-            <% if @project.seeking_mentor? %>
-              <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-700/10">
-                Seeking Mentor
-              </span>
-            <% end %>
-            
-            <% if @project.seeking_cofounder? %>
-              <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
-                Seeking Co-Founder
-              </span>
-            <% end %>
-          <% end %>
+          <%= display_collaboration_badges(@project, current_user) %>
         </div>
       </div>
       
@@ -76,7 +64,7 @@
       <div class="px-4 py-5 sm:px-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900">Project Details</h3>
         <p class="mt-1 max-w-2xl text-sm text-gray-500">
-          Created by <%= @project.user.full_name %> on <%= @project.created_at.strftime("%B %d, %Y") %>
+          Created by <%= link_to @project.user.full_name, entrepreneur_path(@project.user), class: "text-indigo-600 hover:text-indigo-900 underline" %> on <%= @project.created_at.strftime("%B %d, %Y") %>
         </p>
       </div>
       
@@ -85,95 +73,37 @@
           <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Description</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <%= simple_format(@project.description) %>
+              <%= render_formatted_field_value(@project, :description, current_user) %>
             </dd>
           </div>
           
-          <% if current_user.id == @project.user_id %>
-            <!-- Full project details visible to owner -->
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Current Stage</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <%= @project.current_stage || "Not specified" %>
-              </dd>
-            </div>
-            
-            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Target Market</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <%= @project.target_market || "Not specified" %>
-              </dd>
-            </div>
-            
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Funding Status</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <%= @project.funding_status || "Not specified" %>
-              </dd>
-            </div>
-          <% elsif @has_agreement && @project.agreements.exists?([
-            "(entrepreneur_id = :user_id OR mentor_id = :user_id) AND status = :status",
-            { user_id: current_user.id, status: Agreement::ACCEPTED }
-          ]) %>
-            <!-- Full project details visible to users with active agreements -->
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Current Stage</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <%= @project.current_stage || "Not specified" %>
-              </dd>
-            </div>
-            
-            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Target Market</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <%= @project.target_market || "Not specified" %>
-              </dd>
-            </div>
-            
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Funding Status</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <%= @project.funding_status || "Not specified" %>
-              </dd>
-            </div>
-          <% else %>
-            <!-- Redacted information for mentors without active agreements -->
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Current Stage</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <div class="flex items-center">
-                  <span class="text-gray-400">Available after agreement acceptance</span>
-                  <svg class="ml-2 h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-              </dd>
-            </div>
-            
-            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Target Market</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <div class="flex items-center">
-                  <span class="text-gray-400">Available after agreement acceptance</span>
-                  <svg class="ml-2 h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-              </dd>
-            </div>
-            
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Funding Status</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                <div class="flex items-center">
-                  <span class="text-gray-400">Available after agreement acceptance</span>
-                  <svg class="ml-2 h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-              </dd>
-            </div>
-          <% end %>
+          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Current Stage</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <%= render_project_field(@project, :current_stage, current_user) %>
+            </dd>
+          </div>
+          
+          <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Target Market</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <%= render_project_field(@project, :target_market, current_user) %>
+            </dd>
+          </div>
+          
+          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Funding Status</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <%= render_project_field(@project, :funding_status, current_user) %>
+            </dd>
+          </div>
+          
+          <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Team Size</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <%= render_project_field(@project, :team_size, current_user) %>
+            </dd>
+          </div>
         </dl>
       </div>
     </div>

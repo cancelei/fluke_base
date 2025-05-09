@@ -1,7 +1,7 @@
-# Ensure default roles exist in the database
 Rails.application.config.after_initialize do
-  if ActiveRecord::Base.connection.table_exists?("roles")
-    # Only run if we're not in a database migration
+  next if ENV["SKIP_DB_INITIALIZER"] == "true" || ARGV.include?("assets:precompile")
+
+  if ActiveRecord::Base.connected? && ActiveRecord::Base.connection.table_exists?("roles")
     if ActiveRecord::Migrator.current_version.positive?
       Role.ensure_default_roles_exist
     end

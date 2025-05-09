@@ -49,6 +49,7 @@ class OnboardingController < ApplicationController
       # Check if there are more roles to onboard
       if path = current_user.current_onboarding_path
         if path == :entrepreneur
+
           redirect_to onboarding_entrepreneur_path, notice: "#{role_name} onboarding completed! Please complete onboarding for your other roles."
         elsif path == :mentor
           redirect_to onboarding_mentor_path, notice: "#{role_name} onboarding completed! Please complete onboarding for your other roles."

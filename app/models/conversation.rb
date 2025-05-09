@@ -12,6 +12,12 @@ class Conversation < ApplicationRecord
     where("sender_id = ? OR recipient_id = ?", user.id, user.id)
   end
 
+  # Scope to order conversations by most recent message
+  scope :order_by_most_recent_message, -> do
+    joins("LEFT JOIN (SELECT conversation_id, MAX(created_at) as last_message_time FROM messages GROUP BY conversation_id) as latest_messages ON conversations.id = latest_messages.conversation_id")
+      .order("latest_messages.last_message_time DESC NULLS LAST")
+  end
+
   # Find or create a conversation between two users
   def self.between(sender_id, recipient_id)
     conversation = find_by(sender_id: sender_id, recipient_id: recipient_id)

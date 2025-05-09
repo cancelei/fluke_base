@@ -3,13 +3,18 @@ class ConversationsController < ApplicationController
   before_action :set_conversation, only: [ :show ]
 
   def index
-    @conversations = Conversation.involving(current_user).includes(:sender, :recipient, messages: :user)
+    @conversations = Conversation.involving(current_user)
+                                .includes(:sender, :recipient, messages: :user)
+                                .order_by_most_recent_message
     @conversation = @conversations.first if @conversations.any?
+    @message = Message.new if @conversation
   end
 
   def show
-    @conversations = Conversation.involving(current_user).includes(:sender, :recipient, messages: :user)
-    @messages = @conversation.messages
+    @conversations = Conversation.involving(current_user)
+                                .includes(:sender, :recipient, messages: :user)
+                                .order_by_most_recent_message
+    @messages = @conversation.messages.to_a
     @message = Message.new
 
     # Mark messages as read
@@ -17,7 +22,9 @@ class ConversationsController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.turbo_stream
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update("conversation_content", partial: "conversations/conversation_content", locals: { conversation: @conversation, messages: @messages, message: @message })
+      end
     end
   end
 
@@ -29,8 +36,9 @@ class ConversationsController < ApplicationController
   private
 
   def set_conversation
-    @conversation = Conversation.involving(current_user).find(params[:id])
-  rescue ActiveRecord::RecordNotFound
-    redirect_to conversations_path, alert: "Conversation not found"
+    @conversation = Conversation.involving(current_user).find_by(id: params[:id])
+    unless @conversation
+      redirect_to conversations_path, alert: "Conversation not found" and return
+    end
   end
 end

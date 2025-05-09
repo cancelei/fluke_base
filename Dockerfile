@@ -2,8 +2,8 @@
 # check=error=true
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t fluke_base .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name fluke_base fluke_base
+# docker build -t ride_share .
+# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name ride_share ride_share
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
@@ -14,30 +14,39 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 # Rails app lives here
 WORKDIR /rails
 
-# Install base packages
+# Install runtime dependencies
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql-client && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install --no-install-recommends -y \
+    curl libjemalloc2 libvips postgresql-client && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 # Set production environment
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+    BUNDLE_WITHOUT="development:test"
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
-# Install packages needed to build gems
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+# Install build-time dependencies including Node.js 20.x and Yarn
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+    apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+    build-essential git libpq-dev libyaml-dev pkg-config nodejs yarn && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-# Install application gems
+# Install Ruby gems
 COPY Gemfile Gemfile.lock ./
 RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}/ruby/*/cache" "${BUNDLE_PATH}/ruby/*/bundler/gems/*/.git" && \
     bundle exec bootsnap precompile --gemfile
+
+# Install JS packages
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 # Copy application code
 COPY . .
@@ -45,11 +54,11 @@ COPY . .
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
-
-
-
+# Precompile assets with dummy ENV vars to avoid KeyError
+RUN SECRET_KEY_BASE_DUMMY=1 \
+    DATABASE_URL="postgresql://postgres:postgres@localhost/fluke_base_development" \
+    SKIP_DB_INITIALIZER=true \
+    ./bin/rails assets:precompile
 
 # Final stage for app image
 FROM base
@@ -58,14 +67,37 @@ FROM base
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
+# Create start script before switching users
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+# Extract connection details from DATABASE_URL\n\
+DB_USER=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/([^:]+):.*/\\1/")\n\
+DB_PASS=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/[^:]+:([^@]+)@.*/\\1/")\n\
+DB_HOST=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/[^@]+@([^\\/]+)\\/.*/\\1/")\n\
+DB_NAME=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/[^@]+@[^\\/]+\\/(.*)/\\1/")\n\
+\n\
+# Wait for PostgreSQL to be ready\n\
+until PGPASSWORD=$DB_PASS psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1" > /dev/null 2>&1; do\n\
+  echo "Waiting for PostgreSQL to be ready..."\n\
+  sleep 2\n\
+done\n\
+\n\
+# Run database migrations\n\
+./bin/rails db:prepare\n\
+\n\
+# Start the application\n\
+exec "$@"' > /rails/bin/start.sh && \
+chmod +x /rails/bin/start.sh
+
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
-USER 1000:1000
+USER rails:rails
 
 # Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+ENTRYPOINT ["/rails/bin/start.sh"]
 
 # Start server via Thruster by default, this can be overwritten at runtime
 EXPOSE 80
