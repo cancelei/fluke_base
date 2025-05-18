@@ -62,6 +62,12 @@ class AgreementsController < ApplicationController
       @agreement.mentor_id = @mentor.id
     end
 
+    # Set the mentor if mentor_id is provided
+    if params[:entrepreneur_id].present?
+      @entrepreneur = User.find(params[:entrepreneur_id])
+      @agreement.entrepreneur_id = @entrepreneur.id
+    end
+
     # Handle mentor initiated agreements
     if @acting_as_mentor || (params[:mentor_initiated] && current_user.has_role?(:mentor))
       @agreement.mentor_id = current_user.id
@@ -126,6 +132,7 @@ class AgreementsController < ApplicationController
 
     # Ensure mentor is loaded even if it's a counter offer
     @mentor = @agreement.mentor if @mentor.nil?
+    @entrepreneur = @agreement.entrepreneur if @entrepreneur.nil?
   end
 
   def edit

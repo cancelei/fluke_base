@@ -44,31 +44,10 @@ class RoleManager
   end
 
   def eligible_for_mentor_role?
-    return false unless user.has_role?(Role::ENTREPRENEUR)
-
-    six_months_ago = 6.months.ago.to_date
-
-    completed_projects = user.projects.joins(:milestones)
-                            .where(milestones: { status: Milestone::COMPLETED })
-                            .distinct.count
-
-    long_running_projects = user.projects
-                               .where("created_at <= ?", six_months_ago)
-                               .count
-
-    completed_projects.positive? || long_running_projects.positive?
+    true # Anyone can be a mentor
   end
 
   def eligible_for_co_founder_role?
-    return false unless user.has_role?(Role::MENTOR)
-
-    three_months_ago = 3.months.ago.to_date
-
-    active_long_mentorships = user.mentor_agreements
-                                 .where(status: Agreement::ACCEPTED, agreement_type: Agreement::MENTORSHIP)
-                                 .where("created_at <= ?", three_months_ago)
-                                 .count
-
-    active_long_mentorships.positive?
+    true # Anyone can be a co-founder
   end
 end

@@ -7,7 +7,8 @@
   <%= form_with(model: @agreement, class: "space-y-6") do |form| %>
 
     <%= form.hidden_field :project_id, value: @project.id %>
-    <%= form.hidden_field :mentor_id, value: @mentor.id %>
+    <%= form.hidden_field :mentor_id, value: @mentor&.id %>
+    <%= form.hidden_field :entrepreneur_id, value: @entrepreneur&.id %>
 
     <%= hidden_field_tag :mentor_initiated, @mentor_initiated if @mentor_initiated %>
     <% if @is_counter_offer && @original_agreement %>
