@@ -47,11 +47,19 @@ class Ability
     end
 
     can :edit, Agreement do |agreement|
-      # Only allow editing of pending agreements by the initiator
-      agreement.pending? && (
-        (agreement.entrepreneur_id == user.id) ||
-        (agreement.mentor_id == user.id)
-      )
+      # Allow editing if:
+      # 1. User is the initiator of the latest counter offer
+      agreement.latest_counter_offer&.initiator_id == user.id && !agreement.countered?
+    end
+
+    # Check if agreement has counter offer from another entrepreneur
+    can :has_counter_offer_from_entrepreneur, Agreement do |agreement|
+      agreement.counter_offers.exists?(mentor_id: agreement.entrepreneur_id)
+    end
+
+    # Check if agreement has counter offer from mentor
+    can :has_counter_offer_from_mentor, Agreement do |agreement|
+      agreement.counter_offers.exists?(entrepreneur_id: agreement.mentor_id)
     end
 
     can :accept, Agreement do |agreement|

@@ -38,8 +38,10 @@ class AgreementsController < ApplicationController
   end
 
   def new
-    if Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).exists?
-       redirect_to agreements_path, alert: "You can't counter offer your own agreement."
+    # Allow counter offers, but prevent duplicate agreements
+    if params[:counter_to_id].blank? && 
+       Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).exists?
+      redirect_to agreements_path, alert: "You can't create a duplicate agreement."
     end
     @milestone_ids = []
     @agreement = Agreement.new
@@ -60,12 +62,6 @@ class AgreementsController < ApplicationController
     if params[:mentor_id].present?
       @mentor = User.find(params[:mentor_id])
       @agreement.mentor_id = @mentor.id
-    end
-
-    # Set the mentor if mentor_id is provided
-    if params[:entrepreneur_id].present?
-      @entrepreneur = User.find(params[:entrepreneur_id])
-      @agreement.entrepreneur_id = @entrepreneur.id
     end
 
     # Handle mentor initiated agreements
@@ -132,18 +128,21 @@ class AgreementsController < ApplicationController
 
     # Ensure mentor is loaded even if it's a counter offer
     @mentor = @agreement.mentor if @mentor.nil?
-    @entrepreneur = @agreement.entrepreneur if @entrepreneur.nil?
   end
 
   def edit
     authorize! :edit, @agreement
     @milestone_ids = []
 
-
-    # Prevent editing of countered agreements
+    # Get the latest counter offer if this is a countered agreement
     if @agreement.countered?
-      redirect_to @agreement, alert: "This agreement has been countered. Please create a new counter offer instead of editing."
-      return
+      @latest_counter_offer = @agreement.latest_counter_offer
+      if @latest_counter_offer
+        @agreement = @latest_counter_offer
+      else
+        redirect_to @agreement, alert: "This agreement has been countered but no counter offer exists yet. Please create a new counter offer instead."
+        return
+      end
     end
 
     # Set the project and mentor for the view
@@ -216,6 +215,11 @@ class AgreementsController < ApplicationController
     end
 
     if @agreement.save
+      # Set initiator_id for counter offers after save
+      if @original_agreement.present?
+        @agreement.update(initiator_id: current_user.id)
+      end
+
       # If this is a counter offer, update the original agreement status
       if @original_agreement.present?
         @original_agreement.update(status: Agreement::COUNTERED)
@@ -420,7 +424,8 @@ class AgreementsController < ApplicationController
         :weekly_hours,
         :tasks,
         :terms,
-        :milestone_ids
+        :milestone_ids,
+        :initiator_id
       )
     end
 

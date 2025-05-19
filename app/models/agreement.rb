@@ -102,6 +102,18 @@ class Agreement < ApplicationRecord
     status == COUNTERED
   end
 
+  # Returns the latest counter offer for this agreement
+  def latest_counter_offer
+    # If this is an original agreement, find counter offers made to it
+    if counter_to_id.nil?
+      Agreement.where(counter_to_id: id).order(created_at: :desc).first
+    else
+      # If this is a counter offer, find newer counter offers made to the original agreement
+      original_agreement = Agreement.find(counter_to_id)
+      original_agreement.counter_offers.order(created_at: :desc).first
+    end
+  end
+
   # Status update methods
   def accept!
     return false unless pending?

@@ -10,8 +10,16 @@
     </div>
     
     <div class="mt-6 flex flex-wrap justify-start space-x-3">
-      <% if can?(:edit, @agreement) && !@agreement.countered? %>
+      <% if can?(:edit, @agreement) %>
         <%= link_to "Edit Agreement", edit_agreement_path(@agreement), class: "btn-primary" %>
+      <% end %>
+
+      <% if can?(:has_counter_offer_from_entrepreneur, @agreement) %>
+        <span class="text-yellow-600">Note: This agreement has a counter offer from another entrepreneur</span>
+      <% end %>
+
+      <% if can?(:has_counter_offer_from_mentor, @agreement) %>
+        <span class="text-yellow-600">Note: This agreement has a counter offer from a mentor</span>
       <% end %>
       
       <% if can?(:accept, @agreement) %>
@@ -42,7 +50,7 @@
             data: { turbo_confirm: "Are you sure you want to cancel this agreement?" } %>
       <% end %>
       
-      <% if can?(:complete, @agreement) %>
+      <% if can?(:complete, @agreement) && @agreement.active? %>
         <%= button_to "Mark as Completed", complete_agreement_path(@agreement), 
             method: :patch, 
             class: "btn-success", 
