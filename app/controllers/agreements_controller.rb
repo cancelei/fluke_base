@@ -39,9 +39,10 @@ class AgreementsController < ApplicationController
 
   def new
     # Allow counter offers, but prevent duplicate agreements
-    if params[:counter_to_id].blank? && 
-       Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).exists?
-      redirect_to agreements_path, alert: "You can't create a duplicate agreement."
+    agreement = Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).where.not(status: Agreement::PENDING).first
+    if params[:counter_to_id].blank? && agreement.present?
+      flash[:alert] = "You currently have an agreement with this mentor for this project. View agreement <b><a href='#{agreement_path(agreement.id)}'>here</a></b>".html_safe
+      redirect_to agreements_path
     end
     @milestone_ids = []
     @agreement = Agreement.new
@@ -411,21 +412,9 @@ class AgreementsController < ApplicationController
 
     def agreement_params
       params.require(:agreement).permit(
-        :project_id,
-        :mentor_id,
-        :entrepreneur_id,
-        :counter_to_id,
-        :agreement_type,
-        :start_date,
-        :end_date,
-        :payment_type,
-        :hourly_rate,
-        :equity_percentage,
-        :weekly_hours,
-        :tasks,
-        :terms,
-        :milestone_ids,
-        :initiator_id
+        :project_id, :entrepreneur_id, :mentor_id, :status, :agreement_type, :payment_type,
+        :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage,
+        :counter_to_id, milestone_ids: []
       )
     end
 

@@ -49,6 +49,19 @@ class Agreement < ApplicationRecord
   scope :completed, -> { where(status: COMPLETED) }
   scope :rejected, -> { where(status: REJECTED) }
   scope :cancelled, -> { where(status: CANCELLED) }
+
+  # Milestone methods
+  def milestone_ids
+    read_attribute(:milestone_ids) || []
+  end
+
+  def milestone_ids=(value)
+    write_attribute(:milestone_ids, value)
+  end
+
+  def selected_milestones
+    project.milestones.where(id: milestone_ids)
+  end
   scope :countered, -> { where(status: COUNTERED) }
   scope :not_rejected_or_cancelled, -> { where.not(status: [ REJECTED, CANCELLED ]) }
 
