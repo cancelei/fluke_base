@@ -56,12 +56,12 @@ class Ability
 
     can :accept, Agreement do |agreement|
       # Only the receiver can accept a pending agreement
-      agreement.pending? && agreement.mentor_id == user.id
+      agreement.pending? && agreement.initiator_id != user.id
     end
 
     can :reject, Agreement do |agreement|
       # Only the receiver can reject a pending agreement
-      agreement.pending? && agreement.mentor_id == user.id
+      agreement.pending? && agreement.initiator_id != user.id
     end
 
     can :cancel, Agreement do |agreement|
@@ -74,10 +74,11 @@ class Ability
 
     can :counter_offer, Agreement do |agreement|
       # Only the receiver (mentor or entrepreneur) can make a counter offer to a pending agreement
+      last_initiator = agreement.counter_offers.order(created_at: :desc).first&.initiator_id
       agreement.pending? && (
         (agreement.mentor_id == user.id && agreement.entrepreneur_id != user.id) ||
         (agreement.entrepreneur_id == user.id && agreement.mentor_id != user.id)
-      )
+      ) && ((last_initiator.present? && last_initiator != user.id) || agreement.initiator_id != user.id)
     end
 
     can :complete, Agreement do |agreement|

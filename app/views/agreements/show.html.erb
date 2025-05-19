@@ -16,14 +16,14 @@
       
       <% if can?(:accept, @agreement) %>
         <%= button_to "Accept Agreement", accept_agreement_path(@agreement), 
-            method: :post, 
+            method: :patch, 
             class: "btn-success", 
             data: { turbo_confirm: "Are you sure you want to accept this agreement?" } %>
       <% end %>
       
       <% if can?(:reject, @agreement) %>
         <%= button_to "Reject Agreement", reject_agreement_path(@agreement), 
-            method: :post, 
+            method: :patch, 
             class: "btn-danger", 
             data: { turbo_confirm: "Are you sure you want to reject this agreement?" } %>
       <% end %>
@@ -37,14 +37,14 @@
       
       <% if can?(:cancel, @agreement) && !@agreement.countered? %>
         <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement), 
-            method: :post, 
+            method: :patch, 
             class: "btn-danger", 
             data: { turbo_confirm: "Are you sure you want to cancel this agreement?" } %>
       <% end %>
       
       <% if can?(:complete, @agreement) %>
         <%= button_to "Mark as Completed", complete_agreement_path(@agreement), 
-            method: :post, 
+            method: :patch, 
             class: "btn-success", 
             data: { turbo_confirm: "Are you sure you want to mark this agreement as completed?" } %>
       <% end %>

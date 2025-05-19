@@ -188,6 +188,7 @@ class AgreementsController < ApplicationController
   def create
     @agreement = Agreement.new(agreement_params)
     @acting_as_mentor = session[:acting_as_mentor] && current_user.has_role?(:mentor)
+    @agreement.initiator_id = current_user.id
 
     # Set entrepreneur_id for mentor-initiated agreements if not already set
     if (params[:mentor_initiated] || @acting_as_mentor) && current_user.has_role?(:mentor)
