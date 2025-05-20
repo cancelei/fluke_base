@@ -70,7 +70,9 @@ class AgreementsController < ApplicationController
       @agreement.mentor_id = current_user.id
       if @project
         @agreement.entrepreneur_id = @project.user_id
+        puts "project"
       elsif params[:entrepreneur_id].present?
+        puts "entrepreneur"
         @agreement.entrepreneur_id = params[:entrepreneur_id].to_i
         # Fetch the entrepreneur's project if available
         entrepreneur = User.find(@agreement.entrepreneur_id)
@@ -82,6 +84,13 @@ class AgreementsController < ApplicationController
       @mentor_initiated = true
     elsif current_user.has_role?(:entrepreneur)
       # For entrepreneur-initiated agreements
+      puts "role entrepreneur"
+      if current_user.id != @project.user_id
+        flash[:alert] = "You are not acting as mentor so you cannot initiate an agreement with entrepreneur".html_safe
+        redirect_to agreements_path
+        return
+      end
+
       @agreement.entrepreneur_id = current_user.id
     end
 
@@ -382,7 +391,7 @@ class AgreementsController < ApplicationController
       project_id ||= params[:agreement][:project_id] if params[:agreement].present?
 
       # Require a project when not acting as a mentor
-      unless project_id.present?
+      if project_id.blank?
         redirect_to projects_path, alert: "No project selected. Please select a project before creating an agreement."
         return
       end
@@ -391,7 +400,7 @@ class AgreementsController < ApplicationController
 
       # For entrepreneur-initiated agreements, check ownership
       # Skip this check for mentor-initiated agreements
-      unless params[:mentor_initiated] || (current_user.id == @project.user_id)
+      if !params[:mentor_initiated] && (current_user.id == @project.user_id)
         redirect_to projects_path, alert: "You can only create agreements for your own projects."
       end
     end
