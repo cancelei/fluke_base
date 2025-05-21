@@ -72,34 +72,31 @@ class AgreementsController < ApplicationController
   end
 
   def create
-    @agreement = Agreement.new(agreement_params)
-    @acting_as_mentor = acting_as_mentor?
-    @agreement.initiator_id = current_user.id
+    service = Agreements::AgreementCreationService.new(current_user, agreement_params.to_h, session)
+    @agreement, result, @original_agreement = service.call
 
-    set_entrepreneur_for_mentor_initiated
-    @agreement.status = Agreement::PENDING
-    set_original_agreement_for_counter_offer
-    set_agreement_type_from_params
-
-    if @agreement.save
-      update_initiator_for_counter_offer
-      update_original_agreement_status_if_counter_offer
-      notify_and_message_other_party(:create)
+    case result
+    when :success
+      # Notification and messaging can be handled by a callback or another service if needed
       redirect_to @agreement, notice: "Agreement was successfully created."
+    when :select_entrepreneur
+      redirect_to entrepreneurs_path, alert: "Please select an entrepreneur before creating an agreement."
+    when :invalid_counter_offer
+      redirect_to agreement_path(@original_agreement), alert: "You can only make counter offers to pending or countered agreements."
     else
-      Rails.logger.debug @agreement.errors.full_messages.inspect
-      @agreement.errors.full_messages.each { |error| flash[:alert] = error }
-      @project = @agreement.project
-      @mentor = @agreement.mentor
+      Rails.logger.debug @agreement&.errors&.full_messages&.inspect
+      @agreement&.errors&.full_messages&.each { |error| flash[:alert] = error }
+      @project = @agreement&.project
+      @mentor = @agreement&.mentor
       render :new, status: :unprocessable_entity
     end
   end
 
   def update
     authorize! :edit, @agreement
-
-    if @agreement.update(agreement_params)
-      notify_and_message_other_party(:update)
+    service = Agreements::AgreementUpdateService.new(current_user, @agreement, agreement_params.to_h)
+    @agreement, result = service.call
+    if result == :success
       redirect_to @agreement, notice: "Agreement was successfully updated."
     else
       render :edit
@@ -113,8 +110,9 @@ class AgreementsController < ApplicationController
   end
 
   def accept
-    if @agreement.accept!
-      notify_and_message_other_party(:accept)
+    service = Agreements::AgreementStateChangeService.new(current_user, @agreement, :accept)
+    success, result = service.call
+    if success
       redirect_to @agreement, notice: "Agreement was successfully accepted."
     else
       redirect_to @agreement, alert: "Unable to accept agreement."
@@ -122,8 +120,9 @@ class AgreementsController < ApplicationController
   end
 
   def reject
-    if @agreement.reject!
-      notify_and_message_other_party(:reject)
+    service = Agreements::AgreementStateChangeService.new(current_user, @agreement, :reject)
+    success, result = service.call
+    if success
       redirect_to @agreement, notice: "Agreement was successfully rejected."
     else
       redirect_to @agreement, alert: "Unable to reject agreement."
@@ -132,9 +131,9 @@ class AgreementsController < ApplicationController
 
   def complete
     authorize! :complete, @agreement
-
-    if @agreement.complete!
-      notify_other_party(:complete)
+    service = Agreements::AgreementStateChangeService.new(current_user, @agreement, :complete)
+    success, result = service.call
+    if success
       redirect_to @agreement, notice: "This agreement has been marked as completed."
     else
       redirect_to @agreement, alert: "This agreement cannot be marked as completed."
@@ -142,8 +141,9 @@ class AgreementsController < ApplicationController
   end
 
   def cancel
-    if @agreement.cancel!
-      notify_and_message_other_party(:cancel)
+    service = Agreements::AgreementStateChangeService.new(current_user, @agreement, :cancel)
+    success, result = service.call
+    if success
       redirect_to @agreement, notice: "Agreement was successfully cancelled."
     else
       redirect_to @agreement, alert: "Unable to cancel agreement."
@@ -475,7 +475,7 @@ class AgreementsController < ApplicationController
       end
 
       unless (@agreement.pending? && current_user.id == @agreement.entrepreneur_id) ||
-             (@agreement.pending? && current_user.id == @agreement.mentor_id && @agreement.is_counter_offer?)
+             (@agreement.pending? && current_user.id == @agreement.mentor_id && !@agreement.is_counter_offer?)
         redirect_to @agreement, alert: "You cannot modify this agreement."
       end
     end

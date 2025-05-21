@@ -119,7 +119,7 @@ class Agreement < ApplicationRecord
   def latest_counter_offer
     # If this is an original agreement, find counter offers made to it
     if counter_to_id.nil?
-      Agreement.where(counter_to_id: id).order(created_at: :desc).first
+      Agreement.where(id: id).order(created_at: :desc).first
     else
       # If this is a counter offer, find newer counter offers made to the original agreement
       original_agreement = Agreement.find(counter_to_id)
