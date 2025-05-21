@@ -19,7 +19,7 @@ module Agreements
       when :cancel
         change_state(:cancel!)
       else
-        [false, :invalid_action]
+        [ false, :invalid_action ]
       end
     end
 
@@ -27,9 +27,9 @@ module Agreements
 
     def change_state(method)
       if @agreement.send(method)
-        [true, :success]
+        [ true, :success ]
       else
-        [false, :failure]
+        [ false, :failure ]
       end
     end
   end

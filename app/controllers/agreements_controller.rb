@@ -16,7 +16,6 @@ class AgreementsController < ApplicationController
       .order(created_at: :desc)
 
     filter_by_status!(@entrepreneur_agreements, @mentor_agreements)
-
   end
 
   def show
@@ -266,7 +265,7 @@ class AgreementsController < ApplicationController
           @agreement = @latest_counter_offer
         else
           redirect_to @agreement, alert: "This agreement has been countered but no counter offer exists yet. Please create a new counter offer instead."
-          return
+          nil
         end
       end
     end
@@ -310,7 +309,7 @@ class AgreementsController < ApplicationController
           @agreement.entrepreneur_id = @project.user_id if @agreement.entrepreneur_id.blank?
         elsif @acting_as_mentor
           redirect_to entrepreneurs_path, alert: "Please select an entrepreneur before creating an agreement."
-          return
+          nil
         end
       end
     end
@@ -333,7 +332,7 @@ class AgreementsController < ApplicationController
 
     # Centralized notification and message logic
     def notify_and_message_other_party(action)
-      other_party = if @original_agreement&.present? && [:create].include?(action)
+      other_party = if @original_agreement&.present? && [ :create ].include?(action)
         current_user.id == @original_agreement.mentor_id ? @original_agreement.entrepreneur : @original_agreement.mentor
       else
         current_user.id == @agreement.mentor_id ? @agreement.entrepreneur : @agreement.mentor

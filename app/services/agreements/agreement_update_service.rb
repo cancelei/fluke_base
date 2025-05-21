@@ -10,9 +10,9 @@ module Agreements
 
     def call
       if @agreement.update(@params)
-        [@agreement, :success]
+        [ @agreement, :success ]
       else
-        [@agreement, :error]
+        [ @agreement, :error ]
       end
     end
   end

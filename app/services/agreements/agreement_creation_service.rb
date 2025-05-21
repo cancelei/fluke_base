@@ -20,7 +20,7 @@ module Agreements
           project = Project.find(agreement.project_id)
           agreement.entrepreneur_id = project.user_id if agreement.entrepreneur_id.blank?
         elsif acting_as_mentor
-          return [nil, :select_entrepreneur]
+          return [ nil, :select_entrepreneur ]
         end
       end
 
@@ -29,7 +29,7 @@ module Agreements
       if agreement.counter_to_id.present?
         original_agreement = Agreement.find(agreement.counter_to_id)
         unless original_agreement.pending? || original_agreement.countered?
-          return [nil, :invalid_counter_offer, original_agreement]
+          return [ nil, :invalid_counter_offer, original_agreement ]
         end
         agreement.project_id = original_agreement.project_id
         agreement.agreement_type = original_agreement.agreement_type
@@ -48,9 +48,9 @@ module Agreements
       if agreement.save
         agreement.update(initiator_id: @current_user.id) if original_agreement
         original_agreement&.update(status: Agreement::COUNTERED)
-        [agreement, :success, original_agreement]
+        [ agreement, :success, original_agreement ]
       else
-        [agreement, :error]
+        [ agreement, :error ]
       end
     end
   end
