@@ -253,14 +253,28 @@ class AgreementsController < ApplicationController
         Message.create!(
           conversation: conversation,
           user: current_user, # You may want to use a system user if available
-          body: "[Automated] #{current_user.full_name} has made a counter offer for project '#{@agreement.project.name}'. Please review the new terms."
+          body: "[Automated] #{current_user.full_name} has made a counter offer for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
         )
       else
+        other_party = if current_user.id == @agreement.mentor_id
+          @agreement.entrepreneur
+        else
+          @agreement.mentor
+        end
+
         # Notify the mentor about the new agreement (original behavior)
-        NotificationService.new(@agreement.mentor).notify(
+        NotificationService.new(other_party).notify(
           title: "New Agreement Proposal",
           message: "#{current_user.full_name} has proposed an agreement for project #{@agreement.project.name}",
           url: agreement_path(@agreement)
+        )
+
+        # Send automated message in the conversation
+        conversation = Conversation.between(current_user.id, other_party.id)
+        Message.create!(
+          conversation: conversation,
+          user: current_user, # You may want to use a system user if available
+          body: "[Automated] #{current_user.full_name} has proposed an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
         )
       end
 
@@ -282,6 +296,28 @@ class AgreementsController < ApplicationController
     authorize! :edit, @agreement
 
     if @agreement.update(agreement_params)
+
+      other_party = if current_user.id == @agreement.mentor_id
+          @agreement.entrepreneur
+      else
+          @agreement.mentor
+      end
+
+      # Notify the mentor about the new agreement (original behavior)
+      NotificationService.new(other_party).notify(
+        title: "New Agreement Proposal",
+        message: "#{current_user.full_name} has changed the terms for an agreement for project #{@agreement.project.name}",
+        url: agreement_path(@agreement)
+      )
+
+      # Send automated message in the conversation
+      conversation = Conversation.between(current_user.id, other_party.id)
+      Message.create!(
+        conversation: conversation,
+        user: current_user, # You may want to use a system user if available
+        body: "[Automated] #{current_user.full_name} has changed the terms for an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
+      )
+
       redirect_to @agreement, notice: "Agreement was successfully updated."
     else
       render :edit
@@ -296,6 +332,28 @@ class AgreementsController < ApplicationController
 
   def accept
     if @agreement.accept!
+
+      other_party = if current_user.id == @agreement.mentor_id
+          @agreement.entrepreneur
+      else
+          @agreement.mentor
+      end
+
+      # Notify the mentor about the new agreement (original behavior)
+      NotificationService.new(other_party).notify(
+        title: "New Agreement Proposal",
+        message: "#{current_user.full_name} has accepted an agreement for project #{@agreement.project.name}",
+        url: agreement_path(@agreement)
+      )
+
+      # Send automated message in the conversation
+      conversation = Conversation.between(current_user.id, other_party.id)
+      Message.create!(
+        conversation: conversation,
+        user: current_user, # You may want to use a system user if available
+        body: "[Automated] #{current_user.full_name} has accepted an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
+      )
+
       redirect_to @agreement, notice: "Agreement was successfully accepted."
     else
       redirect_to @agreement, alert: "Unable to accept agreement."
@@ -304,6 +362,28 @@ class AgreementsController < ApplicationController
 
   def reject
     if @agreement.reject!
+
+      other_party = if current_user.id == @agreement.mentor_id
+          @agreement.entrepreneur
+      else
+          @agreement.mentor
+      end
+
+      # Notify the mentor about the new agreement (original behavior)
+      NotificationService.new(other_party).notify(
+        title: "New Agreement Proposal",
+        message: "#{current_user.full_name} has rejected an agreement for project #{@agreement.project.name}",
+        url: agreement_path(@agreement)
+      )
+
+      # Send automated message in the conversation
+      conversation = Conversation.between(current_user.id, other_party.id)
+      Message.create!(
+        conversation: conversation,
+        user: current_user, # You may want to use a system user if available
+        body: "[Automated] #{current_user.full_name} has rejected an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
+      )
+
       redirect_to @agreement, notice: "Agreement was successfully rejected."
     else
       redirect_to @agreement, alert: "Unable to reject agreement."
@@ -314,12 +394,25 @@ class AgreementsController < ApplicationController
     authorize! :complete, @agreement
 
     if @agreement.complete!
-      # Notify the other party
-      notify_party = current_user == @agreement.entrepreneur ? @agreement.mentor : @agreement.entrepreneur
-      NotificationService.new(notify_party).notify(
-        title: "Agreement Completed",
+            other_party = if current_user.id == @agreement.mentor_id
+          @agreement.entrepreneur
+            else
+          @agreement.mentor
+            end
+
+      # Notify the mentor about the new agreement (original behavior)
+      NotificationService.new(other_party).notify(
+        title: "New Agreement Proposal",
         message: "#{current_user.full_name} has marked the agreement for project #{@agreement.project.name} as completed",
         url: agreement_path(@agreement)
+      )
+
+      # Send automated message in the conversation
+      conversation = Conversation.between(current_user.id, other_party.id)
+      Message.create!(
+        conversation: conversation,
+        user: current_user, # You may want to use a system user if available
+        body: "[Automated] #{current_user.full_name} has marked the agreement for project #{@agreement.project.name} as completed. Please review the new terms. #{details_link}"
       )
 
       redirect_to @agreement, notice: "This agreement has been marked as completed."
@@ -330,6 +423,27 @@ class AgreementsController < ApplicationController
 
   def cancel
     if @agreement.cancel!
+      other_party = if current_user.id == @agreement.mentor_id
+          @agreement.entrepreneur
+      else
+          @agreement.mentor
+      end
+
+      # Notify the mentor about the new agreement (original behavior)
+      NotificationService.new(other_party).notify(
+        title: "New Agreement Proposal",
+        message: "#{current_user.full_name} has canceled an agreement for project #{@agreement.project.name}",
+        url: agreement_path(@agreement)
+      )
+
+      # Send automated message in the conversation
+      conversation = Conversation.between(current_user.id, other_party.id)
+      Message.create!(
+        conversation: conversation,
+        user: current_user, # You may want to use a system user if available
+        body: "[Automated] #{current_user.full_name} has canceled an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
+      )
+
       redirect_to @agreement, notice: "Agreement was successfully cancelled."
     else
       redirect_to @agreement, alert: "Unable to cancel agreement."
@@ -430,5 +544,11 @@ class AgreementsController < ApplicationController
     def authorize_agreement_action
       action = params[:action].to_sym
       authorize! action, @agreement
+    end
+
+    def details_link
+      <<~HTML
+        <a href="#{agreement_path(@agreement)}" class="p-1 bg-white text-gray-500">View Details</a>
+      HTML
     end
 end
