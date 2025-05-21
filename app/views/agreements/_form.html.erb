@@ -1,5 +1,5 @@
 <% 
-  @milestones = Milestone.where(project_id: @project.id)
+  @milestones = @agreement.project&.milestones || []
   @milestone_ids = @agreement.milestone_ids || []
 %>
 
@@ -22,10 +22,8 @@
         <%= form.hidden_field :entrepreneur_id, value: @project.user_id if @project %>
         <%= form.hidden_field :mentor_id, value: current_user.id %>
       <% else %>
-        <%= form.hidden_field :entrepreneur_id, value: current_user.id %>
-        <% if @mentor %>
-          <%= form.hidden_field :mentor_id, value: @mentor.id %>
-        <% end %>
+        <%= form.hidden_field :entrepreneur_id, value: @agreement.entrepreneur_id %>
+        <%= form.hidden_field :mentor_id, value: @agreement.mentor_id %>
       <% end %>
       
       <% if @mentor_initiated || @acting_as_mentor %>
@@ -134,12 +132,12 @@
       </div>
 
       <div class="sm:col-span-6">
-        <%= form.hidden_field :milestone_ids, value: @milestone_ids, data: { agreement_form_target: "milestoneField" } %>
-
+        
         <%= form.label :milestones, "Milestones", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-1">
+          <input type="hidden" data-agreement-form-target="milestoneField" />
           <% @milestones.each_with_index do |milestone, index| %>
-            <%= check_box_tag "milestone_ids[]", milestone.id, @milestone_ids.include?(milestone.id), 
+            <%= check_box_tag "agreement[milestone_ids][]", milestone.id, @milestone_ids.include?(milestone.id), 
                 id: "milestone_#{index}", 
                 class: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500", 
                 data: { 

@@ -64,7 +64,7 @@ class AgreementsController < ApplicationController
 
   def edit
     authorize! :edit, @agreement
-    @milestone_ids = []
+    @milestone_ids = @agreement.milestone_ids || []
     handle_edit_counter_offer
     set_project_and_mentor_for_edit
     handle_counter_offer_for_edit
@@ -99,7 +99,7 @@ class AgreementsController < ApplicationController
     if result == :success
       redirect_to @agreement, notice: "Agreement was successfully updated."
     else
-      render :edit
+      render :edit, status: :unprocessable_entity
     end
   end
 
