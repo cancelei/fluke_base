@@ -1,5 +1,5 @@
 <% 
-  @milestones = @agreement.project&.milestones || []
+  @milestones = Milestone.where(project_id: @project.id) || []
   @milestone_ids = @agreement.milestone_ids || []
 %>
 
