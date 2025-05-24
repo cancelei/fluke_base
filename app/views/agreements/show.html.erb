@@ -10,20 +10,28 @@
     </div>
     
     <div class="mt-6 flex flex-wrap justify-start space-x-3">
-      <% if can?(:edit, @agreement) && !@agreement.countered? %>
+      <% if can?(:edit, @agreement) %>
         <%= link_to "Edit Agreement", edit_agreement_path(@agreement), class: "btn-primary" %>
+      <% end %>
+
+      <% if can?(:has_counter_offer_from_entrepreneur, @agreement) %>
+        <span class="text-yellow-600">Note: This agreement has a counter offer from another entrepreneur</span>
+      <% end %>
+
+      <% if can?(:has_counter_offer_from_mentor, @agreement) %>
+        <span class="text-yellow-600">Note: This agreement has a counter offer from a mentor</span>
       <% end %>
       
       <% if can?(:accept, @agreement) %>
         <%= button_to "Accept Agreement", accept_agreement_path(@agreement), 
-            method: :post, 
+            method: :patch, 
             class: "btn-success", 
             data: { turbo_confirm: "Are you sure you want to accept this agreement?" } %>
       <% end %>
       
       <% if can?(:reject, @agreement) %>
         <%= button_to "Reject Agreement", reject_agreement_path(@agreement), 
-            method: :post, 
+            method: :patch, 
             class: "btn-danger", 
             data: { turbo_confirm: "Are you sure you want to reject this agreement?" } %>
       <% end %>
@@ -37,14 +45,14 @@
       
       <% if can?(:cancel, @agreement) && !@agreement.countered? %>
         <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement), 
-            method: :post, 
+            method: :patch, 
             class: "btn-danger", 
             data: { turbo_confirm: "Are you sure you want to cancel this agreement?" } %>
       <% end %>
       
-      <% if can?(:complete, @agreement) %>
+      <% if can?(:complete, @agreement) && @agreement.active? %>
         <%= button_to "Mark as Completed", complete_agreement_path(@agreement), 
-            method: :post, 
+            method: :patch, 
             class: "btn-success", 
             data: { turbo_confirm: "Are you sure you want to mark this agreement as completed?" } %>
       <% end %>
@@ -145,6 +153,52 @@
         </dd>
       </div>
       
+      <% if @project.milestones.any? %>
+        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Milestones</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Title
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Due Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <% @project.milestones.where(id: @agreement.milestone_ids).each do |milestone| %>
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">
+                          <%= milestone.title %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="text-sm text-gray-500">
+                          <%= milestone.description %>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">
+                          <%= milestone.due_date.strftime('%b %d, %Y') if milestone.due_date %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </dd>
+        </div>
+      <% end %>
+
       <% if @agreement.terms.present? %>
         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-gray-500">Additional Terms</dt>
@@ -261,10 +315,10 @@
     </div>
     
     <div class="border-t border-gray-200">
-      <div class="overflow-hidden">
+      <div class="relative overflow-x-auto">
         <% if @meetings.any? %>
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Title
@@ -282,7 +336,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <% @meetings.each do |meeting| %>
-                <tr>
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-medium text-gray-900">
                       <%= meeting.title %>

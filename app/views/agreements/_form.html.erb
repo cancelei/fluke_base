@@ -1,46 +1,16 @@
 <% 
-  @milestones = Milestone.where(project_id: @project.id)
+  @milestones = Milestone.where(project_id: @project.id) || []
   @milestone_ids = @agreement.milestone_ids || []
 %>
 
 <div data-controller="agreement-form">
   <%= form_with(model: @agreement, class: "space-y-6") do |form| %>
 
-    <%= form.hidden_field :project_id, value: @project.id %>
-    <%= form.hidden_field :mentor_id, value: @mentor.id %>
-
     <%= hidden_field_tag :mentor_initiated, @mentor_initiated if @mentor_initiated %>
     <% if @is_counter_offer && @original_agreement %>
       <%= form.hidden_field :counter_to_id, value: @original_agreement.id %>
     <% end %>
-    
-    <% if @mentor_initiated %>
-      <%= form.hidden_field :entrepreneur_id %>
-      <%= form.hidden_field :mentor_id %>
-      
-      <div class="bg-blue-50 p-4 rounded-md mb-6">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-yellow-800">
-              You're acting as a mentor
-            </h3>
-            <div class="mt-2 text-sm text-yellow-700">
-              <p>
-                You need to select an entrepreneur and project before creating an agreement.
-              </p>
-              <div class="mt-3">
-                <%= link_to "Browse Entrepreneurs", entrepreneurs_path, class: "btn-primary text-sm" %>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    <% else %>
+
       <%= form.hidden_field :project_id, value: @project.id if @project %>
       <%= hidden_field_tag :mentor_initiated, @mentor_initiated if @mentor_initiated %>
       
@@ -52,10 +22,8 @@
         <%= form.hidden_field :entrepreneur_id, value: @project.user_id if @project %>
         <%= form.hidden_field :mentor_id, value: current_user.id %>
       <% else %>
-        <%= form.hidden_field :entrepreneur_id, value: current_user.id %>
-        <% if @mentor %>
-          <%= form.hidden_field :mentor_id, value: @mentor.id %>
-        <% end %>
+        <%= form.hidden_field :entrepreneur_id, value: @agreement.entrepreneur_id %>
+        <%= form.hidden_field :mentor_id, value: @agreement.mentor_id %>
       <% end %>
       
       <% if @mentor_initiated || @acting_as_mentor %>
@@ -164,12 +132,12 @@
       </div>
 
       <div class="sm:col-span-6">
-        <%= form.hidden_field :milestone_ids, value: @milestone_ids, data: { agreement_form_target: "milestoneField" } %>
-
+        
         <%= form.label :milestones, "Milestones", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-1">
+          <input type="hidden" data-agreement-form-target="milestoneField" />
           <% @milestones.each_with_index do |milestone, index| %>
-            <%= check_box_tag "milestone_ids[]", milestone.id, @milestone_ids.include?(milestone.id), 
+            <%= check_box_tag "agreement[milestone_ids][]", milestone.id, @milestone_ids.include?(milestone.id), 
                 id: "milestone_#{index}", 
                 class: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500", 
                 data: { 
@@ -188,7 +156,6 @@
           <%= form.text_area :terms, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
         </div>
       </div>
-    <% end %>
 
     <div class="mt-6 flex justify-end space-x-3">
       <% if @agreement.new_record? && (!@acting_as_mentor || @project) %>
@@ -200,14 +167,14 @@
         
         <% if can?(:accept, @agreement) %>
           <%= button_to "Accept Agreement", accept_agreement_path(@agreement), 
-              method: :post, 
+              method: :patch, 
               class: "btn-success",
               data: { turbo_confirm: "Are you sure you want to accept this agreement?" } %>
         <% end %>
         
         <% if can?(:reject, @agreement) %>
           <%= button_to "Reject Agreement", reject_agreement_path(@agreement), 
-              method: :post, 
+              method: :patch, 
               class: "btn-danger",
               data: { turbo_confirm: "Are you sure you want to reject this agreement?" } %>
         <% end %>
@@ -221,7 +188,7 @@
         
         <% if can?(:cancel, @agreement) && !@agreement.countered? %>
           <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement), 
-              method: :post, 
+              method: :patch, 
               class: "btn-danger",
               data: { turbo_confirm: "Are you sure you want to cancel this agreement?" } %>
         <% end %>

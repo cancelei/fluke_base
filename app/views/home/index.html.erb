@@ -63,9 +63,7 @@
             Thousands of entrepreneurs, mentors and co-founders are already building together.
           </p>
         </div>
-        <%= turbo_frame_tag "community_stats", data: { stats_target: "frame" } do %>
-          <%= render "stats" %>
-        <% end %>
+        <%= turbo_frame_tag "community_stats", data: { stats_target: "frame" }, src: home_stats_path %>
       </div>
     </div>
   </div>

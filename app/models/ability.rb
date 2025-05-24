@@ -47,21 +47,29 @@ class Ability
     end
 
     can :edit, Agreement do |agreement|
-      # Only allow editing of pending agreements by the initiator
-      agreement.pending? && (
-        (agreement.entrepreneur_id == user.id) ||
-        (agreement.mentor_id == user.id)
-      )
+      # Allow editing if:
+      # 1. User is the initiator of the latest counter offer
+      agreement.latest_counter_offer&.initiator_id == user.id && !agreement.countered?
+    end
+
+    # Check if agreement has counter offer from another entrepreneur
+    can :has_counter_offer_from_entrepreneur, Agreement do |agreement|
+      agreement.counter_offers.exists?(mentor_id: agreement.entrepreneur_id)
+    end
+
+    # Check if agreement has counter offer from mentor
+    can :has_counter_offer_from_mentor, Agreement do |agreement|
+      agreement.counter_offers.exists?(entrepreneur_id: agreement.mentor_id)
     end
 
     can :accept, Agreement do |agreement|
       # Only the receiver can accept a pending agreement
-      agreement.pending? && agreement.mentor_id == user.id
+      agreement.pending? && agreement.initiator_id != user.id
     end
 
     can :reject, Agreement do |agreement|
       # Only the receiver can reject a pending agreement
-      agreement.pending? && agreement.mentor_id == user.id
+      agreement.pending? && agreement.initiator_id != user.id
     end
 
     can :cancel, Agreement do |agreement|
@@ -74,10 +82,11 @@ class Ability
 
     can :counter_offer, Agreement do |agreement|
       # Only the receiver (mentor or entrepreneur) can make a counter offer to a pending agreement
+      last_initiator = agreement.counter_offers.order(created_at: :desc).first&.initiator_id
       agreement.pending? && (
         (agreement.mentor_id == user.id && agreement.entrepreneur_id != user.id) ||
         (agreement.entrepreneur_id == user.id && agreement.mentor_id != user.id)
-      )
+      ) && ((last_initiator.present? && last_initiator != user.id) || agreement.initiator_id != user.id)
     end
 
     can :complete, Agreement do |agreement|

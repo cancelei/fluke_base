@@ -71,6 +71,18 @@
                     <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
                       Rejected
                     </span>
+                    <% when Agreement::COUNTERED %>
+                    <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-600/20">
+                      Countered
+                    </span>
+                  <% when Agreement::CANCELLED %>
+                    <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+                      Cancelled
+                    </span>
+                  <% when Agreement::COMPLETED %>
+                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                      Completed
+                    </span>
                   <% end %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -80,8 +92,14 @@
                   <%= link_to "View", agreement, class: "text-indigo-600 hover:text-indigo-900" %>
                   
                   <% if agreement.pending? %>
-                    <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 text-indigo-600 hover:text-indigo-900" %>
-                    <%= link_to "Cancel", agreement_path(agreement), method: :delete, data: { confirm: "Are you sure you want to cancel this agreement?" }, class: "ml-3 text-red-600 hover:text-red-900" %>
+                    <% if agreement.initiator_id == current_user.id %>
+                      <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 text-indigo-600 hover:text-indigo-900" %>
+                      <%= link_to "Cancel", agreement_path(agreement), method: :delete, data: { confirm: "Are you sure you want to cancel this agreement?" }, class: "ml-3 text-red-600 hover:text-red-900" %>
+                    <% end %>
+                    <% if agreement.initiator_id != current_user.id %>
+                      <%= button_to "Accept", accept_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+                      <%= button_to "Decline", reject_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                    <% end %>
                   <% end %>
                 </td>
               </tr>
@@ -197,8 +215,14 @@
                   <%= link_to "View", agreement, class: "text-indigo-600 hover:text-indigo-900" %>
                   
                   <% if agreement.pending? %>
-                    <%= button_to "Accept", accept_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
-                    <%= button_to "Decline", reject_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                    <% if agreement.initiator_id == current_user.id %>
+                      <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 text-indigo-600 hover:text-indigo-900" %>
+                      <%= link_to "Cancel", agreement_path(agreement), method: :delete, data: { confirm: "Are you sure you want to cancel this agreement?" }, class: "ml-3 text-red-600 hover:text-red-900" %>
+                    <% end %>
+                    <% if agreement.initiator_id != current_user.id %>
+                      <%= button_to "Accept", accept_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+                      <%= button_to "Decline", reject_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                    <% end %>
                   <% end %>
                 </td>
               </tr>

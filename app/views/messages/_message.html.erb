@@ -1,6 +1,6 @@
 <div id="<%= dom_id(message) %>" class="<%= message.user == current_user ? 'flex justify-end mb-2' : 'flex mb-2' %>">
   <div class="<%= message.user == current_user ? 'bg-indigo-500 text-white rounded-lg py-2 px-4 max-w-xs' : 'bg-gray-200 rounded-lg py-2 px-4 max-w-xs' %>">
-    <p class="text-sm"><%= message.body %></p>
+    <p class="text-sm"><%== message.body %></p>
     <p class="text-xs text-right mt-1 <%= message.user == current_user ? 'text-indigo-100' : 'text-gray-500' %>">
       <%= local_assigns.fetch(:timestamp, message.created_at).strftime("%H:%M") %>
     </p>

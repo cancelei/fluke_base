@@ -3,9 +3,9 @@ class OnboardingController < ApplicationController
 
   def entrepreneur
     # For entrepreneurs and co-founders
-    if current_user.has_role?(Role::ENTREPRENEUR)
+    if current_user.has_role?(Role::ENTREPRENEUR) && !current_user.onboarded_for?(Role::ENTREPRENEUR)
       @role_name = Role::ENTREPRENEUR
-    elsif current_user.has_role?(Role::CO_FOUNDER)
+    elsif current_user.has_role?(Role::CO_FOUNDER) && !current_user.onboarded_for?(Role::CO_FOUNDER)
       @role_name = Role::CO_FOUNDER
     else
       redirect_to dashboard_path, alert: "You don't have the Entrepreneur or Co-Founder role."

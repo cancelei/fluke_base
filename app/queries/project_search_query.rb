@@ -17,7 +17,6 @@ class ProjectSearchQuery
   def base_scope
     Project.joins(:user)
            .where.not(user_id: @user.id)
-           .where.not(id: Agreement.where(mentor_id: @user.id).select(:project_id))
            .order(created_at: :desc)
   end
 
