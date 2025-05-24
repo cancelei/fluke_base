@@ -25,7 +25,8 @@ class ApplicationController < ActionController::Base
 
   rescue_from CanCan::AccessDenied, with: :user_not_authorized
 
-  helper_method :selected_project
+  helper_method :selected_project, :acting_as_mentor?
+
   protected
 
   def configure_permitted_parameters
@@ -60,6 +61,10 @@ class ApplicationController < ActionController::Base
 
   def selected_project
     @selected_project
+  end
+
+  def acting_as_mentor?
+    session[:acting_as_mentor].present? && current_user.has_role?(:mentor)
   end
 
   def user_not_authorized

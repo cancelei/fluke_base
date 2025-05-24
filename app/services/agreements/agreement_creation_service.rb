@@ -11,8 +11,6 @@ module Agreements
     def call
       agreement = Agreement.new(@params)
       acting_as_mentor = @session[:acting_as_mentor].present? && @current_user.has_role?(:mentor)
-      agreement.initiator_id = @current_user.id
-      agreement.status = Agreement::PENDING
 
       # Set entrepreneur for mentor-initiated
       if (@params[:mentor_initiated] || acting_as_mentor) && @current_user.has_role?(:mentor)
@@ -25,30 +23,12 @@ module Agreements
       end
 
       # Counter offer logic
-      original_agreement = nil
-      if agreement.counter_to_id.present?
-        original_agreement = Agreement.find(agreement.counter_to_id)
-        unless original_agreement.pending? || original_agreement.countered?
-          return [ nil, :invalid_counter_offer, original_agreement ]
-        end
-        agreement.project_id = original_agreement.project_id
-        agreement.agreement_type = original_agreement.agreement_type
-        agreement.payment_type = original_agreement.payment_type
-        agreement.start_date = original_agreement.start_date
-        agreement.end_date = original_agreement.end_date
-        agreement.weekly_hours = original_agreement.weekly_hours
-        agreement.hourly_rate = original_agreement.hourly_rate
-        agreement.equity_percentage = original_agreement.equity_percentage
-        agreement.tasks = original_agreement.tasks
-        agreement.terms = original_agreement.terms
-      end
+      agreement.countered_to(agreement.counter_to_id) if agreement.counter_to_id.present?
 
       agreement.agreement_type = @params[:weekly_hours].present? ? Agreement::MENTORSHIP : Agreement::CO_FOUNDER
 
       if agreement.save
-        agreement.update(initiator_id: @current_user.id) if original_agreement
-        original_agreement&.update(status: Agreement::COUNTERED)
-        [ agreement, :success, original_agreement ]
+        [ agreement, :success, agreement.counter_to_id ]
       else
         [ agreement, :error ]
       end

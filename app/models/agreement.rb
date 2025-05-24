@@ -50,6 +50,30 @@ class Agreement < ApplicationRecord
   scope :rejected, -> { where(status: REJECTED) }
   scope :cancelled, -> { where(status: CANCELLED) }
 
+  before_create :init_status
+  before_save :update_countered_agreement
+
+  def init_status
+    self.status = Agreement::PENDING
+  end
+
+  def update_countered_agreement
+    counter_to&.update(status: Agreement::COUNTERED) if counter_to_id_changed? && counter_to_id.present?
+  end
+
+  def countered_to(agreement_id)
+    original_agreement = self.class.find(agreement_id)
+
+    if !original_agreement.pending? && !original_agreement.countered?
+      errors.add(:base, "Cannot create a counter offer to an agreement that is not pending or countered")
+      return
+    end
+
+    self.counter_to_id = original_agreement.id
+    attrs_to_copy = original_agreement.attributes.except("id", "created_at", "updated_at", "counter_to_id", "status")
+    assign_attributes(attrs_to_copy)
+  end
+
   # Milestone methods
   def milestone_ids
     read_attribute(:milestone_ids) || []
