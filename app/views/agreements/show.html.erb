@@ -14,12 +14,8 @@
         <%= link_to "Edit Agreement", edit_agreement_path(@agreement), class: "btn-primary" %>
       <% end %>
 
-      <% if can?(:has_counter_offer_from_entrepreneur, @agreement) %>
-        <span class="text-yellow-600">Note: This agreement has a counter offer from another entrepreneur</span>
-      <% end %>
-
-      <% if can?(:has_counter_offer_from_mentor, @agreement) %>
-        <span class="text-yellow-600">Note: This agreement has a counter offer from a mentor</span>
+      <% if can?(:has_counter_offer, @agreement) %>
+        <span class="text-yellow-600">Note: This agreement has a counter offer from another person</span>
       <% end %>
       
       <% if can?(:accept, @agreement) %>
@@ -71,8 +67,8 @@
       <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Entrepreneur</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= @agreement.entrepreneur.full_name %>
-          <% if @agreement.entrepreneur == current_user %>
+          <%= @agreement.initiator.full_name %>
+          <% if @agreement.initiator == current_user %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
           <% end %>
         </dd>
@@ -81,8 +77,8 @@
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Mentor/Co-Founder</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= @agreement.mentor.full_name %>
-          <% if @agreement.mentor == current_user %>
+          <%= @agreement.other_party.full_name %>
+          <% if @agreement.other_party == current_user %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
           <% end %>
         </dd>
@@ -246,7 +242,7 @@
                 <ul class="list-disc list-inside ml-4 mt-1">
                   <% @agreement.counter_offers.each do |counter| %>
                     <li>
-                      <%= link_to "Counter offer from #{counter.entrepreneur_id == current_user.id ? 'you' : counter.entrepreneur.full_name} on #{counter.created_at.strftime('%b %d, %Y')}", agreement_path(counter), class: "text-indigo-600 hover:text-indigo-900" %>
+                      <%= link_to "Counter offer from #{counter.initiator_id == current_user.id ? 'you' : counter.entrepreneur.full_name} on #{counter.created_at.strftime('%b %d, %Y')}", agreement_path(counter), class: "text-indigo-600 hover:text-indigo-900" %>
                       <%= " (#{counter.status})" %>
                     </li>
                   <% end %>

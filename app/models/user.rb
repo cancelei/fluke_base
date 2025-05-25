@@ -19,12 +19,12 @@ class User < ApplicationRecord
   has_many :notifications, dependent: :destroy
 
   # Entrepreneur agreements
-  has_many :entrepreneur_agreements, class_name: "Agreement",
-           foreign_key: "entrepreneur_id", dependent: :destroy
+  has_many :my_agreements, class_name: "Agreement",
+           foreign_key: "initiator_id", dependent: :destroy
 
   # Mentor agreements
-  has_many :mentor_agreements, class_name: "Agreement",
-           foreign_key: "mentor_id", dependent: :destroy
+  has_many :other_party_agreements, class_name: "Agreement",
+           foreign_key: "other_party_id", dependent: :destroy
 
   # Messaging
   has_many :sent_conversations, class_name: "Conversation", foreign_key: "sender_id", dependent: :destroy
@@ -52,7 +52,7 @@ class User < ApplicationRecord
   end
 
   def all_agreements
-    Agreement.where("entrepreneur_id = ? OR mentor_id = ?", id, id)
+    Agreement.where("initiator_id = ? OR other_party_id = ?", id, id)
   end
 
   def avatar_url

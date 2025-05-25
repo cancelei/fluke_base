@@ -5,28 +5,12 @@
 
 <div data-controller="agreement-form">
   <%= form_with(model: @agreement, class: "space-y-6") do |form| %>
-
-    <%= hidden_field_tag :mentor_initiated, @mentor_initiated if @mentor_initiated %>
-    <% if @is_counter_offer && @original_agreement %>
-      <%= form.hidden_field :counter_to_id, value: @original_agreement.id %>
-    <% end %>
-
       <%= form.hidden_field :project_id, value: @project.id if @project %>
       <%= form.hidden_field :initiator_id, value: current_user.id %>
+      <%= form.hidden_field :other_party_id, value: @agreement&.other_party_id || params[:other_party_id] %>
+      <%= form.hidden_field :counter_to_id, value: params[:counter_to_id] %>
       
-      <% if @is_counter_offer && @original_agreement %>
-        <%= form.hidden_field :counter_to_id, value: @original_agreement.id %>
-        <%= form.hidden_field :entrepreneur_id, value: @original_agreement.entrepreneur_id %>
-        <%= form.hidden_field :mentor_id, value: @original_agreement.mentor_id %>
-      <% elsif @mentor_initiated || acting_as_mentor? %>
-        <%= form.hidden_field :entrepreneur_id, value: @project.user_id if @project %>
-        <%= form.hidden_field :mentor_id, value: current_user.id %>
-      <% else %>
-        <%= form.hidden_field :entrepreneur_id, value: @agreement.entrepreneur_id %>
-        <%= form.hidden_field :mentor_id, value: @agreement.mentor_id %>
-      <% end %>
-      
-      <% if @mentor_initiated || acting_as_mentor? %>
+      <% if current_user.id != @project&.user_id %>
         <div class="bg-blue-50 p-4 rounded-md mb-6">
           <div class="flex">
             <div class="flex-shrink-0">
@@ -36,7 +20,7 @@
             </div>
             <div class="ml-3">
               <h3 class="text-sm font-medium text-blue-800">
-                You're initiating an agreement with <%= @project ? User.find(@project.user_id).full_name : "an entrepreneur" %>
+                You're initiating an agreement with <%= @project ? @project.user&.full_name : "an entrepreneur" %>
               </h3>
               <div class="mt-2 text-sm text-blue-700">
                 <p>
@@ -158,7 +142,7 @@
       </div>
 
     <div class="mt-6 flex justify-end space-x-3">
-      <% if @agreement.new_record? && (!acting_as_mentor? || @project) %>
+      <% if @agreement.new_record? && @project %>
         <%= form.submit "Create Agreement", class: "btn-primary" %>
       <% elsif !@agreement.new_record? %>
         <% if can?(:edit, @agreement) && !@agreement.countered? %>

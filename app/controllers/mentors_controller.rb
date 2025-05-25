@@ -34,14 +34,14 @@ class MentorsController < ApplicationController
 
     # Create a new agreement with the mentor
     @agreement = Agreement.new(
-      mentor_id: @mentor.id,
-      entrepreneur_id: current_user.id,
+      other_party_id: @mentor.id,
+      initiator_id: current_user.id,
       status: Agreement::PENDING
     )
 
     # Redirect to the new agreement form with mentor pre-filled
     redirect_to new_agreement_path(
-      mentor_id: @mentor.id,
+      other_party_id: @mentor.id,
       project_id: selected_project.id
     )
   end

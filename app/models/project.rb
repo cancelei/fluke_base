@@ -58,7 +58,7 @@ class Project < ApplicationRecord
   def visible_to_user?(field_name, user)
     return true if user && (user_id == user.id)
     return true if field_public?(field_name)
-    return true if user && agreements.exists?(mentor_id: user.id)
+    return true if user && agreements.exists?(other_party_id: user.id)
     false
   end
 

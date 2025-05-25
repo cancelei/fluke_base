@@ -25,7 +25,7 @@ describe AgreementsController, type: :controller do
   end
 
   describe 'POST #create' do
-    let(:agreement_params) { attributes_for(:agreement, project_id: project.id, mentor_id: mentor.id, entrepreneur_id: user.id) }
+    let(:agreement_params) { attributes_for(:agreement, project_id: project.id, other_party_id: mentor.id, initiator_id: user.id) }
 
     it 'creates a new agreement' do
       expect {

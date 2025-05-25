@@ -7,15 +7,15 @@ class AgreementsController < ApplicationController
   before_action :authorize_agreement_action, only: %i[accept reject counter_offer cancel]
 
   def index
-    @entrepreneur_agreements = current_user.entrepreneur_agreements
-      .includes(:project, :mentor)
+    @my_agreements = current_user.my_agreements
+      .includes(:project, :other_party)
       .order(created_at: :desc)
 
-    @mentor_agreements = current_user.mentor_agreements
-      .includes(:project, :entrepreneur)
+    @other_party_agreements = current_user.other_party_agreements
+      .includes(:project, :initiator)
       .order(created_at: :desc)
 
-    filter_by_status!(@entrepreneur_agreements, @mentor_agreements)
+    filter_by_status!(@my_agreements, @other_party_agreements)
   end
 
   def show
@@ -43,19 +43,11 @@ class AgreementsController < ApplicationController
 
     set_project_from_params_or_session
 
+    if params[:counter_to_id].present?
+      @agreement.countered_to(params[:counter_to_id])
+    end
 
-    set_mentor_from_params
-
-
-    handle_mentor_or_entrepreneur_initiation
-
-
-    handle_counter_offer_for_new
     @milestone_ids = @agreement.milestone_ids || []
-
-
-    # Ensure mentor is loaded even if it's a counter offer
-    @mentor = @agreement.mentor if @mentor.nil?
   end
 
   def edit
@@ -64,7 +56,6 @@ class AgreementsController < ApplicationController
     handle_edit_counter_offer
     set_project_and_mentor_for_edit
     handle_counter_offer_for_edit
-    ensure_mentor_loaded
   end
 
   def create
@@ -78,7 +69,6 @@ class AgreementsController < ApplicationController
       Rails.logger.debug @agreement&.errors&.full_messages&.inspect
       @agreement&.errors&.full_messages&.each { |error| flash[:alert] = error }
       @project = @agreement&.project
-      @mentor = @agreement&.mentor
       render :new, status: :unprocessable_entity
     end
   end
@@ -143,7 +133,7 @@ class AgreementsController < ApplicationController
     redirect_to new_agreement_path(
       project_id: @agreement.project_id,
       counter_to_id: @agreement.id,
-      mentor_id: @agreement.mentor_id
+      other_party_id: @agreement.initiator_id
     )
   end
 
@@ -151,19 +141,19 @@ class AgreementsController < ApplicationController
 
     # --- Refactored helpers below ---
 
-    def filter_by_status!(entrepreneur_agreements, mentor_agreements)
+    def filter_by_status!(my_agreements, other_party_agreements)
       return unless params[:status].present?
-      entrepreneur_agreements.where!(status: params[:status])
-      mentor_agreements.where!(status: params[:status])
+      my_agreements.where!(status: params[:status])
+      other_party_agreements.where!(status: params[:status])
     end
 
     def duplicate_agreement_exists?
-      agreement = Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).where(status: Agreement::ACCEPTED).first
+      agreement = Agreement.where(other_party_id: params[:other_party_id], project_id: params[:project_id], initiator_id: current_user.id).where.not(status: Agreement::ACCEPTED).first
       params[:counter_to_id].blank? && agreement.present?
     end
 
     def duplicate_agreement_flash
-      agreement = Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).where.not(status: Agreement::ACCEPTED).first
+      agreement = Agreement.where(other_party_id: params[:other_party_id], project_id: params[:project_id], initiator_id: current_user.id).where.not(status: Agreement::ACCEPTED).first
       "You currently have an agreement with this mentor for this project. View agreement <b><a href='#{agreement_path(agreement.id)}'>here</a></b>".html_safe
     end
 
@@ -174,62 +164,6 @@ class AgreementsController < ApplicationController
       elsif !acting_as_mentor? && current_user.selected_project.present?
         @project = current_user.selected_project
       end
-    end
-
-    def set_mentor_from_params
-      if params[:mentor_id].present?
-        @mentor = User.find(params[:mentor_id])
-        @agreement.mentor_id = @mentor.id
-      end
-    end
-
-    def handle_mentor_or_entrepreneur_initiation
-      if acting_as_mentor? || (params[:mentor_initiated] && current_user.has_role?(:mentor))
-        @agreement.mentor_id = current_user.id
-        if @project
-          @agreement.entrepreneur_id = @project.user_id
-        elsif params[:entrepreneur_id].present?
-          @agreement.entrepreneur_id = params[:entrepreneur_id].to_i
-          entrepreneur = User.find(@agreement.entrepreneur_id)
-          if entrepreneur.selected_project.present?
-            @project = entrepreneur.selected_project
-            @agreement.project_id = @project.id
-          end
-        end
-        @mentor_initiated = true
-      elsif current_user.has_role?(:entrepreneur)
-        if current_user.id != @project.user_id
-          flash[:alert] = "You are not acting as mentor so you cannot initiate an agreement with entrepreneur".html_safe
-          redirect_to agreements_path
-          return
-        end
-        @agreement.entrepreneur_id = current_user.id
-      end
-    end
-
-    def handle_counter_offer_for_new
-      if params[:counter_to_id].present?
-        @original_agreement = Agreement.find(params[:counter_to_id])
-        unless @original_agreement.pending? || @original_agreement.countered?
-          redirect_to agreement_path(@original_agreement), alert: "You can only make counter offers to pending or countered agreements."
-          return
-        end
-        if current_user.id != @original_agreement.entrepreneur_id && current_user.id != @original_agreement.mentor_id
-          redirect_to agreement_path(@original_agreement), alert: "You can only make counter offers to your own agreements."
-          return
-        end
-        attrs_to_copy = @original_agreement.attributes.except("id", "created_at", "updated_at", "counter_to_id", "status")
-        @agreement.assign_attributes(attrs_to_copy)
-        @agreement.counter_to_id = @original_agreement.id
-        @is_counter_offer = true
-        @project = @original_agreement.project
-      else
-        @is_counter_offer = false
-      end
-    end
-
-    def ensure_mentor_loaded
-      @mentor = @agreement.mentor if @mentor.nil?
     end
 
     def handle_edit_counter_offer
@@ -247,7 +181,6 @@ class AgreementsController < ApplicationController
     def set_project_and_mentor_for_edit
       @project = @agreement.project
       @milestones = Milestone.where(project_id: @project.id)
-      @mentor = @agreement.mentor
       session[:selected_project_id] = @project.id
     end
 
@@ -266,24 +199,12 @@ class AgreementsController < ApplicationController
       end
     end
 
-    def set_entrepreneur_for_mentor_initiated
-      if (params[:mentor_initiated] || acting_as_mentor?) && current_user.has_role?(:mentor)
-        if @agreement.project_id.present?
-          @project = Project.find(@agreement.project_id)
-          @agreement.entrepreneur_id = @project.user_id if @agreement.entrepreneur_id.blank?
-        elsif acting_as_mentor?
-          redirect_to entrepreneurs_path, alert: "Please select an entrepreneur before creating an agreement."
-          nil
-        end
-      end
-    end
-
     # Centralized notification and message logic
     def notify_and_message_other_party(action)
       other_party = if @original_agreement&.present? && [ :create ].include?(action)
-        current_user.id == @original_agreement.mentor_id ? @original_agreement.entrepreneur : @original_agreement.mentor
+        current_user.id == @original_agreement.initiator_id ? @original_agreement.other_party : @original_agreement.initiator
       else
-        current_user.id == @agreement.mentor_id ? @agreement.entrepreneur : @agreement.mentor
+        current_user.id == @agreement.initiator_id ? @agreement.other_party : @agreement.initiator
       end
       case action
       when :create
@@ -360,8 +281,8 @@ class AgreementsController < ApplicationController
 
     def authorize_agreement
       authorized = (
-        current_user.id == @agreement.entrepreneur_id ||
-        current_user.id == @agreement.mentor_id ||
+        current_user.id == @agreement.initiator_id ||
+        current_user.id == @agreement.other_party_id ||
         current_user.has_role?(:admin)
       )
 
@@ -370,7 +291,7 @@ class AgreementsController < ApplicationController
         original = @agreement.counter_to
         authorized = (
           original.present? &&
-          (current_user.id == original.entrepreneur_id || current_user.id == original.mentor_id)
+          (current_user.id == original.initiator_id || current_user.id == original.other_party_id)
         )
       end
 
@@ -389,11 +310,6 @@ class AgreementsController < ApplicationController
         return
       end
 
-      # Skip project ownership check when acting as a mentor
-      if acting_as_mentor?
-        return
-      end
-
       # Get project_id from params
       project_id = params[:project_id]
       project_id ||= params[:agreement][:project_id] if params[:agreement].present?
@@ -406,8 +322,8 @@ class AgreementsController < ApplicationController
 
       @project = Project.find(project_id)
 
-      if !params[:mentor_initiated] && !(params[:mentor_id] || params.dig(:agreement, :mentor_id))
-        redirect_to projects_path, alert: "Select the mentor to create agreement"
+      if !(params[:other_party_id] || params[:agreement][:other_party_id])
+        redirect_to projects_path, alert: "Select the other user to create agreement"
       end
     end
 
@@ -419,15 +335,15 @@ class AgreementsController < ApplicationController
         return
       end
 
-      unless (@agreement.pending? && current_user.id == @agreement.entrepreneur_id) ||
-             (@agreement.pending? && current_user.id == @agreement.mentor_id && !@agreement.is_counter_offer?)
+      unless (@agreement.pending? && current_user.id == @agreement.initiator_id) ||
+             (@agreement.pending? && current_user.id == @agreement.other_party_id && !@agreement.is_counter_offer?)
         redirect_to @agreement, alert: "You cannot modify this agreement."
       end
     end
 
     def agreement_params
       params.require(:agreement).permit(
-        :project_id, :entrepreneur_id, :mentor_id, :agreement_type, :payment_type,
+        :project_id, :other_party_id, :agreement_type, :payment_type,
         :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage,
         :counter_to_id, :initiator_id, milestone_ids: []
       )

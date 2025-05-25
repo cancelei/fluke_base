@@ -18,8 +18,8 @@ class Agreement < ApplicationRecord
 
   # Relationships
   belongs_to :project
-  belongs_to :entrepreneur, class_name: "User", foreign_key: "entrepreneur_id"
-  belongs_to :mentor, class_name: "User", foreign_key: "mentor_id"
+  belongs_to :initiator, class_name: "User", foreign_key: "initiator_id"
+  belongs_to :other_party, class_name: "User", foreign_key: "other_party_id"
   has_many :meetings, dependent: :destroy
   belongs_to :counter_to, class_name: "Agreement", foreign_key: "counter_to_id", optional: true
   has_many :counter_offers, class_name: "Agreement", foreign_key: "counter_to_id", dependent: :destroy
@@ -29,8 +29,8 @@ class Agreement < ApplicationRecord
 
   # Validations
   validates :project_id, presence: true
-  validates :entrepreneur_id, presence: true
-  validates :mentor_id, presence: true
+  validates :initiator_id, presence: true
+  validates :other_party_id, presence: true
   validates :status, presence: true, inclusion: { in: [ PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED, COUNTERED ] }
   validates :agreement_type, presence: true, inclusion: { in: [ MENTORSHIP, CO_FOUNDER ] }
   validates :payment_type, presence: true, inclusion: { in: [ HOURLY, EQUITY, HYBRID ] }
@@ -78,7 +78,7 @@ class Agreement < ApplicationRecord
     end
 
     self.counter_to_id = original_agreement.id
-    attrs_to_copy = original_agreement.attributes.except("id", "created_at", "updated_at", "counter_to_id", "status")
+    attrs_to_copy = original_agreement.attributes.except("id", "created_at", "updated_at", "counter_to_id", "status", "initiator_id", "other_party_id")
     assign_attributes(attrs_to_copy)
   end
 
@@ -108,7 +108,7 @@ class Agreement < ApplicationRecord
 
   # Custom validation: ensure entrepreneur and mentor are different users
   def different_entrepreneur_and_mentor
-    if entrepreneur_id.present? && mentor_id.present? && entrepreneur_id == mentor_id
+    if initiator_id.present? && other_party_id.present? && initiator_id == other_party_id
       errors.add(:base, "Entrepreneur and mentor cannot be the same person")
     end
   end
@@ -205,8 +205,8 @@ class Agreement < ApplicationRecord
   end
 
   def can_view_full_project_details?(user)
-    return true if entrepreneur_id == user.id
-    return true if mentor_id == user.id
+    return true if initiator_id == user.id
+    return true if other_party_id == user.id
     false
   end
 

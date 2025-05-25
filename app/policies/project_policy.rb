@@ -9,7 +9,7 @@ class ProjectPolicy < ApplicationPolicy
 
     # Users with active agreements can view full project details
     if record.agreements.exists?([
-      "(entrepreneur_id = :user_id OR mentor_id = :user_id) AND status = :status",
+      "(initiator_id = :user_id OR other_party_id = :user_id) AND status = :status",
       { user_id: user.id, status: Agreement::ACCEPTED }
     ])
       return true
@@ -17,7 +17,7 @@ class ProjectPolicy < ApplicationPolicy
 
     # Mentors can view basic project info if they have a pending agreement
     if user.has_role?(:mentor) && record.agreements.exists?([
-      "mentor_id = :user_id AND status = :status",
+      "other_party_id = :user_id AND status = :status",
       { user_id: user.id, status: Agreement::PENDING }
     ])
       return true

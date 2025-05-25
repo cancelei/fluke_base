@@ -22,14 +22,14 @@ class ProjectsController < ApplicationController
 
     # Check if the current user has an agreement with the project
     @has_agreement = @project.agreements.exists?([
-      "(entrepreneur_id = :user_id OR mentor_id = :user_id) AND status IN (:statuses)",
+      "(initiator_id = :user_id OR other_party_id = :user_id) AND status IN (:statuses)",
       { user_id: current_user.id, statuses: [ Agreement::ACCEPTED, Agreement::PENDING ] }
     ])
 
     # Load suggested mentors only for project owner
     if current_user.id == @project.user_id
       @suggested_mentors = User.with_role(:mentor)
-                             .where.not(id: @project.agreements.pluck(:mentor_id))
+                             .where.not(id: @project.agreements.pluck(:other_party_id))
                              .limit(3)
     else
       @suggested_mentors = []

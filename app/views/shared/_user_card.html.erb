@@ -26,7 +26,7 @@
       </div>
     <% else %>
       <div class="mt-2 text-xs text-gray-600">
-        <strong>Active Projects:</strong> <%= user.entrepreneur_agreements.active.count %>
+        <strong>Active Projects:</strong> <%= user.my_agreements.active.count %>
       </div>
       <div class="mt-2">
         <%= render partial: 'shared/achievements', locals: { user: user, user_role: :entrepreneur } %>

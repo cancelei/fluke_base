@@ -25,7 +25,7 @@
       <% end %>
     </div>
     
-    <% if @entrepreneur_agreements.any? %>
+    <% if @my_agreements.any? %>
       <div class="overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -41,7 +41,7 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <% @entrepreneur_agreements.each do |agreement| %>
+            <% @my_agreements.each do |agreement| %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">
@@ -55,7 +55,7 @@
                   <% end %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= agreement.mentor.full_name %></div>
+                  <div class="text-sm text-gray-900"><%= agreement.other_party.full_name %></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <% case agreement.status %>
@@ -134,7 +134,7 @@
       <p class="mt-1 text-sm text-gray-500">Agreements where you are the mentor or co-founder</p>
     </div>
     
-    <% if @mentor_agreements.any? %>
+    <% if @other_party_agreements.any? %>
       <div class="overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -150,7 +150,7 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <% @mentor_agreements.each do |agreement| %>
+            <% @other_party_agreements.each do |agreement| %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">
@@ -166,7 +166,7 @@
                   <div class="text-sm text-gray-900"><%= agreement.agreement_type %></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= agreement.entrepreneur.full_name %></div>
+                  <div class="text-sm text-gray-900"><%= agreement.initiator.full_name %></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <% case agreement.status %>

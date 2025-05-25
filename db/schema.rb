@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_19_164109) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_25_174544) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -47,8 +47,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_19_164109) do
     t.string "status"
     t.date "start_date"
     t.date "end_date"
-    t.integer "entrepreneur_id"
-    t.integer "mentor_id"
     t.bigint "project_id", null: false
     t.text "terms"
     t.datetime "created_at", null: false
@@ -61,8 +59,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_19_164109) do
     t.integer "counter_to_id"
     t.integer "milestone_ids", default: [], array: true
     t.bigint "initiator_id"
+    t.bigint "other_party_id"
     t.index ["counter_to_id"], name: "index_agreements_on_counter_to_id"
     t.index ["initiator_id"], name: "index_agreements_on_initiator_id"
+    t.index ["other_party_id"], name: "index_agreements_on_other_party_id"
     t.index ["payment_type"], name: "index_agreements_on_payment_type"
     t.index ["project_id"], name: "index_agreements_on_project_id"
   end
@@ -176,6 +176,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_19_164109) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agreements", "projects"
   add_foreign_key "agreements", "users", column: "initiator_id"
+  add_foreign_key "agreements", "users", column: "other_party_id"
   add_foreign_key "conversations", "users", column: "recipient_id"
   add_foreign_key "conversations", "users", column: "sender_id"
   add_foreign_key "meetings", "agreements"

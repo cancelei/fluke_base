@@ -17,7 +17,7 @@
       <%= entrepreneur.bio || "Aspiring entrepreneur building the future" %>
     </p>
     <div class="mt-2 text-xs text-gray-600">
-      <strong>Active Projects:</strong> <%= entrepreneur.entrepreneur_agreements.active.count %>
+      <strong>Active Projects:</strong> <%= entrepreneur.my_agreements.active.count %>
     </div>
     <div class="mt-2">
       <%= render partial: 'entrepreneurs/achievements', locals: { entrepreneur: entrepreneur } %>

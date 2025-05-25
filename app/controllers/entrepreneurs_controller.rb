@@ -1,10 +1,9 @@
 class EntrepreneursController < ApplicationController
   before_action :authenticate_user!
   before_action :set_entrepreneur, only: [ :show, :message, :propose_agreement ]
-  before_action :ensure_mentor_for_agreement, only: [ :propose_agreement ]
 
   def index
-    @entrepreneurs = User.with_role(Role::ENTREPRENEUR).includes(:projects, :entrepreneur_agreements)
+    @entrepreneurs = User.with_role(Role::ENTREPRENEUR).includes(:projects, :my_agreements)
   end
 
   def show
@@ -28,14 +27,14 @@ class EntrepreneursController < ApplicationController
 
     # Create a new agreement with the entrepreneur
     @agreement = Agreement.new(
-      mentor_id: current_user.id,
-      entrepreneur_id: @entrepreneur.id,
+      initiator_id: current_user.id,
+      other_party_id: @entrepreneur.id,
       status: Agreement::PENDING
     )
 
     # Redirect to the new agreement form with entrepreneur pre-filled
     redirect_to new_agreement_path(
-      entrepreneur_id: @entrepreneur.id,
+      other_party_id: @entrepreneur.id,
       project_id: selected_project.id
     )
   end
@@ -44,10 +43,6 @@ class EntrepreneursController < ApplicationController
 
   def set_entrepreneur
     @entrepreneur = User.find(params[:id])
-  end
-
-  def ensure_mentor_for_agreement
-    require_role!(Role::MENTOR, entrepreneur_path(@entrepreneur), "You must be a mentor to propose agreements")
   end
 
   def selected_project

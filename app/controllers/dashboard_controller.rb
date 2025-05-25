@@ -13,7 +13,7 @@ class DashboardController < ApplicationController
     @projects = current_user.projects.order(created_at: :desc).limit(5)
     @agreements = current_user.all_agreements.order(created_at: :desc).limit(5)
     @upcoming_meetings = Meeting.joins(:agreement)
-                               .where("agreements.entrepreneur_id = ? OR agreements.mentor_id = ?",
+                               .where("agreements.initiator_id = ? OR agreements.other_party_id = ?",
                                       current_user.id, current_user.id)
                                .upcoming.limit(3)
 
@@ -30,8 +30,8 @@ class DashboardController < ApplicationController
       Rails.logger.debug "DEBUG: Projects not owned by this mentor: #{other_projects}"
 
       # Check how many agreements this mentor has
-      mentor_agreements = Agreement.where(mentor_id: current_user.id).count
-      Rails.logger.debug "DEBUG: Mentor has #{mentor_agreements} agreement(s)"
+      other_party_agreements = Agreement.where(other_party_id: current_user.id).count
+      Rails.logger.debug "DEBUG: Mentor has #{other_party_agreements} agreement(s)"
 
       # Check projects with the collaboration_type field set
       projects_with_collab_type = Project.where.not(collaboration_type: [ nil, "" ]).count
@@ -44,7 +44,7 @@ class DashboardController < ApplicationController
       # The actual query for explorable projects
       @explorable_projects = Project.joins(:user)
                                     .where.not(user_id: current_user.id)
-                                    .where.not(id: Agreement.where(mentor_id: current_user.id).select(:project_id))
+                                    .where.not(id: Agreement.where(other_party_id: current_user.id).select(:project_id))
                                     .where("collaboration_type = ? OR collaboration_type = ?", Project::SEEKING_MENTOR, Project::SEEKING_BOTH)
                                     .order(created_at: :desc)
                                     .limit(5)
