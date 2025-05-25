@@ -24,6 +24,9 @@ class Agreement < ApplicationRecord
   belongs_to :counter_to, class_name: "Agreement", foreign_key: "counter_to_id", optional: true
   has_many :counter_offers, class_name: "Agreement", foreign_key: "counter_to_id", dependent: :destroy
 
+  before_validation :init_status, :init_agreement_type, :init_counter_offer
+  before_save :update_countered_agreement
+
   # Validations
   validates :project_id, presence: true
   validates :entrepreneur_id, presence: true
@@ -50,15 +53,20 @@ class Agreement < ApplicationRecord
   scope :rejected, -> { where(status: REJECTED) }
   scope :cancelled, -> { where(status: CANCELLED) }
 
-  before_create :init_status
-  before_save :update_countered_agreement
-
   def init_status
-    self.status = Agreement::PENDING
+    self.status = PENDING if self.status.blank?
+  end
+
+  def init_agreement_type
+    self.agreement_type = self.weekly_hours.present? ? MENTORSHIP : CO_FOUNDER
+  end
+
+  def init_counter_offer
+    countered_to(self.counter_to_id) if self.counter_to_id.present? && self.counter_to_id_changed?
   end
 
   def update_countered_agreement
-    counter_to&.update(status: Agreement::COUNTERED) if counter_to_id_changed? && counter_to_id.present?
+    counter_to&.update(status: COUNTERED) if counter_to_id_changed? && counter_to_id.present?
   end
 
   def countered_to(agreement_id)

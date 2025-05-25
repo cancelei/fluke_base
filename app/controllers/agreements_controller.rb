@@ -68,17 +68,12 @@ class AgreementsController < ApplicationController
   end
 
   def create
-    service = Agreements::AgreementCreationService.new(current_user, agreement_params.to_h, session)
-    @agreement, result, @original_agreement = service.call
+    @agreement = Agreement.new(agreement_params)
 
-    case result
-    when :success
+    if @agreement.save
+      notify_and_message_other_party(:create)
       # Notification and messaging can be handled by a callback or another service if needed
       redirect_to @agreement, notice: "Agreement was successfully created."
-    when :select_entrepreneur
-      redirect_to entrepreneurs_path, alert: "Please select an entrepreneur before creating an agreement."
-    when :invalid_counter_offer
-      redirect_to agreement_path(@original_agreement), alert: "You can only make counter offers to pending or countered agreements."
     else
       Rails.logger.debug @agreement&.errors&.full_messages&.inspect
       @agreement&.errors&.full_messages&.each { |error| flash[:alert] = error }
@@ -90,9 +85,9 @@ class AgreementsController < ApplicationController
 
   def update
     authorize! :edit, @agreement
-    service = Agreements::AgreementUpdateService.new(current_user, @agreement, agreement_params.to_h)
-    @agreement, result = service.call
-    if result == :success
+
+    if @agreement.update(params)
+      notify_and_message_other_party(:update)
       redirect_to @agreement, notice: "Agreement was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -106,9 +101,8 @@ class AgreementsController < ApplicationController
   end
 
   def accept
-    service = Agreements::AgreementStateChangeService.new(current_user, @agreement, :accept)
-    success, result = service.call
-    if success
+    if @agreement.accept!
+      notify_and_message_other_party(:accept)
       redirect_to @agreement, notice: "Agreement was successfully accepted."
     else
       redirect_to @agreement, alert: "Unable to accept agreement."
@@ -116,9 +110,8 @@ class AgreementsController < ApplicationController
   end
 
   def reject
-    service = Agreements::AgreementStateChangeService.new(current_user, @agreement, :reject)
-    success, result = service.call
-    if success
+    if @agreement.reject!
+      notify_and_message_other_party(:reject)
       redirect_to @agreement, notice: "Agreement was successfully rejected."
     else
       redirect_to @agreement, alert: "Unable to reject agreement."
@@ -127,9 +120,9 @@ class AgreementsController < ApplicationController
 
   def complete
     authorize! :complete, @agreement
-    service = Agreements::AgreementStateChangeService.new(current_user, @agreement, :complete)
-    success, result = service.call
-    if success
+
+    if @agreement.complete!
+      notify_and_message_other_party(:complete)
       redirect_to @agreement, notice: "This agreement has been marked as completed."
     else
       redirect_to @agreement, alert: "This agreement cannot be marked as completed."
@@ -137,9 +130,8 @@ class AgreementsController < ApplicationController
   end
 
   def cancel
-    service = Agreements::AgreementStateChangeService.new(current_user, @agreement, :cancel)
-    success, result = service.call
-    if success
+    if @agreement.cancel!
+      notify_and_message_other_party(:cancel)
       redirect_to @agreement, notice: "Agreement was successfully cancelled."
     else
       redirect_to @agreement, alert: "Unable to cancel agreement."
@@ -166,12 +158,12 @@ class AgreementsController < ApplicationController
     end
 
     def duplicate_agreement_exists?
-      agreement = Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).where.not(status: Agreement::PENDING).first
+      agreement = Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).where(status: Agreement::ACCEPTED).first
       params[:counter_to_id].blank? && agreement.present?
     end
 
     def duplicate_agreement_flash
-      agreement = Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).where.not(status: Agreement::PENDING).first
+      agreement = Agreement.where(mentor_id: params[:mentor_id], project_id: params[:project_id]).where.not(status: Agreement::ACCEPTED).first
       "You currently have an agreement with this mentor for this project. View agreement <b><a href='#{agreement_path(agreement.id)}'>here</a></b>".html_safe
     end
 
@@ -414,10 +406,8 @@ class AgreementsController < ApplicationController
 
       @project = Project.find(project_id)
 
-      # For entrepreneur-initiated agreements, check ownership
-      # Skip this check for mentor-initiated agreements
-      if !params[:mentor_initiated] && (current_user.id == @project.user_id)
-        redirect_to projects_path, alert: "You can only create agreements for your own projects."
+      if !params[:mentor_initiated] && !(params[:mentor_id] || params.dig(:agreement, :mentor_id))
+        redirect_to projects_path, alert: "Select the mentor to create agreement"
       end
     end
 
@@ -437,9 +427,9 @@ class AgreementsController < ApplicationController
 
     def agreement_params
       params.require(:agreement).permit(
-        :project_id, :entrepreneur_id, :mentor_id, :status, :agreement_type, :payment_type,
+        :project_id, :entrepreneur_id, :mentor_id, :agreement_type, :payment_type,
         :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage,
-        :counter_to_id, milestone_ids: []
+        :counter_to_id, :initiator_id, milestone_ids: []
       )
     end
 
