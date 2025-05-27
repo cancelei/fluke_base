@@ -13,9 +13,7 @@
           <% if user_signed_in? %>
             <%= link_to "Dashboard", dashboard_path, class: "inline-flex items-center border-b-2 #{current_page?(dashboard_path) ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             <%= link_to "Projects", projects_path, class: "inline-flex items-center border-b-2 #{controller_name == 'projects' && action_name == 'index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <% if current_user.has_role?(:mentor) %>
-              <%= link_to "Explore Projects", explore_projects_path, class: "inline-flex items-center border-b-2 #{controller_name == 'projects' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <% end %>
+            <%= link_to "Explore Projects", explore_projects_path, class: "inline-flex items-center border-b-2 #{controller_name == 'projects' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             <%= link_to "Explore Mentors", explore_mentors_path, class: "inline-flex items-center border-b-2 #{controller_name == 'mentors' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             <%= link_to "Explore Entrepreneurs", explore_entrepreneurs_path, class: "inline-flex items-center border-b-2 #{controller_name == 'entrepreneurs' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             <%= link_to "Agreements", agreements_path, class: "inline-flex items-center border-b-2 #{controller_name == 'agreements' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
@@ -101,12 +99,9 @@
         <div class="border-t border-gray-200 pt-3">
           <%= link_to "Dashboard", dashboard_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
           <%= link_to "Projects", projects_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
-          <% if current_user.has_role?(:mentor) %>
-            <%= link_to "Explore Projects", explore_projects_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
-          <% end %>
-          <% if current_user.has_role?(:entrepreneur) %>
-            <%= link_to "Explore Mentors", explore_mentors_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
-          <% end %>
+          <%= link_to "Explore Projects", explore_projects_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
+          <%= link_to "Explore Mentors", explore_mentors_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
+          <%= link_to "Explore Entrepreneurs", explore_entrepreneurs_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
           <%= link_to "Agreements", agreements_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
           <%= link_to "Messages", conversations_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>
           <%= link_to "Roles", roles_path, class: "block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700" %>

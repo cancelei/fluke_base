@@ -2,7 +2,7 @@ class EntrepreneursController < ApplicationController
   before_action :authenticate_user!
   before_action :set_entrepreneur, only: [ :show, :message, :propose_agreement ]
 
-  def index
+  def explore
     @entrepreneurs = User.with_role(Role::ENTREPRENEUR).includes(:projects, :my_agreements)
   end
 

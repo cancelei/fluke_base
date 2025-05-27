@@ -20,9 +20,9 @@ class Ability
       project.agreements.completed.where(other_party_id: user.id).exists?
     end
 
-    # Allow mentors to explore all projects
-    can :explore, Project if user.has_role?(:mentor)
-    can :read, Project if user.has_role?(:mentor)
+    # All roles can explore and read projects
+    can :explore, Project
+    can :read, Project
 
     # Agreements
     can :read, Agreement do |agreement|

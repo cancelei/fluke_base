@@ -7,12 +7,6 @@ class ProjectsController < ApplicationController
   end
 
   def explore
-    # Verify the user has the mentor role
-    unless current_user.has_role?(:mentor)
-      redirect_to projects_path, alert: "You need to be a mentor to explore available projects"
-      return
-    end
-
     @projects = ProjectSearchQuery.new(current_user, params).results
   end
 

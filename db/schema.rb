@@ -168,7 +168,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_25_174544) do
     t.text "bio"
     t.string "avatar"
     t.integer "selected_project_id"
+    t.string "industry"
+    t.string "expertise", default: [], array: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["expertise"], name: "index_users_on_expertise", using: :gin
+    t.index ["industry"], name: "index_users_on_industry"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 

@@ -1,8 +1,6 @@
 class MentorsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_mentor, only: [ :show, :message, :propose_agreement ]
-  before_action :ensure_entrepreneur_for_agreement, only: [ :propose_agreement ]
-
   def explore
     @mentors = User.with_role(Role::MENTOR)
                    .where.not(id: current_user.id)
@@ -52,9 +50,5 @@ class MentorsController < ApplicationController
     @mentor = User.with_role(Role::MENTOR).find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to explore_mentors_path, alert: "Mentor not found"
-  end
-
-  def ensure_entrepreneur_for_agreement
-    require_role!(Role::ENTREPRENEUR, mentor_path(@mentor), "You must be an entrepreneur to propose agreements")
   end
 end
