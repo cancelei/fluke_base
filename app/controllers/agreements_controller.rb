@@ -322,7 +322,7 @@ class AgreementsController < ApplicationController
 
       @project = Project.find(project_id)
 
-      if !(params[:other_party_id] || params[:agreement][:other_party_id])
+      if !(params[:other_party_id] || params.dig(:agreement, :other_party_id))
         redirect_to projects_path, alert: "Select the other user to create agreement"
       end
     end

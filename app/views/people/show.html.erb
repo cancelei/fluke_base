@@ -1,0 +1,137 @@
+<div class="max-w-5xl mx-auto py-8">
+  <!-- Hero/Profile Header -->
+  <div class="bg-white shadow rounded-lg p-8 flex flex-col md:flex-row items-center md:items-start gap-8 relative">
+    <div class="flex-shrink-0">
+      <% if @person.avatar.attached? %>
+        <%= image_tag @person.avatar, class: "h-32 w-32 rounded-full object-cover border-4 border-indigo-100" %>
+      <% else %>
+        <span class="inline-block h-32 w-32 rounded-full bg-indigo-100 flex items-center justify-center">
+          <svg class="h-20 w-20 text-indigo-300" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+        </span>
+      <% end %>
+    </div>
+    <div class="flex-1 w-full">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
+            <%= @person.full_name %>
+            <% @person.roles.each do |role| %>
+              <% color = role.name == 'mentor' ? 'bg-blue-100 text-blue-700' : role.name == 'entrepreneur' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' %>
+              <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ml-1 <%= color %>"><%= role.name.capitalize %></span>
+            <% end %>
+          </h1>
+          <p class="mt-2 text-gray-600"><%= @person.bio.presence || (current_user == @person ? link_to('Add a bio', edit_profile_path, class: 'text-indigo-600 underline') : 'No bio provided.') %></p>
+        </div>
+        <% if current_user != @person %>
+          <%= link_to 'Message', conversations_path(recipient_id: @person.id), class: "inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
+        <% else %>
+          <%= link_to 'Edit Profile', profile_edit_path, class: "inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm ring-1 ring-inset ring-indigo-200 hover:bg-indigo-50" %>
+        <% end %>
+      </div>
+      <% if current_user != @person %>
+        <!-- Affinity/You and this person -->
+        <div class="mt-4 bg-indigo-50 border border-indigo-100 rounded p-4 flex flex-col gap-2">
+          <h3 class="text-sm font-semibold text-indigo-700 mb-1">You and <%= @person.first_name %></h3>
+          <%# Example: shared projects, skills, agreements %>
+          <% shared_projects = current_user.projects & @person.projects %>
+          <% shared_skills = (current_user.try(:skills) || []) & (@person.try(:skills) || []) %>
+          <% shared_agreements = current_user.all_agreements.where("initiator_id = ? OR other_party_id = ?", @person.id, @person.id) %>
+          <% if shared_projects.any? %>
+            <div class="text-xs text-gray-700">Shared projects: <%= shared_projects.map(&:name).join(', ') %></div>
+          <% end %>
+          <% if shared_skills.any? %>
+            <div class="text-xs text-gray-700">Shared skills: <%= shared_skills.join(', ') %></div>
+          <% end %>
+          <% if shared_agreements.any? %>
+            <div class="text-xs text-gray-700">You have <%= shared_agreements.count %> agreement(s) together.</div>
+          <% end %>
+          <% unless shared_projects.any? || shared_skills.any? || shared_agreements.any? %>
+            <div class="text-xs text-gray-500">No direct affinities yet. Start a conversation or propose a collaboration!</div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Tabs/Sections -->
+  <div class="mt-8">
+    <div class="flex flex-wrap gap-4 border-b border-gray-200 mb-6">
+      <a href="#about" class="text-sm font-medium text-gray-700 hover:text-indigo-700 pb-2 border-b-2 border-transparent hover:border-indigo-500">About</a>
+      <a href="#achievements" class="text-sm font-medium text-gray-700 hover:text-indigo-700 pb-2 border-b-2 border-transparent hover:border-indigo-500">Achievements</a>
+      <a href="#track" class="text-sm font-medium text-gray-700 hover:text-indigo-700 pb-2 border-b-2 border-transparent hover:border-indigo-500">Track Record</a>
+      <a href="#projects" class="text-sm font-medium text-gray-700 hover:text-indigo-700 pb-2 border-b-2 border-transparent hover:border-indigo-500">Projects</a>
+      <a href="#agreements" class="text-sm font-medium text-gray-700 hover:text-indigo-700 pb-2 border-b-2 border-transparent hover:border-indigo-500">Agreements</a>
+      <% if current_user == @person %>
+        <a href="<%= profile_edit_path %>" class="text-sm font-medium text-indigo-700 pb-2 border-b-2 border-indigo-500">Edit Profile</a>
+      <% end %>
+    </div>
+
+    <!-- About -->
+    <section id="about" class="mb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">About</h2>
+      <p class="text-gray-700"><%= @person.bio.presence || (current_user == @person ? link_to('Add a bio', edit_profile_path, class: 'text-indigo-600 underline') : 'No bio provided.') %></p>
+    </section>
+
+    <!-- Achievements -->
+    <section id="achievements" class="mb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Achievements</h2>
+      <%= render partial: 'shared/achievements', locals: { user: @person, user_role: @person.roles.first&.name&.to_sym || :all } %>
+    </section>
+
+    <!-- Track Record -->
+    <section id="track" class="mb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Track Record</h2>
+      <%= render partial: 'shared/track_record', locals: { user: @person, user_role: @person.roles.first&.name&.to_sym || :all } %>
+    </section>
+
+    <!-- Projects -->
+    <section id="projects" class="mb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Projects Involved In</h2>
+      <% if @projects_involved.any? %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <% @projects_involved.uniq.each do |project| %>
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h3 class="text-md font-bold text-indigo-800 mb-1"><%= link_to project.name, project_path(project), class: "hover:underline" %></h3>
+              <p class="text-xs text-gray-500 mb-1">Stage: <%= project.stage.capitalize %></p>
+              <p class="text-xs text-gray-500">Created <%= time_ago_in_words(project.created_at) %> ago</p>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-gray-500">No projects found for this user.</p>
+      <% end %>
+    </section>
+
+    <!-- Agreements -->
+    <section id="agreements" class="mb-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Agreements</h2>
+      <% agreements = @person.all_agreements.order(created_at: :desc).limit(10) %>
+      <% if agreements.any? %>
+        <ul class="divide-y divide-gray-100">
+          <% agreements.each do |agreement| %>
+            <li class="py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <span class="font-medium text-gray-800"><%= agreement.project&.name || 'Project' %></span>
+                <span class="ml-2 text-xs text-gray-500">(<%= agreement.status.capitalize %>)</span>
+              </div>
+              <div class="text-xs text-gray-500 mt-1 sm:mt-0">
+                <%= agreement.created_at.strftime('%b %d, %Y') %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-gray-500">No agreements found for this user.</p>
+      <% end %>
+    </section>
+  </div>
+
+  <% if current_user != @person %>
+    <!-- Call to action for collaboration -->
+    <div class="mt-8 bg-indigo-50 border border-indigo-100 rounded p-6 text-center">
+      <h3 class="text-lg font-semibold text-indigo-800 mb-2">Interested in collaborating with <%= @person.first_name %>?</h3>
+      <p class="text-gray-700 mb-4">Start a conversation or propose a project together!</p>
+      <%= link_to 'Message', conversations_path(recipient_id: @person.id), class: "inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
+    </div>
+  <% end %>
+</div> 

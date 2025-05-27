@@ -90,8 +90,6 @@ Rails.application.routes.draw do
     end
   end
 
-
-
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
@@ -99,4 +97,10 @@ Rails.application.routes.draw do
   # User roles
   get "users/update_role", to: "users#update_role", as: :update_role_users
   post "users/change_role", to: "users#change_role", as: :change_role_users
+
+  get "home/stats", to: "home#stats", as: :home_stats
+
+  # People Explorer (Unified)
+  get "people/explore", to: "people#explore", as: :explore_people
+  get "people/:id", to: "people#show", as: :person
 end

@@ -53,7 +53,7 @@ class ApplicationController < ActionController::Base
     end
 
     # Set default project if none is selected
-    if session[:selected_project_id].nil? && current_user.projects.any?
+    if session[:selected_project_id].nil? && current_user.projects.any? && !acting_as_mentor?
       @selected_project = current_user.projects.first
       session[:selected_project_id] = @selected_project.id
     end

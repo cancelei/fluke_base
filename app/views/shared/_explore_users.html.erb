@@ -1,14 +1,28 @@
 <div class="bg-white shadow-sm rounded-lg p-6">
-  <div class="sm:flex sm:items-center">
+  <div class="sm:flex sm:items-center justify-between">
     <div class="sm:flex-auto">
       <h1 class="text-2xl font-semibold leading-6 text-gray-900"><%= title %></h1>
       <p class="mt-2 text-sm text-gray-700"><%= description %></p>
+    </div>
+    <div class="mt-4 sm:mt-0">
+      <div class="inline-flex rounded-md shadow-sm" role="group">
+        <%= link_to 'All', explore_people_path, class: "px-4 py-2 text-sm font-medium border border-gray-200 #{user_role == :all ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} first:rounded-l-md last:rounded-r-md" %>
+        <%= link_to 'Entrepreneurs', explore_people_path(role: Role::ENTREPRENEUR), class: "px-4 py-2 text-sm font-medium border-t border-b border-gray-200 #{user_role == :entrepreneur ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}" %>
+        <%= link_to 'Mentors', explore_people_path(role: Role::MENTOR), class: "px-4 py-2 text-sm font-medium border border-gray-200 #{user_role == :mentor ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} last:rounded-r-md" %>
+      </div>
     </div>
   </div>
 
   <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
     <% users.each do |user| %>
-      <%= render partial: 'shared/user_card', locals: { user: user, user_role: user_role } %>
+      <% primary_role = user.roles.first&.name&.to_sym %>
+      <% if primary_role == :mentor %>
+        <%= render partial: 'shared/mentor_card', locals: { user: user } %>
+      <% elsif primary_role == :entrepreneur %>
+        <%= render partial: 'shared/entrepreneur_card', locals: { user: user } %>
+      <% else %>
+        <%= render partial: 'shared/user_card', locals: { user: user, user_role: :all } %>
+      <% end %>
     <% end %>
   </div>
 
@@ -17,8 +31,8 @@
       <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
       </svg>
-      <h3 class="mt-2 text-lg font-medium text-gray-900">No <%= user_role.to_s.pluralize %> found</h3>
-      <p class="mt-1 text-sm text-gray-500">We couldn't find any <%= user_role.to_s.pluralize %> matching your criteria.</p>
+      <h3 class="mt-2 text-lg font-medium text-gray-900">No people found</h3>
+      <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filters to find more people.</p>
     </div>
   <% end %>
 
