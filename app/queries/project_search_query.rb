@@ -16,7 +16,6 @@ class ProjectSearchQuery
 
   def base_scope
     Project.joins(:user)
-           .where.not(user_id: @user.id)
            .order(created_at: :desc)
   end
 

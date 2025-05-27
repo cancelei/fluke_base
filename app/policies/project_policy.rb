@@ -4,36 +4,12 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def show?
-    # Users can view projects they own
-    return true if record.user == user
-
-    # Users with active agreements can view full project details
-    if record.agreements.exists?([
-      "(initiator_id = :user_id OR other_party_id = :user_id) AND status = :status",
-      { user_id: user.id, status: Agreement::ACCEPTED }
-    ])
-      return true
-    end
-
-    # Mentors can view basic project info if they have a pending agreement
-    if user.has_role?(:mentor) && record.agreements.exists?([
-      "other_party_id = :user_id AND status = :status",
-      { user_id: user.id, status: Agreement::PENDING }
-    ])
-      return true
-    end
-
-    # Mentors can view basic project info if the project is seeking a mentor
-    if user.has_role?(:mentor) && record.seeking_mentor?
-      return true
-    end
-
-    false
+    true # All authenticated users can view any project
   end
 
   def create?
     # Only entrepreneurs and co-founders can create projects
-    user.has_role?(Role::ENTREPRENEUR) || user.has_role?(Role::CO_FOUNDER)
+    user.has_role?(Role::ENTREPRENEUR)
   end
 
   def update?
@@ -47,19 +23,12 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def explore?
-    # Only mentors can explore available projects
-    user.has_role?(Role::MENTOR)
+    true # All authenticated users can explore projects
   end
 
   class Scope < Scope
     def resolve
-      if user.has_role?(Role::MENTOR)
-        # Mentors can see all projects
-        scope.all
-      else
-        # Others can only see their own projects
-        scope.where(user: user)
-      end
+      scope.all # All authenticated users can see all projects
     end
   end
 end
