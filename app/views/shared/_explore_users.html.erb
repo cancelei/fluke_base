@@ -6,9 +6,9 @@
     </div>
     <div class="mt-4 sm:mt-0">
       <div class="inline-flex rounded-md shadow-sm" role="group">
-        <%= link_to 'All', explore_people_path, class: "px-4 py-2 text-sm font-medium border border-gray-200 #{user_role == :all ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} first:rounded-l-md last:rounded-r-md" %>
-        <%= link_to 'Entrepreneurs', explore_people_path(role: Role::ENTREPRENEUR), class: "px-4 py-2 text-sm font-medium border-t border-b border-gray-200 #{user_role == :entrepreneur ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}" %>
-        <%= link_to 'Mentors', explore_people_path(role: Role::MENTOR), class: "px-4 py-2 text-sm font-medium border border-gray-200 #{user_role == :mentor ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} last:rounded-r-md" %>
+        <%= link_to 'All', explore_people_path, class: "px-4 py-2 text-sm font-medium border border-gray-200 #{params[:role].nil? ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} first:rounded-l-md last:rounded-r-md" %>
+        <%= link_to 'Entrepreneurs', explore_people_path(role: Role::ENTREPRENEUR), class: "px-4 py-2 text-sm font-medium border-t border-b border-gray-200 #{params[:role] == Role::ENTREPRENEUR ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}" %>
+        <%= link_to 'Mentors', explore_people_path(role: Role::MENTOR), class: "px-4 py-2 text-sm font-medium border border-gray-200 #{params[:role] == Role::MENTOR ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} last:rounded-r-md" %>
       </div>
     </div>
   </div>

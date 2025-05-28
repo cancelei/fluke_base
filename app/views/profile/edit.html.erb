@@ -65,6 +65,32 @@
           <%= form.email_field :email, class: "block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
         </div>
       </div>
+      <div>
+        <%= form.label :bio, class: "block text-sm font-medium leading-6 text-gray-900" %>
+        <div class="mt-2">
+          <%= form.text_area :bio, rows: 4, class: "block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
+        </div>
+      </div>
+
+      <div>
+        <%= form.label :industry, class: "block text-sm font-medium leading-6 text-gray-900" %>
+        <div class="mt-2">
+          <%= form.text_field :industry, class: "block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
+        </div>
+      </div>
+
+      <div>
+        <%= form.label :expertise, "Expertise", class: "block text-sm font-medium leading-6 text-gray-900" %>
+        <div class="mt-2 space-y-2">
+          <% expertises = ["Ruby", "Rails", "JavaScript", "React", "DevOps", "UI/UX", "Product Management", "Testing", "Other"] %>
+          <% expertises.each do |exp| %>
+        <div class="flex items-center">
+          <%= check_box_tag "user[expertise][]", exp, (@user.respond_to?(:expertise) && @user.expertise&.include?(exp)), id: "user_expertise_#{exp.parameterize}", multiple: true %>
+          <%= label_tag "user_expertise_#{exp.parameterize}", exp, class: "ml-2 text-sm text-gray-700" %>
+        </div>
+          <% end %>
+        </div>
+      </div>
 
       <div class="flex justify-end gap-x-3">
         <%= link_to "Cancel", profile_show_path, class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>

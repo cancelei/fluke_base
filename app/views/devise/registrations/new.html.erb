@@ -61,12 +61,12 @@
               <% roles = Role.all %>
               <% if roles.present? %>
                 <%= f.collection_radio_buttons :role_id, roles, :id, :name do |b| %>
-                  <div class="relative flex items-start p-4 border border-gray-200 rounded-lg hover:border-indigo-500 transition-colors duration-200">
+                  <%= b.label(class: "relative flex items-start p-4 border border-gray-200 rounded-lg hover:border-indigo-500 transition-colors duration-200") do %>
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center">
                         <%= b.radio_button(class: "h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600", required: true) %>
                         <div class="ml-3">
-                          <%= b.label(class: "text-base font-semibold text-gray-900") { b.text } %>
+                          <%= b.text %>
                         </div>
                       </div>
                       <div class="mt-2">
@@ -86,7 +86,7 @@
                         <% end %>
                       </div>
                     </div>
-                  </div>
+                  <% end %>
                 <% end %>
               <% else %>
                 <p class="text-sm text-red-600">No roles available. Please contact an administrator.</p>
