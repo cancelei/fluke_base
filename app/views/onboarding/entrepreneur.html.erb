@@ -2,8 +2,10 @@
   <div class="px-4 py-5 sm:p-6">
     <h2 class="text-lg font-medium text-gray-900 mb-4">Entrepreneur Onboarding</h2>
     
-    <%= form_with url: "/complete_onboarding", method: :post, class: "space-y-6" do |f| %>
+    
+    <%= form_with model: current_user, url: "/complete_onboarding", method: :post, class: "space-y-6" do |f| %>
       <%= f.hidden_field :role_name, value: @role_name %>
+
       <div>
         <%= f.label :business_stage, "What stage is your business in?", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-2">
@@ -39,49 +41,29 @@
       </div>
 
       <div>
-        <%= f.label :seeking, "What are you seeking help with?", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.label :help_seekings, "What are you seeking help with?", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-2 space-y-2">
-          <div class="flex items-start">
-            <%= f.check_box :seeking_business_strategy, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="seeking_business_strategy" class="text-sm font-medium text-gray-700">Business Strategy</label>
+          <%= f.collection_check_boxes :help_seekings, [
+                ["Business Strategy", "business_strategy"],
+                ["Product Development", "product_development"],
+                ["Marketing & Sales", "marketing"],
+                ["Funding & Investment", "funding"],
+                ["Operations & Scaling", "operations"]
+              ], :last, :first do |cb| %>
+            <div class="flex items-start">
+              <%= cb.check_box(class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1") %>
+              <div class="ml-3">
+                <%= cb.label(class: "text-sm font-medium text-gray-700") %>
+              </div>
             </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :seeking_product_development, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="seeking_product_development" class="text-sm font-medium text-gray-700">Product Development</label>
-            </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :seeking_marketing, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="seeking_marketing" class="text-sm font-medium text-gray-700">Marketing & Sales</label>
-            </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :seeking_funding, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="seeking_funding" class="text-sm font-medium text-gray-700">Funding & Investment</label>
-            </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :seeking_operations, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="seeking_operations" class="text-sm font-medium text-gray-700">Operations & Scaling</label>
-            </div>
-          </div>
+          <% end %>
         </div>
       </div>
 
       <div>
-        <%= f.label :bio, "Tell us a bit about yourself and your business", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.label :business_info, "Tell us a bit about yourself and your business", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-2">
-          <%= f.text_area :bio, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          <%= f.text_area :business_info, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
         </div>
       </div>
 

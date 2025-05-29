@@ -66,11 +66,16 @@ class OnboardingController < ApplicationController
 
   def user_onboarding_params
     params.require(:user).permit(
+      # Mentor fields
       :bio,
       :years_of_experience,
       :hourly_rate,
+      :business_stage,
+      :industry,
+      :business_info,
       expertise: [],
-      industries: []
+      industries: [],
+      help_seekings: []
     )
   end
 end

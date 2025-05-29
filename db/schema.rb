@@ -169,10 +169,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_29_164119) do
     t.string "avatar"
     t.integer "selected_project_id"
     t.string "expertise", default: [], array: true
+    t.string "industry"
     t.float "years_of_experience"
     t.float "hourly_rate"
     t.string "industries", default: [], array: true
     t.string "skills", default: [], array: true
+    t.string "business_stage"
+    t.string "help_seekings", default: [], array: true
+    t.text "business_info"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["expertise"], name: "index_users_on_expertise", using: :gin
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
