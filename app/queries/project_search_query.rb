@@ -20,7 +20,7 @@ class ProjectSearchQuery
   end
 
   def filter_by_collaboration_type(scope)
-    return scope.seeking_mentor unless @params[:collaboration_type].present?
+    return scope unless @params[:collaboration_type].present?
 
     case @params[:collaboration_type]
     when "mentor"

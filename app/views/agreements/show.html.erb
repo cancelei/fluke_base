@@ -65,20 +65,20 @@
       </div>
       
       <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Entrepreneur</dt>
+        <dt class="text-sm font-medium text-gray-500">Entrepreneur/Co-Founder</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= @agreement.initiator.full_name %>
-          <% if @agreement.initiator == current_user %>
+          <%= @agreement.other_party.full_name %>
+          <% if @agreement.other_party == current_user %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
           <% end %>
         </dd>
       </div>
       
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Mentor/Co-Founder</dt>
+        <dt class="text-sm font-medium text-gray-500">Mentor</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= @agreement.other_party.full_name %>
-          <% if @agreement.other_party == current_user %>
+          <%= @agreement.initiator.full_name %>
+          <% if @agreement.initiator == current_user %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
           <% end %>
         </dd>
