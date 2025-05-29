@@ -26,7 +26,6 @@ class OnboardingController < ApplicationController
     role_name = nil
 
     if params[:role_name].present?
-      # If the role is passed in the params, use that
       role_name = params[:role_name]
     elsif current_user.has_role?(Role::ENTREPRENEUR) && !current_user.onboarded_for?(Role::ENTREPRENEUR)
       role_name = Role::ENTREPRENEUR
@@ -41,24 +40,37 @@ class OnboardingController < ApplicationController
       return
     end
 
-    # Store onboarding information (we'll use bio for all roles for now)
-    current_user.update(bio: params[:bio])
-
-    # Mark the role as onboarded
-    if current_user.mark_onboarded_for(role_name)
-      # Check if there are more roles to onboard
-      if path = current_user.current_onboarding_path
-        if path == :entrepreneur
-
-          redirect_to onboarding_entrepreneur_path, notice: "#{role_name} onboarding completed! Please complete onboarding for your other roles."
-        elsif path == :mentor
-          redirect_to onboarding_mentor_path, notice: "#{role_name} onboarding completed! Please complete onboarding for your other roles."
+    # Update user fields from form
+    if current_user.update(user_onboarding_params)
+      # Mark the role as onboarded
+      if current_user.mark_onboarded_for(role_name)
+        # Check if there are more roles to onboard
+        if path = current_user.current_onboarding_path
+          if path == :entrepreneur
+            redirect_to onboarding_entrepreneur_path, notice: "#{role_name} onboarding completed! Please complete onboarding for your other roles."
+          elsif path == :mentor
+            redirect_to onboarding_mentor_path, notice: "#{role_name} onboarding completed! Please complete onboarding for your other roles."
+          end
+        else
+          redirect_to dashboard_path, notice: "#{role_name} onboarding completed! Welcome to FlukeBase."
         end
       else
-        redirect_to dashboard_path, notice: "#{role_name} onboarding completed! Welcome to FlukeBase."
+        redirect_to dashboard_path, alert: "Could not complete onboarding. Please try again."
       end
     else
-      redirect_to dashboard_path, alert: "Could not complete onboarding. Please try again."
+      redirect_to request.referer || dashboard_path, alert: "Could not save your information. Please check your input."
     end
+  end
+
+  private
+
+  def user_onboarding_params
+    params.require(:user).permit(
+      :bio,
+      :years_of_experience,
+      :hourly_rate,
+      expertise: [],
+      industries: []
+    )
   end
 end

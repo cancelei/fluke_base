@@ -2,100 +2,60 @@
   <div class="px-4 py-5 sm:p-6">
     <h2 class="text-lg font-medium text-gray-900 mb-4">Mentor Onboarding</h2>
     
-    <%= form_with url: "/complete_onboarding", method: :post, class: "space-y-6" do |f| %>
+    <%= form_with model: current_user, url: "/complete_onboarding", method: :post, class: "space-y-6" do |f| %>
       <%= f.hidden_field :role_name, value: @role_name %>
+
       <div>
-        <%= f.label :expertise_areas, "What are your areas of expertise?", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.label :expertise, "What are your areas of expertise?", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-2 space-y-2">
-          <div class="flex items-start">
-            <%= f.check_box :expertise_business_strategy, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="expertise_business_strategy" class="text-sm font-medium text-gray-700">Business Strategy</label>
+          <%= f.collection_check_boxes :expertise, [
+                ["Business Strategy", "business_strategy"],
+                ["Product Development", "product_development"],
+                ["Marketing & Sales", "marketing"],
+                ["Funding & Investment", "funding"],
+                ["Operations & Scaling", "operations"]
+              ], :last, :first do |cb| %>
+            <div class="flex items-start">
+              <%= cb.check_box(class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1") %>
+              <div class="ml-3">
+                <%= cb.label(class: "text-sm font-medium text-gray-700") %>
+              </div>
             </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :expertise_product_development, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="expertise_product_development" class="text-sm font-medium text-gray-700">Product Development</label>
-            </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :expertise_marketing, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="expertise_marketing" class="text-sm font-medium text-gray-700">Marketing & Sales</label>
-            </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :expertise_funding, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="expertise_funding" class="text-sm font-medium text-gray-700">Funding & Investment</label>
-            </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :expertise_operations, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="expertise_operations" class="text-sm font-medium text-gray-700">Operations & Scaling</label>
-            </div>
-          </div>
+          <% end %>
         </div>
       </div>
 
       <div>
         <%= f.label :industries, "What industries do you specialize in?", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-2 space-y-2">
-          <div class="flex items-start">
-            <%= f.check_box :industry_technology, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="industry_technology" class="text-sm font-medium text-gray-700">Technology</label>
+          <%= f.collection_check_boxes :industries, [
+                ["Technology", "technology"],
+                ["Healthcare", "healthcare"],
+                ["Finance", "finance"],
+                ["Education", "education"],
+                ["E-commerce", "ecommerce"]
+              ], :last, :first do |cb| %>
+            <div class="flex items-start">
+              <%= cb.check_box(class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1") %>
+              <div class="ml-3">
+                <%= cb.label(class: "text-sm font-medium text-gray-700") %>
+              </div>
             </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :industry_healthcare, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="industry_healthcare" class="text-sm font-medium text-gray-700">Healthcare</label>
-            </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :industry_finance, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="industry_finance" class="text-sm font-medium text-gray-700">Finance</label>
-            </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :industry_education, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="industry_education" class="text-sm font-medium text-gray-700">Education</label>
-            </div>
-          </div>
-          
-          <div class="flex items-start">
-            <%= f.check_box :industry_ecommerce, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1" %>
-            <div class="ml-3">
-              <label for="industry_ecommerce" class="text-sm font-medium text-gray-700">E-commerce</label>
-            </div>
-          </div>
+          <% end %>
         </div>
       </div>
 
       <div>
-        <%= f.label :experience, "Years of experience", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.label :years_of_experience, "Years of experience", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-2">
-          <%= f.select :experience, 
-            [
-              ["1-3 years", "1-3"], 
-              ["4-6 years", "4-6"], 
-              ["7-10 years", "7-10"], 
-              ["10+ years", "10+"]
-            ],
-            { include_blank: "Select experience" },
-            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }
+          <%= f.select :years_of_experience, [
+                ["1-3 years", 2],
+                ["4-6 years", 5],
+                ["7-10 years", 8.5],
+                ["10+ years", 12]
+              ],
+              { include_blank: "Select experience" },
+              { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }
           %>
         </div>
       </div>

@@ -14,9 +14,9 @@
       <%= user_role.to_s.capitalize %>
     </span>
     <p class="text-sm text-gray-500 truncate mt-1">
-      <%= user.bio || (user_role == :mentor ? "Experienced professional ready to mentor" : "Aspiring entrepreneur building the future") %>
+      <%= user.bio || (user_role == Role::MENTOR ? "Experienced professional ready to mentor" : "Aspiring entrepreneur building the future") %>
     </p>
-    <% if user_role == :mentor %>
+    <% if user_role == Role::MENTOR %>
       <div class="mt-2 flex flex-wrap gap-1">
         <% ["Ruby", "Rails", "JavaScript", "React", "UI/UX", "Marketing"].sample(3).each do |skill| %>
           <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700">
