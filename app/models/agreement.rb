@@ -19,6 +19,7 @@ class Agreement < ApplicationRecord
   # Relationships
   belongs_to :project
   belongs_to :initiator, class_name: "User", foreign_key: "initiator_id"
+  belongs_to :counter_offer_turn, class_name: "User", foreign_key: "counter_offer_turn_id"
   belongs_to :other_party, class_name: "User", foreign_key: "other_party_id"
   has_many :meetings, dependent: :destroy
   belongs_to :counter_to, class_name: "Agreement", foreign_key: "counter_to_id", optional: true

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_30_163916) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_30_175701) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -60,6 +60,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_30_163916) do
     t.integer "milestone_ids", default: [], array: true
     t.bigint "initiator_id"
     t.bigint "other_party_id"
+    t.jsonb "initiator_meta", default: {"id"=>nil, "role"=>nil}, null: false
+    t.jsonb "agreement_meta", default: [], array: true
+    t.bigint "counter_offer_turn_id"
+    t.index ["counter_offer_turn_id"], name: "index_agreements_on_counter_offer_turn_id"
     t.index ["counter_to_id"], name: "index_agreements_on_counter_to_id"
     t.index ["initiator_id"], name: "index_agreements_on_initiator_id"
     t.index ["other_party_id"], name: "index_agreements_on_other_party_id"
@@ -187,6 +191,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_30_163916) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agreements", "projects"
+  add_foreign_key "agreements", "users", column: "counter_offer_turn_id"
   add_foreign_key "agreements", "users", column: "initiator_id"
   add_foreign_key "agreements", "users", column: "other_party_id"
   add_foreign_key "conversations", "users", column: "recipient_id"

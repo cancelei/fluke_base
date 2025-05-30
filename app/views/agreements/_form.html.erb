@@ -7,7 +7,7 @@
   <%= form_with(model: @agreement, class: "space-y-6") do |form| %>
       <%= form.hidden_field :project_id, value: @project.id if @project %>
       <%= form.hidden_field :initiator_id, value: current_user.id %>
-      <%= form.hidden_field :other_party_id, value: @agreement&.other_party_id || params[:other_party_id] %>
+      <%= form.hidden_field :other_party_id, value: @agreement&.counter_offer_turn_id %>
       <%= form.hidden_field :counter_to_id, value: params[:counter_to_id] %>
       
       <% if current_user.id != @project&.user_id %>

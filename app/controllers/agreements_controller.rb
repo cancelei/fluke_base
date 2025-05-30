@@ -44,6 +44,8 @@ class AgreementsController < ApplicationController
     set_project_from_params_or_session
 
     if params[:counter_to_id].present?
+      original_agreement = Agreement.find(params[:counter_to_id])
+      @initiator_details = original_agreement.initiator_meta
       @agreement.countered_to(params[:counter_to_id])
     end
 
@@ -59,7 +61,19 @@ class AgreementsController < ApplicationController
   end
 
   def create
+    project_id = params.dig("agreement", "project_id").to_i
+    if project_id.present?
+      old_agreement = Project.find_by_id(project_id).agreements.order(id: :desc).first
+    end
+
     @agreement = Agreement.new(agreement_params)
+    if old_agreement.present?
+      @agreement.initiator_meta = old_agreement.initiator_meta
+    else
+      @agreement.initiator_meta["id"] = current_user.id
+      @agreement.initiator_meta["role"] = Role.find_by_id(current_user.current_role_id).name
+    end
+    @agreement.counter_offer_turn_id = @agreement.other_party_id
 
     if @agreement.save
       notify_and_message_other_party(:create)

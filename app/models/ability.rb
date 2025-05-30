@@ -90,7 +90,7 @@ class Ability
   end
 
   def can_make_counter_offer?(user, agreement, last_initiator)
-    agreement.pending? && (
+    (agreement.pending? || agreement.countered?) && (
       (agreement.other_party_id == user.id && agreement.initiator_id != user.id) ||
       (agreement.initiator_id == user.id && agreement.other_party_id != user.id)
     ) && ((last_initiator.present? && last_initiator != user.id) || agreement.initiator_id != user.id)

@@ -21,6 +21,18 @@
                       </p>
                     </div>
                   <% end %>
+                  <% details = fetch_initiator_data(@initiator_details) %>
+                  <% if details %>
+                    <div class="mb-6">
+                      <h2 class="text-lg font-medium text-gray-900">Initiator Details</h2>
+                      <p class="mt-1 text-sm text-gray-500">
+                        <span class="font-medium">Name:</span> <%= details.first %>
+                      </p>
+                      <p class="mt-1 text-sm text-gray-500">
+                        <span class="font-medium">Role:</span> <%= details.last %>
+                      </p>
+                    </div>
+                  <% end %>
 
                   <% if @mentor %>
                     <div class="mb-6">

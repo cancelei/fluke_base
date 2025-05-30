@@ -15,7 +15,7 @@
       <% end %>
 
       <% if can?(:has_counter_offer, @agreement) %>
-        <span class="text-yellow-600">Note: This agreement has a counter offer from another person</span>
+        <div class="text-yellow-600">Note: This agreement has a counter offer from another person</div>
       <% end %>
       
       <% if can?(:accept, @agreement) %>
