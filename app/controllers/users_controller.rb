@@ -15,24 +15,12 @@ class UsersController < ApplicationController
   end
 
   def update_selected_project
-    if params[:acting_as_mentor].present?
-      # When acting as a mentor, clear the selected project
-      session[:acting_as_mentor] = true
-      current_user.update(selected_project_id: nil)
-
-      respond_to do |format|
-        format.html { redirect_back fallback_location: root_path, notice: "Now acting as mentor." }
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("navbar-projects", partial: "shared/navbar_projects", locals: { current_user: current_user, selected_project: nil }) }
-      end
-      return
-    else
-      # Clear the acting_as_mentor flag when selecting a project
-      session[:acting_as_mentor] = false
-    end
-
+    user_is_mentor = current_user.current_role_id == 2 # id 2 is for mentor here
     project = current_user.projects.find_by(id: params[:project_id])
     if project
-      current_user.update(selected_project_id: project.id)
+      # if user is a mentor and user selects a project then we will change it to Entrepreneur
+      current_user.update(selected_project_id: project.id, current_role_id: 1) if user_is_mentor
+      current_user.update(selected_project_id: project.id) unless user_is_mentor
       respond_to do |format|
         format.html { redirect_back fallback_location: root_path, notice: "Project selected." }
         format.turbo_stream { render turbo_stream: turbo_stream.replace("navbar-projects", partial: "shared/navbar_projects", locals: { current_user: current_user, selected_project: project }) }
@@ -48,7 +36,11 @@ class UsersController < ApplicationController
   def switch_current_role
     role = Role.find(params[:role_id])
     if current_user.current_role != role
-      current_user.update(current_role_id: role.id)
+      if role.name == "Mentor"
+        current_user.update!(current_role_id: role.id, selected_project_id: nil)
+      else
+        current_user.update(current_role_id: role.id)
+      end
       respond_to do |format|
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace(
