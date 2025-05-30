@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   belongs_to :selected_project, class_name: "Project", optional: true
+  belongs_to :current_role, class_name: "Role", optional: true
 
   include Roleable
 

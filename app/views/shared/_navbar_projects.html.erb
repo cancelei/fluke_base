@@ -24,11 +24,11 @@
           role: "menuitem" %>
       <% end %>
       
-      <% if current_user.has_role?(Role::MENTOR) %>
+      <% current_user.user_roles.where.not(role_id: current_user.current_role_id).each do |user_role| %>
         <div class="border-t border-gray-100 my-1"></div>
-        <%= button_to "Acting as Mentor",
-          update_selected_project_path(project_id: nil, acting_as_mentor: true),
-          method: :patch,
+        <%= button_to "Change role to #{user_role.role.name}",
+          switch_current_role_users_path(role_id: user_role.role_id),
+          method: :post,
           class: "block w-full text-left px-4 py-2 text-sm text-indigo-700 hover:bg-gray-100 #{'bg-indigo-100 font-bold' if current_user.selected_project_id.nil? && session[:acting_as_mentor]}",
           role: "menuitem" %>
       <% end %>

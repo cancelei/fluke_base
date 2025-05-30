@@ -97,6 +97,7 @@ Rails.application.routes.draw do
   # User roles
   get "users/update_role", to: "users#update_role", as: :update_role_users
   post "users/change_role", to: "users#change_role", as: :change_role_users
+  post "users/switch_current_role", to: "users#switch_current_role", as: :switch_current_role_users
 
   get "home/stats", to: "home#stats", as: :home_stats
 

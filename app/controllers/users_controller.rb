@@ -44,4 +44,26 @@ class UsersController < ApplicationController
       end
     end
   end
+
+  def switch_current_role
+    role = Role.find(params[:role_id])
+    if current_user.current_role != role
+      current_user.update(current_role_id: role.id)
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "navbar-projects",
+            partial: "shared/navbar_projects",
+            locals: { current_user: current_user, selected_project: current_user.selected_project }
+          )
+        end
+        format.html { redirect_to root_path, notice: "Current role switched to #{role.name}." }
+      end
+    else
+      respond_to do |format|
+        format.turbo_stream { head :unprocessable_entity }
+        format.html { redirect_to root_path, alert: "You are already in the #{role.name} role." }
+      end
+    end
+  end
 end

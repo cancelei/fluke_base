@@ -148,12 +148,12 @@ class AgreementsController < ApplicationController
     end
 
     def duplicate_agreement_exists?
-      agreement = Agreement.where(other_party_id: params[:other_party_id], project_id: params[:project_id], initiator_id: current_user.id).where.not(status: Agreement::ACCEPTED).first
+      agreement = Agreement.where(other_party_id: params[:other_party_id], project_id: params[:project_id], initiator_id: current_user.id).where(status: [ Agreement::ACCEPTED, Agreement::PENDING ]).first
       params[:counter_to_id].blank? && agreement.present?
     end
 
     def duplicate_agreement_flash
-      agreement = Agreement.where(other_party_id: params[:other_party_id], project_id: params[:project_id], initiator_id: current_user.id).where.not(status: Agreement::ACCEPTED).first
+      agreement = Agreement.where(other_party_id: params[:other_party_id], project_id: params[:project_id], initiator_id: current_user.id).where(status: [ Agreement::ACCEPTED, Agreement::PENDING ]).first
       "You currently have an agreement with this mentor for this project. View agreement <b><a href='#{agreement_path(agreement.id)}'>here</a></b>".html_safe
     end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_29_164119) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_30_163916) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -177,6 +177,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_29_164119) do
     t.string "business_stage"
     t.string "help_seekings", default: [], array: true
     t.text "business_info"
+    t.bigint "current_role_id"
+    t.index ["current_role_id"], name: "index_users_on_current_role_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["expertise"], name: "index_users_on_expertise", using: :gin
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -197,4 +199,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_29_164119) do
   add_foreign_key "projects", "users"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
+  add_foreign_key "users", "roles", column: "current_role_id"
 end
