@@ -49,6 +49,7 @@ class AgreementsController < ApplicationController
       @agreement.countered_to(params[:counter_to_id])
     end
 
+    @other_party = User.find_by_id(params[:other_party_id])
     @milestone_ids = @agreement.milestone_ids || []
   end
 
@@ -69,10 +70,9 @@ class AgreementsController < ApplicationController
     @agreement = Agreement.new(agreement_params)
     if old_agreement.present?
       @agreement.initiator_meta = old_agreement.initiator_meta
-    else
-      @agreement.initiator_meta["id"] = current_user.id
-      @agreement.initiator_meta["role"] = Role.find_by_id(current_user.current_role_id).name
     end
+
+    @agreement.initiator_meta = { "id" => current_user.id, "role" => current_user.current_role&.name } if @agreement.initiator_meta.compact_blank.blank?
     @agreement.counter_offer_turn_id = @agreement.other_party_id
 
     if @agreement.save
@@ -358,7 +358,7 @@ class AgreementsController < ApplicationController
     def agreement_params
       params.require(:agreement).permit(
         :project_id, :other_party_id, :agreement_type, :payment_type,
-        :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage,
+        :start_date, :end_date, :tasks, :terms, :weekly_hours, :hourly_rate, :equity_percentage,
         :counter_to_id, :initiator_id, milestone_ids: []
       )
     end

@@ -15,7 +15,7 @@
 
   <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
     <% users.each do |user| %>
-      <% primary_role = user.roles.first&.name %>
+      <% primary_role = user.current_role&.name || user.roles.first&.name %>
       <% if primary_role == Role::MENTOR %>
         <%= render partial: 'shared/mentor_card', locals: { user: user } %>
       <% elsif primary_role == Role::ENTREPRENEUR %>

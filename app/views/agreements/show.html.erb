@@ -71,8 +71,10 @@
           <% if @agreement.initiator == current_user %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
           <% end %>
-          <% if @project.user == current_user %>
+          <% if @project.user == @agreement.initiator %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Entrepreneur</span>
+          <% else %>
+            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Mentor</span>
           <% end %>
         </dd>
       </div>
@@ -84,8 +86,10 @@
           <% if @agreement.other_party == current_user %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
           <% end %>
-          <% if @project.user == current_user %>
+          <% if @project.user == @agreement.other_party %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Entrepreneur</span>
+          <% else %>
+            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Mentor</span>
           <% end %>
         </dd>
       </div>
