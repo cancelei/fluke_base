@@ -25,7 +25,7 @@ class Agreement < ApplicationRecord
   belongs_to :counter_to, class_name: "Agreement", foreign_key: "counter_to_id", optional: true
   has_many :counter_offers, class_name: "Agreement", foreign_key: "counter_to_id", dependent: :destroy
 
-  before_validation :init_status, :init_agreement_type, :init_counter_offer
+  before_validation :init_status, :init_agreement_type
   before_save :update_countered_agreement
 
   # Validations

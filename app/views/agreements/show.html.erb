@@ -380,3 +380,28 @@
     </div>
   </div>
 <% end %>
+
+<% agreement_chain = [] %>
+<% current = @agreement %>
+<% while current.counter_to.present? %>
+  <% agreement_chain << [current, current.counter_to] %>
+  <% current = current.counter_to %>
+<% end %>
+<% agreement_chain.each_with_index do |(agreement, previous_agreement), idx| %>
+  <div class="mt-3 mb-3">
+    <h3 class="font-bold text-indigo-700 mb-2">
+      <% if agreement_chain.last == [agreement, previous_agreement] %>
+        Initial Agreement
+      <% else %>
+        Counter Offer <%= agreement_chain.length - idx - 1 %>
+      <% end %>
+
+      By <%= agreement.initiator&.full_name %>
+
+      <% if agreement.initiator_id == current_user.id %>
+        <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
+      <% end %>
+    </h3>
+    <%= render partial: "agreement_changes", locals: { agreement: agreement, previous_agreement: previous_agreement } %>
+  </div>
+<% end %>
