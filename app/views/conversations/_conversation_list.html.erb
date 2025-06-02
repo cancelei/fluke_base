@@ -1,5 +1,5 @@
 <% if conversations.any? %>
-  <ul class="divide-y">
+  <ul class="divide-y" style="height: calc(100vh - 180px)">
     <% conversations.each do |conversation| %>
       <% other_user = conversation.other_user(current_user) %>
       <%= link_to conversation_path(conversation), 
