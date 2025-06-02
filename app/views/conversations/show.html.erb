@@ -16,14 +16,14 @@
   <div class="flex flex-1 overflow-hidden relative">
     <!-- Overlay for mobile -->
     <div id="sidebar-overlay" 
-         class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden hidden" 
+         class="fixed inset-0 backdrop-blur-sm bg-opacity-50 z-10 md:hidden hidden"
          data-conversation-target="overlay" 
          data-action="click->conversation#closeSidebar">
     </div>
     
     <!-- Sidebar with conversation list -->
     <div id="conversation_sidebar" 
-         class="fixed md:relative inset-y-0 left-0 w-full md:w-1/3 bg-white border-r transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-20 md:z-0 overflow-y-auto h-full"
+         class="fixed md:relative inset-y-0 left-0 w-[80%] md:w-1/3 bg-white border-r transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-20 md:z-0 overflow-y-auto h-full"
          data-conversation-target="sidebar">
       <div class="p-2 h-full">
         <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: current_user %>
