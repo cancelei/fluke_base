@@ -71,4 +71,23 @@ export default class extends Controller {
       this.closeSidebar();
     }
   }
+
+  selectConversation(event) {
+    // Remove active class from all conversation items
+    const allConversationItems = this.element.querySelectorAll('[data-conversation-id]');
+    allConversationItems.forEach(item => {
+      item.classList.remove('bg-indigo-200', 'text-white');
+      item.classList.add('hover:bg-gray-50');
+    });
+    
+    // Add active class to clicked conversation
+    const clickedItem = event.currentTarget;
+    clickedItem.classList.add('bg-indigo-200', 'text-white');
+    clickedItem.classList.remove('hover:bg-gray-50');
+    
+    // Close sidebar on mobile after selection
+    if (window.innerWidth < 768) {
+      this.closeSidebar();
+    }
+  }
 }
