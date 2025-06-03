@@ -1,5 +1,5 @@
 <% if conversations.any? %>
-  <ul class="divide-y">
+  <ul class="divide-y" style="height: calc(100vh - 180px)">
     <% conversations.each do |conversation| %>
       <%= render "conversations/conversation_item", conversation: conversation, current_conversation: current_conversation, current_user: current_user %>
     <% end %>
