@@ -35,12 +35,12 @@ class Conversation < ApplicationRecord
 
   # Check if a conversation has unread messages for a user
   def unread_messages_for?(user)
-    messages.where.not(user: user, read: false).exists?
+    messages.where.not(user: user).where(read: false).exists?
   end
 
   # Mark all unread messages as read for a user
   def mark_as_read_for(user)
-    messages.where.not(user: user, read: false).update_all(read: true)
+    messages.where.not(user: user).where(read: false).update_all(read: true)
   end
 
   # Get the last message of the conversation

@@ -23,7 +23,8 @@ class ConversationsController < ApplicationController
     respond_to do |format|
       format.html
       format.turbo_stream do
-        render turbo_stream: turbo_stream.update("conversation_content", partial: "conversations/conversation_content", locals: { conversation: @conversation, messages: @messages, message: @message })
+        render turbo_stream: [ turbo_stream.update("conversation_content", partial: "conversations/conversation_content", locals: { conversation: @conversation, messages: @messages, message: @message }),
+                             turbo_stream.update("conversation_list", partial: "conversations/conversation_list", locals: { conversations: @conversations, current_conversation: @conversation }) ]
       end
     end
   end
