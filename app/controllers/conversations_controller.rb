@@ -29,6 +29,17 @@ class ConversationsController < ApplicationController
     end
   end
 
+  def mark_as_read
+    Conversation.find_by_id(params[:id].to_i).mark_as_read_for(current_user)
+    respond_to do |format|
+      format.html
+      format.turbo_stream do
+        render turbo_stream: [ turbo_stream.update("conversation_content", partial: "conversations/conversation_content", locals: { conversation: @conversation, messages: @messages, message: @message }),
+                               turbo_stream.update("conversation_list", partial: "conversations/conversation_list", locals: { conversations: @conversations, current_conversation: @conversation }) ]
+      end
+    end
+  end
+
   def create
     @conversation = Conversation.between(current_user.id, params[:recipient_id])
     redirect_to conversation_path(@conversation)

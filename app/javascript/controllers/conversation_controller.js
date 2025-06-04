@@ -73,8 +73,8 @@ export default class extends Controller {
   }
 
   selectConversation(event) {
-    // Remove active class from all conversation items
-    const allConversationItems = this.element.querySelectorAll('[data-conversation-id]');
+    this.markAsRead(event, this.element.dataset.conversationId)
+    const allConversationItems = document.querySelectorAll('[data-conversation-id]');
     allConversationItems.forEach(item => {
       item.classList.remove('bg-indigo-200', 'text-white');
       item.classList.add('hover:bg-gray-50');
@@ -89,5 +89,46 @@ export default class extends Controller {
     if (window.innerWidth < 768) {
       this.closeSidebar();
     }
+  }
+
+  markAsRead(event, conversationId) {
+    event.preventDefault()
+
+    fetch(`/conversations/${conversationId}/mark_as_read`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").getAttribute("content"),
+      },
+      body: JSON.stringify({}) // send any required payload here
+    })
+        .then(response => {
+          if (response.ok) {
+            this.updateConversationIdInPath(conversationId)
+          } else {
+            console.error("Failed to mark as read")
+          }
+        })
+        .catch(error => {
+          console.error("Network error:", error)
+        })
+  }
+
+  updateConversationIdInPath(newId) {
+    const path = window.location.pathname;
+
+    if (path.match(/\/conversations\/\d+$/)) {
+      // Case: /conversations/123 → replace ID
+      var updatedPath = path.replace(/(\/conversations\/)\d+$/, `$1${newId}`);
+    } else if (path.match(/\/conversations\/?$/)) {
+      // Case: /conversations or /conversations/ → just add ID
+      var updatedPath = `${path.replace(/\/$/, '')}/${newId}`;
+    } else {
+      // Else: append /conversations/:id to the end
+      var updatedPath = `${path.replace(/\/$/, '')}/conversations/${newId}`;
+    }
+
+    const newUrl = `${window.location.origin}${updatedPath}${window.location.search}`;
+    window.location.href = newUrl;
   }
 }

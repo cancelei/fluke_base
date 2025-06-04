@@ -66,6 +66,9 @@ Rails.application.routes.draw do
   # Messaging
   resources :conversations, only: [ :index, :show, :create ] do
     resources :messages, only: [ :create ]
+    member do
+      post :mark_as_read
+    end
   end
 
   # Mentors
