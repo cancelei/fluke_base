@@ -1,0 +1,189 @@
+<div class="container mx-auto px-4 py-8">
+  <!-- Date Carousel -->
+  <div class="bg-white shadow rounded-lg p-4 mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">
+        <%= @selected_date.strftime('%B %d, %Y') %>
+      </h2>
+    </div>
+    <div class="flex justify-between items-center overflow-x-auto pb-2 -mx-2">
+      <% @date_range.each do |date| %>
+        <%= link_to agreement_time_logs_path(@agreement, date: date), 
+                  class: "flex-shrink-0 mx-1 text-center #{date == @selected_date ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'}" do %>
+          <div class="w-16 p-2 rounded-lg <%= date == @selected_date ? 'bg-indigo-50' : 'hover:bg-gray-50' %>">
+            <div class="text-sm font-medium"><%= date.strftime('%a') %></div>
+            <div class="text-2xl font-bold mt-1"><%= date.day %></div>
+            <% if date == Date.current %>
+              <div class="h-1 w-1 mx-auto mt-1 rounded-full bg-indigo-600"></div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">Time Tracking</h1>
+    <div>
+      <p class="text-lg">
+        Agreement: <span class="font-semibold"><%= @agreement.agreement_type %></span>
+      </p>
+      <p class="text-gray-600">
+        Project: <span class="font-medium"><%= @agreement.project.name %></span>
+      </p>
+    </div>
+  </div>
+
+  <% if @agreement.time_logs.in_progress.exists? %>
+    <% current_log = @agreement.time_logs.in_progress.last %>
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-blue-700">
+            Currently tracking time for <span class="font-semibold"><%= current_log.milestone.title %></span>
+            <span class="ml-2 text-blue-600">
+              (Started <%= time_ago_in_words(current_log.started_at) %> ago)
+            </span>
+          </p>
+          <%= button_to 'Stop Tracking', stop_tracking_agreement_time_logs_path(@agreement, milestone_id: current_log.milestone_id), 
+              method: :post, 
+              class: 'mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500' %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Milestones for <%= @selected_date.strftime('%B %d, %Y') %>
+        </h3>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">
+        Track time for milestones in this agreement
+      </p>
+    </div>
+    <div class="border-t border-gray-200">
+      <ul class="divide-y divide-gray-200">
+        <% @agreement.project.milestones.each do |milestone| %>
+          <li class="px-4 py-4 sm:px-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="min-w-0 flex-1 flex items-center">
+                  <div class="min-w-0 flex-1 px-4">
+                    <div class="text-sm font-medium text-indigo-600 truncate">
+                      <%= milestone.title %>
+                    </div>
+                    <div class="mt-1 flex items-center text-sm text-gray-500">
+                      <span class="truncate">
+                        Due: <%= milestone.due_date.strftime('%B %d, %Y') %>
+                      </span>
+                      <span class="mx-2">•</span>
+                      <span>
+                        Status: <span class="<%= status_badge_class(milestone.status) %>">
+                          <%= milestone.status.humanize %>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ml-4 flex-shrink-0">
+                <% if milestone.status == 'completed' %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Completed
+                  </span>
+                <% else %>
+                  <% active_log = @agreement.time_logs.in_progress.find_by(milestone_id: milestone.id) %>
+                  <% if active_log %>
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                      In Progress
+                    </span>
+                  <% else %>
+                    <%# Only show start tracking if there's no active log for this milestone in any agreement %>
+                    <% if TimeLog.in_progress.where(milestone_id: milestone.id).where.not(agreement_id: @agreement.id).empty? %>
+                      <%= button_to agreement_time_logs_path(@agreement, milestone_id: milestone.id, date: @selected_date), 
+                          method: :post, 
+                          class: 'inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+                          data: { confirm: 'Start tracking time for this milestone?' } do %>
+                        Start Tracking
+                      <% end %>
+                    <% else %>
+                      <span class="text-sm text-gray-500">
+                        Being tracked in another agreement
+                      </span>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Time Logs
+      </h3>
+    </div>
+    <div class="border-t border-gray-200">
+      <% if @time_logs.any? %>
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Milestone
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Started
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Ended
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Duration
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @time_logs.each do |log| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= log.milestone.title %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <%= log.started_at.strftime('%b %d, %Y %I:%M %p') %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <%= log.ended_at&.strftime('%b %d, %Y %I:%M %p') || 'In Progress' %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= log.hours_spent > 0 ? "#{log.hours_spent} hours" : 'Less than an hour' %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="px-4 py-4 text-center text-gray-500">
+          No time logs found. Start tracking time for a milestone above.
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

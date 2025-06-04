@@ -19,13 +19,23 @@ class User < ApplicationRecord
   has_many :projects, dependent: :destroy
   has_many :notifications, dependent: :destroy
 
-  # Entrepreneur agreements
+  # Entrepreneur agreements (where user is the entrepreneur)
   has_many :my_agreements, class_name: "Agreement",
            foreign_key: "initiator_id", dependent: :destroy
 
-  # Mentor agreements
+  # Mentor agreements (where user is the mentor)
   has_many :other_party_agreements, class_name: "Agreement",
            foreign_key: "other_party_id", dependent: :destroy
+           
+  # Alias for clarity when user is a mentor
+  def agreements_as_mentor
+    other_party_agreements
+  end
+  
+  # Alias for clarity when user is an entrepreneur
+  def agreements_as_entrepreneur
+    my_agreements
+  end
 
   # Messaging
   has_many :sent_conversations, class_name: "Conversation", foreign_key: "sender_id", dependent: :destroy

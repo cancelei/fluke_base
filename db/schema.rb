@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_01_164318) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_04_182025) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -149,6 +149,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_01_164318) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "time_logs", force: :cascade do |t|
+    t.bigint "agreement_id", null: false
+    t.bigint "milestone_id", null: false
+    t.datetime "started_at", precision: nil, null: false
+    t.datetime "ended_at", precision: nil
+    t.text "description"
+    t.decimal "hours_spent", precision: 10, scale: 2, default: "0.0"
+    t.string "status", default: "in_progress"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agreement_id", "milestone_id"], name: "index_time_logs_on_agreement_id_and_milestone_id"
+    t.index ["agreement_id"], name: "index_time_logs_on_agreement_id"
+    t.index ["milestone_id"], name: "index_time_logs_on_milestone_id"
+  end
+
   create_table "user_roles", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "role_id", null: false
@@ -203,6 +218,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_01_164318) do
   add_foreign_key "milestones", "projects"
   add_foreign_key "notifications", "users"
   add_foreign_key "projects", "users"
+  add_foreign_key "time_logs", "agreements"
+  add_foreign_key "time_logs", "milestones"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
   add_foreign_key "users", "roles", column: "current_role_id"

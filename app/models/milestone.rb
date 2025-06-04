@@ -1,6 +1,7 @@
 class Milestone < ApplicationRecord
   # Relationships
   belongs_to :project
+  has_many :time_logs, dependent: :destroy
 
   # Validations
   validates :title, :due_date, :status, presence: true
