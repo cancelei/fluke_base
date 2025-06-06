@@ -26,12 +26,12 @@ class User < ApplicationRecord
   # Mentor agreements (where user is the mentor)
   has_many :other_party_agreements, class_name: "Agreement",
            foreign_key: "other_party_id", dependent: :destroy
-           
+
   # Alias for clarity when user is a mentor
   def agreements_as_mentor
     other_party_agreements
   end
-  
+
   # Alias for clarity when user is an entrepreneur
   def agreements_as_entrepreneur
     my_agreements

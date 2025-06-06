@@ -90,10 +90,12 @@ class AgreementsController < ApplicationController
   def update
     authorize! :edit, @agreement
 
-    if @agreement.update(params)
+    if @agreement.update(agreement_params)
       notify_and_message_other_party(:update)
       redirect_to @agreement, notice: "Agreement was successfully updated."
     else
+      # Ensure @project is set for the form partial
+      @project = @agreement.project
       render :edit, status: :unprocessable_entity
     end
   end

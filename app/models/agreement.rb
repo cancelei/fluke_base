@@ -85,7 +85,7 @@ class Agreement < ApplicationRecord
 
   # Associations
   has_many :time_logs, dependent: :destroy
-  
+
   # Milestone methods
   def milestone_ids
     read_attribute(:milestone_ids) || []
@@ -98,12 +98,12 @@ class Agreement < ApplicationRecord
   def selected_milestones
     project.milestones.where(id: milestone_ids)
   end
-  
+
   # Time tracking methods
   def total_hours_logged
     time_logs.completed.sum(:hours_spent).round(2)
   end
-  
+
   def current_time_log
     time_logs.in_progress.last
   end

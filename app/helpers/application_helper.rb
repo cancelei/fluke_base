@@ -8,19 +8,19 @@ module ApplicationHelper
       "No projects found"
     end
   end
-  
+
   def status_badge_class(status)
     case status.to_s.downcase
-    when 'completed', 'accepted', 'active'
-      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800'
-    when 'in_progress', 'pending', 'countered'
-      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800'
-    when 'rejected', 'cancelled', 'failed'
-      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800'
-    when 'not_started', 'draft'
-      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800'
+    when "completed", "accepted", "active"
+      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+    when "in_progress", "pending", "countered"
+      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"
+    when "rejected", "cancelled", "failed"
+      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+    when "not_started", "draft"
+      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800"
     else
-      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800'
+      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
     end
   end
 end

@@ -12,6 +12,6 @@ class CreateTimeLogs < ActiveRecord::Migration[6.1]
       t.timestamps
     end
 
-    add_index :time_logs, [:agreement_id, :milestone_id]
+    add_index :time_logs, [ :agreement_id, :milestone_id ]
   end
 end

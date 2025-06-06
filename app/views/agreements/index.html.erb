@@ -55,7 +55,7 @@
                   <% end %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= agreement.other_party.full_name %></div>
+                  <div class="text-sm text-gray-900"><%= agreement.project.user_id != current_user.id ? agreement.project.user.full_name : agreement.other_party.full_name %></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <% case agreement.status %>
