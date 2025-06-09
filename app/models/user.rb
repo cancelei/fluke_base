@@ -19,13 +19,24 @@ class User < ApplicationRecord
   has_many :projects, dependent: :destroy
   has_many :notifications, dependent: :destroy
 
-  # Entrepreneur agreements (where user is the entrepreneur)
-  has_many :my_agreements, class_name: "Agreement",
+  # All agreements where user is a party
+  has_many :initiated_agreements, class_name: "Agreement",
            foreign_key: "initiator_id", dependent: :destroy
-
-  # Mentor agreements (where user is the mentor)
-  has_many :other_party_agreements, class_name: "Agreement",
+  has_many :received_agreements, class_name: "Agreement",
            foreign_key: "other_party_id", dependent: :destroy
+
+  # Agreements where user is the entrepreneur (project owner)
+  def my_agreements
+    Agreement.joins(:project)
+            .where("projects.user_id = ?", id)
+  end
+
+  # Agreements where user is the mentor/co-founder (not project owner)
+  def other_party_agreements
+    Agreement.joins(:project)
+            .where("(agreements.initiator_id = ? OR agreements.other_party_id = ?) AND projects.user_id != ?",
+                  id, id, id)
+  end
 
   # Alias for clarity when user is a mentor
   def agreements_as_mentor

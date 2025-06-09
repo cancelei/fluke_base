@@ -8,11 +8,11 @@ class AgreementsController < ApplicationController
 
   def index
     @my_agreements = current_user.my_agreements
-      .includes(:project, :other_party)
+      .includes(:project, :initiator, :other_party)
       .order(created_at: :desc)
 
     @other_party_agreements = current_user.other_party_agreements
-      .includes(:project, :initiator)
+      .includes(:project, :initiator, :other_party)
       .order(created_at: :desc)
 
     filter_by_status!(@my_agreements, @other_party_agreements)

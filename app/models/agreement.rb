@@ -53,6 +53,7 @@ class Agreement < ApplicationRecord
   scope :completed, -> { where(status: COMPLETED) }
   scope :rejected, -> { where(status: REJECTED) }
   scope :cancelled, -> { where(status: CANCELLED) }
+  scope :countered, -> { where(status: COUNTERED) }
 
   def init_status
     self.status = PENDING if self.status.blank?
@@ -107,7 +108,7 @@ class Agreement < ApplicationRecord
   def current_time_log
     time_logs.in_progress.last
   end
-  scope :countered, -> { where(status: COUNTERED) }
+
   scope :not_rejected_or_cancelled, -> { where.not(status: [ REJECTED, CANCELLED ]) }
 
   # Custom validation: ensure end date is after start date

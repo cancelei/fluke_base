@@ -34,7 +34,7 @@
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
           </svg>
           Initiate Agreement for your Selected Project
-        <% end if current_user.selected_project_id %>
+        <% end if current_user != @person && current_user.has_role?(Role::ENTREPRENEUR) && current_user.selected_project_id.present? && current_user.current_role&.name == Role::ENTREPRENEUR %>
         <% if current_user != @person %>
           <%= button_to 'Message', conversations_path(recipient_id: @person.id), method: :post, data: {turbo: false}, class: "inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
         <% else %>

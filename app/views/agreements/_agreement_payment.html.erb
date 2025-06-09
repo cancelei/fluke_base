@@ -1,0 +1,13 @@
+<% if agreement.payment_type.present? %>
+  <div class="text-sm text-gray-900">
+    <%= agreement.payment_type %>
+    <% if agreement.payment_type == Agreement::HOURLY || agreement.payment_type == Agreement::HYBRID %>
+      <span class="text-xs text-gray-500">($<%= number_with_precision(agreement.hourly_rate, precision: 2) %>/hr)</span>
+    <% end %>
+    <% if agreement.payment_type == Agreement::EQUITY || agreement.payment_type == Agreement::HYBRID %>
+      <span class="text-xs text-gray-500">(<%= number_with_precision(agreement.equity_percentage, precision: 2) %>% equity)</span>
+    <% end %>
+  </div>
+<% else %>
+  <span class="text-xs text-gray-500">Not specified</span>
+<% end %> 

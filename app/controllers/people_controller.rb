@@ -13,7 +13,8 @@ class PeopleController < ApplicationController
     if @project_id.present?
       users = users.joins(:projects).where(projects: { id: @project_id })
     end
-    users = users.distinct.where.not(id: current_user.id).includes(:roles, :projects, :my_agreements, :other_party_agreements)
+    users = users.distinct.where.not(id: current_user.id)
+                 .includes(:roles, :projects, :initiated_agreements, :received_agreements)
     @users = users.page(params[:page]).per(12)
   end
 
