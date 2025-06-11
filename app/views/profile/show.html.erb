@@ -28,6 +28,19 @@
         <dt class="text-sm font-medium text-gray-500">Email address</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @user.email %></dd>
       </div>
+      <% if @user.github_username.present? %>
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">GitHub</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <%= link_to "https://github.com/#{@user.github_username}", target: "_blank", class: "text-indigo-600 hover:text-indigo-900" do %>
+            github.com/<%= @user.github_username %>
+            <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+          <% end %>
+        </dd>
+      </div>
+      <% end %>
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Roles</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
