@@ -35,6 +35,102 @@ class Project < ApplicationRecord
     target_market funding_status team_size collaboration_type
   ]
 
+  # Associations
+  has_many :github_logs, dependent: :destroy
+
+  # GitHub integration methods
+  
+  # Fetches and stores commits from GitHub
+  # @param access_token [String] GitHub access token
+  # @return [Integer] Number of new commits stored
+  def fetch_and_store_commits(access_token = nil)
+    return 0 unless repository_url.present?
+    
+    commits = GithubService.fetch_commits(self, access_token)
+    return 0 unless commits.any?
+    
+    # Find existing commit SHAs to avoid duplicates
+    existing_shas = github_logs.pluck(:commit_sha)
+    new_commits = commits.reject { |c| existing_shas.include?(c[:commit_sha]) }
+    
+    # Bulk insert new commits
+    if new_commits.any?
+      GithubLog.insert_all(new_commits)
+    end
+    
+    new_commits.size
+  end
+  
+  # Get summary of GitHub contributions by user
+  # @return [Array<Hash>] Array of contribution hashes with user details and stats
+  def github_contributions
+    return [] unless github_logs.exists?
+    
+    # Group logs by user and calculate stats
+    contributions = github_logs
+      .joins(:user)
+      .group('users.id', 'users.first_name', 'users.last_name', 'users.email', 'users.avatar_url', 'users.github_username')
+      .select(
+        'users.id as user_id',
+        'users.first_name',
+        'users.last_name',
+        'users.email',
+        'users.avatar_url',
+        'users.github_username',
+        'COUNT(github_logs.id) as commit_count',
+        'SUM(github_logs.lines_added) as total_added',
+        'SUM(github_logs.lines_removed) as total_removed',
+        'MIN(github_logs.commit_date) as first_commit_date',
+        'MAX(github_logs.commit_date) as last_commit_date'
+      )
+      .order('commit_count DESC')
+      
+    # Convert to array of hashes with proper types
+    contributions.map do |c|
+      {
+        user: User.find(c.user_id),
+        commit_count: c.commit_count.to_i,
+        total_added: c.total_added.to_i,
+        total_removed: c.total_removed.to_i,
+        net_changes: c.total_added.to_i - c.total_removed.to_i,
+        first_commit_date: c.first_commit_date,
+        last_commit_date: c.last_commit_date
+      }
+    end
+  end
+  
+  # Check if a user can view GitHub logs for this project
+  # @param user [User] The user to check
+  # @return [Boolean] True if user can view logs
+  def can_view_github_logs?(user)
+    return false unless user
+    
+    # Project owner can always view
+    return true if user_id == user.id
+    
+    # Check for accepted agreements
+    agreements.accepted.exists?(other_party_id: user.id)
+  end
+  
+  # Get recent GitHub logs
+  # @param limit [Integer] Number of logs to return
+  # @return [ActiveRecord::Relation] Recent GitHub logs
+  def recent_github_logs(limit = 20)
+    github_logs.includes(:user).order(commit_date: :desc).limit(limit)
+  end
+  
+  def contributions_summary
+    github_logs.select('user_id, COUNT(*) as commit_count, SUM(lines_added) as total_added, SUM(lines_removed) as total_removed')
+              .group(:user_id)
+              .includes(:user)
+  end
+  
+  def can_view_github_logs?(user)
+    return false if user.nil? || repository_url.blank?
+    user_id == user.id || 
+    agreements.accepted.exists?(["(initiator_id = :user_id OR other_party_id = :user_id)", { user_id: user.id }])
+  end
+
   # Scopes
   scope :ideas, -> { where(stage: IDEA) }
   scope :prototypes, -> { where(stage: PROTOTYPE) }

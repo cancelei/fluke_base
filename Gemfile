@@ -29,6 +29,9 @@ gem "stripe", "~> 9.0"
 # Calendar integration
 gem "google-api-client", require: "google/apis/calendar_v3"
 
+# GitHub API integration
+gem "octokit", "~> 6.1"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 

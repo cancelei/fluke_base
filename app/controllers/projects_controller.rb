@@ -14,10 +14,14 @@ class ProjectsController < ApplicationController
     authorize! :read, @project
     @milestones = @project.milestones.order(created_at: :desc)
 
+
     # Check if the current user has an agreement with the project
-    @has_agreement = @project.agreements.exists?([
-      "(initiator_id = :user_id OR other_party_id = :user_id) AND status IN (:statuses)",
-      { user_id: current_user.id, statuses: [ Agreement::ACCEPTED, Agreement::PENDING ] }
+    @has_agreement = @project.agreements.active.exists?([
+      "(initiator_id = :user_id OR other_party_id = :user_id)",
+      { user_id: current_user.id }
+    ]) || @project.agreements.pending.exists?([
+      "(initiator_id = :user_id OR other_party_id = :user_id)",
+      { user_id: current_user.id }
     ])
 
     # Load suggested mentors only for project owner

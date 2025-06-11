@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_11_164832) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_11_171426) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -78,6 +78,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_164832) do
     t.datetime "updated_at", null: false
     t.index ["recipient_id"], name: "index_conversations_on_recipient_id"
     t.index ["sender_id"], name: "index_conversations_on_sender_id"
+  end
+
+  create_table "github_logs", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "agreement_id", null: false
+    t.bigint "user_id", null: false
+    t.string "commit_sha"
+    t.text "commit_message"
+    t.integer "lines_added"
+    t.integer "lines_removed"
+    t.datetime "commit_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
+    t.index ["project_id"], name: "index_github_logs_on_project_id"
+    t.index ["user_id"], name: "index_github_logs_on_user_id"
   end
 
   create_table "meetings", force: :cascade do |t|
@@ -214,6 +230,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_164832) do
   add_foreign_key "agreements", "users", column: "other_party_id"
   add_foreign_key "conversations", "users", column: "recipient_id"
   add_foreign_key "conversations", "users", column: "sender_id"
+  add_foreign_key "github_logs", "agreements"
+  add_foreign_key "github_logs", "projects"
+  add_foreign_key "github_logs", "users"
   add_foreign_key "meetings", "agreements"
   add_foreign_key "messages", "conversations"
   add_foreign_key "messages", "users"

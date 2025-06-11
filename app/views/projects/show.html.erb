@@ -15,6 +15,15 @@
       </div>
       
       <div class="flex space-x-3">
+        <% if @project.repository_url.present? && (@has_agreement || current_user.id == @project.user_id) %>
+          <%= link_to project_github_logs_path(@project), class: "inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" do %>
+            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4m-8 0l-4-4 4-4" />
+            </svg>
+            View GitHub Activity
+          <% end %>
+        <% end %>
+        
         <% if current_user.id == @project.user_id %>
           <%= link_to edit_project_path(@project), class: "inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" do %>
             <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

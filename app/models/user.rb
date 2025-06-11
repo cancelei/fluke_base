@@ -48,6 +48,21 @@ class User < ApplicationRecord
     my_agreements
   end
 
+  # Validations
+  validates :github_username, format: { with: /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i, message: 'is not a valid GitHub username', allow_blank: true, multiline: true }
+
+  # Class methods
+  def self.find_by_github_identifier(identifier)
+    return nil if identifier.blank?
+    
+    # Try to find by GitHub username (case insensitive)
+    user = where('LOWER(github_username) = ?', identifier.downcase).first
+    return user if user
+    
+    # Try to find by email
+    find_by(email: identifier.downcase)
+  end
+
   # Messaging
   has_many :sent_conversations, class_name: "Conversation", foreign_key: "sender_id", dependent: :destroy
   has_many :received_conversations, class_name: "Conversation", foreign_key: "recipient_id", dependent: :destroy

@@ -1,0 +1,303 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <div class="lg:flex lg:items-center lg:justify-between mb-8">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+        GitHub Activity
+      </h2>
+      <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+        <div class="mt-2 flex items-center text-sm text-gray-500">
+          <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+          </svg>
+          Last updated: <%= time_ago_in_words(@last_updated) %> ago
+        </div>
+        <div class="mt-2 flex items-center text-sm text-gray-500">
+          <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <%= number_with_delimiter(@total_commits) %> total commits
+        </div>
+      </div>
+    </div>
+    <div class="mt-5 flex lg:mt-0 lg:ml-4">
+      <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
+        <span class="hidden sm:block">
+          <%= link_to project_path(@project), 
+                    class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            Back to Project
+          <% end %>
+        </span>
+        <span class="sm:ml-3">
+          <%= button_to fetch_commits_project_github_logs_path(@project), 
+                      class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                      data: { turbo: false, disable_with: "<i class='fa fa-spinner fa-spin'></i> Refreshing..." } do %>
+            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh Commits
+          <% end %>
+        </span>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Stats -->
+  <% if @total_commits.to_i.positive? %>
+    <div class="bg-white shadow rounded-lg mb-8">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Repository Statistics</h3>
+        <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Commits</dt>
+            <dd class="mt-1 text-3xl font-semibold text-gray-900"><%= number_with_delimiter(@total_commits) %></dd>
+          </div>
+          <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">Lines Added</dt>
+            <dd class="mt-1 text-3xl font-semibold text-green-600">+<%= number_with_delimiter(@total_additions) %></dd>
+          </div>
+          <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">Lines Removed</dt>
+            <dd class="mt-1 text-3xl font-semibold text-red-600">-<%= number_with_delimiter(@total_deletions) %></dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Contributions Summary -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Contributions Summary</h3>
+          <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            Overview of all contributions to the repository
+          </p>
+        </div>
+        <div class="text-sm text-gray-500">
+          <% if @last_updated.present? %>
+            Last activity: <%= time_ago_in_words(@last_updated) %> ago
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <% if @contributions.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contributor</th>
+              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Commits</th>
+              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Changes</th>
+              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Net</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @contributions.each do |contribution| 
+              net_changes = (contribution[:total_added] || 0) - (contribution[:total_removed] || 0)
+              net_class = net_changes.positive? ? 'text-green-600' : net_changes.negative? ? 'text-red-600' : 'text-gray-500'
+              user = contribution[:user]
+            %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <%= image_tag user.avatar_url.presence || 'default-avatar.png', 
+                                  class: 'h-10 w-10 rounded-full',
+                                  alt: user.full_name,
+                                  onerror: "this.onerror=null; this.src='/assets/default-avatar.png'" %>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">
+                        <%= user.full_name %>
+                        <% if user == @project.user %>
+                          <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                            Owner
+                          </span>
+                        <% end %>
+                      </div>
+                      <% if user.github_username.present? %>
+                        <div class="text-sm text-gray-500 flex items-center">
+                          <svg class="h-4 w-4 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                          </svg>
+                          <%= link_to user.github_username, 
+                                    "https://github.com/#{user.github_username}", 
+                                    target: "_blank", 
+                                    class: "text-indigo-600 hover:text-indigo-900 hover:underline" %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                    <%= number_with_delimiter(contribution[:commit_count] || 0) %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center justify-center space-x-4">
+                    <div class="text-sm text-green-600 font-medium">
+                      +<%= number_with_delimiter(contribution[:total_added] || 0) %>
+                    </div>
+                    <div class="text-sm text-red-600 font-medium">
+                      -<%= number_with_delimiter(contribution[:total_removed] || 0) %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <span class="text-sm font-medium <%= net_class %>">
+                    <%= number_with_delimiter(net_changes) %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="px-6 py-12 text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No contributions yet</h3>
+        <p class="mt-1 text-sm text-gray-500">
+          <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
+            Click the "Refresh Commits" button to fetch contributions from GitHub.
+          <% else %>
+            This project doesn't have any GitHub activity yet.
+          <% end %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Recent Commits -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Commits</h3>
+        <% if @recent_commits.any? %>
+          <div class="text-sm text-gray-500">
+            Showing <%= @recent_commits.size %> most recent commits
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <% if @recent_commits.any? %>
+      <div class="border-t border-gray-200">
+        <ul class="divide-y divide-gray-200">
+          <% @recent_commits.each do |commit| %>
+            <li class="px-6 py-4 hover:bg-gray-50">
+              <div class="flex items-start">
+                <div class="flex-shrink-0 h-10 w-10">
+                  <%= image_tag commit.user&.avatar_url.presence || 'default-avatar.png', 
+                              class: 'h-10 w-10 rounded-full',
+                              alt: commit.user&.full_name,
+                              onerror: "this.onerror=null; this.src='/assets/default-avatar.png'" %>
+                </div>
+                <div class="ml-4 flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-gray-900 truncate">
+                      <%= commit.user&.full_name || 'Unknown User' %>
+                      <% if commit.user == @project.user %>
+                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                          Owner
+                        </span>
+                      <% end %>
+                    </p>
+                    <div class="ml-2 flex-shrink-0 flex items-center">
+                      <a href="<%= commit.commit_url %>" 
+                         target="_blank"
+                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
+                         title="View on GitHub">
+                        <svg class="h-3 w-3 mr-1 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                          <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                        </svg>
+                        <%= commit.commit_sha[0..6] %>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="mt-1 text-sm text-gray-800">
+                    <%= link_to commit.message.split("\n").first, 
+                                commit.commit_url, 
+                                target: "_blank",
+                                class: "text-indigo-600 hover:text-indigo-900 hover:underline break-words" %>
+                  </div>
+                  <% if commit.message.include?("\n") %>
+                    <div class="mt-1 p-2 text-xs text-gray-500 bg-gray-50 rounded overflow-hidden">
+                      <div class="line-clamp-2">
+                        <%= simple_format(commit.message.split("\n")[1..-1].join("\n"), {}, wrapper_tag: "span") %>
+                      </div>
+                    </div>
+                  <% end %>
+                  <div class="mt-2 flex items-center text-xs text-gray-500">
+                    <span class="flex items-center">
+                      <svg class="h-3 w-3 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg class="mr-1.5 h-3.5 w-3.5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 5.47a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72v5.69a.75.75 0 001.5 0v-5.69l1.72 1.72a.75.75 0 101.06-1.06l-3-3z" clip-rule="evenodd" />
+                      </svg>
+                      <span class="font-medium text-green-600"><%= commit.lines_added %></span>
+                    </span>
+                    <span class="inline-flex items-center">
+                      <svg class="mr-1.5 h-3.5 w-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 14.03a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72V6.75a.75.75 0 011.5 0v7.69l1.72-1.72a.75.75 0 111.06 1.06l-3 3z" clip-rule="evenodd" />
+                      </svg>
+                      <span class="font-medium text-red-600"><%= commit.lines_removed %></span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% else %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="px-4 py-12 sm:p-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748.057 1.08.254l7.25 4.067c.5.282.828.762.94 1.31.113.55.003 1.13-.3 1.6-.3.474-.78.83-1.33.97l-7.45 1.36c-.51.1-1.05.05-1.53-.14-.48-.19-.88-.53-1.13-.97l-2.1-3.45" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13.5A8.5 8.5 0 0 1 11.5 5H15m-3.5 14.5c-4.694 0-8.5-3.806-8.5-8.5s3.806-8.5 8.5-8.5 8.5 3.806 8.5 8.5c0 .864-.13 1.698-.37 2.487" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9z" />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">No GitHub activity found</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
+            Click the button below to fetch commits from the repository.
+          <% else %>
+            This project doesn't have any GitHub activity yet or the repository is not properly configured.
+          <% end %>
+        </p>
+        
+        <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
+          <div class="mt-6">
+            <%= button_to fetch_commits_project_github_logs_path(@project), 
+                        class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                        data: { turbo: false } do %>
+              <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Fetch Commits from GitHub
+            <% end %>
+          </div>
+          
+          <div class="mt-4 text-sm text-gray-500">
+            <p class="mb-2">Make sure:</p>
+            <ul class="list-disc text-left max-w-md mx-auto space-y-1">
+              <li>The repository URL is correctly set in project settings</li>
+              <li>You have the necessary permissions to access the repository</li>
+              <li>The repository has at least one commit</li>
+            </ul>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
