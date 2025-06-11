@@ -10,6 +10,10 @@ class Project < ApplicationRecord
   validates :description, presence: true
   validates :stage, presence: true
   validates :collaboration_type, inclusion: { in: [ "mentor", "co_founder", "both", nil ] }
+  validates :repository_url, format: {
+    with: /(^$|^https?:\/\/github\.com\/[^\/]+\/[^\/]+$|^[^\/\s]+\/[^\/\s]+$)/,
+    message: "must be a valid GitHub repository URL or in the format username/repository"
+  }, allow_blank: true
 
   # Default values and lifecycle hooks
   before_save :set_defaults
