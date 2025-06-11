@@ -212,7 +212,7 @@
                       <% end %>
                     </p>
                     <div class="ml-2 flex-shrink-0 flex items-center">
-                      <a href="<%= commit.commit_url %>" 
+                      <a href="<%= commit.commit_url %>"
                          target="_blank"
                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
                          title="View on GitHub">
@@ -224,15 +224,15 @@
                     </div>
                   </div>
                   <div class="mt-1 text-sm text-gray-800">
-                    <%= link_to commit.message.split("\n").first, 
-                                commit.commit_url, 
+                    <%= link_to commit.commit_message.split("\n").first,
+                                commit.commit_url,
                                 target: "_blank",
                                 class: "text-indigo-600 hover:text-indigo-900 hover:underline break-words" %>
                   </div>
-                  <% if commit.message.include?("\n") %>
+                  <% if commit.commit_message.include?("\n") %>
                     <div class="mt-1 p-2 text-xs text-gray-500 bg-gray-50 rounded overflow-hidden">
                       <div class="line-clamp-2">
-                        <%= simple_format(commit.message.split("\n")[1..-1].join("\n"), {}, wrapper_tag: "span") %>
+                        <%= simple_format(commit.commit_message.split("\n")[1..-1].join("\n"), {}, wrapper_tag: "span") %>
                       </div>
                     </div>
                   <% end %>

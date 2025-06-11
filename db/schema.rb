@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_11_171426) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_11_183903) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -91,7 +91,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_171426) do
     t.datetime "commit_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "commit_url"
+    t.jsonb "changed_files", default: [], array: true
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
+    t.index ["project_id", "commit_sha", "agreement_id", "user_id"], name: "index_for_unique_logs", unique: true
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
   end
@@ -216,6 +219,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_171426) do
     t.text "business_info"
     t.bigint "current_role_id"
     t.string "github_username"
+    t.string "github_token"
     t.index ["current_role_id"], name: "index_users_on_current_role_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["expertise"], name: "index_users_on_expertise", using: :gin

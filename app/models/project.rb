@@ -48,16 +48,14 @@ class Project < ApplicationRecord
     
     commits = GithubService.fetch_commits(self, access_token)
     return 0 unless commits.any?
-    
+
     # Find existing commit SHAs to avoid duplicates
     existing_shas = github_logs.pluck(:commit_sha)
     new_commits = commits.reject { |c| existing_shas.include?(c[:commit_sha]) }
-    
+
     # Bulk insert new commits
-    if new_commits.any?
-      GithubLog.insert_all(new_commits)
-    end
-    
+    GithubLog.upsert_all(commits, unique_by: [:project_id, :commit_sha, :agreement_id, :user_id])
+
     new_commits.size
   end
   
@@ -69,13 +67,13 @@ class Project < ApplicationRecord
     # Group logs by user and calculate stats
     contributions = github_logs
       .joins(:user)
-      .group('users.id', 'users.first_name', 'users.last_name', 'users.email', 'users.avatar_url', 'users.github_username')
+      .group('users.id', 'users.first_name', 'users.last_name', 'users.email', 'users.avatar', 'users.github_username')
       .select(
         'users.id as user_id',
         'users.first_name',
         'users.last_name',
         'users.email',
-        'users.avatar_url',
+        'users.avatar',
         'users.github_username',
         'COUNT(github_logs.id) as commit_count',
         'SUM(github_logs.lines_added) as total_added',
