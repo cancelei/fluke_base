@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_11_183903) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_12_150826) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -93,6 +93,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_11_183903) do
     t.datetime "updated_at", null: false
     t.string "commit_url"
     t.jsonb "changed_files", default: [], array: true
+    t.string "branch_name"
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
     t.index ["project_id", "commit_sha", "agreement_id", "user_id"], name: "index_for_unique_logs", unique: true
     t.index ["project_id"], name: "index_github_logs_on_project_id"

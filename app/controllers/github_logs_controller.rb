@@ -4,20 +4,31 @@ class GithubLogsController < ApplicationController
   before_action :authorize_access!
   
   def index
-    # Get contributions summary with user details and additional stats
-    @contributions = @project.github_contributions
+    # Get the selected branch from params or default to nil (all branches)
+    @selected_branch = params[:branch].presence
+    
+    # Build base query for recent commits
+    recent_commits_query = @project.github_logs.includes(:user).order(commit_date: :desc)
+    recent_commits_query = recent_commits_query.where(branch_name: @selected_branch) if @selected_branch.present?
     
     # Get recent commits for the activity feed with user preloading
-    @recent_commits = @project.github_logs
-                            .includes(:user)
-                            .order(commit_date: :desc)
-                            .limit(20)
+    @recent_commits = recent_commits_query.limit(20)
+    
+    # Build base query for statistics
+    stats_query = @project.github_logs
+    stats_query = stats_query.where(branch_name: @selected_branch) if @selected_branch.present?
     
     # Calculate statistics
-    @total_commits = @project.github_logs.count
-    @total_additions = @project.github_logs.sum(:lines_added) || 0
-    @total_deletions = @project.github_logs.sum(:lines_removed) || 0
+    @total_commits = stats_query.count
+    @total_additions = stats_query.sum(:lines_added) || 0
+    @total_deletions = stats_query.sum(:lines_removed) || 0
     @last_updated = @recent_commits.first&.commit_date || Time.current
+    
+    # Get contributions summary with user details and additional stats
+    @contributions = @project.github_contributions(branch: @selected_branch)
+    
+    # Get available branches for the dropdown
+    @available_branches = @project.available_branches
     
     respond_to do |format|
       format.html
@@ -43,7 +54,9 @@ class GithubLogsController < ApplicationController
       return
     end
     
-    count = @project.fetch_and_store_commits(current_user.github_token)
+    # Get the selected branch from params
+    branch = params[:branch].presence
+    count = @project.fetch_and_store_commits(current_user.github_token, branch: branch)
     
     respond_to do |format|
       format.html { 
@@ -98,5 +111,11 @@ class GithubLogsController < ApplicationController
       redirect_to @project, 
                   alert: "You don't have permission to view GitHub logs for this project."
     end
+  end
+  
+  helper_method :current_branch
+  
+  def current_branch
+    params[:branch].presence
   end
 end

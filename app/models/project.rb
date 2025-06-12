@@ -42,11 +42,12 @@ class Project < ApplicationRecord
   
   # Fetches and stores commits from GitHub
   # @param access_token [String] GitHub access token
+  # @param branch [String] Optional branch name to fetch commits from
   # @return [Integer] Number of new commits stored
-  def fetch_and_store_commits(access_token = nil)
+  def fetch_and_store_commits(access_token = nil, branch: nil)
     return 0 unless repository_url.present?
     
-    commits = GithubService.fetch_commits(self, access_token)
+    commits = GithubService.fetch_commits(self, access_token, branch: branch)
     return 0 unless commits.any?
 
     # Find existing commit SHAs to avoid duplicates
@@ -59,14 +60,26 @@ class Project < ApplicationRecord
     new_commits.size
   end
   
+  # Get available branches from GitHub logs
+  # @return [Array<String>] List of branch names
+  def available_branches
+    github_logs.distinct.pluck(:branch_name).compact.sort
+  end
+  
   # Get summary of GitHub contributions by user
+  # @param branch [String] Optional branch name to filter by
   # @return [Array<Hash>] Array of contribution hashes with user details and stats
-  def github_contributions
+  def github_contributions(branch: nil)
     return [] unless github_logs.exists?
     
+    # Start with base query
+    query = github_logs.joins(:user)
+    
+    # Filter by branch if specified
+    query = query.where(branch_name: branch) if branch.present?
+    
     # Group logs by user and calculate stats
-    contributions = github_logs
-      .joins(:user)
+    contributions = query
       .group('users.id', 'users.first_name', 'users.last_name', 'users.email', 'users.avatar', 'users.github_username')
       .select(
         'users.id as user_id',
