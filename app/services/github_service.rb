@@ -26,7 +26,8 @@ class GithubService
       client = github_client(access_token)
       
       # If a specific branch is requested, fetch commits only from that branch
-      if branch.present?
+      if branch.present?GitHub Username
+
         shallow_commits = client.commits(repo_path, sha: branch)
         process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch)
       else

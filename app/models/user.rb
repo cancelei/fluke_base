@@ -12,6 +12,9 @@ class User < ApplicationRecord
   # Pay integration
   include Pay::Billable
 
+  # Validations
+  validates :github_token, length: { maximum: 255 }, allow_blank: true
+
   # Virtual attribute for role selection in forms
   attr_accessor :role_id
 

@@ -48,6 +48,14 @@
           </div>
 
           <div>
+            <%= f.label :github_token, "GitHub Personal Access Token", class: "block text-sm font-medium leading-6 text-gray-900" %>
+            <div class="mt-2">
+              <%= f.text_field :github_token, autocomplete: "off", class: "block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
+              <p class="mt-1 text-sm text-gray-500">Required for private repositories. <a href="https://github.com/settings/tokens/new?scopes=repo&description=FlukeBase" target="_blank" class="text-indigo-600 hover:text-indigo-500">Generate token</a> (select 'repo' scope)</p>
+            </div>
+          </div>
+
+          <div>
             <%= f.label :password, class: "block text-sm font-medium leading-6 text-gray-900" %>
             <div class="mt-2">
               <%= f.password_field :password, autocomplete: "new-password", class: "block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>

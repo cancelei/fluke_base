@@ -2,8 +2,18 @@
 
 class Users::RegistrationsController < Devise::RegistrationsController
   before_action :ensure_roles_exist, only: [ :new, :create ]
-  # before_action :configure_sign_up_params, only: [:create]
-  # before_action :configure_account_update_params, only: [:update]
+  before_action :configure_sign_up_params, only: [:create]
+  before_action :configure_account_update_params, only: [:update]
+  
+  protected
+  
+  def configure_sign_up_params
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name, :last_name, :github_username, :github_token])
+  end
+  
+  def configure_account_update_params
+    devise_parameter_sanitizer.permit(:account_update, keys: [:first_name, :last_name, :github_username, :github_token, :avatar])
+  end
 
   # GET /resource/sign_up
   # def new
