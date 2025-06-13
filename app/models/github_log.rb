@@ -15,7 +15,7 @@ class GithubLog < ApplicationRecord
 
   # Returns a summary of contributions by user for a project
   def self.contributions_summary(project_id)
-    select('user_id, COUNT(*) as commit_count, SUM(lines_added) as total_added, SUM(lines_removed) as total_removed')
+    select("user_id, COUNT(*) as commit_count, SUM(lines_added) as total_added, SUM(lines_removed) as total_removed")
       .for_project(project_id)
       .group(:user_id)
       .includes(:user)

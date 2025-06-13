@@ -39,14 +39,14 @@ class Project < ApplicationRecord
   has_many :github_logs, dependent: :destroy
 
   # GitHub integration methods
-  
+
   # Fetches and stores commits from GitHub
   # @param access_token [String] GitHub access token
   # @param branch [String] Optional branch name to fetch commits from
   # @return [Integer] Number of new commits stored
   def fetch_and_store_commits(access_token = nil, branch: nil)
     return 0 unless repository_url.present?
-    
+
     commits = GithubService.fetch_commits(self, access_token, branch: branch)
     return 0 unless commits.any?
 
@@ -55,47 +55,47 @@ class Project < ApplicationRecord
     new_commits = commits.reject { |c| existing_shas.include?(c[:commit_sha]) }
 
     # Bulk insert new commits
-    GithubLog.upsert_all(commits, unique_by: [:project_id, :commit_sha, :agreement_id, :user_id])
+    GithubLog.upsert_all(commits, unique_by: [ :project_id, :commit_sha, :agreement_id, :user_id ])
 
     new_commits.size
   end
-  
+
   # Get available branches from GitHub logs
   # @return [Array<String>] List of branch names
   def available_branches
     github_logs.distinct.pluck(:branch_name).compact.sort
   end
-  
+
   # Get summary of GitHub contributions by user
   # @param branch [String] Optional branch name to filter by
   # @return [Array<Hash>] Array of contribution hashes with user details and stats
   def github_contributions(branch: nil)
     return [] unless github_logs.exists?
-    
+
     # Start with base query
     query = github_logs.joins(:user)
-    
+
     # Filter by branch if specified
     query = query.where(branch_name: branch) if branch.present?
-    
+
     # Group logs by user and calculate stats
     contributions = query
-      .group('users.id', 'users.first_name', 'users.last_name', 'users.email', 'users.avatar', 'users.github_username')
+      .group("users.id", "users.first_name", "users.last_name", "users.email", "users.avatar", "users.github_username")
       .select(
-        'users.id as user_id',
-        'users.first_name',
-        'users.last_name',
-        'users.email',
-        'users.avatar',
-        'users.github_username',
-        'COUNT(github_logs.id) as commit_count',
-        'SUM(github_logs.lines_added) as total_added',
-        'SUM(github_logs.lines_removed) as total_removed',
-        'MIN(github_logs.commit_date) as first_commit_date',
-        'MAX(github_logs.commit_date) as last_commit_date'
+        "users.id as user_id",
+        "users.first_name",
+        "users.last_name",
+        "users.email",
+        "users.avatar",
+        "users.github_username",
+        "COUNT(github_logs.id) as commit_count",
+        "SUM(github_logs.lines_added) as total_added",
+        "SUM(github_logs.lines_removed) as total_removed",
+        "MIN(github_logs.commit_date) as first_commit_date",
+        "MAX(github_logs.commit_date) as last_commit_date"
       )
-      .order('commit_count DESC')
-      
+      .order("commit_count DESC")
+
     # Convert to array of hashes with proper types
     contributions.map do |c|
       {
@@ -109,37 +109,37 @@ class Project < ApplicationRecord
       }
     end
   end
-  
+
   # Check if a user can view GitHub logs for this project
   # @param user [User] The user to check
   # @return [Boolean] True if user can view logs
   def can_view_github_logs?(user)
     return false unless user
-    
+
     # Project owner can always view
     return true if user_id == user.id
-    
+
     # Check for accepted agreements
     agreements.accepted.exists?(other_party_id: user.id)
   end
-  
+
   # Get recent GitHub logs
   # @param limit [Integer] Number of logs to return
   # @return [ActiveRecord::Relation] Recent GitHub logs
   def recent_github_logs(limit = 20)
     github_logs.includes(:user).order(commit_date: :desc).limit(limit)
   end
-  
+
   def contributions_summary
-    github_logs.select('user_id, COUNT(*) as commit_count, SUM(lines_added) as total_added, SUM(lines_removed) as total_removed')
+    github_logs.select("user_id, COUNT(*) as commit_count, SUM(lines_added) as total_added, SUM(lines_removed) as total_removed")
               .group(:user_id)
               .includes(:user)
   end
-  
+
   def can_view_github_logs?(user)
     return false if user.nil? || repository_url.blank?
-    user_id == user.id || 
-    agreements.accepted.exists?(["(initiator_id = :user_id OR other_party_id = :user_id)", { user_id: user.id }])
+    user_id == user.id ||
+    agreements.accepted.exists?([ "(initiator_id = :user_id OR other_party_id = :user_id)", { user_id: user.id } ])
   end
 
   # Scopes

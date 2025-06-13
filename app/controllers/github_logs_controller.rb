@@ -2,39 +2,39 @@ class GithubLogsController < ApplicationController
   before_action :set_project
   before_action :authenticate_user!
   before_action :authorize_access!
-  
+
   def index
     # Get the selected branch from params or default to nil (all branches)
     @selected_branch = params[:branch].presence
-    
+
     # Build base query for recent commits
     recent_commits_query = @project.github_logs.includes(:user).order(commit_date: :desc)
     recent_commits_query = recent_commits_query.where(branch_name: @selected_branch) if @selected_branch.present?
-    
+
     # Get recent commits for the activity feed with user preloading
     @recent_commits = recent_commits_query.limit(20)
-    
+
     # Build base query for statistics
     stats_query = @project.github_logs
     stats_query = stats_query.where(branch_name: @selected_branch) if @selected_branch.present?
-    
+
     # Calculate statistics
     @total_commits = stats_query.count
     @total_additions = stats_query.sum(:lines_added) || 0
     @total_deletions = stats_query.sum(:lines_removed) || 0
     @last_updated = @recent_commits.first&.commit_date || Time.current
-    
+
     # Get contributions summary with user details and additional stats
     @contributions = @project.github_contributions(branch: @selected_branch)
-    
+
     # Get available branches for the dropdown
     @available_branches = @project.available_branches
-    
+
     respond_to do |format|
       format.html
-      format.json { 
-        render json: { 
-          contributions: @contributions, 
+      format.json {
+        render json: {
+          contributions: @contributions,
           recent_commits: @recent_commits,
           stats: {
             total_commits: @total_commits,
@@ -42,33 +42,33 @@ class GithubLogsController < ApplicationController
             total_deletions: @total_deletions,
             last_updated: @last_updated
           }
-        } 
+        }
       }
     end
   end
-  
+
   def fetch_commits
     if current_user.github_token.blank?
-      redirect_to project_github_logs_path(@project), 
+      redirect_to project_github_logs_path(@project),
                   alert: "You need to connect your GitHub account first."
       return
     end
-    
+
     # Get the selected branch from params
     branch = params[:branch].presence
     count = @project.fetch_and_store_commits(current_user.github_token, branch: branch)
-    
+
     respond_to do |format|
-      format.html { 
+      format.html {
         if count.positive?
-          redirect_to project_github_logs_path(@project), 
+          redirect_to project_github_logs_path(@project),
                       notice: "Successfully fetched #{count} new #{"commit".pluralize(count)} from GitHub."
         else
-          redirect_to project_github_logs_path(@project), 
+          redirect_to project_github_logs_path(@project),
                       notice: "No new commits found or there was an error fetching commits."
         end
       }
-      format.json { 
+      format.json {
         if count.positive?
           render json: { message: "Fetched #{count} new #{"commit".pluralize(count)}", count: count }
         else
@@ -78,43 +78,43 @@ class GithubLogsController < ApplicationController
     end
   rescue Octokit::Unauthorized
     respond_to do |format|
-      format.html { 
-        redirect_to project_github_logs_path(@project), 
+      format.html {
+        redirect_to project_github_logs_path(@project),
                     alert: "GitHub authentication failed. Please check your GitHub token."
       }
-      format.json { 
-        render json: { error: "GitHub authentication failed. Please check your GitHub token." }, 
-               status: :unauthorized 
+      format.json {
+        render json: { error: "GitHub authentication failed. Please check your GitHub token." },
+               status: :unauthorized
       }
     end
   rescue Octokit::Error => e
     respond_to do |format|
-      format.html { 
-        redirect_to project_github_logs_path(@project), 
+      format.html {
+        redirect_to project_github_logs_path(@project),
                     alert: "GitHub API error: #{e.message}"
       }
-      format.json { 
-        render json: { error: "GitHub API error: #{e.message}" }, 
-               status: :unprocessable_entity 
+      format.json {
+        render json: { error: "GitHub API error: #{e.message}" },
+               status: :unprocessable_entity
       }
     end
   end
-  
+
   private
-  
+
   def set_project
     @project = Project.find(params[:project_id])
   end
-  
+
   def authorize_access!
     unless @project.can_view_github_logs?(current_user)
-      redirect_to @project, 
+      redirect_to @project,
                   alert: "You don't have permission to view GitHub logs for this project."
     end
   end
-  
+
   helper_method :current_branch
-  
+
   def current_branch
     params[:branch].presence
   end

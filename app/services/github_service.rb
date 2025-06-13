@@ -10,23 +10,23 @@ class GithubService
       agreements = project.agreements.active.includes(:initiator, :other_party)
 
       # Preload all related users and their GitHub usernames
-      related_users = ([project.user] + agreements.map(&:initiator) + agreements.map(&:other_party)).compact.uniq
-      
+      related_users = ([ project.user ] + agreements.map(&:initiator) + agreements.map(&:other_party)).compact.uniq
+
       # Create a hash of email => user_id for quick lookup
       user_emails = {}
       # Create a hash of github_username => user_id for quick lookup
       user_github_identifiers = {}
-      
+
       # Preload users and their GitHub usernames
-      User.where(id: related_users.map(&:id)).where.not(github_username: [nil, '']).find_each do |user|
+      User.where(id: related_users.map(&:id)).where.not(github_username: [ nil, "" ]).find_each do |user|
         user_emails[user.email.downcase] = user.id if user.email.present?
         user_github_identifiers[user.github_username.downcase] = user.id if user.github_username.present?
       end
 
       client = github_client(access_token)
-      
+
       # If a specific branch is requested, fetch commits only from that branch
-      if branch.present?GitHub Username
+      if branch.present? GitHub Username
 
         shallow_commits = client.commits(repo_path, sha: branch)
         process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch)
@@ -34,13 +34,13 @@ class GithubService
         # Fetch all branches and their commits
         branches = client.branches(repo_path)
         all_commits = []
-        
+
         branches.each do |branch|
           branch_name = branch.name
           branch_commits = client.commits(repo_path, sha: branch_name)
           all_commits += process_commits(project, branch_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_name)
         end
-        
+
         all_commits.uniq { |c| c[:commit_sha] }
       end
     rescue Octokit::Error => e
@@ -59,14 +59,14 @@ class GithubService
     end
 
     def extract_repo_path(url)
-      if url.include?('github.com/')
-        url.split('github.com/').last.gsub(/\.git$/, '')
+      if url.include?("github.com/")
+        url.split("github.com/").last.gsub(/\.git$/, "")
       else
-        url.gsub(/\.git$/, '')
+        url.gsub(/\.git$/, "")
       end
     end
 
-    def process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_name = 'main')
+    def process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_name = "main")
       shallow_commits.map do |shallow_commit|
         next if shallow_commit.sha.blank? || shallow_commit.commit.nil?
 
@@ -78,7 +78,7 @@ class GithubService
         user_id = find_user_id(author_email, user_emails, user_github_identifiers, commit)
         next unless user_id
 
-        agreement = agreements.find { |a| [a.initiator_id, a.other_party_id].include?(user_id) }
+        agreement = agreements.find { |a| [ a.initiator_id, a.other_party_id ].include?(user_id) }
 
         stats = commit.stats || {}
 
@@ -122,7 +122,7 @@ class GithubService
       end
 
       # Finally, try to find by the author identifier if it's an email
-      if author_identifier.include?('@')
+      if author_identifier.include?("@")
         user_id = user_github_identifiers[author_identifier.downcase]
         return user_id if user_id
       end
