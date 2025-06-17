@@ -22,6 +22,9 @@ Rails.application.routes.draw do
   # Dashboard route
   get "dashboard" => "dashboard#index", as: :dashboard
 
+  namespace :admin do
+    resources :solid_queue_jobs, only: [:index, :destroy, :show]
+  end
   # Notifications
   resources :notifications, only: [ :index, :show ] do
     post :mark_as_read, on: :member

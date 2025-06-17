@@ -26,7 +26,7 @@ gem "devise"
 gem "pay", "~> 6.8"
 gem "stripe", "~> 9.0"
 
-# Calendar integration
+# Calendar integration``
 gem "google-api-client", require: "google/apis/calendar_v3"
 
 # GitHub API integration
