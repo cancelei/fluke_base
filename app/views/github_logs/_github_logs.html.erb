@@ -5,7 +5,7 @@
         GitHub Activity for <%= @project.name %>
       </h2>
       
-      <% if @available_branches.any? %>
+      <% if @available_branches&.any? %>
         <div class="mt-2">
           <%= form_tag(project_github_logs_path(@project), method: :get, class: "flex items-center") do %>
             <label for="branch" class="mr-2 text-sm font-medium text-gray-700">Branch:</label>
@@ -27,7 +27,7 @@
           <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
           </svg>
-          Last updated: <%= time_ago_in_words(@last_updated) %> ago
+          Last updated: <%= time_ago_in_words(@last_updated) if @last_updated.present? %> ago
         </div>
         <div class="mt-2 flex items-center text-sm text-gray-500">
           <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -40,28 +40,29 @@
     <div class="mt-5 flex lg:mt-0 lg:ml-4">
       <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
         <span class="hidden sm:block">
+          <%= button_to refresh_project_github_logs_path,
+                    method: :post,
+                    class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                    data: { confirm: "Are you sure you want to refresh the commits? This may take a few minutes." } do %>
+            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v3a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+            </svg>
+            Refresh Commits
+          <% end %>
+        </span>
+        <span class="hidden sm:block">
           <%= link_to project_path(@project), 
-                    class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+                    class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ml-3" do %>
             <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
             Back to Project
           <% end %>
         </span>
-        <span class="sm:ml-3">
-          <%= button_to fetch_commits_project_github_logs_path(@project, branch: @selected_branch), 
-                      class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
-                      data: { turbo: false, disable_with: "<i class='fa fa-spinner fa-spin'></i> Refreshing..." } do %>
-            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refresh Commits
-          <% end %>
-        </span>
       <% end %>
     </div>
   </div>
-  
+
   <!-- Stats -->
   <% if @total_commits.to_i.positive? %>
     <div class="bg-white shadow rounded-lg mb-8">
@@ -103,7 +104,7 @@
       </div>
     </div>
     
-    <% if @contributions.any? %>
+    <% if @contributions&.any? %>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -199,7 +200,7 @@
     <div class="px-4 py-5 sm:px-6">
       <div class="flex items-center justify-between">
         <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Commits</h3>
-        <% if @recent_commits.any? %>
+        <% if @recent_commits&.any? %>
           <div class="text-sm text-gray-500">
             Showing <%= @recent_commits.size %> most recent commits
           </div>
@@ -207,7 +208,7 @@
       </div>
     </div>
     
-    <% if @recent_commits.any? %>
+    <% if @recent_commits&.any? %>
       <div class="border-t border-gray-200">
         <ul class="divide-y divide-gray-200">
           <% @recent_commits.each do |commit| %>
@@ -255,14 +256,15 @@
                     </div>
                   <% end %>
                   <div class="mt-2 flex items-center text-xs text-gray-500">
-                    <span class="flex items-center">
+                    <div class="flex items-center">
                       <svg class="h-3 w-3 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
                       <svg class="mr-1.5 h-3.5 w-3.5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
                         <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 5.47a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72v5.69a.75.75 0 001.5 0v-5.69l1.72 1.72a.75.75 0 101.06-1.06l-3-3z" clip-rule="evenodd" />
                       </svg>
                       <span class="font-medium text-green-600"><%= commit.lines_added %></span>
-                    </span>
+                    </div>
                     <span class="inline-flex items-center">
                       <svg class="mr-1.5 h-3.5 w-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
                         <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 14.03a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72V6.75a.75.75 0 011.5 0v7.69l1.72-1.72a.75.75 0 111.06 1.06l-3 3z" clip-rule="evenodd" />
@@ -339,16 +341,6 @@
         </p>
         
         <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
-          <div class="mt-6">
-            <%= button_to fetch_commits_project_github_logs_path(@project), 
-                        class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
-                        data: { turbo: false } do %>
-              <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Fetch Commits from GitHub
-            <% end %>
-          </div>
           
           <div class="mt-4 text-sm text-gray-500">
             <p class="mb-2">Make sure:</p>

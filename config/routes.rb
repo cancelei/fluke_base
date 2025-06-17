@@ -48,15 +48,13 @@ Rails.application.routes.draw do
   resources :projects do
     resources :milestones
     resources :github_logs, only: [ :index ] do
-      collection do
-        post :fetch_commits
-      end
+      post :refresh, on: :collection
     end
-
     collection do
       get :explore
     end
   end
+
 
   resources :agreements do
     resources :meetings

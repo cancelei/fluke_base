@@ -94,3 +94,5 @@ gem "kaminari", "~> 1.2"
 gem "cancancan", "~> 3.6"
 
 gem "letter_avatar"
+
+gem "faraday-retry", "~> 2.3"

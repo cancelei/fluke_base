@@ -47,6 +47,15 @@ class GithubLogsController < ApplicationController
     end
   end
 
+  def refresh
+    @branch = params[:branch] || "main"
+    # Queue the background job
+    GithubCommitRefreshJob.perform_later(@project.id)
+
+    # Set up a polling interval for job status updates
+    redirect_to project_github_logs_path(@project), notice: "Commit refresh has been queued."
+  end
+
   def fetch_commits
     if current_user.github_token.blank?
       redirect_to project_github_logs_path(@project),

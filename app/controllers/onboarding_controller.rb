@@ -41,7 +41,6 @@ class OnboardingController < ApplicationController
     end
 
     # Update user fields from form
-    binding.pry
     if current_user.update(user_onboarding_params)
       # Mark the role as onboarded
       if current_user.mark_onboarded_for(role_name)
