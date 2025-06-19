@@ -3,6 +3,24 @@ class TimeLogsController < ApplicationController
   before_action :set_agreement
   before_action :set_milestone, only: [ :create, :stop_tracking ]
   before_action :set_time_log, only: [ :stop_tracking ]
+  before_action :set_manual_time_log, only: [ :index ]
+  before_action :ensure_no_active_time_log, only: [ :create_manual ]
+
+  def create_manual
+    if @agreement.time_logs.in_progress.exists?
+      redirect_to agreement_time_logs_path(@agreement), alert: "You already have a time log in progress."
+      return
+    end
+
+    @time_log = @agreement.time_logs.new(time_log_params)
+    @time_log.status = "completed"
+
+    if @time_log.save
+      redirect_to agreement_time_logs_path(@agreement), notice: "Time log created successfully."
+    else
+      redirect_to agreement_time_logs_path(@agreement), alert: @time_log.errors.full_messages.to_sentence
+    end
+  end
 
   def index
     # Set the selected date or default to today
@@ -16,9 +34,18 @@ class TimeLogsController < ApplicationController
 
     # Get time logs for the selected date
     @time_logs = @agreement.time_logs
-                         .includes(:milestone)
-                         .where("DATE(started_at) = ?", @selected_date)
-                         .order(started_at: :desc)
+                           .includes(:milestone)
+                           .where("DATE(started_at) = '#{@selected_date}'")
+                           .order(started_at: :desc)
+
+    @milestones_pending_confirmation = @milestones
+                                         .includes(:time_logs)
+                                         .where(status: "in_progress", time_logs: { status: "completed" })
+    @time_logs_completed = @milestones
+                            .includes(:time_logs)
+                            .where(status: "completed", time_logs: { status: "completed" })
+                            .where("DATE(time_logs.started_at) = ?", @selected_date)
+    @time_logs_manual = @agreement.time_logs.where(milestone_id: nil)
   end
 
   def create
@@ -50,6 +77,20 @@ class TimeLogsController < ApplicationController
   end
 
   private
+
+  def time_log_params
+    params.require(:time_log).permit(:started_at, :ended_at, :description)
+  end
+
+  def ensure_no_active_time_log
+    if @agreement.time_logs.in_progress.exists?
+      redirect_to agreement_time_logs_path(@agreement), alert: "You already have a time log in progress."
+    end
+  end
+
+  def set_manual_time_log
+    @time_log_manual = TimeLog.new
+  end
 
   def set_agreement
     # Check if user is either the mentor or entrepreneur in the agreement

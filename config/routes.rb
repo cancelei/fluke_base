@@ -49,7 +49,9 @@ Rails.application.routes.draw do
 
   # Resources
   resources :projects do
-    resources :milestones
+    resources :milestones do
+      post :confirm, on: :member
+    end
     resources :github_logs, only: [ :index ] do
       post :refresh, on: :collection
     end
@@ -64,6 +66,7 @@ Rails.application.routes.draw do
     resources :time_logs, only: [ :index, :create ] do
       collection do
         post :stop_tracking
+        post :create_manual, action: :create_manual
       end
     end
 

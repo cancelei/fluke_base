@@ -1,6 +1,6 @@
 class MilestonesController < ApplicationController
   before_action :set_project
-  before_action :set_milestone, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_milestone, only: [ :show, :edit, :update, :destroy, :confirm ]
 
   def index
     @milestones = @project.milestones.order(due_date: :asc)
@@ -37,6 +37,14 @@ class MilestonesController < ApplicationController
   def destroy
     @milestone.destroy
     redirect_to project_path(@project), notice: "Milestone was successfully deleted."
+  end
+
+  def confirm
+    if @milestone.update(status: Milestone::COMPLETED)
+      redirect_to agreement_time_logs_path(@milestone.project.agreements.first), notice: "Milestone was successfully marked as completed."
+    else
+      redirect_to agreement_time_logs_path(@milestone.project.agreements.first), alert: "Failed to mark milestone as completed."
+    end
   end
 
   private

@@ -1,20 +1,23 @@
 class TimeLog < ApplicationRecord
   # Relationships
   belongs_to :agreement
-  belongs_to :milestone
+  belongs_to :milestone, optional: true
 
   # Validations
   validates :started_at, presence: true
   validate :ended_at_after_started_at
   validates :hours_spent, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :status, inclusion: { in: %w[in_progress completed] }
-
+  validates :description, presence: true, if: -> { milestone_id.nil? }
+  # Validate that start time is not in the future
+  validate :start_time_not_in_future
 
   # Status scopes
   scope :in_progress, -> { where(status: "in_progress") }
   scope :completed, -> { where(status: "completed") }
   scope :for_agreement, ->(agreement_id) { where(agreement_id: agreement_id) }
   scope :for_milestone, ->(milestone_id) { where(milestone_id: milestone_id) }
+  scope :manual, -> { where(milestone_id: nil) }
 
   # Callbacks
   before_save :calculate_hours_spent
@@ -36,6 +39,7 @@ class TimeLog < ApplicationRecord
     self.hours_spent = ((ended_at - started_at) / 1.hour).round(2)
   end
 
+
   private
 
   def ended_at_after_started_at
@@ -43,6 +47,14 @@ class TimeLog < ApplicationRecord
 
     if ended_at < started_at
       errors.add(:ended_at, "must be after the start time")
+    end
+  end
+
+  def start_time_not_in_future
+    return if started_at.blank?
+
+    if started_at > Time.zone.now
+      errors.add(:started_at, "cannot be in the future")
     end
   end
 end

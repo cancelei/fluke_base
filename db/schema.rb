@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_16_180446) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_18_174830) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -304,7 +304,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_16_180446) do
 
   create_table "time_logs", force: :cascade do |t|
     t.bigint "agreement_id", null: false
-    t.bigint "milestone_id", null: false
+    t.bigint "milestone_id"
     t.datetime "started_at", precision: nil, null: false
     t.datetime "ended_at", precision: nil
     t.text "description"
