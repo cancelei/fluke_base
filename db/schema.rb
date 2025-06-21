@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_18_174830) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_21_163333) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -312,9 +312,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_18_174830) do
     t.string "status", default: "in_progress"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
     t.index ["agreement_id", "milestone_id"], name: "index_time_logs_on_agreement_id_and_milestone_id"
     t.index ["agreement_id"], name: "index_time_logs_on_agreement_id"
     t.index ["milestone_id"], name: "index_time_logs_on_milestone_id"
+    t.index ["user_id"], name: "index_time_logs_on_user_id"
   end
 
   create_table "user_roles", force: :cascade do |t|
@@ -381,6 +383,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_18_174830) do
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "time_logs", "agreements"
   add_foreign_key "time_logs", "milestones"
+  add_foreign_key "time_logs", "users"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
   add_foreign_key "users", "roles", column: "current_role_id"

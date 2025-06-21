@@ -1,6 +1,6 @@
 class TimeLogsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_agreement
+  before_action :set_agreement, except: [ :filter ]
   before_action :set_milestone, only: [ :create, :stop_tracking ]
   before_action :set_time_log, only: [ :stop_tracking ]
   before_action :set_manual_time_log, only: [ :index ]
@@ -13,6 +13,7 @@ class TimeLogsController < ApplicationController
     end
 
     @time_log = @agreement.time_logs.new(time_log_params)
+    @time_log.user = current_user
     @time_log.status = "completed"
 
     if @time_log.save
@@ -57,7 +58,8 @@ class TimeLogsController < ApplicationController
     @time_log = @agreement.time_logs.new(
       milestone: @milestone,
       started_at: Time.current,
-      status: "in_progress"
+      status: "in_progress",
+      user: current_user
     )
 
     if @time_log.save
@@ -74,6 +76,37 @@ class TimeLogsController < ApplicationController
     else
       redirect_to agreement_time_logs_path(@agreement), alert: @time_log.errors.full_messages.to_sentence
     end
+  end
+
+  def filter
+    @selected_project = Project.find_by(id: params[:project_id])
+    @selected_user = User.find_by(id: params[:user_id])
+    # Set the selected date or default to today
+    @selected_date = params[:date].present? ? Date.parse(params[:date]) : Date.current
+
+    # Get the date range for the carousel (3 days before and after selected date)
+    @date_range = (@selected_date - 3.days)..(@selected_date + 3.days)
+
+    @projects = Project.where(id: current_user.projects.ids + current_user.mentor_projects.ids)
+    @milestones = Milestone.where(project_id: @selected_project&.id || @projects.ids)
+    @users = User.joins(:time_logs).where(time_logs: { milestone_id: @milestones.ids }).distinct
+
+    @time_logs = TimeLog.where(milestone: @milestones)
+    @time_logs = @time_logs.where(user_id: @selected_user.id) if @selected_user.present?
+    @time_logs = @time_logs.includes(:milestone, :user)
+                           .where("DATE(started_at) = '#{@selected_date}'")
+                           .order(started_at: :desc)
+
+    @milestones_pending_confirmation = @milestones
+                                         .includes(:time_logs)
+                                         .where(status: "in_progress", time_logs: { status: "completed" })
+    @time_logs_completed = @milestones
+                            .includes(:time_logs)
+                            .where(status: "completed", time_logs: { status: "completed" })
+                            .where("DATE(time_logs.started_at) = ?", @selected_date)
+    puts @time_logs_completed.inspect
+
+    @time_logs_manual = TimeLog.where(milestone_id: nil, user_id: @selected_user&.id || current_user.id)
   end
 
   private

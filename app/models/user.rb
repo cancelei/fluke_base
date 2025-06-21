@@ -21,6 +21,7 @@ class User < ApplicationRecord
   # Relationships
   has_many :projects, dependent: :destroy
   has_many :notifications, dependent: :destroy
+  has_many :time_logs
 
   # All agreements where user is a party
   has_many :initiated_agreements, class_name: "Agreement",
@@ -81,6 +82,10 @@ class User < ApplicationRecord
   scope :with_role, ->(role_name) {
     joins(:roles).where(roles: { name: role_name })
   }
+
+  def mentor_projects
+    Project.includes(:agreements).where(agreements: { initiator_id: id }).or(Project.includes(:agreements).where(agreements: { other_party_id: id }))
+  end
 
   # Methods
   def full_name

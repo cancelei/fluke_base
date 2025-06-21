@@ -60,6 +60,7 @@ Rails.application.routes.draw do
     end
   end
 
+  get "time_logs/filter", to: "time_logs#filter", as: :filter_time_logs
 
   resources :agreements do
     resources :meetings

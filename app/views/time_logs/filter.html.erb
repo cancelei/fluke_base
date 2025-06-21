@@ -1,0 +1,232 @@
+<!-- app/views/timelogs/index.html.erb -->
+<h1 class="text-2xl font-bold mb-4">Time Logs</h1>
+
+<div class="flex space-x-4 mb-6">
+  <%= form_with url: filter_time_logs_path, method: :get, local: true, class: "flex space-x-2" do %>
+    <div>
+      <%= select_tag :project_id, options_from_collection_for_select(@projects, :id, :name, @selected_project&.id), include_blank: "All Projects", class: "rounded border-gray-300" %>
+    </div>
+    <div>
+      <%= select_tag :user_id, options_from_collection_for_select(@users, :id, :first_name, @selected_user&.id), include_blank: "All Users", class: "rounded border-gray-300" %>
+    </div>
+    <div>
+      <%= submit_tag "Filter", class: "bg-indigo-600 text-white px-4 py-2 rounded" %>
+    </div>
+  <% end %>
+</div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Time Logs Pending Confirmation
+      </h3>
+    </div>
+    <div class="border-t border-gray-200">
+      <% if @milestones_pending_confirmation.any? { |milestone| @selected_user ? milestone.time_logs.where(user_id: @selected_user.id).exists? : true } %>
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Project
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              User
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Milestone
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Due Date
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Started
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Ended
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Duration
+            </th>
+          </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+          <% @milestones_pending_confirmation.each do |milestone| %>
+          <% time_log_users = milestone.time_logs.map(&:user).uniq %>
+            <% (@selected_user ? [@selected_user] : time_log_users).each do |user| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= milestone.project.name %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= user.full_name %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= milestone.title %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <%= milestone.due_date.strftime('%b %d, %Y %I:%M %p') %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <ul>
+                      <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
+                        <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <ul>
+                      <% milestone.time_logs.where(user:).pluck(:ended_at).each do |log| %>
+                        <li><%= log&.strftime('%b %d, %Y %I:%M %p') || "-" %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
+                  <%= hours_spend > 0 ? "#{hours_spend} hours" : 'Less than an hour' %>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="px-4 py-4 text-center text-gray-500">
+          No time logs found. Start tracking time for a milestone above.
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+<div class="bg-white shadow overflow-hidden sm:rounded-lg mt-3">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg leading-6 font-medium text-gray-900">
+      Time Logs for Completed Tasks
+    </h3>
+  </div>
+  <div class="border-t border-gray-200">
+    <% if @time_logs_completed.any? { |milestone| @selected_user ? milestone.time_logs.where(user_id: @selected_user.id).exists? : true } %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Project
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            User
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Milestone
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Due Date
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Started
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Ended
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Duration
+          </th>
+        </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+        <% @time_logs_completed.each do |milestone| %>
+          <% time_log_users = milestone.time_logs.map(&:user).uniq %>
+            <% (@selected_user ? [@selected_user] : time_log_users).each do |user| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= milestone.project.name %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= user.full_name %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= milestone.title %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <%= milestone.due_date.strftime('%b %d, %Y %I:%M %p') %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <ul>
+                      <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
+                        <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <ul>
+                      <% milestone.time_logs.where(user:).pluck(:ended_at).each do |log| %>
+                        <li><%= log&.strftime('%b %d, %Y %I:%M %p') || "-" %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
+                  <%= hours_spend > 0 ? "#{hours_spend} hours" : 'Less than an hour' %>
+                </td>
+              </tr>
+            <% end %>
+        <% end %>
+        <% @time_logs_manual.each do |log| %>
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-indigo-600 truncate">
+                <%= log.description %>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">
+                -
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">
+                <%= log.started_at.strftime('%b %d, %Y %I:%M %p') %>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">
+                <%= log.ended_at.strftime('%b %d, %Y %I:%M %p') %>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <%= log.hours_spent > 0 ? "#{log.hours_spent} hours" : 'Less than an hour' %>
+            </td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="px-4 py-4 text-center text-gray-500">
+        No time logs found. Start tracking time for a milestone above.
+      </div>
+    <% end %>
+  </div>
+
+</div>

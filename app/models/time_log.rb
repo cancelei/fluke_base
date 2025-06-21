@@ -1,6 +1,7 @@
 class TimeLog < ApplicationRecord
   # Relationships
   belongs_to :agreement
+  belongs_to :user
   belongs_to :milestone, optional: true
 
   # Validations
