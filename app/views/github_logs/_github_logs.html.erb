@@ -38,7 +38,7 @@
       </div>
     </div>
     <div class="mt-5 flex lg:mt-0 lg:ml-4">
-      <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
+      <% if @project.user == current_user || @project.agreements.active.exists?(other_party_id: current_user.id) %>
         <span class="hidden sm:block">
           <%= button_to refresh_project_github_logs_path,
                     method: :post,
@@ -185,7 +185,7 @@
         </svg>
         <h3 class="mt-2 text-sm font-medium text-gray-900">No contributions yet</h3>
         <p class="mt-1 text-sm text-gray-500">
-          <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
+          <% if @project.user == current_user || @project.agreements.active.exists?(other_party_id: current_user.id) %>
             Click the "Refresh Commits" button to fetch contributions from GitHub.
           <% else %>
             This project doesn't have any GitHub activity yet.
@@ -333,14 +333,14 @@
         </svg>
         <h3 class="mt-4 text-lg font-medium text-gray-900">No GitHub activity found</h3>
         <p class="mt-2 text-sm text-gray-500">
-          <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
+          <% if @project.user == current_user || @project.agreements.active.exists?(other_party_id: current_user.id) %>
             Click the button below to fetch commits from the repository.
           <% else %>
             This project doesn't have any GitHub activity yet or the repository is not properly configured.
           <% end %>
         </p>
         
-        <% if @project.user == current_user || @project.agreements.accepted.exists?(other_party_id: current_user.id) %>
+        <% if @project.user == current_user || @project.agreements.active.exists?(other_party_id: current_user.id) %>
           
           <div class="mt-4 text-sm text-gray-500">
             <p class="mb-2">Make sure:</p>

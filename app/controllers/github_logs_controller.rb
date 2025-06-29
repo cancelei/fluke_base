@@ -48,9 +48,8 @@ class GithubLogsController < ApplicationController
   end
 
   def refresh
-    @branch = params[:branch] || "main"
     # Queue the background job
-    GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token)
+    GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, params[:branch].presence)
 
     # Set up a polling interval for job status updates
     redirect_to project_github_logs_path(@project), notice: "Commit refresh has been queued."
@@ -64,8 +63,7 @@ class GithubLogsController < ApplicationController
     end
 
     # Get the selected branch from params
-    branch = params[:branch].presence
-    count = @project.fetch_and_store_commits(current_user.github_token, branch: branch)
+    count = @project.fetch_and_store_commits(current_user.github_token, branch: params[:branch].presence)
 
     respond_to do |format|
       format.html {

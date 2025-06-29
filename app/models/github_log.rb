@@ -3,6 +3,8 @@ class GithubLog < ApplicationRecord
   belongs_to :agreement, optional: true
   belongs_to :user
 
+  belongs_to :time_log, -> { where("agreement_id = ? AND commit_date BETWEEN started_at AND ended_at", agreement_id) }, optional: true
+
   validates :commit_sha, presence: true, uniqueness: true
   validates :lines_added, :lines_removed, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :commit_date, presence: true

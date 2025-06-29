@@ -139,7 +139,7 @@ class Project < ApplicationRecord
   def can_view_github_logs?(user)
     return false if user.nil? || repository_url.blank?
     user_id == user.id ||
-    agreements.accepted.exists?([ "(initiator_id = :user_id OR other_party_id = :user_id)", { user_id: user.id } ])
+    agreements.active.exists?([ "(initiator_id = :user_id OR other_party_id = :user_id)", { user_id: user.id } ])
   end
 
   # Scopes

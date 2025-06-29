@@ -15,7 +15,12 @@ class Agreement < ApplicationRecord
   HOURLY = "Hourly"
   EQUITY = "Equity"
   HYBRID = "Hybrid"
-
+  # enum :status, { pending: "Pending",
+  #   accepted: "Accepted",
+  #   completed: "Completed",
+  #   rejected: "Rejected",
+  #   cancelled: "Cancelled",
+  #   countered: "Countered" }
   # Relationships
   belongs_to :project
   belongs_to :initiator, class_name: "User", foreign_key: "initiator_id"

@@ -104,7 +104,6 @@ class TimeLogsController < ApplicationController
                             .includes(:time_logs)
                             .where(status: "completed", time_logs: { status: "completed" })
                             .where("DATE(time_logs.started_at) = ?", @selected_date)
-    puts @time_logs_completed.inspect
 
     @time_logs_manual = TimeLog.where(milestone_id: nil, user_id: @selected_user&.id || current_user.id)
   end
