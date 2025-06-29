@@ -4,7 +4,6 @@ class TimeLog < ApplicationRecord
   belongs_to :user
   belongs_to :milestone, optional: true
 
-  has_many :github_activities, -> { where("agreement_id = ? AND commit_date BETWEEN ? AND ?", agreement_id, started_at, ended_at) }, class_name: "GithubLog"
 
   # Validations
   validates :started_at, presence: true
@@ -42,6 +41,12 @@ class TimeLog < ApplicationRecord
     self.hours_spent = ((ended_at - started_at) / 1.hour).round(2)
   end
 
+  def github_activities
+    GithubLog.where(
+      agreement_id: agreement_id,
+      commit_date: (started_at..ended_at)
+    )
+  end
 
   private
 

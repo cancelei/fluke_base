@@ -22,4 +22,8 @@ class GithubLog < ApplicationRecord
       .group(:user_id)
       .includes(:user)
   end
+
+  def time_log
+    TimeLog.find_by(agreement_id: agreement_id, started_at: ..commit_date, ended_at: commit_date..)
+  end
 end
