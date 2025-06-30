@@ -54,6 +54,11 @@ class Project < ApplicationRecord
       branches = service.branches
 
       branches.each do |branch|
+        # Storing github logs branch by branch instead of overloading it with the whole repo
+        # This allows us to fetch commits for each branch separately
+        # and avoids issues with large repositories.
+        # We Should make it asynchronous to avoid blocking the main thread
+        # NOTE: It's not asynchronous here, but can be made so by using a job queue
         fetch_and_store_commits(access_token, branch:)
       end
 
