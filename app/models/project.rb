@@ -47,7 +47,20 @@ class Project < ApplicationRecord
   def fetch_and_store_commits(access_token = nil, branch: nil)
     return 0 unless repository_url.present?
 
-    commits = GithubService.fetch_commits(self, access_token, branch: branch)
+    service = GithubService.new(self, access_token, branch: branch)
+
+    if branch.blank?
+      # Fetch all branches and their commits
+      branches = service.branches
+
+      branches.each do |branch|
+        fetch_and_store_commits(access_token, branch:)
+      end
+
+      return 0
+    end
+
+    commits = service.fetch_commits
     return 0 unless commits.any?
 
     # Find existing commit SHAs to avoid duplicates
