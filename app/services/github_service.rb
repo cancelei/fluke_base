@@ -1,5 +1,5 @@
 class GithubService
-  attr_reader :project, :access_token, :branch, :repo_path, :client, :user_emails, :user_github_identifiers
+  attr_reader :project, :access_token, :branch, :repo_path, :client, :user_emails, :user_github_identifiers, :agreements
 
   # Initialize the service with project, access token, and optional branch
   def initialize(project, access_token = nil, branch: nil)
@@ -11,7 +11,7 @@ class GithubService
     @client = github_client(access_token)
   end
 
-  def fetch_commits(project, access_token = nil, branch: nil)
+  def fetch_commits
     return [] if project.repository_url.blank?
 
     repo_path = extract_repo_path(project.repository_url)

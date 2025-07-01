@@ -54,12 +54,7 @@ class Project < ApplicationRecord
       branches = service.branches
 
       branches.each do |branch|
-        # Storing github logs branch by branch instead of overloading it with the whole repo
-        # This allows us to fetch commits for each branch separately
-        # and avoids issues with large repositories.
-        # We Should make it asynchronous to avoid blocking the main thread
-        # NOTE: It's not asynchronous here, but can be made so by using a job queue
-        fetch_and_store_commits(access_token, branch:)
+        GithubCommitRefreshJob.perform_later(id, access_token, branch.name)
       end
 
       return 0
@@ -75,6 +70,9 @@ class Project < ApplicationRecord
     # Bulk insert new commits
     GithubLog.upsert_all(commits, unique_by: [ :project_id, :commit_sha, :agreement_id, :user_id ])
 
+    puts "Stored #{new_commits.size} new commits for branch '#{branch}' in project '#{name}'"
+
+    # Return the number of new commits stored
     new_commits.size
   end
 
