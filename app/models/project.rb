@@ -37,6 +37,7 @@ class Project < ApplicationRecord
 
   # Associations
   has_many :github_logs, dependent: :destroy
+  has_many :github_branches, dependent: :destroy
 
   # GitHub integration methods
 
@@ -44,42 +45,12 @@ class Project < ApplicationRecord
   # @param access_token [String] GitHub access token
   # @param branch [String] Optional branch name to fetch commits from
   # @return [Integer] Number of new commits stored
-  def fetch_and_store_commits(access_token = nil, branch: nil)
-    return 0 unless repository_url.present?
 
-    service = GithubService.new(self, access_token, branch: branch)
-
-    if branch.blank?
-      # Fetch all branches and their commits
-      branches = service.branches
-
-      branches.each do |branch|
-        GithubCommitRefreshJob.perform_later(id, access_token, branch.name)
-      end
-
-      return 0
-    end
-
-    commits = service.fetch_commits
-    return 0 unless commits.any?
-
-    # Find existing commit SHAs to avoid duplicates
-    existing_shas = github_logs.pluck(:commit_sha)
-    new_commits = commits.reject { |c| existing_shas.include?(c[:commit_sha]) }
-
-    # Bulk insert new commits
-    GithubLog.upsert_all(commits, unique_by: [ :project_id, :commit_sha, :agreement_id, :user_id ])
-
-    puts "Stored #{new_commits.size} new commits for branch '#{branch}' in project '#{name}'"
-
-    # Return the number of new commits stored
-    new_commits.size
-  end
 
   # Get available branches from GitHub logs
   # @return [Array<String>] List of branch names
   def available_branches
-    github_logs.distinct.pluck(:branch_name).compact.sort
+    github_branches.pluck(:id, :branch_name).compact.sort
   end
 
   # Get summary of GitHub contributions by user

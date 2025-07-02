@@ -16,7 +16,7 @@ class GithubLogsController < ApplicationController
 
     # Build base query for statistics
     stats_query = @project.github_logs
-    stats_query = stats_query.where(branch_name: @selected_branch) if @selected_branch.present?
+    stats_query = stats_query.where(github_branches_id: @selected_branch) if @selected_branch.present?
 
     # Calculate statistics
     @total_commits = stats_query.count
@@ -49,7 +49,13 @@ class GithubLogsController < ApplicationController
 
   def refresh
     # Queue the background job
-    GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, params[:branch].presence)
+    branch_name = params[:branch].presence
+    if branch_name.present?
+      GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, branch_name)
+    else
+      GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
+    end
+
 
     # Set up a polling interval for job status updates
     redirect_to project_github_logs_path(@project), notice: "Commit refresh has been queued."

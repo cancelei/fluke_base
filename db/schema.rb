@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_21_163333) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_02_175044) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -80,6 +80,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_163333) do
     t.index ["sender_id"], name: "index_conversations_on_sender_id"
   end
 
+  create_table "github_branches", force: :cascade do |t|
+    t.bigint "project_id"
+    t.bigint "user_id"
+    t.string "branch_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "branch_name", "user_id"], name: "idx_on_project_id_branch_name_user_id_fcdce7d2d8", unique: true
+    t.index ["project_id"], name: "index_github_branches_on_project_id"
+    t.index ["user_id"], name: "index_github_branches_on_user_id"
+  end
+
   create_table "github_logs", force: :cascade do |t|
     t.bigint "project_id", null: false
     t.bigint "agreement_id", null: false
@@ -93,8 +104,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_163333) do
     t.datetime "updated_at", null: false
     t.string "commit_url"
     t.jsonb "changed_files", default: [], array: true
-    t.string "branch_name"
+    t.bigint "github_branches_id"
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
+    t.index ["github_branches_id"], name: "index_github_logs_on_github_branches_id"
     t.index ["project_id", "commit_sha", "agreement_id", "user_id"], name: "index_for_unique_logs", unique: true
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
@@ -366,7 +378,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_163333) do
   add_foreign_key "agreements", "users", column: "other_party_id"
   add_foreign_key "conversations", "users", column: "recipient_id"
   add_foreign_key "conversations", "users", column: "sender_id"
+  add_foreign_key "github_branches", "projects"
+  add_foreign_key "github_branches", "users"
   add_foreign_key "github_logs", "agreements"
+  add_foreign_key "github_logs", "github_branches", column: "github_branches_id"
   add_foreign_key "github_logs", "projects"
   add_foreign_key "github_logs", "users"
   add_foreign_key "meetings", "agreements"

@@ -271,7 +271,7 @@
     </h3>
   </div>
   <div class="border-t border-gray-200">
-    <% if @time_logs_completed.any? %>
+    <% if @time_logs_completed.any? || @time_logs_manual.any? %>
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
         <tr>
