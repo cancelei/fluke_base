@@ -6,7 +6,7 @@ class CreateGithubBranches < ActiveRecord::Migration[8.0]
       t.string :branch_name
       t.timestamps
     end
-    add_index :github_branches, [:project_id, :branch_name, :user_id], unique: true
+    add_index :github_branches, [ :project_id, :branch_name, :user_id ], unique: true
 
     remove_column :github_logs, :branch_name, if_exists: true
 

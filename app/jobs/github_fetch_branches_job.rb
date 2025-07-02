@@ -1,5 +1,4 @@
 class GithubFetchBranchesJob < ApplicationJob
-
   def perform(project_id, access_token)
     @project = Project.find(project_id)
     service = GithubService.new(@project, access_token)

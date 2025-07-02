@@ -77,7 +77,7 @@ class GithubService
 
     # Upsert all branch owners in a single query
     unless branch_owners.empty?
-      GithubBranch.upsert_all(branch_owners, unique_by: [:project_id, :branch_name, :user_id])
+      GithubBranch.upsert_all(branch_owners, unique_by: [ :project_id, :branch_name, :user_id ])
     end
 
     branch_owners

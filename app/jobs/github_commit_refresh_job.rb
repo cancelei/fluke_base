@@ -1,5 +1,4 @@
 class GithubCommitRefreshJob < ApplicationJob
-
   def perform(project_id, access_token, branch = nil)
     @project = Project.find(project_id)
     return if branch.nil?
