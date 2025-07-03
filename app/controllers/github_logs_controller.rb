@@ -9,7 +9,7 @@ class GithubLogsController < ApplicationController
 
     # Build base query for recent commits
     recent_commits_query = @project.github_logs.includes(:user).order(commit_date: :desc)
-    recent_commits_query = recent_commits_query.where(branch_name: @selected_branch) if @selected_branch.present?
+    recent_commits_query = recent_commits_query.where(github_branches_id: @selected_branch) if @selected_branch.present?
 
     # Get recent commits for the activity feed with user preloading
     @recent_commits = recent_commits_query.limit(20)
@@ -49,9 +49,8 @@ class GithubLogsController < ApplicationController
 
   def refresh
     # Queue the background job
-    branch_name = params[:branch].presence
-    if branch_name.present?
-      GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, branch_name)
+    if @selected_branch.present?
+      GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, @selected_branch)
     else
       GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
     end

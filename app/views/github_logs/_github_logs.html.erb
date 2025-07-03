@@ -11,9 +11,9 @@
             <label for="branch" class="mr-2 text-sm font-medium text-gray-700">Branch:</label>
             <div class="relative">
               <select id="branch" name="branch" onchange="this.form.submit()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                <option value="" <%= 'selected' unless @selected_branch %>>All Branches</option>
+                <option value="0" <%= 'selected' unless @selected_branch %>>All Branches</option>
                 <% @available_branches.each do |id, branch| %>
-                  <option value="<%= id %>" <%= 'selected' if @selected_branch == id %>>
+                  <option value="<%= id %>" <%= 'selected' if @selected_branch.to_s == id.to_s %>>
                     <%= branch.presence || 'main' %>
                   </option>
                 <% end %>
