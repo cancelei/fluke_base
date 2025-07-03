@@ -293,6 +293,9 @@
                         </svg>
                         <%= commit.commit_sha[0..6] %>
                       </a>
+                      <div class="text-xs text-gray-500 ms-2">
+                        <%= commit.commit_date.strftime("%b %d, %Y %I:%M%p") %>
+                      </div>
                     </div>
                   </div>
                   <div class="mt-1 text-sm text-gray-800">

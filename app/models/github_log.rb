@@ -2,6 +2,7 @@ class GithubLog < ApplicationRecord
   belongs_to :project
   belongs_to :agreement, optional: true
   belongs_to :user
+  belongs_to :github_branch, foreign_key: "github_branches_id"
 
   belongs_to :time_log, -> { where("agreement_id = ? AND commit_date BETWEEN started_at AND ended_at", agreement_id) }, optional: true
 

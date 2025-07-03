@@ -60,10 +60,10 @@ class Project < ApplicationRecord
     return [] unless github_logs.exists?
 
     # Start with base query
-    query = github_logs.joins(:user)
+    query = github_logs.joins(:user, :github_branch)
 
     # Filter by branch if specified
-    query = query.where(branch_name: branch) if branch.present?
+    query = query.where(github_branches: { branch_name: branch }) if branch.present?
 
     # Group logs by user and calculate stats
     contributions = query

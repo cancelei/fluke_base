@@ -7,7 +7,7 @@
       <%= f.select :queue, 
                   [['All Queues', '']] + 
                   SolidQueue::Job.select(:queue_name).distinct.pluck(:queue_name).map { |q| [q, q] },
-                  {}, 
+                  { selected: params[:queue] },
                   onchange: "this.form.submit()" %>
     </div>
     
@@ -16,7 +16,16 @@
       <%= f.select :priority, 
                   [['All Priorities', '']] + 
                   [['High (1)', '1'], ['Medium (2)', '2'], ['Low (3)', '3']],
-                  {}, 
+                  { selected: params[:priority] },
+                  onchange: "this.form.submit()" %>
+    </div>
+
+    <div class="filter-group">
+      <label for="status">Status:</label>
+      <%= f.select :status,
+                  [['All Statuses', '']] +
+                  [['Pending', 'pending'], ['Failed', 'failed'], ['Completed', 'completed'], ['Running', 'running']],
+                  { selected: params[:status] },
                   onchange: "this.form.submit()" %>
     </div>
 
@@ -24,18 +33,16 @@
       <label for="sort">Sort:</label>
       <%= f.select :sort, 
                   [['Newest First', 'desc'], ['Oldest First', 'asc']],
-                  {}, 
-                  onchange: "this.form.submit()",
-                  selected: params[:sort] %>
+                  { selected: params[:sort] || 'desc' },
+                  onchange: "this.form.submit()" %>
     </div>
 
     <div class="filter-group">
       <label for="per_page">Per Page:</label>
       <%= f.select :per_page, 
                   [['25', '25'], ['50', '50'], ['100', '100']],
-                  {}, 
-                  onchange: "this.form.submit()",
-                  selected: params[:per_page] %>
+                  { selected: params[:per_page] || '25' },
+                  onchange: "this.form.submit()" %>
     </div>
   </div>
 <% end %>
@@ -77,18 +84,29 @@
               <% end %>
             </td>
             <td><%= job.class_name %></td>
-            <td>
-              <% if job.finished_at %>
-                <span class="status-completed">Completed</span>
-              <% elsif job.arguments && job.arguments['exception_executions'] && !job.arguments['exception_executions'].empty? %>
+            <td class="status-cell">
+              <% if job.failed? || (job.arguments && job.arguments['exception_executions'] && !job.arguments['exception_executions'].empty?) %>
                 <span class="status-failed">Failed</span>
+              <% elsif job.finished? %>
+                <span class="status-completed">Completed</span>
+              <% elsif job.ready? %>
+                <span class="status-running">Ready</span>
+              <% elsif job.scheduled? %>
+                <span class="status-running">Scheduled</span>
               <% else %>
                 <span class="status-pending">Pending</span>
               <% end %>
             </td>
             <td><%= job.scheduled_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
             <td><%= job.created_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
-            <td>
+            <td class="actions">
+              <% if job.failed? || (job.arguments && job.arguments['exception_executions']&.any?) %>
+                <%= link_to "Retry", retry_admin_solid_queue_job_path(job), 
+                           method: :post,
+                           class: "retry-btn",
+                           data: { confirm: "Are you sure you want to retry this job?" } %>
+                <span class="action-separator">|</span>
+              <% end %>
               <%= link_to "Delete", admin_solid_queue_job_path(job), 
                          method: :delete,
                          data: { confirm: "Are you sure you want to delete this job?" },
@@ -165,6 +183,36 @@
   color: #007bff;
   font-weight: bold;
 }
+
+.status-running {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.actions {
+  white-space: nowrap;
+}
+
+.retry-btn {
+  color: #17a2b8;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.retry-btn:hover {
+  color: #138496;
+  text-decoration: underline;
+}
+
+.action-separator {
+  margin: 0 5px;
+  color: #dee2e6;
+}
+
+.status-cell {
+  text-transform: capitalize;
+}
+
 .reset-filters {
   margin-top: 20px;
   text-align: right;

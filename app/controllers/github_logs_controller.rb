@@ -12,7 +12,7 @@ class GithubLogsController < ApplicationController
     recent_commits_query = recent_commits_query.where(github_branches_id: @selected_branch) if @selected_branch.present?
 
     # Get recent commits for the activity feed with user preloading
-    @recent_commits = recent_commits_query.limit(20)
+    @recent_commits = recent_commits_query.limit(50)
 
     # Build base query for statistics
     stats_query = @project.github_logs
