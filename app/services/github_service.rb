@@ -18,13 +18,46 @@ class GithubService
     return [] if repo_path.blank?
 
     load_users
-
     client = github_client(access_token)
 
     # If a specific branch is requested, fetch commits only from that branch
     if branch.present?
-      shallow_commits = client.commits(repo_path, sha: branch)
-      process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch)
+      all_commits = []
+      page = 1
+      per_page = 100 # Maximum allowed by GitHub API
+
+      # Keep fetching pages until we get fewer commits than the per_page limit
+      loop do
+        begin
+          commits = client.commits(repo_path, {
+            sha: branch,
+            per_page: per_page,
+            page: page
+          })
+
+          break if commits.empty?
+
+          all_commits.concat(commits)
+          page += 1
+
+          # If we got fewer commits than the per_page limit, we've reached the end
+          break if commits.size < per_page
+        rescue Octokit::TooManyRequests => e
+          # If we hit rate limit, wait and retry
+          reset_time = e.response_headers["x-ratelimit-reset"].to_i
+          wait_time = [ reset_time - Time.now.to_i + 1, 1 ].max
+          Rails.logger.warn "GitHub API rate limit reached. Waiting #{wait_time} seconds..."
+          sleep(wait_time)
+          retry
+        rescue Octokit::Error => e
+          Rails.logger.error "GitHub API Error: #{e.message}"
+          break
+        end
+      end
+
+      branch_id = GithubBranch.find_by(branch_name: branch)&.id
+
+      process_commits(project, all_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_id)
     else
       []
     end
@@ -147,22 +180,23 @@ class GithubService
     end
   end
 
-  def process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_name = "main")
+  def process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_id)
     shallow_commits.map do |shallow_commit|
       next if shallow_commit.sha.blank? || shallow_commit.commit.nil?
 
       # Fetch full commit data for diff stats and file changes
       commit = client.commit(repo_path, shallow_commit.sha)
       author_email = commit.author&.login.presence || commit.commit.author&.email.to_s.downcase
+      puts "Author Email is #{author_email}"
       next unless author_email.present?
 
       user_id = find_user_id(author_email, user_emails, user_github_identifiers, commit)
+      puts "User is this #{user_id}"
       next unless user_id
 
       agreement = agreements.find { |a| [ a.initiator_id, a.other_party_id ].include?(user_id) }
 
       stats = commit.stats || {}
-      branch_id = GithubBranch.find_by(branch_name: branch_name)&.id
       changed_files = commit.files.map do |file|
         {
           filename: file.filename,
