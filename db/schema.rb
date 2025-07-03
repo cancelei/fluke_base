@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_02_175044) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_03_184116) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -105,9 +105,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_02_175044) do
     t.string "commit_url"
     t.jsonb "changed_files", default: [], array: true
     t.bigint "github_branches_id"
+    t.string "unregistered_user_name"
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
     t.index ["github_branches_id"], name: "index_github_logs_on_github_branches_id"
-    t.index ["project_id", "commit_sha", "agreement_id", "user_id"], name: "index_for_unique_logs", unique: true
+    t.index ["project_id", "commit_sha", "agreement_id"], name: "index_github_logs_on_project_id_and_commit_sha_and_agreement_id", unique: true
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
   end

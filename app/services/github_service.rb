@@ -187,12 +187,9 @@ class GithubService
       # Fetch full commit data for diff stats and file changes
       commit = client.commit(repo_path, shallow_commit.sha)
       author_email = commit.author&.login.presence || commit.commit.author&.email.to_s.downcase
-      puts "Author Email is #{author_email}"
       next unless author_email.present?
 
       user_id = find_user_id(author_email, user_emails, user_github_identifiers, commit)
-      puts "User is this #{user_id}"
-      next unless user_id
 
       agreement = agreements.find { |a| [ a.initiator_id, a.other_party_id ].include?(user_id) }
 
@@ -220,7 +217,8 @@ class GithubService
         github_branches_id: branch_id,
         changed_files: changed_files, # This gives you per-file details including diffs
         created_at: Time.current,
-        updated_at: Time.current
+        updated_at: Time.current,
+        unregistered_user_name: author_email
       }
     end.compact
   end
