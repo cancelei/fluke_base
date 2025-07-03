@@ -93,8 +93,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_184116) do
 
   create_table "github_logs", force: :cascade do |t|
     t.bigint "project_id", null: false
-    t.bigint "agreement_id", null: false
-    t.bigint "user_id", null: false
+    t.bigint "agreement_id"
+    t.bigint "user_id"
     t.string "commit_sha"
     t.text "commit_message"
     t.integer "lines_added"
@@ -108,7 +108,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_184116) do
     t.string "unregistered_user_name"
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
     t.index ["github_branches_id"], name: "index_github_logs_on_github_branches_id"
-    t.index ["project_id", "commit_sha", "agreement_id"], name: "index_github_logs_on_project_id_and_commit_sha_and_agreement_id", unique: true
+    t.index ["project_id", "commit_sha"], name: "index_github_logs_on_project_id_and_commit_sha", unique: true
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
   end

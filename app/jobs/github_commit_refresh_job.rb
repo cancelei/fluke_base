@@ -26,8 +26,10 @@ class GithubCommitRefreshJob < ApplicationJob
   def fetch_and_store_commits(access_token = nil, branch: nil)
     return 0 if @project.repository_url.blank?
 
+    puts "Fetching commits for branch #{branch}"
     service = GithubService.new(@project, access_token, branch: branch)
     commits = service.fetch_commits
+    puts "Getting these commits #{commits.length}"
     return 0 if commits.blank?
 
     # Find existing commit SHAs to avoid duplicates
@@ -35,12 +37,17 @@ class GithubCommitRefreshJob < ApplicationJob
     new_commits = commits.reject { |c| existing_shas.include?(c[:commit_sha]) }
 
     # Bulk insert new commits
+
     if new_commits.any?
-      GithubLog.upsert_all(
-        new_commits.map { |c| c.merge(project_id: @project.id) },
-        unique_by: [ :project_id, :commit_sha, :agreement_id, :user_id ]
-      )
-      Rails.logger.info "Stored #{new_commits.size} new commits for branch '#{branch}' in project '#{@project.name}'"
+      begin
+        GithubLog.upsert_all(
+          new_commits.map { |c| c.merge(project_id: @project.id) },
+          unique_by: [ :project_id, :commit_sha ]
+        )
+        Rails.logger.info "Stored #{new_commits.size} new commits for branch '#{branch}' in project '#{@project.name}'"
+      rescue => e
+        puts e
+      end
     end
 
     new_commits.size

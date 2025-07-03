@@ -181,11 +181,14 @@ class GithubService
   end
 
   def process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_id)
+    i = 0
     shallow_commits.map do |shallow_commit|
+      i += 1
       next if shallow_commit.sha.blank? || shallow_commit.commit.nil?
 
       # Fetch full commit data for diff stats and file changes
       commit = client.commit(repo_path, shallow_commit.sha)
+      puts "Processing #{i} out of #{shallow_commits.length} commits"
       author_email = commit.author&.login.presence || commit.commit.author&.email.to_s.downcase
       next unless author_email.present?
 
@@ -230,7 +233,6 @@ class GithubService
     return user_id if user_id
 
     # Then try to find by GitHub login from the commit
-    puts commit
     if commit.author&.login
       user_id = user_github_identifiers[commit.author.login.downcase]
       return user_id if user_id

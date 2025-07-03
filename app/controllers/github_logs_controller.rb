@@ -49,8 +49,9 @@ class GithubLogsController < ApplicationController
 
   def refresh
     # Queue the background job
-    if @selected_branch.present?
-      GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, @selected_branch)
+    if params[:branch]
+      branch_name = GithubBranch.find_by_id(params[:branch].to_i).branch_name
+      GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, branch_name)
     else
       GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
     end
