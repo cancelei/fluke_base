@@ -1,9 +1,12 @@
+require "ostruct"
+
 class Project < ApplicationRecord
   # Relationships
   belongs_to :user
   has_many :agreements, dependent: :destroy
   has_many :milestones, dependent: :destroy
-  has_many :mentors, through: :agreements, source: :mentor
+  has_many :mentorships, -> { where(agreement_type: "Mentorship") }, class_name: "Agreement", foreign_key: "project_id"
+  has_many :mentors, through: :mentorships, source: :other_party
 
   # Validations
   validates :name, presence: true
@@ -56,17 +59,27 @@ class Project < ApplicationRecord
   # Get summary of GitHub contributions by user
   # @param branch [String] Optional branch name to filter by
   # @return [Array<Hash>] Array of contribution hashes with user details and stats
-  def github_contributions(branch: nil)
+  def github_contributions(branch: nil, agreement_only: false, agreement_user_ids: nil)
     return [] unless github_logs.exists?
 
-    # Start with base query
-    query = github_logs.joins(:user, :github_branch)
+    # Apply agreement filter if needed
+    if agreement_only && agreement_user_ids.present?
+      registered_query = github_logs.joins(:user, :github_branch)
+                                 .where(users: { id: agreement_user_ids })
+      unregistered_query = github_logs.none  # Exclude unregistered users when filtering by agreement
+    else
+      registered_query = github_logs.joins(:user, :github_branch).where.not(users: { id: nil })
+      unregistered_query = github_logs.joins(:github_branch).where(user_id: nil).where.not(unregistered_user_name: [ nil, "" ])
+    end
 
     # Filter by branch if specified
-    query = query.where(github_branches: { branch_name: branch }) if branch.present?
+    if branch.present?
+      registered_query = registered_query.where(github_branches: { branch_name: branch })
+      unregistered_query = unregistered_query.where(github_branches: { branch_name: branch })
+    end
 
-    # Group logs by user and calculate stats
-    contributions = query
+    # Get registered users' contributions
+    registered_contributions = registered_query
       .group("users.id", "users.first_name", "users.last_name", "users.email", "users.avatar", "users.github_username")
       .select(
         "users.id as user_id",
@@ -75,18 +88,67 @@ class Project < ApplicationRecord
         "users.email",
         "users.avatar",
         "users.github_username",
+        "NULL as unregistered_user_name",
         "COUNT(github_logs.id) as commit_count",
         "SUM(github_logs.lines_added) as total_added",
         "SUM(github_logs.lines_removed) as total_removed",
         "MIN(github_logs.commit_date) as first_commit_date",
         "MAX(github_logs.commit_date) as last_commit_date"
       )
-      .order("commit_count DESC")
+
+    # Get unregistered users' contributions
+    unregistered_contributions = unregistered_query
+      .group("github_logs.unregistered_user_name")
+      .select(
+        "NULL as user_id",
+        "NULL as first_name",
+        "NULL as last_name",
+        "NULL as email",
+        "NULL as avatar",
+        "NULL as github_username",
+        "github_logs.unregistered_user_name",
+        "COUNT(github_logs.id) as commit_count",
+        "SUM(github_logs.lines_added) as total_added",
+        "SUM(github_logs.lines_removed) as total_removed",
+        "MIN(github_logs.commit_date) as first_commit_date",
+        "MAX(github_logs.commit_date) as last_commit_date"
+      )
+
+    # Combine and sort all contributions by commit count
+    all_contributions = (registered_contributions.to_a + unregistered_contributions.to_a)
+      .sort_by { |c| -c.commit_count.to_i }
 
     # Convert to array of hashes with proper types
-    contributions.map do |c|
+    all_contributions.map do |c|
+      user = if c.user_id.present?
+        User.find(c.user_id)
+      else
+        # Create a simple object that responds to the methods the view expects
+        unregistered_user = OpenStruct.new(
+          id: nil,
+          name: c.unregistered_user_name,
+          github_username: c.unregistered_user_name,
+          unregistered: true
+        )
+
+        # Define methods needed by the view
+        def unregistered_user.avatar_url
+          nil
+        end
+
+        def unregistered_user.full_name
+          name
+        end
+
+        def unregistered_user.owner?(_project)
+          false
+        end
+
+        unregistered_user
+      end
+
       {
-        user: User.find(c.user_id),
+        user: user,
         commit_count: c.commit_count.to_i,
         total_added: c.total_added.to_i,
         total_removed: c.total_removed.to_i,

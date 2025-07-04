@@ -4,12 +4,24 @@ class GithubLogsController < ApplicationController
   before_action :authorize_access!
 
   def index
-    # Get the selected branch from params or default to nil (all branches)
+    # Get filter parameters
     @selected_branch = params[:branch].presence
+    @agreement_only = params[:agreement_only] == "1"
+
+    # Get agreement user IDs if filtering by agreement
+    agreement_user_ids = if @agreement_only
+      # Include project owner and mentors with accepted agreements
+      user_ids = []
+      user_ids += @project.mentorships
+                         .where(status: "Accepted")
+                         .pluck(:initiator_id, :other_party_id)
+      user_ids.flatten.uniq
+    end
 
     # Build base query for recent commits
     recent_commits_query = @project.github_logs.includes(:user).order(commit_date: :desc)
-    recent_commits_query = recent_commits_query.where(github_branches_id: @selected_branch) if @selected_branch.present?
+    recent_commits_query = recent_commits_query.where(github_branches_id: @selected_branch) if @selected_branch.present? && @selected_branch.to_i != 0
+    recent_commits_query = recent_commits_query.where(user_id: agreement_user_ids) if @agreement_only && agreement_user_ids.present?
 
     # Get recent commits for the activity feed with user preloading
     @recent_commits = recent_commits_query.limit(50)
@@ -17,6 +29,7 @@ class GithubLogsController < ApplicationController
     # Build base query for statistics
     stats_query = @project.github_logs
     stats_query = stats_query.where(github_branches_id: @selected_branch) if @selected_branch.present?
+    stats_query = stats_query.where(user_id: agreement_user_ids) if @agreement_only && agreement_user_ids.present?
 
     # Calculate statistics
     @total_commits = stats_query.count
@@ -25,7 +38,11 @@ class GithubLogsController < ApplicationController
     @last_updated = @recent_commits.first&.commit_date || Time.current
 
     # Get contributions summary with user details and additional stats
-    @contributions = @project.github_contributions(branch: @selected_branch)
+    @contributions = @project.github_contributions(
+      branch: @selected_branch,
+      agreement_only: @agreement_only,
+      agreement_user_ids: agreement_user_ids
+    )
 
     # Get available branches for the dropdown
     @available_branches = @project.available_branches
