@@ -1,0 +1,18 @@
+<!-- Progress Bar for Agreement Hours -->
+<% total_allowed_hours = agreement.weekly_hours * agreement.duration_in_weeks %>
+<% used_hours = agreement.time_logs.where.not(status: 'in_progress').sum(:hours_spent) + ((current_log && current_log.started_at) ? ((Time.zone.now - current_log.started_at) / 1.hour).round(2) : 0) %>
+<% percent_used = total_allowed_hours > 0 ? [(used_hours.to_f / total_allowed_hours * 100).round, 100].min : 0 %>
+<div class="mb-8">
+<div class="flex justify-between items-center mb-1">
+    <span class="text-sm font-medium text-indigo-700">Time Used</span>
+    <span class="text-sm font-medium text-indigo-700">
+    <%= used_hours %> / <%= total_allowed_hours %> hours
+    </span>
+</div>
+<div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-300">
+    <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+</div>
+<div class="text-xs text-gray-500 mt-1">
+    <%= percent_used %>% of allowed hours used
+</div>
+</div>

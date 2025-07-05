@@ -318,6 +318,10 @@
   </div>
 </div>
 
+<div class="mt-8">
+  <%= render "time_logs/remaining_time_progress", agreement: @agreement, current_log: nil %>
+</div>
+
 <% if @agreement.active? || @agreement.completed? %>
   <!-- Only show meetings section if agreement is active or completed -->
   <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
