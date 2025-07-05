@@ -66,16 +66,27 @@ class GithubLogsController < ApplicationController
 
   def refresh
     # Queue the background job
-    if params[:branch]
-      branch_name = GithubBranch.find_by_id(params[:branch].to_i).branch_name
-      GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, branch_name)
+    if params[:branch].present?
+      branch = GithubBranch.find_by_id(params[:branch].to_i)
+
+      if branch.nil?
+        redirect_to project_github_logs_path(@project), alert: "Selected branch not found."
+        return
+      end
+
+      if branch.branch_name.blank?
+        redirect_to project_github_logs_path(@project), alert: "Branch name is missing for the selected branch."
+        return
+      end
+
+      Rails.logger.info "Scheduling refresh for project #{@project.id}, branch: #{branch.branch_name}"
+      GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, branch.branch_name)
+      redirect_to project_github_logs_path(@project), notice: "Commit refresh has been queued for branch '#{branch.branch_name}'."
     else
+      Rails.logger.info "Scheduling branch fetch for project #{@project.id}"
       GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
+      redirect_to project_github_logs_path(@project), notice: "Branch and commit refresh has been queued."
     end
-
-
-    # Set up a polling interval for job status updates
-    redirect_to project_github_logs_path(@project), notice: "Commit refresh has been queued."
   end
 
   def fetch_commits

@@ -14,10 +14,11 @@ class GithubCommitRefreshJob < ApplicationJob
     end
 
     if branch.blank?
-      Rails.logger.error "Branch cannot be blank"
+      Rails.logger.error "Branch cannot be blank for project ID: #{project_id}"
       return
     end
 
+    Rails.logger.info "Starting commit refresh for project #{project_id}, branch: #{branch}"
     fetch_and_store_commits(access_token, branch: branch)
   end
 
@@ -26,10 +27,11 @@ class GithubCommitRefreshJob < ApplicationJob
   def fetch_and_store_commits(access_token = nil, branch: nil)
     return 0 if @project.repository_url.blank?
 
-    puts "Fetching commits for branch #{branch}"
+    Rails.logger.info "Fetching commits for branch #{branch} in project #{@project.id}"
     service = GithubService.new(@project, access_token, branch: branch)
     commits = service.fetch_commits
-    puts "Getting these commits #{commits.length}"
+    Rails.logger.info "Found #{commits.length} commits for branch #{branch}"
+
     return 0 if commits.blank?
 
     # Find existing commit SHAs to avoid duplicates
@@ -37,7 +39,6 @@ class GithubCommitRefreshJob < ApplicationJob
     new_commits = commits.reject { |c| existing_shas.include?(c[:commit_sha]) }
 
     # Bulk insert new commits
-
     if new_commits.any?
       begin
         GithubLog.upsert_all(
@@ -46,8 +47,10 @@ class GithubCommitRefreshJob < ApplicationJob
         )
         Rails.logger.info "Stored #{new_commits.size} new commits for branch '#{branch}' in project '#{@project.name}'"
       rescue => e
-        puts e
+        Rails.logger.error "Error storing commits: #{e.message}\n#{e.backtrace.join("\n")}"
       end
+    else
+      Rails.logger.info "No new commits to store for branch '#{branch}' in project '#{@project.name}'"
     end
 
     new_commits.size

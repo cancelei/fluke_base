@@ -79,24 +79,42 @@ class GithubService
     load_users
     branch_owners = []
 
-    branches.each do |branch|
+    # Get all branches first
+    all_branches = begin
+      branches
+    rescue Octokit::Error => e
+      Rails.logger.error "Error fetching branches: #{e.message}"
+      return []
+    end
+
+    if all_branches.blank?
+      Rails.logger.warn "No branches found for repository: #{repo_path}"
+      return []
+    end
+
+    Rails.logger.info "Processing #{all_branches.size} branches for #{repo_path}"
+
+    all_branches.each do |branch|
       begin
         # Get the first commit on the branch (oldest)
         first_commit = first_commit_on_branch(repo_path, branch.name)
-        next unless first_commit
+        unless first_commit
+          Rails.logger.warn "No commits found for branch #{branch.name} in #{repo_path}"
+          next
+        end
 
         # Find the user by email or GitHub username
         user_id = User.find_by(email: first_commit[:email])&.id
 
-        next unless user_id
-        #
-        # agreement_id = project.agreements.where(status: "Accepted")&.first&.id
-        # next unless agreement_id
+        unless user_id
+          Rails.logger.warn "No user found for email #{first_commit[:email]} in branch #{branch.name}"
+          # Still include the branch even if we can't associate a user
+          user_id = project.user_id # Default to project owner
+        end
 
         # Prepare branch data for upsert
         branch_owners << {
           project_id: project.id,
-          # agreement_id: agreement_id, # Can be associated later if needed
           user_id: user_id,
           branch_name: branch.name,
           created_at: Time.current,
@@ -111,6 +129,9 @@ class GithubService
     # Upsert all branch owners in a single query
     unless branch_owners.empty?
       GithubBranch.upsert_all(branch_owners, unique_by: [ :project_id, :branch_name, :user_id ])
+      Rails.logger.info "Stored #{branch_owners.size} branches for project #{project.id}"
+    else
+      Rails.logger.warn "No valid branches found for project #{project.id}"
     end
 
     branch_owners
