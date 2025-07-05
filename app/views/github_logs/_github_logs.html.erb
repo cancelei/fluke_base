@@ -6,43 +6,63 @@
       </h2>
       
       <% if @available_branches&.any? %>
-        <div class="mt-2">
-          <%= form_tag(project_github_logs_path(@project), method: :get, class: "space-y-4 sm:space-y-0 sm:flex sm:space-x-4") do %>
-            <div class="flex items-center">
-              <label for="branch" class="mr-2 text-sm font-medium text-gray-700">Branch:</label>
-              <div class="relative">
-                <select id="branch" name="branch" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                  <option value="0" <%= 'selected' unless @selected_branch %>>All Branches</option>
+        <div class="mt-2 flex items-center space-x-4">
+          <div class="flex items-center">
+            <label for="branch" class="mr-2 text-sm font-medium text-gray-700">Branch:</label>
+            <div class="relative">
+              <div class="relative" data-controller="dropdown">
+                <button type="button" class="flex items-center w-full rounded-md bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" data-action="click->dropdown#toggle">
+                  <span class="mr-2"><%= @selected_branch.present? ? (@available_branches.find { |id, _val| id == @selected_branch.to_i }&.last || 'main') : 'All Branches' %></span>
+                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <div class="absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
+                  <%= link_to "All Branches", project_github_logs_path(@project, branch: nil, user_name: @user_name, agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
                   <% @available_branches.each do |id, branch| %>
-                    <option value="<%= id %>" <%= 'selected' if @selected_branch.to_s == id.to_s %>>
-                      <%= branch.presence || 'main' %>
-                    </option>
+                    <%= link_to (branch.presence || 'main'), project_github_logs_path(@project, branch: id, user_name: @user_name, agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
                   <% end %>
-                </select>
+                </div>
               </div>
             </div>
-            
-            <div class="flex items-center">
-              <div class="flex items-center">
-                <input id="agreement_only" name="agreement_only" type="checkbox" value="1" 
-                      class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" 
-                      <%= 'checked' if @agreement_only %>
-                      onchange="this.form.submit()">
-                <label for="agreement_only" class="ml-2 block text-sm text-gray-700">
-                  Show agreement commits only
-                </label>
+          </div>
+
+          <div class="flex items-center">
+            <label for="user_name" class="mr-2 text-sm font-medium text-gray-700">User Name:</label>
+            <div class="relative">
+              <div class="relative" data-controller="dropdown">
+                <button type="button" class="flex items-center w-full rounded-md bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" data-action="click->dropdown#toggle">
+                  <span class="mr-2"><%= @user_name.presence || 'All Users' %></span>
+                  <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <div class="absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
+                  <%= link_to "All Users", project_github_logs_path(@project, branch: @selected_branch, user_name: nil, agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+                  <% @available_users.each do |name| %>
+                    <%= link_to name, project_github_logs_path(@project, branch: @selected_branch, user_name: name, agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+                  <% end %>
+                </div>
               </div>
-              
-              <button type="submit" class="ml-2 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Apply Filters
-              </button>
-              
-              <% if @selected_branch || @agreement_only %>
-                <%= link_to 'Clear Filters', project_github_logs_path(@project), 
-                    class: 'ml-2 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500' %>
-              <% end %>
             </div>
-          <% end %>
+          </div>
+
+          <div class="flex items-center">
+            <a href="<%= project_github_logs_path(@project, branch: @selected_branch, user_name: @user_name, agreement_only: @agreement_only ? nil : true) %>" class="flex items-center">
+              <input id="agreement_only" name="agreement_only" type="checkbox" value="1" 
+                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" 
+                    <%= 'checked' if @agreement_only %>
+                    >
+              <label for="agreement_only" class="ml-2 block text-sm text-gray-700">
+                Show agreement commits only
+              </label>
+            </a>
+
+            <% if @selected_branch || @agreement_only || @user_name %>
+              <%= link_to 'Clear Filters', project_github_logs_path(@project), 
+                  class: 'ml-2 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500' %>
+            <% end %>
+          </div>
         </div>
       <% end %>
       <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">

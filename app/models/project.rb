@@ -59,11 +59,11 @@ class Project < ApplicationRecord
   # Get summary of GitHub contributions by user
   # @param branch [String] Optional branch name to filter by
   # @return [Array<Hash>] Array of contribution hashes with user details and stats
-  def github_contributions(branch: nil, agreement_only: false, agreement_user_ids: nil)
+  def github_contributions(branch: nil, agreement_only: false, agreement_user_ids: nil, user_name: nil)
     return [] unless github_logs.exists?
 
     # Apply agreement filter if needed
-    if agreement_only && agreement_user_ids.present?
+    if agreement_only
       registered_query = github_logs.joins(:user, :github_branch)
                                  .where(users: { id: agreement_user_ids })
       unregistered_query = github_logs.none  # Exclude unregistered users when filtering by agreement
@@ -72,10 +72,16 @@ class Project < ApplicationRecord
       unregistered_query = github_logs.joins(:github_branch).where(user_id: nil).where.not(unregistered_user_name: [ nil, "" ])
     end
 
+    # Apply user_name filter if needed
+    if user_name
+      registered_query = registered_query.where(unregistered_user_name: user_name)
+      unregistered_query = unregistered_query.where(unregistered_user_name: user_name)
+    end
+
     # Filter by branch if specified
-    if branch.present?
-      registered_query = registered_query.where(github_branches: { branch_name: branch })
-      unregistered_query = unregistered_query.where(github_branches: { branch_name: branch })
+    if branch.present? && branch.to_i != 0
+      registered_query = registered_query.where(github_branches: { id: branch })
+      unregistered_query = unregistered_query.where(github_branches: { id: branch })
     end
 
     # Get registered users' contributions

@@ -6,7 +6,8 @@ class GithubLogsController < ApplicationController
   def index
     # Get filter parameters
     @selected_branch = params[:branch].presence
-    @agreement_only = params[:agreement_only] == "1"
+    @agreement_only = params[:agreement_only].presence
+    @user_name = params[:user_name].presence
 
     # Get agreement user IDs if filtering by agreement
     agreement_user_ids = if @agreement_only
@@ -21,15 +22,17 @@ class GithubLogsController < ApplicationController
     # Build base query for recent commits
     recent_commits_query = @project.github_logs.includes(:user).order(commit_date: :desc)
     recent_commits_query = recent_commits_query.where(github_branches_id: @selected_branch) if @selected_branch.present? && @selected_branch.to_i != 0
-    recent_commits_query = recent_commits_query.where(user_id: agreement_user_ids) if @agreement_only && agreement_user_ids.present?
+    recent_commits_query = recent_commits_query.where(unregistered_user_name: @user_name) if @user_name.present?
+    recent_commits_query = recent_commits_query.where(user_id: agreement_user_ids) if @agreement_only
 
     # Get recent commits for the activity feed with user preloading
     @recent_commits = recent_commits_query.limit(50)
 
     # Build base query for statistics
     stats_query = @project.github_logs
-    stats_query = stats_query.where(github_branches_id: @selected_branch) if @selected_branch.present?
-    stats_query = stats_query.where(user_id: agreement_user_ids) if @agreement_only && agreement_user_ids.present?
+    stats_query = stats_query.where(github_branches_id: @selected_branch) if @selected_branch.present? && @selected_branch.to_i != 0
+    stats_query = stats_query.where(unregistered_user_name: @user_name) if @user_name.present?
+    stats_query = stats_query.where(user_id: agreement_user_ids) if @agreement_only
 
     # Calculate statistics
     @total_commits = stats_query.count
@@ -41,11 +44,13 @@ class GithubLogsController < ApplicationController
     @contributions = @project.github_contributions(
       branch: @selected_branch,
       agreement_only: @agreement_only,
-      agreement_user_ids: agreement_user_ids
+      agreement_user_ids: agreement_user_ids,
+      user_name: @user_name
     )
 
     # Get available branches for the dropdown
     @available_branches = @project.available_branches
+    @available_users = stats_query.pluck(:unregistered_user_name).compact.uniq.sort
 
     respond_to do |format|
       format.html
