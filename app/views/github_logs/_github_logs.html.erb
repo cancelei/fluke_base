@@ -6,8 +6,8 @@
       </h2>
       
       <% if @available_branches&.any? %>
-        <div class="mt-2 flex items-center space-x-4">
-          <div class="flex items-center">
+        <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex items-center mb-2 lg:mb-0">
             <label for="branch" class="mr-2 text-sm font-medium text-gray-700">Branch:</label>
             <div class="relative">
               <div class="relative" data-controller="dropdown">
@@ -27,11 +27,38 @@
             </div>
           </div>
 
-          <div class="flex items-center">
+          <div class="flex items-center mb-2 lg:mb-0">
+            <a href="<%= project_github_logs_path(@project, branch: @selected_branch, user_name: @user_name, agreement_only: @agreement_only ? nil : true) %>" class="flex items-center">
+              <div class="flex items-center justify-center w-full">
+  
+                <label for="toggleB" class="flex items-center cursor-pointer">
+                  <!-- toggle -->
+                  <div class="relative">
+                    <!-- input -->
+                    <input type="checkbox" id="toggleB" class="sr-only" <%= 'checked' if @agreement_only %>>
+                    <!-- line -->
+                    <div class="block bg-indigo-600 w-14 h-8 rounded-full"></div>
+                    <!-- dot -->
+                    <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                  </div>
+                  <!-- label -->
+                  <div class="ml-3 text-gray-700 font-medium">
+                    Agreement Commits
+                  </div>
+                </label>
+              
+              </div>
+              <input id="agreement_only" name="agreement_only" type="checkbox" value="1" 
+                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" 
+                    <%= 'checked' if @agreement_only %> hidden>
+            </a>
+          </div>
+
+          <div class="flex items-center mb-2 lg:mb-0">
             <label for="user_name" class="mr-2 text-sm font-medium text-gray-700">User Name:</label>
             <div class="relative">
               <div class="relative" data-controller="dropdown">
-                <button type="button" class="flex items-center w-full rounded-md bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" data-action="click->dropdown#toggle">
+                <button type="button" class="flex items-center w-full min-w-[180px] rounded-md bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" data-action="click->dropdown#toggle">
                   <span class="mr-2"><%= @user_name.presence || 'All Users' %></span>
                   <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -47,21 +74,12 @@
             </div>
           </div>
 
-          <div class="flex items-center">
-            <a href="<%= project_github_logs_path(@project, branch: @selected_branch, user_name: @user_name, agreement_only: @agreement_only ? nil : true) %>" class="flex items-center">
-              <input id="agreement_only" name="agreement_only" type="checkbox" value="1" 
-                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" 
-                    <%= 'checked' if @agreement_only %>
-                    >
-              <label for="agreement_only" class="ml-2 block text-sm text-gray-700">
-                Show agreement commits only
-              </label>
-            </a>
-
+          
+          <div class="flex items-end mb-2 lg:mb-0">
             <% if @selected_branch || @agreement_only || @user_name %>
-              <%= link_to 'Clear Filters', project_github_logs_path(@project), 
-                  class: 'ml-2 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500' %>
-            <% end %>
+            <%= link_to 'Clear Filters', project_github_logs_path(@project), 
+                class: 'ml-2 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500' %>
+          <% end %>
           </div>
         </div>
       <% end %>
@@ -80,14 +98,14 @@
         </div>
       </div>
     </div>
-    <div class="mt-5 flex lg:mt-0 lg:ml-4">
+    <div class="mt-5 flex flex-col items-center justify-between lg:mt-0 lg:ml-4 h-20">
       <% if @project.user == current_user || @project.agreements.active.exists?(other_party_id: current_user.id) %>
         <span class="hidden sm:block">
-          <%= button_to refresh_project_github_logs_path(branch: @selected_branch),
+          <%= button_to refresh_project_github_logs_path(branch: @selected_branch, user_name: @user_name, agreement_only: @agreement_only),
                     method: :post,
                     class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
                     data: { confirm: "Are you sure you want to refresh the commits? This may take a few minutes." } do %>
-            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg class="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v3a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
             </svg>
             Refresh Commits
@@ -96,7 +114,7 @@
         <span class="hidden sm:block">
           <%= link_to project_path(@project), 
                     class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ml-3" do %>
-            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg class="mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
             Back to Project

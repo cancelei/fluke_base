@@ -25,3 +25,12 @@
   transition: max-height 0.3s ease-in-out;
   overflow: hidden;
 }
+
+/* Toggle B */
+.dot {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+input:checked ~ .dot {
+  transform: translateX(100%);
+  background-color: white;
+}

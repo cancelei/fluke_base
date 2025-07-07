@@ -86,7 +86,7 @@ class GithubLogsController < ApplicationController
 
       Rails.logger.info "Scheduling refresh for project #{@project.id}, branch: #{branch.branch_name}"
       GithubCommitRefreshJob.perform_later(@project.id, current_user.github_token, branch.branch_name)
-      redirect_to project_github_logs_path(@project), notice: "Commit refresh has been queued for branch '#{branch.branch_name}'."
+      redirect_to project_github_logs_path(@project, branch: branch.id), notice: "Commit refresh has been queued for branch '#{branch.branch_name}'."
     else
       Rails.logger.info "Scheduling branch fetch for project #{@project.id}"
       GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
