@@ -55,9 +55,11 @@ class GithubService
         end
       end
 
-      branch_id = GithubBranch.find_by(branch_name: branch)&.id
+      db_branch = GithubBranch.find_by(branch_name: branch)
 
-      process_commits(project, all_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_id)
+
+      puts "Processing commits for branch #{db_branch.branch_name}"
+      process_commits(project, all_commits, user_emails, user_github_identifiers, agreements, client, repo_path, db_branch.id)
     else
       []
     end
