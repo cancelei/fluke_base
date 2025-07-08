@@ -30,17 +30,27 @@ class GithubCommitRefreshJob < ApplicationJob
     Rails.logger.info "Fetching commits for branch #{branch} in project #{@project.id}"
     service = GithubService.new(@project, access_token, branch: branch)
     commits = service.fetch_commits
+    commit_shas = commits.map { |c| c[:commit_sha] }
+    branch_id = GithubBranch.find_by(project_id: @project.id, branch_name: branch).id
     Rails.logger.info "Found #{commits.length} commits for branch #{branch}"
-
+    puts commits.length
     return 0 if commits.blank?
       begin
         GithubLog.upsert_all(
           commits.map { |c| c.merge(project_id: @project.id) },
-          unique_by: [ :project_id, :commit_sha, :github_branches_id ]
+          unique_by: [ :project_id, :commit_sha ]
         )
+        log_ids = GithubLog.where(project_id: @project.id, commit_sha: commit_shas).pluck(:id)
+        github_branch_logs = log_ids.map { |id| { github_branch_id: branch_id, github_log_id: id } }
+        puts github_branch_logs
+        GithubBranchLog.upsert_all(
+          github_branch_logs,
+          unique_by: [ :github_branch_id, :github_log_id ]
+        )
+
         Rails.logger.info "Stored #{commits.size} commits for branch '#{branch}' in project '#{@project.name}'"
       rescue => e
-        Rails.logger.error "Error storing commits: #{e.message}\n#{e.backtrace.join("\n")}"
+        puts "Error storing commits: #{e.message}\n#{e.backtrace.join("\n")}"
       end
   end
 end

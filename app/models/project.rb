@@ -64,12 +64,12 @@ class Project < ApplicationRecord
 
     # Apply agreement filter if needed
     if agreement_only
-      registered_query = github_logs.joins(:user, :github_branch)
+      registered_query = github_logs.joins(:user, :github_branch_logs)
                                  .where(users: { id: agreement_user_ids })
       unregistered_query = github_logs.none  # Exclude unregistered users when filtering by agreement
     else
-      registered_query = github_logs.joins(:user, :github_branch).where.not(users: { id: nil })
-      unregistered_query = github_logs.joins(:github_branch).where(user_id: nil).where.not(unregistered_user_name: [ nil, "" ])
+      registered_query = github_logs.joins(:user, :github_branch_logs).where.not(users: { id: nil })
+      unregistered_query = github_logs.joins(:github_branch_logs).where(user_id: nil).where.not(unregistered_user_name: [ nil, "" ])
     end
 
     # Apply user_name filter if needed
@@ -80,8 +80,8 @@ class Project < ApplicationRecord
 
     # Filter by branch if specified
     if branch.present? && branch.to_i != 0
-      registered_query = registered_query.where(github_branches: { id: branch })
-      unregistered_query = unregistered_query.where(github_branches: { id: branch })
+      registered_query = registered_query.where(github_branch_logs: { github_branch_id: branch })
+      unregistered_query = unregistered_query.where(github_branch_logs: { github_branch_id: branch })
     end
 
     # Get registered users' contributions

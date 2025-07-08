@@ -240,7 +240,6 @@ class GithubService
         lines_added: stats[:additions].to_i,
         lines_removed: stats[:deletions].to_i,
         commit_date: commit.commit.author.date,
-        github_branches_id: branch_id,
         changed_files: changed_files, # This gives you per-file details including diffs
         created_at: Time.current,
         updated_at: Time.current,

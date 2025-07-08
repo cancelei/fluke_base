@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_07_174542) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_08_182451) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -80,6 +80,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_07_174542) do
     t.index ["sender_id"], name: "index_conversations_on_sender_id"
   end
 
+  create_table "github_branch_logs", force: :cascade do |t|
+    t.bigint "github_branch_id", null: false
+    t.bigint "github_log_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["github_branch_id", "github_log_id"], name: "index_github_branch_logs_on_github_branch_id_and_github_log_id", unique: true
+    t.index ["github_branch_id"], name: "index_github_branch_logs_on_github_branch_id"
+    t.index ["github_log_id"], name: "index_github_branch_logs_on_github_log_id"
+  end
+
   create_table "github_branches", force: :cascade do |t|
     t.bigint "project_id"
     t.bigint "user_id"
@@ -104,11 +114,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_07_174542) do
     t.datetime "updated_at", null: false
     t.string "commit_url"
     t.jsonb "changed_files", default: [], array: true
-    t.bigint "github_branches_id"
     t.string "unregistered_user_name"
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
-    t.index ["github_branches_id"], name: "index_github_logs_on_github_branches_id"
-    t.index ["project_id", "commit_sha", "github_branches_id"], name: "index_github_logs_on_project_id_and_commit_sha_and_branch_id", unique: true
+    t.index ["project_id", "commit_sha"], name: "index_github_logs_on_project_commit_sha", unique: true
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
   end
@@ -382,7 +390,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_07_174542) do
   add_foreign_key "github_branches", "projects"
   add_foreign_key "github_branches", "users"
   add_foreign_key "github_logs", "agreements"
-  add_foreign_key "github_logs", "github_branches", column: "github_branches_id"
   add_foreign_key "github_logs", "projects"
   add_foreign_key "github_logs", "users"
   add_foreign_key "meetings", "agreements"
