@@ -263,7 +263,7 @@
         <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Commits</h3>
         <% if @recent_commits&.any? %>
           <div class="text-sm text-gray-500">
-            Showing <%= @recent_commits.size %> most recent commits
+            Showing <%= @recent_commits.size %> of <%= @recent_commits.total_count %> commits
           </div>
         <% end %>
       </div>
@@ -438,6 +438,11 @@
             </li>
           <% end %>
         </ul>
+      </div>
+      
+      <!-- Pagination for commits -->
+      <div class="px-6 py-4 border-t border-gray-200">
+        <%= render partial: 'shared/pagination', locals: { records: @recent_commits } %>
       </div>
     </div>
   <% else %>

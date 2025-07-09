@@ -36,6 +36,8 @@
     </div>
   <% end %>
 
-  <!-- Pagination (optional: add logic if using kaminari/paginate) -->
-  <%#= paginate users if defined?(paginate) %>
+  <!-- Pagination using our shared component -->
+  <div class="mt-6">
+    <%= render partial: 'shared/pagination', locals: { records: users } %>
+  </div>
 </div>

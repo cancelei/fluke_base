@@ -25,8 +25,8 @@ class GithubLogsController < ApplicationController
     recent_commits_query = recent_commits_query.where(unregistered_user_name: @user_name) if @user_name.present?
     recent_commits_query = recent_commits_query.where(user_id: agreement_user_ids) if @agreement_only
 
-    # Get recent commits for the activity feed with user preloading
-    @recent_commits = recent_commits_query.limit(50)
+    # Get recent commits for the activity feed with user preloading and pagination
+    @recent_commits = recent_commits_query.page(params[:page]).per(15)
 
     # Build base query for statistics
     stats_query = @project.github_logs.includes(:user, :github_branch_logs)
@@ -63,6 +63,12 @@ class GithubLogsController < ApplicationController
             total_additions: @total_additions,
             total_deletions: @total_deletions,
             last_updated: @last_updated
+          },
+          pagination: {
+            current_page: @recent_commits.current_page,
+            total_pages: @recent_commits.total_pages,
+            per_page: @recent_commits.limit_value,
+            total_count: @recent_commits.total_count
           }
         }
       }
