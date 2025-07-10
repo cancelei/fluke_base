@@ -319,7 +319,7 @@
 </div>
 
 <div class="mt-8">
-  <%= render "time_logs/remaining_time_progress", agreement: @agreement, current_log: nil %>
+  <%= render "time_logs/remaining_time_progress", agreement: @agreement, project: @agreement.project, current_log: nil %>
 </div>
 
 <% if @agreement.active? || @agreement.completed? %>

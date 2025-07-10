@@ -67,7 +67,7 @@
                   <%= agreement.start_date.strftime("%b %d, %Y") %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <%= render "time_logs/remaining_time_progress", agreement: agreement, current_log: nil %>
+                  <%= render "time_logs/remaining_time_progress", agreement: agreement, project: agreement.project, current_log: nil %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <%= render "agreement_actions", agreement: agreement %>
@@ -131,7 +131,7 @@
                   <%= render "agreement_payment", agreement: agreement %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <%= render "time_logs/remaining_time_progress", agreement: agreement, current_log: nil %>
+                  <%= render "time_logs/remaining_time_progress", agreement: agreement, project: agreement.project, current_log: nil %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <%= render "agreement_actions", agreement: agreement %>

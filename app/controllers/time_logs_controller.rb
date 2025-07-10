@@ -24,6 +24,7 @@ class TimeLogsController < ApplicationController
   end
 
   def index
+    @owner = current_user.id == @agreement.project.user_id
     # Set the selected date or default to today
     @selected_date = params[:date].present? ? Date.parse(params[:date]) : Date.current
 
