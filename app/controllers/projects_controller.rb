@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_project, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_project, only: [ :show, :edit, :update, :destroy, :time_logs ]
 
   def index
     @projects = current_user.projects.order(created_at: :desc)
@@ -66,6 +66,33 @@ class ProjectsController < ApplicationController
     authorize! :destroy, @project
     @project.destroy
     redirect_to projects_path, notice: "Project was successfully deleted."
+  end
+
+  def time_logs
+    @owner = @project.user_id == current_user.id
+    # Set the selected date or default to today
+    @selected_date = params[:date].present? ? Date.parse(params[:date]) : Date.current
+
+    # Get the date range for the carousel (3 days before and after selected date)
+    @date_range = (@selected_date - 3.days)..(@selected_date + 3.days)
+
+    @milestones = Milestone.where(project_id: @project.id)
+    @users = User.joins(:time_logs).where(time_logs: { milestone_id: @milestones.ids }).distinct
+
+    @time_logs = TimeLog.where(milestone: @milestones)
+    @time_logs = @time_logs.includes(:milestone, :user)
+                           .where("DATE(started_at) = '#{@selected_date}'")
+                           .order(started_at: :desc)
+
+    @milestones_pending_confirmation = @milestones
+                                         .includes(:time_logs)
+                                         .where(status: "in_progress", time_logs: { status: "completed" })
+    @time_logs_completed = @milestones
+                            .includes(:time_logs)
+                            .where(status: "completed", time_logs: { status: "completed" })
+                            .where("DATE(time_logs.started_at) = ?", @selected_date)
+
+    @time_logs_manual = TimeLog.where(milestone_id: nil, user_id: @users.ids)
   end
 
   private

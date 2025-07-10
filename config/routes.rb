@@ -62,6 +62,9 @@ Rails.application.routes.draw do
     collection do
       get :explore
     end
+    member do
+      get :time_logs
+    end
   end
 
   get "time_logs/filter", to: "time_logs#filter", as: :filter_time_logs
