@@ -127,4 +127,10 @@ class User < ApplicationRecord
     # which stores the project_id in the session
     nil # The actual project is set by the controller
   end
+
+  def show_project_context_nav?
+    # Returns the user's preference for showing the project context navigation
+    # This column defaults to true, so users will see the nav by default
+    self[:show_project_context_nav]
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_08_182451) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_10_185249) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -374,6 +374,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_08_182451) do
     t.bigint "current_role_id"
     t.string "github_username"
     t.string "github_token"
+    t.boolean "show_project_context_nav", default: false, null: false
     t.index ["current_role_id"], name: "index_users_on_current_role_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

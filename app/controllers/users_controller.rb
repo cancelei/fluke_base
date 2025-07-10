@@ -23,7 +23,12 @@ class UsersController < ApplicationController
       current_user.update(selected_project_id: project.id) unless user_is_mentor
       respond_to do |format|
         format.html { redirect_back fallback_location: root_path, notice: "Project selected." }
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("navbar-projects", partial: "shared/navbar_projects", locals: { current_user: current_user, selected_project: project }) }
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("navbar-projects", partial: "shared/navbar_projects", locals: { current_user: current_user, selected_project: project }),
+            turbo_stream.replace("project-context", partial: "shared/project_context_nav", locals: { selected_project: project })
+          ]
+        end
       end
     else
       respond_to do |format|
@@ -43,11 +48,18 @@ class UsersController < ApplicationController
       end
       respond_to do |format|
         format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "navbar-projects",
-            partial: "shared/navbar_projects",
-            locals: { current_user: current_user, selected_project: current_user.selected_project }
-          )
+          render turbo_stream: [
+            turbo_stream.replace(
+              "navbar-projects",
+              partial: "shared/navbar_projects",
+              locals: { current_user: current_user, selected_project: current_user.selected_project }
+            ),
+            turbo_stream.replace(
+              "project-context",
+              partial: "shared/project_context_nav",
+              locals: { selected_project: current_user.selected_project }
+            )
+          ]
         end
         format.html { redirect_to root_path, notice: "Current role switched to #{role.name}." }
       end

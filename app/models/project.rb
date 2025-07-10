@@ -253,6 +253,12 @@ class Project < ApplicationRecord
     stage == SCALING
   end
 
+  # Check if project is connected to GitHub
+  # @return [Boolean] True if the project has a repository URL set
+  def github_connected?
+    repository_url.present?
+  end
+
   private
 
   def set_defaults

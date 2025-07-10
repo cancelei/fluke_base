@@ -121,4 +121,10 @@
       <% end %>
     </div>
   </div>
-</nav> 
+</nav>
+
+<%= turbo_frame_tag "project-context" do %>
+  <% if user_signed_in? && selected_project.present? %>
+    <%= render 'shared/project_context_nav', selected_project: selected_project %>
+  <% end %>
+<% end %>

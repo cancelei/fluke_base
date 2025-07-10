@@ -116,6 +116,21 @@
         </div>
       </div>
 
+      <div class="border-t border-gray-200 pt-6 mb-6">
+        <h3 class="text-base font-semibold leading-6 text-gray-900">Interface Preferences</h3>
+        <div class="mt-4 max-w-xl space-y-4">
+          <div class="relative flex items-start">
+            <div class="flex h-6 items-center">
+              <%= form.check_box :show_project_context_nav, class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" %>
+            </div>
+            <div class="ml-3 text-sm leading-6">
+              <%= form.label :show_project_context_nav, "Show project context navigation", class: "font-medium text-gray-900" %>
+              <p class="text-gray-500">Display additional navigation links for the currently selected project</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div class="flex justify-end gap-x-3">
         <%= link_to "Cancel", profile_show_path, class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
         <%= form.submit "Update Profile", class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
