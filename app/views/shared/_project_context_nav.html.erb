@@ -1,34 +1,38 @@
-<% if selected_project.present? && current_user.show_project_context_nav? %>
-  <div class="bg-indigo-50 py-2 px-4 border-t border-indigo-100">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-4">
-        <h3 class="text-sm font-medium text-indigo-700">
-          <%= selected_project.name %>
-        </h3>
-      </div>
-      <div class="flex space-x-2">
-        <%= link_to project_path(selected_project), class: "text-xs font-medium text-indigo-600 hover:text-indigo-800" do %>
-          Details
-        <% end %>
-        
-        <% if controller_path.include?('milestones') || controller_name == 'projects' %>
-          <%= link_to project_milestones_path(selected_project), class: "text-xs font-medium text-indigo-600 hover:text-indigo-800" do %>
-            Milestones
+<%= turbo_frame_tag 'project-context-nav' do %>
+  <% if selected_project.present? && current_user.show_project_context_nav? %>
+    <div class="bg-indigo-50 py-2 px-4 border-t border-indigo-100">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <h3 class="text-sm font-medium text-indigo-700">
+            <%= selected_project.name %>
+          </h3>
+        </div>
+        <div class="flex space-x-2">
+          <%= link_to project_path(selected_project), 
+                    class: "text-xs font-medium text-indigo-600 hover:text-indigo-800",
+                    data: { turbo_frame: '_top' } do %>
+            Details
           <% end %>
-        <% end %>
-        
-        <% if controller_path.include?('time_logs') || controller_name == 'projects' %>
-          <%= link_to time_logs_project_path(selected_project), class: "text-xs font-medium text-indigo-600 hover:text-indigo-800" do %>
-            Time Logs
+          
+            <%= link_to project_milestones_path(selected_project), 
+                      class: "text-xs font-medium text-indigo-600 hover:text-indigo-800",
+                      data: { turbo_frame: '_top' } do %>
+              Milestones
+            <% end %>
+          
+            <%= link_to time_logs_project_path(selected_project), 
+                      class: "text-xs font-medium text-indigo-600 hover:text-indigo-800",
+                      data: { turbo_frame: '_top' } do %>
+              Time Logs
+            <% end %>
+          
+            <%= link_to project_github_logs_path(selected_project), 
+                      class: "text-xs font-medium text-indigo-600 hover:text-indigo-800",
+                      data: { turbo_frame: '_top' } do %>
+              GitHub Logs
           <% end %>
-        <% end %>
-        
-        <% if selected_project.github_connected? && (controller_path.include?('github_logs') || controller_name == 'projects') %>
-          <%= link_to project_github_logs_path(selected_project), class: "text-xs font-medium text-indigo-600 hover:text-indigo-800" do %>
-            GitHub Logs
-          <% end %>
-        <% end %>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
 <% end %>

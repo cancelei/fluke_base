@@ -14,12 +14,8 @@ class ProjectsController < ApplicationController
     authorize! :read, @project
     @milestones = @project.milestones.order(created_at: :desc)
 
-
     # Check if the current user has an agreement with the project
     @has_agreement = @project.agreements.active.exists?([
-      "(initiator_id = :user_id OR other_party_id = :user_id)",
-      { user_id: current_user.id }
-    ]) || @project.agreements.pending.exists?([
       "(initiator_id = :user_id OR other_party_id = :user_id)",
       { user_id: current_user.id }
     ])
@@ -31,6 +27,17 @@ class ProjectsController < ApplicationController
                              .limit(3)
     else
       @suggested_mentors = []
+    end
+    
+    # Update the selected project in the session
+    if current_user && current_user.projects.include?(@project)
+      ProjectSelectionService.new(current_user, session, @project.id).call
+      @selected_project = @project
+    end
+    
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @project }
     end
   end
 

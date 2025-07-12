@@ -43,9 +43,9 @@ class ApplicationController < ActionController::Base
   def set_selected_project
     return unless user_signed_in?
 
-    if params[:project_id].present?
+    if params[:project_id].present? && params[:project_id] != session[:selected_project_id].to_s
       # Update selected project if a new one is selected
-      session[:selected_project_id] = params[:project_id]
+      ProjectSelectionService.new(current_user, session, params[:project_id]).call
     elsif session[:selected_project_id].present?
       # Verify the project still exists and user still has access
       @selected_project = current_user.projects.find_by(id: session[:selected_project_id])

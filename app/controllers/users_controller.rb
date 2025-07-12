@@ -15,18 +15,30 @@ class UsersController < ApplicationController
   end
 
   def update_selected_project
-    user_is_mentor = current_user.current_role_id == 2 # id 2 is for mentor here
-    project = current_user.projects.find_by(id: params[:project_id])
-    if project
-      # if user is a mentor and user selects a project then we will change it to Entrepreneur
-      current_user.update(selected_project_id: project.id, current_role_id: 1) if user_is_mentor
-      current_user.update(selected_project_id: project.id) unless user_is_mentor
+    service = ProjectSelectionService.new(current_user, session, params[:project_id])
+
+    if service.call
+      @selected_project = service.project  # Set instance variable for the view
+      
       respond_to do |format|
-        format.html { redirect_back fallback_location: root_path, notice: "Project selected." }
+        format.html do
+          redirect_to project_path(@selected_project), notice: "Project selected."
+        end
         format.turbo_stream do
           render turbo_stream: [
-            turbo_stream.replace("navbar-projects", partial: "shared/navbar_projects", locals: { current_user: current_user, selected_project: project }),
-            turbo_stream.replace("project-context", partial: "shared/project_context_nav", locals: { selected_project: project })
+            turbo_stream.replace("navbar-projects",
+              partial: "shared/navbar_projects",
+              locals: { 
+                current_user: current_user, 
+                selected_project: @selected_project,
+                controller_name: controller_name,
+                request: request
+              }
+            ),
+            turbo_stream.replace("project-context-nav",
+              partial: "shared/project_context_nav",
+              locals: { selected_project: @selected_project }
+            )
           ]
         end
       end

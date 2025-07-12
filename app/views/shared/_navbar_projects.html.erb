@@ -1,4 +1,6 @@
 <%= turbo_frame_tag 'navbar-projects' do %>
+  <% selected_project_id = session[:selected_project_id] || current_user.selected_project_id %>
+  <% selected_project ||= current_user.projects.find_by(id: selected_project_id) if selected_project_id.present? %>
   <% if session[:acting_as_mentor] %>
     <button type="button" class="h-16 inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700" data-action="click->dropdown#toggle">
       Acting as Mentor
@@ -7,20 +9,20 @@
       </svg>
     </button>
   <% else %>
-  <button type="button" class="h-16 inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700" data-action="click->dropdown#toggle">
-    <% if current_user.current_role_id == 2 %>
-      Acting as Mentor
-    <% else %>
-      <% if controller_name == 'github_logs' && @project.present? %>
-        <%= @project.name %>
+    <button type="button" class="h-16 inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700" data-action="click->dropdown#toggle">
+      <% if current_user.current_role_id == 2 %>
+        Acting as Mentor
       <% else %>
-        <%= selected_project&.name || "Select Project" %>
+        <% if controller_name == 'github_logs' && @project.present? %>
+          <%= @project.name %>
+        <% else %>
+          <%= selected_project&.name || "Select Project" %>
+        <% end %>
       <% end %>
-    <% end %>
-    <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-    </svg>
-  </button>
+      <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
   <% end %>
   <div class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
     <div class="py-1" role="menu" aria-orientation="vertical">
@@ -32,11 +34,16 @@
             class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'bg-indigo-100 font-bold' if params[:project_id].to_i == project.id}",
             role: "menuitem" %>
         <% else %>
-          <%= button_to project.name,
-            update_selected_project_path(project_id: project.id),
-            method: :patch,
-            class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'bg-indigo-100 font-bold' if current_user.selected_project_id == project.id}",
-            role: "menuitem" %>
+          <% is_project_page = request.path.include?('projects/') %>
+          <%= form_with(url: update_selected_project_path(project_id: project.id), 
+                      method: :patch, 
+                      data: { turbo: is_project_page ? false : true }) do |f| %>
+            <button type="submit" 
+                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <%= 'bg-indigo-100 font-bold' if selected_project&.id == project.id %>"
+                    role="menuitem">
+              <%= project.name %>
+            </button>
+          <% end %>
         <% end %>
       <% end %>
       
