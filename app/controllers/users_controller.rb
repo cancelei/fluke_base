@@ -19,23 +19,23 @@ class UsersController < ApplicationController
 
     if service.call
       @selected_project = service.project  # Set instance variable for the view
-      
+
       respond_to do |format|
         format.html do
-          redirect_to project_path(@selected_project), notice: "Project selected."
+          redirect_to project_path(@selected_project)
         end
         format.turbo_stream do
           render turbo_stream: [
             turbo_stream.replace("navbar-projects",
               partial: "shared/navbar_projects",
-              locals: { 
-                current_user: current_user, 
+              locals: {
+                current_user: current_user,
                 selected_project: @selected_project,
                 controller_name: controller_name,
                 request: request
               }
             ),
-            turbo_stream.replace("project-context-nav",
+            turbo_stream.replace("project-context",
               partial: "shared/project_context_nav",
               locals: { selected_project: @selected_project }
             )

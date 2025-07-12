@@ -43,19 +43,21 @@ class ApplicationController < ActionController::Base
   def set_selected_project
     return unless user_signed_in?
 
-    if params[:project_id].present? && params[:project_id] != session[:selected_project_id].to_s
-      # Update selected project if a new one is selected
-      ProjectSelectionService.new(current_user, session, params[:project_id]).call
-    elsif session[:selected_project_id].present?
-      # Verify the project still exists and user still has access
-      @selected_project = current_user.projects.find_by(id: session[:selected_project_id])
-      session[:selected_project_id] = nil unless @selected_project
-    end
-
-    # Set default project if none is selected
-    if session[:selected_project_id].nil? && current_user.projects.any? && !acting_as_mentor?
-      @selected_project = current_user.projects.first
-      session[:selected_project_id] = @selected_project.id
+    if params[:project_id].present?
+      project = Project.find_by(id: params[:project_id])
+      if project && current_user.projects.include?(project)
+        ProjectSelectionService.new(current_user, session, project.id).call
+        @selected_project = project
+      end
+    else
+      # Set @selected_project from session if not set by params
+      selected_project_id = session[:selected_project_id] || current_user.selected_project_id
+      @selected_project = current_user.projects.find_by(id: selected_project_id) if selected_project_id.present?
+      
+      if @selected_project.nil? && current_user.projects.any? && !acting_as_mentor?
+        @selected_project = current_user.projects.first
+        session[:selected_project_id] = @selected_project.id if @selected_project
+      end
     end
   end
 
