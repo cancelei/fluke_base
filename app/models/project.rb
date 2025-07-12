@@ -7,6 +7,7 @@ class Project < ApplicationRecord
   has_many :milestones, dependent: :destroy
   has_many :mentorships, -> { where(agreement_type: "Mentorship") }, class_name: "Agreement", foreign_key: "project_id"
   has_many :mentors, through: :mentorships, source: :other_party
+  has_many :time_logs
 
   # Validations
   validates :name, presence: true

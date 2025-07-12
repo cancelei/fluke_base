@@ -8,7 +8,7 @@
     </div>
     <div class="flex justify-between items-center overflow-x-auto pb-2 -mx-2">
       <% @date_range.each do |date| %>
-        <%= link_to agreement_time_logs_path(@agreement, date: date),
+        <%= link_to time_logs_path(@project, date: date),
                     class: "flex-shrink-0 mx-1 text-center #{date == @selected_date ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'}" do %>
           <div class="w-16 p-2 rounded-lg <%= date == @selected_date ? 'bg-indigo-50' : 'hover:bg-gray-50' %>">
             <div class="text-sm font-medium"><%= date.strftime('%a') %></div>
@@ -25,11 +25,8 @@
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold">Time Tracking</h1>
     <div>
-      <p class="text-lg">
-        Agreement: <span class="font-semibold"><%= @agreement.agreement_type %></span>
-      </p>
       <p class="text-gray-600">
-        Project: <span class="font-medium"><%= @agreement.project.name %></span>
+        Project: <span class="font-medium"><%= @project.name %></span>
       </p>
     </div>
   </div>
@@ -45,7 +42,7 @@
       </p>
     </div>
     <div class="px-4 py-5 sm:p-6">
-      <%= form_with(model: @time_log_manual, url: create_manual_agreement_time_logs_path(@agreement), method: :post, local: true) do |f| %>
+      <%= form_with(model: @time_log_manual, url: create_manual_time_logs_path(@project), method: :post, local: true) do |f| %>
         <div class="grid grid-cols-6 gap-6">
           <div class="col-span-6 sm:col-span-3">
             <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
@@ -73,8 +70,8 @@
   </div>
 
   <!-- Current Time Log (if any) -->
-  <% if @agreement.time_logs.where(user_id: current_user.id).in_progress.exists? %>
-    <% current_log = @agreement.time_logs.in_progress.last %>
+  <% if @project.time_logs.where(user_id: current_user.id).in_progress.exists? %>
+    <% current_log = @project.time_logs.in_progress.last %>
     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
       <div class="flex items-center">
         <div class="flex-shrink-0">
@@ -89,7 +86,7 @@
             (Started <%= time_ago_in_words(current_log.started_at) %> ago)
           </span>
           </p>
-          <%= button_to 'Stop Tracking', stop_tracking_agreement_time_logs_path(@agreement, milestone_id: current_log.milestone_id),
+          <%= button_to 'Stop Tracking', stop_tracking_time_logs_path(@project, milestone_id: current_log.milestone_id),
                         method: :post,
                         class: 'mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500' %>
         </div>
@@ -97,7 +94,7 @@
     </div>
   <% end %>
 
-  <%= render "remaining_time_progress", agreement: @agreement, project: @agreement.project, current_log: current_log, owner: @owner %>
+  <%= render "remaining_time_progress", project: @project, current_log: current_log, owner: @owner %>
 
   <!-- All Milestones Section -->
   <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
@@ -108,7 +105,7 @@
         </h3>
       </div>
       <p class="mt-1 text-sm text-gray-500">
-        Track time for milestones in this agreement
+        Track time for milestones in this project
       </p>
     </div>
     <div class="border-t border-gray-200">
@@ -137,15 +134,15 @@
                 </div>
               </div>
               <div class="ml-4 flex-shrink-0">
-                <% active_log = @agreement.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id) %>
+                <% active_log = @project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id) %>
                 <% if active_log %>
                   <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                     In Progress
                   </span>
                 <% else %>
-                  <%# Only show start tracking if there's no active log for this milestone in any agreement %>
-                  <% if TimeLog.in_progress.where(milestone_id: milestone.id, user_id: current_user.id).where.not(agreement_id: @agreement.id).empty? %>
-                    <%= button_to agreement_time_logs_path(@agreement, milestone_id: milestone.id, date: @selected_date),
+                  <%# Only show start tracking if there's no active log for this milestone in any project %>
+                  <% if TimeLog.in_progress.where(milestone_id: milestone.id, user_id: current_user.id).where.not(project_id: @project.id).empty? %>
+                    <%= button_to time_logs_path(@project, milestone_id: milestone.id, date: @selected_date),
                                   method: :post,
                                   class: 'inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
                                   data: { confirm: 'Start tracking time for this milestone?' } do %>
@@ -153,7 +150,7 @@
                     <% end %>
                   <% else %>
                     <span class="text-sm text-gray-500">
-                      Being tracked in another agreement
+                      Being tracked in another project
                     </span>
                   <% end %>
                 <% end %>
@@ -245,7 +242,7 @@
                 </td>
                 <td>
                   <% if @owner %>
-                    <%= button_to 'Mark as Completed', confirm_project_milestone_path(@agreement.project, milestone),
+                    <%= button_to 'Mark as Completed', confirm_project_milestone_path(@project, milestone),
                                   method: :post,
                                   class: 'ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
                     %>

@@ -63,7 +63,12 @@ Rails.application.routes.draw do
       get :explore
     end
     member do
-      get :time_logs
+      resources :time_logs, only: [ :index, :create ] do
+        collection do
+          post :stop_tracking
+          post :create_manual, action: :create_manual
+        end
+      end
     end
   end
 
@@ -71,12 +76,6 @@ Rails.application.routes.draw do
 
   resources :agreements do
     resources :meetings
-    resources :time_logs, only: [ :index, :create ] do
-      collection do
-        post :stop_tracking
-        post :create_manual, action: :create_manual
-      end
-    end
 
     member do
       patch :accept

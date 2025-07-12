@@ -1,6 +1,6 @@
 class TimeLog < ApplicationRecord
   # Relationships
-  belongs_to :agreement
+  belongs_to :project
   belongs_to :user
   belongs_to :milestone, optional: true
 
@@ -17,7 +17,7 @@ class TimeLog < ApplicationRecord
   # Status scopes
   scope :in_progress, -> { where(status: "in_progress") }
   scope :completed, -> { where(status: "completed") }
-  scope :for_agreement, ->(agreement_id) { where(agreement_id: agreement_id) }
+  scope :for_project, ->(project_id) { where(project_id: project_id) }
   scope :for_milestone, ->(milestone_id) { where(milestone_id: milestone_id) }
   scope :manual, -> { where(milestone_id: nil) }
 

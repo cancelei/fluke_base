@@ -54,7 +54,7 @@
       <% end %>
       
       <% if @agreement.active? && (current_user == @agreement.initiator || current_user == @agreement.other_party) %>
-        <%= link_to "Time Logs", agreement_time_logs_path(@agreement), 
+        <%= link_to "Time Logs", time_logs_path(@agreement.project), 
             class: "btn-primary" %>
       <% end %>
     </div>

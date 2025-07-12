@@ -27,17 +27,16 @@
   <div class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
     <div class="py-1" role="menu" aria-orientation="vertical">
       <% current_user.projects.each do |project| %>
-        <% if controller_name == 'github_logs' %>
+        <% if request.path.include?('projects/') %>
           <%= link_to project.name,
-            project_github_logs_path(project),
+            request.path.gsub(/projects\/\d+/, "projects/#{project.id}"),
             data: { turbo: false },
             class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'bg-indigo-100 font-bold' if params[:project_id].to_i == project.id}",
             role: "menuitem" %>
         <% else %>
-          <% is_project_page = request.path.include?('projects/') %>
           <%= form_with(url: update_selected_project_path(project_id: project.id), 
                       method: :patch, 
-                      data: { turbo: is_project_page ? false : true }) do |f| %>
+                      data: { turbo: true }) do |f| %>
             <button type="submit" 
                     class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <%= 'bg-indigo-100 font-bold' if selected_project&.id == project.id %>"
                     role="menuitem">

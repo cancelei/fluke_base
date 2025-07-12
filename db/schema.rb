@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_10_185249) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_12_164358) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -324,7 +324,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_10_185249) do
   end
 
   create_table "time_logs", force: :cascade do |t|
-    t.bigint "agreement_id", null: false
     t.bigint "milestone_id"
     t.datetime "started_at", precision: nil, null: false
     t.datetime "ended_at", precision: nil
@@ -334,9 +333,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_10_185249) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.index ["agreement_id", "milestone_id"], name: "index_time_logs_on_agreement_id_and_milestone_id"
-    t.index ["agreement_id"], name: "index_time_logs_on_agreement_id"
-    t.index ["milestone_id"], name: "index_time_logs_on_milestone_id"
+    t.bigint "project_id"
+    t.index ["project_id", "milestone_id"], name: "index_time_logs_on_project_id_and_milestone_id"
     t.index ["user_id"], name: "index_time_logs_on_user_id"
   end
 
@@ -405,8 +403,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_10_185249) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "time_logs", "agreements"
   add_foreign_key "time_logs", "milestones"
+  add_foreign_key "time_logs", "projects"
   add_foreign_key "time_logs", "users"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
