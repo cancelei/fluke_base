@@ -11,7 +11,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # end
 
   # POST /resource
-  def createcomplete_onboarding
+  def create
     super do |resource|
       if resource.persisted? && params[:user] && params[:user][:role_id].present?
         role = Role.find_by(id: params[:user][:role_id])
