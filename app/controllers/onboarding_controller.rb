@@ -52,6 +52,11 @@ class OnboardingController < ApplicationController
             redirect_to onboarding_mentor_path, notice: "#{role_name} onboarding completed! Please complete onboarding for your other roles."
           end
         else
+          if session[:comes_from_project_new]
+            session[:comes_from_project_new] = false
+            redirect_to new_project_path, notice: "#{role_name} onboarding completed! Now you can create the project"
+            return
+          end
           redirect_to dashboard_path, notice: "#{role_name} onboarding completed! Welcome to FlukeBase."
         end
       else

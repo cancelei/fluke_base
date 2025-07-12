@@ -28,13 +28,13 @@ class ProjectsController < ApplicationController
     else
       @suggested_mentors = []
     end
-    
+
     # Update the selected project in the session
     if current_user && current_user.projects.include?(@project)
       ProjectSelectionService.new(current_user, session, @project.id).call
       @selected_project = @project
     end
-    
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @project }
@@ -42,6 +42,16 @@ class ProjectsController < ApplicationController
   end
 
   def new
+    unless current_user.has_role?(Role::ENTREPRENEUR) && current_user.onboarded_for?(Role::ENTREPRENEUR)
+      # Add Entrepreneur role if not present
+      session[:comes_from_project_new] = true
+      current_user.add_role("Entrepreneur") unless current_user.has_role?("Entrepreneur")
+      # Redirect to entrepreneur onboarding
+      redirect_to onboarding_entrepreneur_path, notice: "Please complete your entrepreneur profile before creating a project."
+      return
+    end
+
+
     @project = Project.new
   end
 
