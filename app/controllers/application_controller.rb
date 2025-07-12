@@ -53,7 +53,7 @@ class ApplicationController < ActionController::Base
       # Set @selected_project from session if not set by params
       selected_project_id = session[:selected_project_id] || current_user.selected_project_id
       @selected_project = current_user.projects.find_by(id: selected_project_id) if selected_project_id.present?
-      
+
       if @selected_project.nil? && current_user.projects.any? && !acting_as_mentor?
         @selected_project = current_user.projects.first
         session[:selected_project_id] = @selected_project.id if @selected_project
