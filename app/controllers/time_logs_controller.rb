@@ -37,7 +37,6 @@ class TimeLogsController < ApplicationController
     # Get time logs for the selected date
     @time_logs = @project.time_logs
                            .includes(:milestone)
-                           .where("DATE(started_at) = '#{@selected_date}'")
                            .order(started_at: :desc)
 
     @milestones_pending_confirmation = @milestones
@@ -45,9 +44,7 @@ class TimeLogsController < ApplicationController
                                          .where(status: "in_progress", time_logs: { status: "completed" })
     @time_logs_completed = @milestones
                             .includes(:time_logs)
-                            .where(status: "completed", time_logs: { status: "completed" })
-                            .where("DATE(time_logs.started_at) = ?", @selected_date)
-    @time_logs_manual = @project.time_logs.where(milestone_id: nil)
+                            .where(status: Milestone::COMPLETED, time_logs: { status: "completed" })
   end
 
   def create
@@ -112,7 +109,7 @@ class TimeLogsController < ApplicationController
   private
 
   def time_log_params
-    params.require(:time_log).permit(:started_at, :ended_at, :description)
+    params.require(:time_log).permit(:started_at, :ended_at, :description, :milestone_id, :manual_entry)
   end
 
   def ensure_no_active_time_log

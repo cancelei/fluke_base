@@ -15,6 +15,8 @@ class TimeLog < ApplicationRecord
   validate :start_time_not_in_future
 
   # Status scopes
+  scope :not_manual, -> { where(manual_entry: false) }
+  scope :manual, -> { where(manual_entry: true) }
   scope :in_progress, -> { where(status: "in_progress") }
   scope :completed, -> { where(status: "completed") }
   scope :for_project, ->(project_id) { where(project_id: project_id) }

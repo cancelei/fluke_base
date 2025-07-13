@@ -44,6 +44,7 @@
     <div class="px-4 py-5 sm:p-6">
       <%= form_with(model: @time_log_manual, url: create_manual_time_logs_path(@project), method: :post, local: true) do |f| %>
         <div class="grid grid-cols-6 gap-6">
+          <%= f.hidden_field :manual_entry, value: true %>
           <div class="col-span-6 sm:col-span-3">
             <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
             <%= f.text_area :description, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", rows: 3 %>
@@ -54,12 +55,18 @@
             <%= f.datetime_field :started_at,
                                  class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
           </div>
-
           <div class="col-span-6 sm:col-span-3">
             <%= f.label :ended_at, "End Time", class: "block text-sm font-medium text-gray-700" %>
             <%= f.datetime_field :ended_at,
                                  class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
                                  max: Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
+          </div>
+
+          <div class="col-span-6 sm:col-span-3">
+            <%= f.label :milestone_id, "Milestone", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.collection_select :milestone_id, @project.milestones, :id, :title,
+                  { include_blank: false },
+                  { class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
           </div>
         </div>
         <div class="mt-5">
@@ -199,13 +206,20 @@
           </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-          <% @milestones_pending_confirmation.each do |milestone| %>
-          <% time_log_users = milestone.time_logs.map(&:user).uniq %>
-            <% time_log_users.each do |user| %>
+          <% time_log_users = @owner ? @project.time_logs.map(&:user).uniq : [current_user, @project.user].compact %>
+          <% time_log_users.each do |user| %>
+            <% @milestones_pending_confirmation.each do |milestone| %>
+              <% next unless milestone.time_logs.where(user: user).any? %>
+
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-indigo-600 truncate">
                     <%= user.full_name %>
+                    <% if user.id == @project.user_id %> 
+                      <div class="'ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600">
+                        owner
+                      </div>
+                    <% end %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -230,8 +244,19 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">
                     <ul>
-                      <% milestone.time_logs.where(user:).pluck(:ended_at).each do |log| %>
-                        <li><%= log&.strftime('%b %d, %Y %I:%M %p') || "-" %></li>
+                      <% milestone.time_logs.where(user:).each do |log| %>
+                        <li>
+                          <%= log.ended_at&.strftime('%b %d, %Y %I:%M %p') || "-" %>
+                            <% if log.manual_entry %>
+                            <div class="relative group ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600 cursor-pointer">
+                              m
+                              <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white border border-gray-300 rounded shadow-lg p-2 text-gray-700 text-xs z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                              <strong>Justification:</strong>
+                              <div><%= log.description.presence || "No justification provided." %></div>
+                              </div>
+                            </div>
+                            <% end %>
+                        </li>
                       <% end %>
                     </ul>
                   </div>
@@ -270,7 +295,7 @@
     </h3>
   </div>
   <div class="border-t border-gray-200">
-    <% if @time_logs_completed.any? || @time_logs_manual.any? %>
+    <% if @time_logs_completed.any? %>
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
         <tr>
@@ -295,13 +320,20 @@
         </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-        <% @time_logs_completed.each do |milestone| %>
-          <% time_log_users = milestone.time_logs.map(&:user).uniq %>
-            <% time_log_users.each do |user| %>
+        <% time_log_users = @owner ? @project.time_logs.map(&:user).uniq : [current_user, @project.user].compact %>
+        <% time_log_users.each do |user| %>
+          <% @time_logs_completed.each do |milestone| %>
+              <% next unless milestone.time_logs.where(user: user).any? %>
+
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-indigo-600 truncate">
                     <%= user.full_name %>
+                    <% if user.id == @project.user_id %> 
+                      <div class="'ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600">
+                        owner
+                      </div>
+                    <% end %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -326,8 +358,19 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">
                     <ul>
-                      <% milestone.time_logs.where(user:).pluck(:ended_at).each do |log| %>
-                        <li><%= log&.strftime('%b %d, %Y %I:%M %p') || "-" %></li>
+                      <% milestone.time_logs.where(user:).each do |log| %>
+                        <li>
+                          <%= log.ended_at&.strftime('%b %d, %Y %I:%M %p') || "-" %>
+                          <% if log.manual_entry %>
+                            <div class="relative group ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600 cursor-pointer">
+                              m
+                              <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white border border-gray-300 rounded shadow-lg p-2 text-gray-700 text-xs z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                              <strong>Justification:</strong>
+                              <div><%= log.description.presence || "No justification provided." %></div>
+                              </div>
+                            </div>
+                            <% end %>
+                        </li>
                       <% end %>
                     </ul>
                   </div>
@@ -339,33 +382,6 @@
               </tr>
             <% end %>
         <% end %>
-        <% @time_logs_manual.each do |log| %>
-          <tr>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-medium text-indigo-600 truncate">
-                <%= log.description %>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">
-                -
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">
-                <%= log.started_at.strftime('%b %d, %Y %I:%M %p') %>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">
-                <%= log.ended_at.strftime('%b %d, %Y %I:%M %p') %>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <%= log.hours_spent > 0 ? "#{log.hours_spent} hours" : 'Less than an hour' %>
-            </td>
-          </tr>
-        <% end %>
         </tbody>
       </table>
     <% else %>
@@ -374,7 +390,6 @@
       </div>
     <% end %>
   </div>
-
 </div>
 </div>
 

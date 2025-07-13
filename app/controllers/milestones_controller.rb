@@ -41,9 +41,9 @@ class MilestonesController < ApplicationController
 
   def confirm
     if @milestone.update(status: Milestone::COMPLETED)
-      redirect_to time_logs_path(@milestone.project.agreements.first), notice: "Milestone was successfully marked as completed."
+      redirect_back fallback_location: project_path(@project), notice: "Milestone confirmed successfully."
     else
-      redirect_to time_logs_path(@milestone.project.agreements.first), alert: "Failed to mark milestone as completed."
+      redirect_back fallback_location: project_path(@project), alert: "Failed to mark milestone as completed."
     end
   end
 
