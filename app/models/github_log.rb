@@ -26,6 +26,6 @@ class GithubLog < ApplicationRecord
   end
 
   def time_log
-    TimeLog.find_by(agreement_id: agreement_id, started_at: ..commit_date, ended_at: commit_date..)
+    TimeLog.find_by(project_id: project_id, started_at: ..commit_date, ended_at: commit_date..)
   end
 end
