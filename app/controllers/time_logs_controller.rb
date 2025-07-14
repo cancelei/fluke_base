@@ -61,6 +61,7 @@ class TimeLogsController < ApplicationController
     )
 
     if @time_log.save
+      session[:progress_milestone_id] = @time_log.milestone_id
       Milestone.find_by_id(@time_log.milestone_id).update(status: "in_progress")
       redirect_to time_logs_path(@project), notice: "Started tracking time for this milestone."
     else
@@ -70,6 +71,7 @@ class TimeLogsController < ApplicationController
 
   def stop_tracking
     if @time_log.complete!
+      session[:progress_milestone_id] = nil
       redirect_to time_logs_path(@project), notice: "Stopped tracking time."
     else
       redirect_to time_logs_path(@project), alert: @time_log.errors.full_messages.to_sentence

@@ -1,0 +1,14 @@
+<% if current_user.selected_project_id.present? && session[:progress_milestone_id].present? %>
+    <div class="flex justify-between items-center w-full bg-green-50 py-2 px-4 border-t border-green-100">
+        <% milestone = Milestone.find_by(id: session[:progress_milestone_id]) %>
+        <% active_log = selected_project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id)%>
+        <% if milestone && active_log %>
+            <span class="text-sm font-medium text-green-700"><b>Milestone in progress:</b> <%= milestone.title %></span>
+            <%= button_to stop_tracking_time_logs_path(selected_project, milestone_id: milestone.id), method: :post, class: "ml-2 text-red-600 hover:text-red-800", form: { data: { turbo: false } } do %>
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>
+                </svg>
+            <% end %>
+        <% end %>
+    </div>
+<% end %>
