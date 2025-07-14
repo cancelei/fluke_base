@@ -25,7 +25,7 @@
 
   <body class="min-h-screen bg-gray-50">
     <%= render 'shared/navbar' %>
-    <%= render 'shared/flash_messages' %>
+    <%= render 'shared/toast_messages' %>
     
     <%= turbo_frame_tag "project-context" do %>
       <% if user_signed_in? && @selected_project.present? %>
