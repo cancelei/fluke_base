@@ -19,7 +19,7 @@
             <%= link_to "Messages", conversations_path, class: "inline-flex items-center border-b-2 #{controller_name == 'conversations' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             <%= link_to "Roles", roles_path, class: "inline-flex items-center border-b-2 #{controller_name == 'roles' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
             
-            <% if current_user.projects.any? %>
+            <% if current_user.projects.any? || current_user.received_agreements.any?  || current_user.initiated_agreements.any? %>
             <div class="relative" data-controller="dropdown">
                 <%= render 'shared/navbar_projects', current_user: current_user %>
             </div>
