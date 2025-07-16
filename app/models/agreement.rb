@@ -48,6 +48,7 @@ class Agreement < ApplicationRecord
   validates :hourly_rate, presence: true, numericality: { greater_than_or_equal_to: 0 }, if: -> { payment_type == HOURLY || payment_type == HYBRID }
   validates :equity_percentage, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }, if: -> { payment_type == EQUITY || payment_type == HYBRID }
   validate :end_date_after_start_date
+  validates :milestone_ids, presence: true, if: -> { agreement_type == MENTORSHIP }
   validate :valid_payment_terms
   validate :different_entrepreneur_and_mentor
 
@@ -89,9 +90,6 @@ class Agreement < ApplicationRecord
     attrs_to_copy = original_agreement.attributes.except("id", "created_at", "updated_at", "counter_to_id", "status", "initiator_id", "other_party_id")
     assign_attributes(attrs_to_copy)
   end
-
-  # Associations
-  has_many :time_logs, dependent: :destroy
 
   # Milestone methods
   def milestone_ids

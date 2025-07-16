@@ -1,5 +1,6 @@
 <% if user_signed_in? && current_user.selected_project_id.present? && session[:progress_milestone_id].present? %>
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <% selected_project = Project.find(current_user.selected_project_id) %>
         <% milestone = Milestone.find_by(id: session[:progress_milestone_id]) %>
         <% active_log = selected_project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id)%>
         <% total_seconds = selected_project.time_logs.where(user: current_user, milestone_id: milestone.id).where.not(status: 'in_progress').sum(:hours_spent) * 3600 + ((active_log && active_log.started_at) ? (Time.zone.now - active_log.started_at).to_i : 0) %>

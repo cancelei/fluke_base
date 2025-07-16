@@ -4,14 +4,9 @@ class TimeLogsController < ApplicationController
   before_action :set_milestone, only: [ :create, :stop_tracking ]
   before_action :set_time_log, only: [ :stop_tracking ]
   before_action :set_manual_time_log, only: [ :index ]
-  before_action :ensure_no_active_time_log, only: [ :create_manual ]
+  before_action :ensure_no_active_time_log, only: [ :create_manual, :create ]
 
   def create_manual
-    if @project.time_logs.in_progress.exists?
-      redirect_to time_logs_path(@project), alert: "You already have a time log in progress."
-      return
-    end
-
     @time_log = @project.time_logs.new(time_log_params)
     @time_log.user = current_user
     @time_log.status = "completed"
@@ -32,7 +27,7 @@ class TimeLogsController < ApplicationController
     @date_range = (@selected_date - 3.days)..(@selected_date + 3.days)
 
     # Get milestones for the current project's project
-    @milestones = @project.milestones
+    @milestones = (@owner ? @project.milestones : Milestone.where(id: @project.agreements.where("initiator_id = ? OR other_party_id = ?", current_user.id, current_user.id).pluck(:milestone_ids).flatten))
 
     # Get time logs for the selected date
     @time_logs = @project.time_logs
@@ -48,11 +43,6 @@ class TimeLogsController < ApplicationController
   end
 
   def create
-    if @project.time_logs.in_progress.exists?
-      redirect_to time_logs_path(@project), alert: "You already have a time log in progress."
-      return
-    end
-
     @time_log = @project.time_logs.new(
       milestone: @milestone,
       started_at: Time.current,
@@ -115,7 +105,7 @@ class TimeLogsController < ApplicationController
   end
 
   def ensure_no_active_time_log
-    if @project.time_logs.in_progress.exists?
+    if time_log_in_progress
       redirect_to time_logs_path(@project), alert: "You already have a time log in progress."
     end
   end
@@ -142,5 +132,9 @@ class TimeLogsController < ApplicationController
     return if @time_log.present?
 
     redirect_to time_logs_path(@project), alert: "No active time log found for this milestone."
+  end
+
+  def time_log_in_progress
+    @project.time_logs.in_progress.where(user_id: current_user.id).exists?
   end
 end

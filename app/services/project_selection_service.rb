@@ -14,7 +14,7 @@ class ProjectSelectionService
   end
 
   def project
-    @project ||= @user.projects.find_by(id: @project_id)
+    @project ||= Project.find_by(id: @project_id)
   end
 
   private

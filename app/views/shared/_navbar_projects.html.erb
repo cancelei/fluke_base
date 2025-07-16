@@ -26,8 +26,8 @@
   <% end %>
   <div class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
     <div class="py-1" role="menu" aria-orientation="vertical">
-      <% (current_user.projects + current_user.initiated_agreements.includes(:project).map(&:project) + current_user.received_agreements.includes(:project).map(&:project)).uniq.each do |project| %>
-        <% if request.path.include?('projects/') %>
+      <% (current_user.projects + current_user.initiated_agreements.active.includes(:project).map(&:project) + current_user.received_agreements.active.includes(:project).map(&:project)).uniq.each do |project| %>
+        <% if request.path.match?(/projects\/\d+/) %>
           <%= link_to project.name,
             request.path.gsub(/projects\/\d+/, "projects/#{project.id}"),
             data: { turbo: false },
