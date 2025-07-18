@@ -4,8 +4,8 @@ FactoryBot.define do
     status { "MyString" }
     start_date { "2025-04-09" }
     end_date { "2025-04-09" }
-    entrepreneur_id { 1 }
-    mentor_id { 1 }
+    initiator_id { 1 }
+    other_party_id { 1 }
     project { nil }
     terms { "MyText" }
   end

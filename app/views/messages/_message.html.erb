@@ -1,8 +1,48 @@
 <div id="<%= dom_id(message) %>" class="<%= message.user == current_user ? 'flex justify-end mb-2' : 'flex mb-2' %>">
   <div class="<%= message.user == current_user ? 'bg-indigo-500 text-white rounded-lg py-2 px-4 max-w-xs' : 'bg-gray-200 rounded-lg py-2 px-4 max-w-xs' %>">
+    <div class="mb-2">
+      <% if message.attachments.attached? %>
+        <div class="mb-1 space-y-2">
+          <% message.attachments.each do |file| %>
+            <% content_type = file.content_type %>
+            <% if content_type.start_with?("image/") %>
+              <div>
+                <%= image_tag url_for(file), alt: file.filename.to_s, class: "rounded max-h-48 mb-1" %>
+              </div>
+            <% elsif content_type.start_with?("video/") %>
+              <div>
+                <video controls class="rounded max-h-48 mb-1">
+                  <source src="<%= url_for(file) %>" type="<%= content_type %>">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            <% elsif content_type.start_with?("audio/") %>
+              <div>
+                <audio controls class="mb-1">
+                  <source src="<%= url_for(file) %>" type="<%= content_type %>">
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            <% else %>
+              <div>
+                <%= link_to file.filename.to_s, url_for(file), target: "_blank", class: "underline" %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+      <% if message.audio.attached? %>
+        <div>
+          <audio controls>
+            <source src="<%= url_for(message.audio) %>" type="<%= message.audio.content_type %>">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      <% end %>
+    </div>
     <p class="text-sm"><%== message.body %></p>
     <p class="text-xs text-right mt-1 <%= message.user == current_user ? 'text-indigo-100' : 'text-gray-500' %>">
       <%= local_assigns.fetch(:timestamp, message.created_at).strftime("%H:%M") %>
     </p>
   </div>
-</div> 
+</div>

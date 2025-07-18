@@ -3,8 +3,11 @@ class Message < ApplicationRecord
   belongs_to :conversation
   belongs_to :user
 
+  has_many_attached :attachments
+  has_one_attached :audio # for voice messages
+
   # Validations
-  validates :body, presence: true
+  validates :body, presence: true, unless: -> { audio.attached? || attachments.attached? }
   validates :conversation_id, presence: true
   validates :user_id, presence: true
 

@@ -72,4 +72,5 @@ Rails.application.configure do
 
   # Devise mailer configuration
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  config.active_job.queue_adapter = :solid_queue
 end

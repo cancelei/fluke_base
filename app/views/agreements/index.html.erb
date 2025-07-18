@@ -16,16 +16,16 @@
     <div class="px-4 py-5 sm:px-6 flex items-center justify-between">
       <div>
         <h2 class="text-lg font-medium text-gray-900">Your Projects</h2>
-        <p class="mt-1 text-sm text-gray-500">Agreements where you are the entrepreneur</p>
+        <p class="mt-1 text-sm text-gray-500">Agreements for projects you own</p>
       </div>
       <% if current_user.projects.any? %>
-        <%= link_to "Find mentors", explore_mentors_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+        <%= link_to "Find people", explore_people_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
       <% else %>
         <%= link_to "Create Project First", new_project_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
       <% end %>
     </div>
     
-    <% if @entrepreneur_agreements.any? %>
+    <% if @my_agreements.any? %>
       <div class="overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -35,13 +35,14 @@
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mentor</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Time</th>
               <th scope="col" class="relative px-6 py-3">
                 <span class="sr-only">Actions</span>
               </th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <% @entrepreneur_agreements.each do |agreement| %>
+            <% @my_agreements.each do |agreement| %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">
@@ -55,52 +56,21 @@
                   <% end %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= agreement.mentor.full_name %></div>
+                  <div class="text-sm text-gray-900">
+                    <%= agreement.initiator_id == current_user.id ? agreement.other_party.full_name : agreement.initiator.full_name %>
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <% case agreement.status %>
-                  <% when Agreement::PENDING %>
-                    <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
-                      Pending
-                    </span>
-                  <% when Agreement::ACCEPTED %>
-                    <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                      Active
-                    </span>
-                  <% when Agreement::REJECTED %>
-                    <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
-                      Rejected
-                    </span>
-                    <% when Agreement::COUNTERED %>
-                    <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-600/20">
-                      Countered
-                    </span>
-                  <% when Agreement::CANCELLED %>
-                    <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
-                      Cancelled
-                    </span>
-                  <% when Agreement::COMPLETED %>
-                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
-                      Completed
-                    </span>
-                  <% end %>
+                  <%= render "agreement_status", agreement: agreement %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <%= agreement.start_date.strftime("%b %d, %Y") %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <%= link_to "View", agreement, class: "text-indigo-600 hover:text-indigo-900" %>
-                  
-                  <% if agreement.pending? %>
-                    <% if agreement.initiator_id == current_user.id %>
-                      <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 text-indigo-600 hover:text-indigo-900" %>
-                      <%= link_to "Cancel", agreement_path(agreement), method: :delete, data: { confirm: "Are you sure you want to cancel this agreement?" }, class: "ml-3 text-red-600 hover:text-red-900" %>
-                    <% end %>
-                    <% if agreement.initiator_id != current_user.id %>
-                      <%= button_to "Accept", accept_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
-                      <%= button_to "Decline", reject_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-                    <% end %>
-                  <% end %>
+                  <%= render "time_logs/remaining_time_progress", agreement: agreement, project: agreement.project, current_log: nil %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <%= render "agreement_actions", agreement: agreement %>
                 </td>
               </tr>
             <% end %>
@@ -108,22 +78,7 @@
         </table>
       </div>
     <% else %>
-      <div class="text-center py-12 bg-white">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No agreements</h3>
-        <p class="mt-1 text-sm text-gray-500">Get started by creating a new agreement for one of your projects.</p>
-        <% if current_user.projects.any? %>
-          <div class="mt-6">
-            <%= link_to "Find Mentor", explore_mentors_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-          </div>
-        <% else %>
-          <div class="mt-6">
-            <%= link_to "Create Project First", new_project_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-          </div>
-        <% end %>
-      </div>
+      <%= render "empty_state_entrepreneur" %>
     <% end %>
   </div>
 
@@ -131,10 +86,10 @@
   <div class="bg-white shadow sm:rounded-lg">
     <div class="px-4 py-5 sm:px-6">
       <h2 class="text-lg font-medium text-gray-900">Your Mentorships</h2>
-      <p class="mt-1 text-sm text-gray-500">Agreements where you are the mentor or co-founder</p>
+      <p class="mt-1 text-sm text-gray-500">Agreements where you are mentoring other projects</p>
     </div>
     
-    <% if @mentor_agreements.any? %>
+    <% if @other_party_agreements.any? %>
       <div class="overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -144,13 +99,14 @@
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrepreneur</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Time</th>
               <th scope="col" class="relative px-6 py-3">
                 <span class="sr-only">Actions</span>
               </th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <% @mentor_agreements.each do |agreement| %>
+            <% @other_party_agreements.each do |agreement| %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">
@@ -166,64 +122,19 @@
                   <div class="text-sm text-gray-900"><%= agreement.agreement_type %></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= agreement.entrepreneur.full_name %></div>
+                  <div class="text-sm text-gray-900"><%= agreement.project.user.full_name %></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <% case agreement.status %>
-                  <% when Agreement::PENDING %>
-                    <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
-                      Pending
-                    </span>
-                  <% when Agreement::ACCEPTED %>
-                    <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                      Active
-                    </span>
-                  <% when Agreement::REJECTED %>
-                    <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
-                      Rejected
-                    </span>
-                  <% when Agreement::COUNTERED %>
-                    <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-600/20">
-                      Countered
-                    </span>
-                  <% when Agreement::CANCELLED %>
-                    <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
-                      Cancelled
-                    </span>
-                  <% when Agreement::COMPLETED %>
-                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">
-                      Completed
-                    </span>
-                  <% end %>
+                  <%= render "agreement_status", agreement: agreement %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <% if agreement.payment_type.present? %>
-                    <div class="text-sm text-gray-900">
-                      <%= agreement.payment_type %>
-                      <% if agreement.payment_type == Agreement::HOURLY || agreement.payment_type == Agreement::HYBRID %>
-                        <span class="text-xs text-gray-500">($<%= number_with_precision(agreement.hourly_rate, precision: 2) %>/hr)</span>
-                      <% end %>
-                      <% if agreement.payment_type == Agreement::EQUITY || agreement.payment_type == Agreement::HYBRID %>
-                        <span class="text-xs text-gray-500">(<%= number_with_precision(agreement.equity_percentage, precision: 2) %>% equity)</span>
-                      <% end %>
-                    </div>
-                  <% else %>
-                    <span class="text-xs text-gray-500">Not specified</span>
-                  <% end %>
+                  <%= render "agreement_payment", agreement: agreement %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <%= render "time_logs/remaining_time_progress", agreement: agreement, project: agreement.project, current_log: nil %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <%= link_to "View", agreement, class: "text-indigo-600 hover:text-indigo-900" %>
-                  
-                  <% if agreement.pending? %>
-                    <% if agreement.initiator_id == current_user.id %>
-                      <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 text-indigo-600 hover:text-indigo-900" %>
-                      <%= link_to "Cancel", agreement_path(agreement), method: :delete, data: { confirm: "Are you sure you want to cancel this agreement?" }, class: "ml-3 text-red-600 hover:text-red-900" %>
-                    <% end %>
-                    <% if agreement.initiator_id != current_user.id %>
-                      <%= button_to "Accept", accept_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
-                      <%= button_to "Decline", reject_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-                    <% end %>
-                  <% end %>
+                  <%= render "agreement_actions", agreement: agreement %>
                 </td>
               </tr>
             <% end %>
@@ -231,13 +142,7 @@
         </table>
       </div>
     <% else %>
-      <div class="text-center py-12 bg-white">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No mentorships</h3>
-        <p class="mt-1 text-sm text-gray-500">You haven't been invited to mentor any projects yet.</p>
-      </div>
+      <%= render "empty_state_mentor" %>
     <% end %>
   </div>
 </div>

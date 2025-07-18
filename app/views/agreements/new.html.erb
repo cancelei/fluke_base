@@ -21,19 +21,31 @@
                       </p>
                     </div>
                   <% end %>
-
-                  <% if @mentor %>
+                  <% details = fetch_initiator_data(@initiator_details) %>
+                  <% if details %>
                     <div class="mb-6">
-                      <h2 class="text-lg font-medium text-gray-900">Mentor Details</h2>
+                      <h2 class="text-lg font-medium text-gray-900">Agreement Initiator Details</h2>
+                      <p class="mt-1 text-sm text-gray-500">
+                        <span class="font-medium">Name:</span> <%= details.first %>
+                      </p>
+                      <p class="mt-1 text-sm text-gray-500">
+                        <span class="font-medium">Role:</span> <%= details.last %>
+                      </p>
+                    </div>
+                  <% end %>
+
+                  <% if @other_party %>
+                    <div class="mb-6">
+                      <h2 class="text-lg font-medium text-gray-900">Other Party Details</h2>
                       <div class="mt-2 flex items-center space-x-3">
-                        <% if @mentor.avatar.attached? %>
-                          <%= image_tag @mentor.avatar, class: "h-12 w-12 rounded-full" %>
+                        <% if @other_party.avatar.attached? %>
+                          <%= image_tag @other_party.avatar, class: "h-12 w-12 rounded-full" %>
                         <% else %>
-                          <img src="<%= @mentor.avatar_url %>" class="h-12 w-12 rounded-full" />
+                          <img src="<%= @other_party.avatar_url %>" class="h-12 w-12 rounded-full" />
                         <% end %>
                         <div>
-                          <p class="text-sm font-medium text-gray-900"><%= @mentor.full_name %></p>
-                          <p class="text-sm text-gray-500">Mentor</p>
+                          <p class="text-sm font-medium text-gray-900"><%= @other_party.full_name %></p>
+                          <p class="text-sm text-gray-500"><%= @other_party.current_role&.name %></p>
                         </div>
                       </div>
                     </div>

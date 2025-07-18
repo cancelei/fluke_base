@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   belongs_to :selected_project, class_name: "Project", optional: true
+  belongs_to :current_role, class_name: "Role", optional: true
 
   include Roleable
 
@@ -11,20 +12,60 @@ class User < ApplicationRecord
   # Pay integration
   include Pay::Billable
 
+  # Validations
+  validates :github_token, length: { maximum: 255 }, allow_blank: true
+
   # Virtual attribute for role selection in forms
   attr_accessor :role_id
 
   # Relationships
   has_many :projects, dependent: :destroy
   has_many :notifications, dependent: :destroy
+  has_many :time_logs
 
-  # Entrepreneur agreements
-  has_many :entrepreneur_agreements, class_name: "Agreement",
-           foreign_key: "entrepreneur_id", dependent: :destroy
+  # All agreements where user is a party
+  has_many :initiated_agreements, class_name: "Agreement",
+           foreign_key: "initiator_id", dependent: :destroy
+  has_many :received_agreements, class_name: "Agreement",
+           foreign_key: "other_party_id", dependent: :destroy
 
-  # Mentor agreements
-  has_many :mentor_agreements, class_name: "Agreement",
-           foreign_key: "mentor_id", dependent: :destroy
+  # Agreements where user is the entrepreneur (project owner)
+  def my_agreements
+    Agreement.joins(:project)
+            .where("projects.user_id = ?", id)
+  end
+
+  # Agreements where user is the mentor/co-founder (not project owner)
+  def other_party_agreements
+    Agreement.joins(:project)
+            .where("(agreements.initiator_id = ? OR agreements.other_party_id = ?) AND projects.user_id != ?",
+                  id, id, id)
+  end
+
+  # Alias for clarity when user is a mentor
+  def agreements_as_mentor
+    other_party_agreements
+  end
+
+  # Alias for clarity when user is an entrepreneur
+  def agreements_as_entrepreneur
+    my_agreements
+  end
+
+  # Validations
+  validates :github_username, format: { with: /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i, message: "is not a valid GitHub username", allow_blank: true, multiline: true }
+
+  # Class methods
+  def self.find_by_github_identifier(identifier)
+    return nil if identifier.blank?
+
+    # Try to find by GitHub username (case insensitive)
+    user = where("LOWER(github_username) = ?", identifier.downcase).first
+    return user if user
+
+    # Try to find by email
+    find_by(email: identifier.downcase)
+  end
 
   # Messaging
   has_many :sent_conversations, class_name: "Conversation", foreign_key: "sender_id", dependent: :destroy
@@ -42,6 +83,10 @@ class User < ApplicationRecord
     joins(:roles).where(roles: { name: role_name })
   }
 
+  def mentor_projects
+    Project.includes(:agreements).where(agreements: { initiator_id: id }).or(Project.includes(:agreements).where(agreements: { other_party_id: id }))
+  end
+
   # Methods
   def full_name
     "#{first_name} #{last_name}"
@@ -52,7 +97,7 @@ class User < ApplicationRecord
   end
 
   def all_agreements
-    Agreement.where("entrepreneur_id = ? OR mentor_id = ?", id, id)
+    Agreement.where("initiator_id = ? OR other_party_id = ?", id, id)
   end
 
   def avatar_url
@@ -81,5 +126,11 @@ class User < ApplicationRecord
     # The actual project selection is managed by ApplicationController#set_selected_project
     # which stores the project_id in the session
     nil # The actual project is set by the controller
+  end
+
+  def show_project_context_nav?
+    # Returns the user's preference for showing the project context navigation
+    # This column defaults to true, so users will see the nav by default
+    self[:show_project_context_nav]
   end
 end

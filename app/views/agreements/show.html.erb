@@ -14,12 +14,8 @@
         <%= link_to "Edit Agreement", edit_agreement_path(@agreement), class: "btn-primary" %>
       <% end %>
 
-      <% if can?(:has_counter_offer_from_entrepreneur, @agreement) %>
-        <span class="text-yellow-600">Note: This agreement has a counter offer from another entrepreneur</span>
-      <% end %>
-
-      <% if can?(:has_counter_offer_from_mentor, @agreement) %>
-        <span class="text-yellow-600">Note: This agreement has a counter offer from a mentor</span>
+      <% if can?(:has_counter_offer, @agreement) %>
+        <div class="text-yellow-600">Note: This agreement has a counter offer from another person</div>
       <% end %>
       
       <% if can?(:accept, @agreement) %>
@@ -56,6 +52,11 @@
             class: "btn-success", 
             data: { turbo_confirm: "Are you sure you want to mark this agreement as completed?" } %>
       <% end %>
+      
+      <% if @agreement.active? && (current_user == @agreement.initiator || current_user == @agreement.other_party) %>
+        <%= link_to "Time Logs", time_logs_path(@agreement.project), 
+            class: "btn-primary" %>
+      <% end %>
     </div>
   </div>
   
@@ -68,22 +69,48 @@
         </dd>
       </div>
       
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Entrepreneur</dt>
+      <% if @agreement.active? && @project.repository_url.present? %>
+        <% repo = format_github_repo(@project.repository_url) %>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">GitHub Repository</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <%= link_to repo[:url], target: "_blank", rel: "noopener noreferrer", class: "text-indigo-600 hover:text-indigo-900 flex items-center" do %>
+              <svg class="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+              </svg>
+              <%= repo[:display] %>
+            <% end %>
+            <p class="mt-1 text-xs text-gray-500">This repository is only visible to you because you have an accepted agreement for this project.</p>
+          </dd>
+        </div>
+      <% end %>
+      
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">1st Party</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= @agreement.entrepreneur.full_name %>
-          <% if @agreement.entrepreneur == current_user %>
+          <%= @agreement.initiator.full_name %>
+          <% if @agreement.initiator == current_user %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
+          <% end %>
+          <% if @project.user == @agreement.initiator %>
+            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Entrepreneur</span>
+          <% else %>
+            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Mentor</span>
           <% end %>
         </dd>
       </div>
-      
-      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Mentor/Co-Founder</dt>
+
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">2nd Party</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= @agreement.mentor.full_name %>
-          <% if @agreement.mentor == current_user %>
+          <%= @agreement.other_party.full_name %>
+          <% if @agreement.other_party == current_user %>
             <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
+          <% end %>
+          <% if @project.user == @agreement.other_party %>
+            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Entrepreneur</span>
+          <% else %>
+            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Mentor</span>
           <% end %>
         </dd>
       </div>
@@ -208,7 +235,7 @@
         </div>
       <% end %>
 
-      <% if !@can_view_full_details && @agreement.mentor == current_user && @agreement.pending? %>
+      <% if !@can_view_full_details && @agreement.other_party == current_user && @agreement.pending? %>
         <div class="bg-yellow-50 px-4 py-5">
           <div class="flex">
             <div class="flex-shrink-0">
@@ -246,7 +273,7 @@
                 <ul class="list-disc list-inside ml-4 mt-1">
                   <% @agreement.counter_offers.each do |counter| %>
                     <li>
-                      <%= link_to "Counter offer from #{counter.entrepreneur_id == current_user.id ? 'you' : counter.entrepreneur.full_name} on #{counter.created_at.strftime('%b %d, %Y')}", agreement_path(counter), class: "text-indigo-600 hover:text-indigo-900" %>
+                      <%= link_to "Counter offer from #{counter.initiator_id == current_user.id ? 'you' : counter.initiator.full_name} on #{counter.created_at.strftime('%b %d, %Y')}", agreement_path(counter), class: "text-indigo-600 hover:text-indigo-900" %>
                       <%= " (#{counter.status})" %>
                     </li>
                   <% end %>
@@ -289,6 +316,10 @@
       <% end %>
     </dl>
   </div>
+</div>
+
+<div class="mt-8">
+  <%= render "time_logs/remaining_time_progress", agreement: @agreement, project: @agreement.project, current_log: nil %>
 </div>
 
 <% if @agreement.active? || @agreement.completed? %>
@@ -372,5 +403,30 @@
         <% end %>
       </div>
     </div>
+  </div>
+<% end %>
+
+<% agreement_chain = [] %>
+<% current = @agreement %>
+<% while current.counter_to.present? %>
+  <% agreement_chain << [current, current.counter_to] %>
+  <% current = current.counter_to %>
+<% end %>
+<% agreement_chain.each_with_index do |(agreement, previous_agreement), idx| %>
+  <div class="mt-3 mb-3">
+    <h3 class="font-bold text-indigo-700 mb-2">
+      <% if agreement_chain.last == [agreement, previous_agreement] %>
+        Initial Agreement
+      <% else %>
+        Counter Offer <%= agreement_chain.length - idx - 1 %>
+      <% end %>
+
+      By <%= agreement.initiator&.full_name %>
+
+      <% if agreement.initiator_id == current_user.id %>
+        <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
+      <% end %>
+    </h3>
+    <%= render partial: "agreement_changes", locals: { agreement: agreement, previous_agreement: previous_agreement } %>
   </div>
 <% end %>

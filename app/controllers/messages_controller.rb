@@ -16,6 +16,13 @@ class MessagesController < ApplicationController
             partial: "messages/message",
             locals: { message: @message, current_user: @conversation.sender }
           )
+
+          Turbo::StreamsChannel.broadcast_replace_to(
+            @conversation.sender,
+            target: "conversation_#{@conversation.id}_item",
+            partial: "conversations/conversation_item",
+            locals: { conversation: @conversation, current_conversation: nil, current_user: @conversation.sender }
+          )
         end
 
         if @conversation.recipient != current_user
@@ -24,6 +31,13 @@ class MessagesController < ApplicationController
             target: "conversation_#{@conversation.id}_messages",
             partial: "messages/message",
             locals: { message: @message, current_user: @conversation.recipient }
+          )
+
+          Turbo::StreamsChannel.broadcast_replace_to(
+            @conversation.recipient,
+            target: "conversation_#{@conversation.id}_item",
+            partial: "conversations/conversation_item",
+            locals: { conversation: @conversation, current_conversation: nil, current_user: @conversation.recipient }
           )
         end
 
@@ -42,6 +56,6 @@ class MessagesController < ApplicationController
   end
 
   def message_params
-    params.require(:message).permit(:body)
+    params.require(:message).permit(:body, :voice, :audio, attachments: [])
   end
 end

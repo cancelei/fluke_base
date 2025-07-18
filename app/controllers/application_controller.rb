@@ -25,12 +25,13 @@ class ApplicationController < ActionController::Base
 
   rescue_from CanCan::AccessDenied, with: :user_not_authorized
 
-  helper_method :selected_project
+  helper_method :selected_project, :acting_as_mentor?
+
   protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [ :first_name, :last_name, :role_id ])
-    devise_parameter_sanitizer.permit(:account_update, keys: [ :first_name, :last_name, :role_id ])
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :first_name, :last_name, :role_id, :github_username, :github_token ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :first_name, :last_name, :role_id, :github_username, :github_token ])
   end
 
   def after_sign_in_path_for(resource)
@@ -43,23 +44,29 @@ class ApplicationController < ActionController::Base
     return unless user_signed_in?
 
     if params[:project_id].present?
-      # Update selected project if a new one is selected
-      session[:selected_project_id] = params[:project_id]
-    elsif session[:selected_project_id].present?
-      # Verify the project still exists and user still has access
-      @selected_project = current_user.projects.find_by(id: session[:selected_project_id])
-      session[:selected_project_id] = nil unless @selected_project
-    end
+      project = Project.find_by(id: params[:project_id])
+      if project && current_user.projects.include?(project)
+        ProjectSelectionService.new(current_user, session, project.id).call
+        @selected_project = project
+      end
+    else
+      # Set @selected_project from session if not set by params
+      selected_project_id = session[:selected_project_id] || current_user.selected_project_id
+      @selected_project = current_user.projects.find_by(id: selected_project_id) if selected_project_id.present?
 
-    # Set default project if none is selected
-    if session[:selected_project_id].nil? && current_user.projects.any?
-      @selected_project = current_user.projects.first
-      session[:selected_project_id] = @selected_project.id
+      if @selected_project.nil? && current_user.projects.any? && !acting_as_mentor?
+        @selected_project = current_user.projects.first
+        session[:selected_project_id] = @selected_project.id if @selected_project
+      end
     end
   end
 
   def selected_project
     @selected_project
+  end
+
+  def acting_as_mentor?
+    session[:acting_as_mentor].present? && current_user.has_role?(:mentor)
   end
 
   def user_not_authorized

@@ -1,0 +1,232 @@
+<!-- app/views/admin/solid_queue_jobs/index.html.erb -->
+<div class="solid-queue-jobs">
+  <%= form_with url: admin_solid_queue_jobs_path, method: :get do |f| %>
+  <div class="filters">
+    <div class="filter-group">
+      <label for="queue">Queue:</label>
+      <%= f.select :queue, 
+                  [['All Queues', '']] + 
+                  SolidQueue::Job.select(:queue_name).distinct.pluck(:queue_name).map { |q| [q, q] },
+                  { selected: params[:queue] },
+                  onchange: "this.form.submit()" %>
+    </div>
+    
+    <div class="filter-group">
+      <label for="priority">Priority:</label>
+      <%= f.select :priority, 
+                  [['All Priorities', '']] + 
+                  [['High (1)', '1'], ['Medium (2)', '2'], ['Low (3)', '3']],
+                  { selected: params[:priority] },
+                  onchange: "this.form.submit()" %>
+    </div>
+
+    <div class="filter-group">
+      <label for="status">Status:</label>
+      <%= f.select :status,
+                  [['All Statuses', '']] +
+                  [['Pending', 'pending'], ['Failed', 'failed'], ['Completed', 'completed'], ['Running', 'running']],
+                  { selected: params[:status] },
+                  onchange: "this.form.submit()" %>
+    </div>
+
+    <div class="filter-group">
+      <label for="sort">Sort:</label>
+      <%= f.select :sort, 
+                  [['Newest First', 'desc'], ['Oldest First', 'asc']],
+                  { selected: params[:sort] || 'desc' },
+                  onchange: "this.form.submit()" %>
+    </div>
+
+    <div class="filter-group">
+      <label for="per_page">Per Page:</label>
+      <%= f.select :per_page, 
+                  [['25', '25'], ['50', '50'], ['100', '100']],
+                  { selected: params[:per_page] || '25' },
+                  onchange: "this.form.submit()" %>
+    </div>
+  </div>
+<% end %>
+
+<%# Add a reset button %>
+<div class="reset-filters">
+  <%= link_to "Reset Filters", admin_solid_queue_jobs_path, class: "reset-btn" %>
+</div>
+
+  <div class="table-container">
+    <table class="solid-queue-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Queue</th>
+          <th>Priority</th>
+          <th>Job Class</th>
+          <th>Status</th>
+          <th>Scheduled At</th>
+          <th>Arguments</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @jobs.each do |job| %>
+          <tr>
+            <td><%= job.id %></td>
+            <td><%= job.queue_name %></td>
+            <td>
+              <% case job.priority
+                 when 0 %>
+                  Normal
+              <% when 1 %>
+                  High
+              <% when 2 %>
+                  Medium
+              <% when 3 %>
+                  Low
+              <% end %>
+            </td>
+            <td><%= job.class_name %></td>
+            <td class="status-cell">
+              <% if job.failed? || (job.arguments && job.arguments['exception_executions'] && !job.arguments['exception_executions'].empty?) %>
+                <span class="status-failed">Failed</span>
+              <% elsif job.finished? %>
+                <span class="status-completed">Completed</span>
+              <% elsif job.ready? %>
+                <span class="status-running">Ready</span>
+              <% elsif job.scheduled? %>
+                <span class="status-running">Scheduled</span>
+              <% else %>
+                <span class="status-pending">Pending</span>
+              <% end %>
+            </td>
+            <td><%= job.scheduled_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
+            <td><%= job.arguments&.dig("arguments") %></td>
+            <td class="actions">
+              <% if job.failed? || (job.arguments && job.arguments['exception_executions']&.any?) %>
+                <%= link_to "Retry", retry_admin_solid_queue_job_path(job), 
+                           method: :post,
+                           class: "retry-btn",
+                           data: { confirm: "Are you sure you want to retry this job?" } %>
+                <span class="action-separator">|</span>
+              <% end %>
+              <%= link_to "Delete", admin_solid_queue_job_path(job), 
+                         method: :delete,
+                         data: { confirm: "Are you sure you want to delete this job?" },
+                         class: "delete-btn" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <%= paginate @jobs %>
+</div>
+
+<style>
+.solid-queue-jobs {
+  padding: 20px;
+}
+
+.filters {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-weight: bold;
+}
+
+.solid-queue-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.solid-queue-table th,
+.solid-queue-table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.solid-queue-table th {
+  background-color: #f5f5f5;
+}
+
+.delete-btn {
+  color: #dc3545;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.delete-btn:hover {
+  color: #c82333;
+}
+
+.status-completed {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-failed {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.status-pending {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.status-running {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.actions {
+  white-space: nowrap;
+}
+
+.retry-btn {
+  color: #17a2b8;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.retry-btn:hover {
+  color: #138496;
+  text-decoration: underline;
+}
+
+.action-separator {
+  margin: 0 5px;
+  color: #dee2e6;
+}
+
+.status-cell {
+  text-transform: capitalize;
+}
+
+.reset-filters {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.reset-btn {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.reset-btn:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+</style>

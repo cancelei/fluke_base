@@ -1,0 +1,396 @@
+<div class="container mx-auto py-8">
+  <!-- Date Carousel -->
+  <div class="bg-white shadow rounded-lg p-4 mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">
+        <%= @selected_date.strftime('%B %d, %Y') %>
+      </h2>
+    </div>
+    <div class="flex justify-between items-center overflow-x-auto pb-2 -mx-2">
+      <% @date_range.each do |date| %>
+        <%= link_to time_logs_path(@project, date: date),
+                    class: "flex-shrink-0 mx-1 text-center #{date == @selected_date ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'}" do %>
+          <div class="w-16 p-2 rounded-lg <%= date == @selected_date ? 'bg-indigo-50' : 'hover:bg-gray-50' %>">
+            <div class="text-sm font-medium"><%= date.strftime('%a') %></div>
+            <div class="text-2xl font-bold mt-1"><%= date.day %></div>
+            <% if date == Date.current %>
+              <div class="h-1 w-1 mx-auto mt-1 rounded-full bg-indigo-600"></div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">Time Tracking</h1>
+    <div>
+      <p class="text-gray-600">
+        Project: <span class="font-medium"><%= @project.name %></span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Manual Time Log Entry -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Add Manual Time Log
+      </h3>
+      <p class="mt-1 text-sm text-gray-500">
+        Log time for tasks not associated with milestones
+      </p>
+    </div>
+    <div class="px-4 py-5 sm:p-6">
+      <%= form_with(model: @time_log_manual, url: create_manual_time_logs_path(@project), method: :post, local: true) do |f| %>
+        <div class="grid grid-cols-6 gap-6">
+          <%= f.hidden_field :manual_entry, value: true %>
+          <div class="col-span-6 sm:col-span-3">
+            <%= f.label :description, class: "block text-sm font-medium text-gray-700" %>
+            <%= f.text_area :description, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", rows: 3 %>
+          </div>
+
+          <div class="col-span-6 sm:col-span-3">
+            <%= f.label :started_at, "Start Time", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.datetime_field :started_at,
+                                 class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+          <div class="col-span-6 sm:col-span-3">
+            <%= f.label :ended_at, "End Time", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.datetime_field :ended_at,
+                                 class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                 max: Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
+          </div>
+
+          <div class="col-span-6 sm:col-span-3">
+            <%= f.label :milestone_id, "Milestone", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.collection_select :milestone_id, @milestones, :id, :title,
+                  { include_blank: false },
+                  { class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+          </div>
+        </div>
+        <div class="mt-5">
+          <%= f.submit "Add Time Log", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Current Time Log (if any) -->
+  <% if @project.time_logs.where(user_id: current_user.id).in_progress.exists? %>
+    <% current_log = @project.time_logs.in_progress.last %>
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-blue-700">
+            Currently tracking time for <span class="font-semibold"><%= current_log.milestone.title %></span>
+            <span class="ml-2 text-blue-600">
+            (Started <%= time_ago_in_words(current_log.started_at) %> ago)
+          </span>
+          </p>
+          <%= button_to 'Stop Tracking', stop_tracking_time_logs_path(@project, milestone_id: current_log.milestone_id),
+                        method: :post,
+                        class: 'mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500' %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <%= render "remaining_time_progress", project: @project, current_log: current_log, owner: @owner %>
+
+  <!-- All Milestones Section -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Milestones for <%= @selected_date.strftime('%B %d, %Y') %>
+        </h3>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">
+        Track time for milestones in this project
+      </p>
+    </div>
+    <div class="border-t border-gray-200">
+      <ul class="divide-y divide-gray-200">
+        <% @milestones.not_completed.each do |milestone| %>
+          <li class="px-4 py-4 sm:px-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="min-w-0 flex-1 flex items-center">
+                  <div class="min-w-0 flex-1 px-4">
+                    <div class="text-sm font-medium text-indigo-600 truncate">
+                      <%= milestone.title %>
+                    </div>
+                    <div class="mt-1 flex items-center text-sm text-gray-500">
+                      <span class="truncate">
+                        Due: <%= milestone.due_date.strftime('%B %d, %Y') %>
+                      </span>
+                      <span class="mx-2">•</span>
+                      <span>
+                        Status: <span class="<%= status_badge_class(milestone.status) %>">
+                          <%= milestone.status.humanize %>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ml-4 flex-shrink-0">
+                <% active_log = @project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id) %>
+                <% if active_log %>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                    In Progress
+                  </span>
+                <% else %>
+                  <%# Only show start tracking if there's no active log for this milestone in any project %>
+                  <% if TimeLog.in_progress.where(milestone_id: milestone.id, user_id: current_user.id).where.not(project_id: @project.id).empty? %>
+                    <%= button_to time_logs_path(@project, milestone_id: milestone.id, date: @selected_date),
+                                  method: :post,
+                                  class: 'inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+                                  data: { confirm: 'Start tracking time for this milestone?' } do %>
+                      Start Tracking
+                    <% end %>
+                  <% else %>
+                    <span class="text-sm text-gray-500">
+                      Being tracked in another project
+                    </span>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Time Logs Pending Confirmation
+      </h3>
+    </div>
+    <div class="border-t border-gray-200">
+      <% if @milestones_pending_confirmation.any? %>
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              User
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Milestone
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Due Date
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Started
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Ended
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Duration
+            </th>
+            <% if @owner %>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Action
+              </th>
+            <% end %>
+          </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+          <% time_log_users = @owner ? @project.time_logs.map(&:user).uniq : [current_user, @project.user].compact %>
+          <% time_log_users.each do |user| %>
+            <% @milestones_pending_confirmation.each do |milestone| %>
+              <% next unless milestone.time_logs.where(user: user).any? %>
+
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= user.full_name %>
+                    <% if user.id == @project.user_id %> 
+                      <div class="'ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600">
+                        owner
+                      </div>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= milestone.title %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <%= milestone.due_date.strftime('%b %d, %Y %I:%M %p') %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <ul>
+                      <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
+                        <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <ul>
+                      <% milestone.time_logs.where(user:).each do |log| %>
+                        <li>
+                          <%= log.ended_at&.strftime('%b %d, %Y %I:%M %p') || "-" %>
+                            <% if log.manual_entry %>
+                            <div class="relative group ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600 cursor-pointer">
+                              m
+                              <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white border border-gray-300 rounded shadow-lg p-2 text-gray-700 text-xs z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                              <strong>Justification:</strong>
+                              <div><%= log.description.presence || "No justification provided." %></div>
+                              </div>
+                            </div>
+                            <% end %>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
+                  <%= hours_spend > 0 ? "#{hours_spend} hours" : 'Less than an hour' %>
+                </td>
+                <td>
+                  <% if @owner %>
+                    <%= button_to 'Mark as Completed', confirm_project_milestone_path(@project, milestone),
+                                  method: :post,
+                                  class: 'ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
+                    %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="px-4 py-4 text-center text-gray-500">
+          No time logs found. Start tracking time for a milestone above.
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+
+<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+  <div class="px-4 py-5 sm:px-6">
+    <h3 class="text-lg leading-6 font-medium text-gray-900">
+      Time Logs for Completed Tasks
+    </h3>
+  </div>
+  <div class="border-t border-gray-200">
+    <% if @time_logs_completed.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            User
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Milestone
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Due Date
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Started
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Ended
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Duration
+          </th>
+        </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+        <% time_log_users = @owner ? @project.time_logs.map(&:user).uniq : [current_user, @project.user].compact %>
+        <% time_log_users.each do |user| %>
+          <% @time_logs_completed.each do |milestone| %>
+              <% next unless milestone.time_logs.where(user: user).any? %>
+
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= user.full_name %>
+                    <% if user.id == @project.user_id %> 
+                      <div class="'ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600">
+                        owner
+                      </div>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-indigo-600 truncate">
+                    <%= milestone.title %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <%= milestone.due_date.strftime('%b %d, %Y %I:%M %p') %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <ul>
+                      <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
+                        <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <ul>
+                      <% milestone.time_logs.where(user:).each do |log| %>
+                        <li>
+                          <%= log.ended_at&.strftime('%b %d, %Y %I:%M %p') || "-" %>
+                          <% if log.manual_entry %>
+                            <div class="relative group ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600 cursor-pointer">
+                              m
+                              <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white border border-gray-300 rounded shadow-lg p-2 text-gray-700 text-xs z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                              <strong>Justification:</strong>
+                              <div><%= log.description.presence || "No justification provided." %></div>
+                              </div>
+                            </div>
+                            <% end %>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
+                  <%= hours_spend > 0 ? "#{hours_spend} hours" : 'Less than an hour' %>
+                </td>
+              </tr>
+            <% end %>
+        <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="px-4 py-4 text-center text-gray-500">
+        No time logs found. Start tracking time for a milestone above.
+      </div>
+    <% end %>
+  </div>
+</div>
+</div>
+
+</div>

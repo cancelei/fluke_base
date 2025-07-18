@@ -15,19 +15,29 @@ class Agreement < ApplicationRecord
   HOURLY = "Hourly"
   EQUITY = "Equity"
   HYBRID = "Hybrid"
-
+  # enum :status, { pending: "Pending",
+  #   accepted: "Accepted",
+  #   completed: "Completed",
+  #   rejected: "Rejected",
+  #   cancelled: "Cancelled",
+  #   countered: "Countered" }
   # Relationships
   belongs_to :project
-  belongs_to :entrepreneur, class_name: "User", foreign_key: "entrepreneur_id"
-  belongs_to :mentor, class_name: "User", foreign_key: "mentor_id"
+  belongs_to :initiator, class_name: "User", foreign_key: "initiator_id"
+  belongs_to :counter_offer_turn, class_name: "User", foreign_key: "counter_offer_turn_id"
+  belongs_to :other_party, class_name: "User", foreign_key: "other_party_id"
   has_many :meetings, dependent: :destroy
   belongs_to :counter_to, class_name: "Agreement", foreign_key: "counter_to_id", optional: true
   has_many :counter_offers, class_name: "Agreement", foreign_key: "counter_to_id", dependent: :destroy
+  has_many :github_logs, dependent: :destroy
+
+  before_validation :init_status, :init_agreement_type
+  before_save :update_countered_agreement
 
   # Validations
   validates :project_id, presence: true
-  validates :entrepreneur_id, presence: true
-  validates :mentor_id, presence: true
+  validates :initiator_id, presence: true
+  validates :other_party_id, presence: true
   validates :status, presence: true, inclusion: { in: [ PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED, COUNTERED ] }
   validates :agreement_type, presence: true, inclusion: { in: [ MENTORSHIP, CO_FOUNDER ] }
   validates :payment_type, presence: true, inclusion: { in: [ HOURLY, EQUITY, HYBRID ] }
@@ -38,6 +48,7 @@ class Agreement < ApplicationRecord
   validates :hourly_rate, presence: true, numericality: { greater_than_or_equal_to: 0 }, if: -> { payment_type == HOURLY || payment_type == HYBRID }
   validates :equity_percentage, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }, if: -> { payment_type == EQUITY || payment_type == HYBRID }
   validate :end_date_after_start_date
+  validates :milestone_ids, presence: true, if: -> { agreement_type == MENTORSHIP }
   validate :valid_payment_terms
   validate :different_entrepreneur_and_mentor
 
@@ -49,6 +60,36 @@ class Agreement < ApplicationRecord
   scope :completed, -> { where(status: COMPLETED) }
   scope :rejected, -> { where(status: REJECTED) }
   scope :cancelled, -> { where(status: CANCELLED) }
+  scope :countered, -> { where(status: COUNTERED) }
+
+  def init_status
+    self.status = PENDING if self.status.blank?
+  end
+
+  def init_agreement_type
+    self.agreement_type = self.weekly_hours.present? ? MENTORSHIP : CO_FOUNDER
+  end
+
+  def init_counter_offer
+    countered_to(self.counter_to_id) if self.counter_to_id.present? && self.counter_to_id_changed?
+  end
+
+  def update_countered_agreement
+    counter_to&.update(status: COUNTERED) if counter_to_id_changed? && counter_to_id.present?
+  end
+
+  def countered_to(agreement_id)
+    original_agreement = self.class.find(agreement_id)
+
+    if !original_agreement.pending? && !original_agreement.countered?
+      errors.add(:base, "Cannot create a counter offer to an agreement that is not pending or countered")
+      return
+    end
+
+    self.counter_to_id = original_agreement.id
+    attrs_to_copy = original_agreement.attributes.except("id", "created_at", "updated_at", "counter_to_id", "status", "initiator_id", "other_party_id")
+    assign_attributes(attrs_to_copy)
+  end
 
   # Milestone methods
   def milestone_ids
@@ -62,7 +103,16 @@ class Agreement < ApplicationRecord
   def selected_milestones
     project.milestones.where(id: milestone_ids)
   end
-  scope :countered, -> { where(status: COUNTERED) }
+
+  # Time tracking methods
+  def total_hours_logged
+    time_logs.completed.sum(:hours_spent).round(2)
+  end
+
+  def current_time_log
+    time_logs.in_progress.last
+  end
+
   scope :not_rejected_or_cancelled, -> { where.not(status: [ REJECTED, CANCELLED ]) }
 
   # Custom validation: ensure end date is after start date
@@ -76,7 +126,7 @@ class Agreement < ApplicationRecord
 
   # Custom validation: ensure entrepreneur and mentor are different users
   def different_entrepreneur_and_mentor
-    if entrepreneur_id.present? && mentor_id.present? && entrepreneur_id == mentor_id
+    if initiator_id.present? && other_party_id.present? && initiator_id == other_party_id
       errors.add(:base, "Entrepreneur and mentor cannot be the same person")
     end
   end
@@ -173,8 +223,8 @@ class Agreement < ApplicationRecord
   end
 
   def can_view_full_project_details?(user)
-    return true if entrepreneur_id == user.id
-    return true if mentor_id == user.id
+    return true if initiator_id == user.id
+    return true if other_party_id == user.id
     false
   end
 

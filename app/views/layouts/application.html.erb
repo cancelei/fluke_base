@@ -25,7 +25,15 @@
 
   <body class="min-h-screen bg-gray-50">
     <%= render 'shared/navbar' %>
-    <%= render 'shared/flash_messages' %>
+    <%= render 'shared/toast_messages' %>
+    
+    <%= turbo_frame_tag "project-context" do %>
+      <% if user_signed_in? && @selected_project.present? %>
+        <%= render 'shared/project_context_nav', selected_project: @selected_project %>
+      <% end %>
+    <% end %>
+
+    <%= render 'shared/milestone_bar' %>
     
     <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
       <%= yield %>

@@ -1,0 +1,14 @@
+<%# 
+  Reusable pagination partial that wraps Kaminari's paginator
+  
+  Parameters:
+  - records: The ActiveRecord::Relation that has been paginated with Kaminari
+  - remote: (optional) Whether to use AJAX for pagination (default: false)
+  - class_name: (optional) Additional CSS classes for the pagination container
+%>
+
+<% if records.respond_to?(:total_pages) && records.total_pages > 1 %>
+  <div class="<%= local_assigns[:class_name] %>">
+    <%= paginate records, remote: local_assigns[:remote] || false %>
+  </div>
+<% end %>

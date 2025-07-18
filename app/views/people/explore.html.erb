@@ -1,0 +1,35 @@
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+  <div class="px-4 py-6 sm:px-0">
+    <nav class="flex mb-4 text-sm text-gray-500" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1">
+        <li>
+          <%= link_to 'All People', explore_people_path, class: "hover:underline #{@role.blank? && @project_id.blank? ? 'font-bold text-indigo-700' : ''}" %>
+        </li>
+        <li>
+          <span>/</span>
+        </li>
+        <li>
+          <%= link_to 'Entrepreneurs', explore_people_path(role: Role::ENTREPRENEUR), class: "hover:underline #{(@role == Role::ENTREPRENEUR) ? 'font-bold text-indigo-700' : ''}" %>
+        </li>
+        <li>
+          <span>/</span>
+        </li>
+        <li>
+          <%= link_to 'Mentors', explore_people_path(role: Role::MENTOR), class: "hover:underline #{(@role == Role::MENTOR) ? 'font-bold text-indigo-700' : ''}" %>
+        </li>
+        <% if @project_id.present? %>
+          <li><span>/</span></li>
+          <li>
+            <%= link_to 'By Project', explore_people_path(project_id: @project_id), class: "hover:underline font-bold text-indigo-700" %>
+          </li>
+        <% end %>
+      </ol>
+    </nav>
+    <%= form_with url: explore_people_path, method: :get, class: "flex flex-wrap gap-2 mb-6" do |f| %>
+      <%= f.text_field :search, value: params[:search], placeholder: "Search people...", class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+      <%= f.select :role, [["All Roles", ""], ["Entrepreneur", Role::ENTREPRENEUR], ["Mentor", Role::MENTOR]], { selected: params[:role] }, { class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+      <%= f.submit "Search", class: "inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
+    <% end %>
+    <%= render partial: 'shared/explore_users', locals: { users: @users, user_role: @role&.to_sym || :all, title: 'Explore People', description: 'Browse all entrepreneurs and mentors on the platform.' } %>
+  </div>
+</div> 

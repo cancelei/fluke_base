@@ -7,12 +7,6 @@ class ProjectsController < ApplicationController
   end
 
   def explore
-    # Verify the user has the mentor role
-    unless current_user.has_role?(:mentor)
-      redirect_to projects_path, alert: "You need to be a mentor to explore available projects"
-      return
-    end
-
     @projects = ProjectSearchQuery.new(current_user, params).results
   end
 
@@ -21,22 +15,43 @@ class ProjectsController < ApplicationController
     @milestones = @project.milestones.order(created_at: :desc)
 
     # Check if the current user has an agreement with the project
-    @has_agreement = @project.agreements.exists?([
-      "(entrepreneur_id = :user_id OR mentor_id = :user_id) AND status IN (:statuses)",
-      { user_id: current_user.id, statuses: [ Agreement::ACCEPTED, Agreement::PENDING ] }
+    @has_agreement = @project.agreements.active.exists?([
+      "(initiator_id = :user_id OR other_party_id = :user_id)",
+      { user_id: current_user.id }
     ])
 
     # Load suggested mentors only for project owner
     if current_user.id == @project.user_id
       @suggested_mentors = User.with_role(:mentor)
-                             .where.not(id: @project.agreements.pluck(:mentor_id))
+                             .where.not(id: @project.agreements.pluck(:other_party_id))
                              .limit(3)
     else
       @suggested_mentors = []
     end
+
+    # Update the selected project in the session
+    if current_user && current_user.projects.include?(@project)
+      ProjectSelectionService.new(current_user, session, @project.id).call
+      @selected_project = @project
+    end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @project }
+    end
   end
 
   def new
+    unless current_user.has_role?(Role::ENTREPRENEUR) && current_user.onboarded_for?(Role::ENTREPRENEUR)
+      # Add Entrepreneur role if not present
+      session[:comes_from_project_new] = true
+      current_user.add_role("Entrepreneur") unless current_user.has_role?("Entrepreneur")
+      # Redirect to entrepreneur onboarding
+      redirect_to onboarding_entrepreneur_path, notice: "Please complete your entrepreneur profile before creating a project."
+      return
+    end
+
+
     @project = Project.new
   end
 
@@ -44,6 +59,7 @@ class ProjectsController < ApplicationController
     @project = current_user.projects.new(project_params)
 
     if @project.save
+      GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
       redirect_to @project, notice: "Project was successfully created."
     else
       render :new, status: :unprocessable_entity
@@ -76,6 +92,6 @@ class ProjectsController < ApplicationController
   end
 
   def project_params
-    params.require(:project).permit(:name, :description, :stage, :category, :current_stage, :target_market, :funding_status, :team_size, :collaboration_type, public_fields: [])
+    params.require(:project).permit(:name, :description, :stage, :category, :current_stage, :target_market, :funding_status, :team_size, :collaboration_type, :repository_url, public_fields: [])
   end
 end

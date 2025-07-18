@@ -1,8 +1,8 @@
 <%# Shows track record for a user, role-aware. %>
 <ul class="list-disc pl-5 text-sm text-gray-700">
   <% if user_role == :mentor %>
-    <% user.mentor_agreements.completed.each do |agreement| %>
-      <li>Mentored <%= agreement.entrepreneur.full_name %> in <%= agreement.project&.name || 'a project' %> (<%= agreement.created_at.strftime('%Y') %>)</li>
+    <% user.other_party_agreements.completed.each do |agreement| %>
+      <li>Mentored <%= agreement.initiator.full_name %> in <%= agreement.project&.name || 'a project' %> (<%= agreement.created_at.strftime('%Y') %>)</li>
     <% end %>
   <% else %>
     <% user.projects.each do |project| %>

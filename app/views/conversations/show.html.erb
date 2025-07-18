@@ -1,12 +1,37 @@
-<div class="bg-white shadow-sm rounded-lg">
-  <h1 class="text-2xl font-bold text-gray-900 p-4 border-b">Messages</h1>
+<div class="bg-white shadow-sm rounded-lg h-[80vh] flex flex-col overflow-hidden" data-controller="conversation">
+  <h1 class="text-2xl font-bold text-gray-900 p-4 border-b flex items-center justify-between">
+    <div class="flex items-center">
+      <button id="hamburger-btn" 
+              class="md:hidden p-2 -ml-2 mr-2 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" 
+              aria-label="Toggle conversations" 
+              data-action="click->conversation#toggleSidebar">
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <span>Messages</span>
+    </div>
+  </h1>
   
-  <div class="flex h-[75vh]">
+  <div class="flex flex-1 overflow-hidden relative">
+    <!-- Overlay for mobile -->
+    <div id="sidebar-overlay" 
+         class="fixed inset-0 backdrop-blur-sm bg-opacity-50 z-10 md:hidden hidden"
+         data-conversation-target="overlay" 
+         data-action="click->conversation#closeSidebar">
+    </div>
+    
     <!-- Sidebar with conversation list -->
-    <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: current_user %>
+    <div id="conversation_sidebar" 
+         class="fixed md:relative inset-y-0 left-0 w-[80%] md:w-1/3 bg-white border-r transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-20 md:z-0 overflow-y-auto h-full"
+         data-conversation-target="sidebar">
+      <div class="p-2 h-full">
+        <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: current_user %>
+      </div>
+    </div>
     
     <!-- Conversation content -->
-    <div id="conversation_content" class="w-2/3 flex flex-col">
+    <div id="conversation_content" class="flex-1 flex flex-col overflow-y-auto h-full w-full md:w-2/3">
       <%= render "conversations/conversation_content", conversation: @conversation, messages: @messages, message: @message %>
     </div>
   </div>

@@ -21,7 +21,9 @@
                 <% end %>
               </p>
             </div>
-            <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Active</span>
+            <% if role.id == current_user.current_role_id %>
+              <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Active</span>
+            <% end %>
           </li>
         <% end %>
       </ul>

@@ -82,10 +82,10 @@
                 <div class="mt-2 sm:flex sm:justify-between">
                   <div class="sm:flex">
                     <p class="flex items-center text-sm text-gray-500">
-                      <% if current_user.id == agreement.entrepreneur_id %>
-                        <span>Mentor: <%= agreement.mentor.full_name %></span>
+                      <% if current_user.id == agreement.initiator_id %>
+                        <span>Other Party: <%= agreement.other_party.full_name %></span>
                       <% else %>
-                        <span>Entrepreneur: <%= agreement.entrepreneur.full_name %></span>
+                        <span>Initiator: <%= agreement.initiator.full_name %></span>
                       <% end %>
                     </p>
                   </div>

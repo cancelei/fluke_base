@@ -16,12 +16,11 @@ class ProjectSearchQuery
 
   def base_scope
     Project.joins(:user)
-           .where.not(user_id: @user.id)
            .order(created_at: :desc)
   end
 
   def filter_by_collaboration_type(scope)
-    return scope.seeking_mentor unless @params[:collaboration_type].present?
+    return scope unless @params[:collaboration_type].present?
 
     case @params[:collaboration_type]
     when "mentor"

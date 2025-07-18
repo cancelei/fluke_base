@@ -94,7 +94,22 @@
         <%= form.text_area :description, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
         <%= render_public_field_checkbox(form, :description, project) %>
       </div>
-      <p class="mt-1 text-sm text-gray-500">Give a detailed description of your project idea</p>
+    </div>
+
+    <div class="sm:col-span-6">
+      <%= form.label :repository_url, "GitHub Repository URL", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1 flex items-center">
+        <div class="flex rounded-md shadow-sm w-full">
+          <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-gray-500 sm:text-sm">
+            github.com/
+          </span>
+          <%= form.text_field :repository_url, 
+                            placeholder: "username/repository", 
+                            class: "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+        </div>
+        <%= render_public_field_checkbox(form, :repository_url, project) %>
+      </div>
+      <p class="mt-1 text-sm text-gray-500">Optional. The GitHub repository for this project (e.g., username/repository)</p>
     </div>
 
     <div class="sm:col-span-6">
