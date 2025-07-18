@@ -60,17 +60,17 @@ module UiHelper
     variant = options.delete(:variant) || :primary
     size = options.delete(:size) || :default
     icon = options.delete(:icon)
-    
+
     css_class = "btn btn-#{variant}"
     css_class += " btn-#{size}" if size != :default
     css_class += " #{options.delete(:class)}" if options[:class]
-    
+
     options[:class] = css_class
 
     content = []
     content << ui_icon(icon, class: "-ml-0.5 mr-1.5 h-5 w-5") if icon
     content << text
-    
+
     if block_given?
       content << capture(&block)
     end
@@ -84,12 +84,12 @@ module UiHelper
 
   def ui_icon(icon_name, options = {})
     return "" if icon_name.blank?
-    
+
     css_class = "h-5 w-5 #{options[:class]}"
-    
+
     case icon_name.to_s
     when "plus"
-      content_tag(:svg, 
+      content_tag(:svg,
         tag.path(fill_rule: "evenodd", d: "M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z", clip_rule: "evenodd"),
         class: css_class, fill: "currentColor", viewBox: "0 0 20 20")
     when "edit"
@@ -130,21 +130,21 @@ module UiHelper
   def ui_badge(text, variant = :primary, options = {})
     css_class = "badge badge-#{variant}"
     css_class += " #{options[:class]}" if options[:class]
-    
+
     content_tag(:span, text, class: css_class)
   end
 
   def ui_card(options = {}, &block)
     css_class = "card"
     css_class += " #{options[:class]}" if options[:class]
-    
+
     content_tag(:div, class: css_class, &block)
   end
 
   def ui_card_header(title, subtitle = nil, options = {})
     css_class = "card-header"
     css_class += " #{options[:class]}" if options[:class]
-    
+
     content_tag(:div, class: css_class) do
       content = []
       content << content_tag(:h3, title, class: "text-lg font-medium leading-6 text-gray-900")
@@ -156,26 +156,26 @@ module UiHelper
   def ui_empty_state(title, description, action_text = nil, action_url = nil, options = {})
     content_tag(:div, class: "text-center py-12") do
       content = []
-      
+
       # Icon
       icon = options[:icon] || "folder"
       content << content_tag(:div, class: "mx-auto h-12 w-12 text-gray-400") do
         ui_icon(icon, class: "mx-auto h-12 w-12")
       end
-      
+
       # Title
       content << content_tag(:h3, title, class: "mt-2 text-sm font-medium text-gray-900")
-      
+
       # Description
       content << content_tag(:p, description, class: "mt-1 text-sm text-gray-500")
-      
+
       # Action button
       if action_text && action_url
         content << content_tag(:div, class: "mt-6") do
           ui_button(action_text, action_url, variant: :primary, icon: "plus")
         end
       end
-      
+
       safe_join(content)
     end
   end
@@ -183,24 +183,24 @@ module UiHelper
   def ui_search_form(url, options = {}, &block)
     search_value = options[:search_value] || params[:search]
     method = options[:method] || :get
-    
+
     form_with(url: url, method: method, class: "flex space-x-2") do |f|
       content = []
-      
+
       # Search input
-      content << f.text_field(:search, 
-        value: search_value, 
-        placeholder: options[:placeholder] || "Search...", 
+      content << f.text_field(:search,
+        value: search_value,
+        placeholder: options[:placeholder] || "Search...",
         class: "form-input")
-      
+
       # Additional form fields from block
       if block_given?
         content << capture(f, &block)
       end
-      
+
       # Submit button
       content << f.submit(options[:submit_text] || "Search", class: "btn btn-primary")
-      
+
       safe_join(content)
     end
   end
@@ -265,26 +265,26 @@ module UiHelper
 
   def render_mentor_card_content(user)
     content = []
-    
+
     # Skills
-    skills = user.skills || ["Business", "Tech", "Marketing", "UI/UX", "Growth"]
+    skills = user.skills || [ "Business", "Tech", "Marketing", "UI/UX", "Growth" ]
     content << content_tag(:div, class: "flex flex-wrap gap-1") do
       skills.first(3).map do |skill|
         content_tag(:span, skill, class: "inline-flex items-center rounded bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700")
       end.join.html_safe
     end
-    
+
     # Stats
     content << content_tag(:div, class: "mt-2 flex justify-between items-center text-xs text-gray-600") do
       "Mentees: #{user.other_party_agreements.completed.count}"
     end
-    
+
     safe_join(content)
   end
 
   def render_entrepreneur_card_content(user)
     content = []
-    
+
     content << content_tag(:div, class: "flex flex-col gap-1 text-xs text-gray-600") do
       stats = []
       stats << "Projects: <strong>#{user.projects.count}</strong>"
@@ -293,29 +293,28 @@ module UiHelper
       end
       safe_join(stats.map { |stat| content_tag(:span, stat.html_safe) })
     end
-    
+
     safe_join(content)
   end
 
   def render_general_card_content(user)
     content = []
-    
+
     content << content_tag(:div, class: "text-xs text-gray-600") do
       "Active Projects: #{user.my_agreements.where(status: Agreement::ACCEPTED).count}"
     end
-    
+
     content << content_tag(:div, class: "mt-2") do
-      render partial: 'shared/achievements', locals: { user: user, user_role: :entrepreneur }
+      render partial: "shared/achievements", locals: { user: user, user_role: :entrepreneur }
     end
-    
+
     safe_join(content)
   end
 end
 
-  def stage_badge(stage)
-    return "" unless stage.present?
+def stage_badge(stage)
+  return "" unless stage.present?
 
-    content_tag(:span, stage.capitalize,
-      class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800")
-  end
+  content_tag(:span, stage.capitalize,
+    class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800")
 end
