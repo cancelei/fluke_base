@@ -3,6 +3,8 @@ class User < ApplicationRecord
   belongs_to :current_role, class_name: "Role", optional: true
 
   include Roleable
+  include UserAgreements
+  include UserMessaging
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -14,46 +16,23 @@ class User < ApplicationRecord
 
   # Validations
   validates :github_token, length: { maximum: 255 }, allow_blank: true
+  validates :github_username, format: { with: /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i, message: "is not a valid GitHub username", allow_blank: true, multiline: true }
+  validates :first_name, :last_name, presence: true
 
   # Virtual attribute for role selection in forms
   attr_accessor :role_id
 
   # Relationships
   has_many :projects, dependent: :destroy
-  has_many :notifications, dependent: :destroy
   has_many :time_logs
 
-  # All agreements where user is a party
-  has_many :initiated_agreements, class_name: "Agreement",
-           foreign_key: "initiator_id", dependent: :destroy
-  has_many :received_agreements, class_name: "Agreement",
-           foreign_key: "other_party_id", dependent: :destroy
+  # Avatar
+  has_one_attached :avatar
 
-  # Agreements where user is the entrepreneur (project owner)
-  def my_agreements
-    Agreement.joins(:project)
-            .where("projects.user_id = ?", id)
-  end
-
-  # Agreements where user is the mentor/co-founder (not project owner)
-  def other_party_agreements
-    Agreement.joins(:project)
-            .where("(agreements.initiator_id = ? OR agreements.other_party_id = ?) AND projects.user_id != ?",
-                  id, id, id)
-  end
-
-  # Alias for clarity when user is a mentor
-  def agreements_as_mentor
-    other_party_agreements
-  end
-
-  # Alias for clarity when user is an entrepreneur
-  def agreements_as_entrepreneur
-    my_agreements
-  end
-
-  # Validations
-  validates :github_username, format: { with: /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i, message: "is not a valid GitHub username", allow_blank: true, multiline: true }
+  # Scopes
+  scope :with_role, ->(role_name) {
+    joins(:roles).where(roles: { name: role_name })
+  }
 
   # Class methods
   def self.find_by_github_identifier(identifier)
@@ -67,58 +46,19 @@ class User < ApplicationRecord
     find_by(email: identifier.downcase)
   end
 
-  # Messaging
-  has_many :sent_conversations, class_name: "Conversation", foreign_key: "sender_id", dependent: :destroy
-  has_many :received_conversations, class_name: "Conversation", foreign_key: "recipient_id", dependent: :destroy
-  has_many :messages, dependent: :destroy
-
-  # Avatar
-  has_one_attached :avatar
-
-  # Validations
-  validates :first_name, :last_name, presence: true
-
-  # Scopes
-  scope :with_role, ->(role_name) {
-    joins(:roles).where(roles: { name: role_name })
-  }
-
-  def mentor_projects
-    Project.includes(:agreements).where(agreements: { initiator_id: id }).or(Project.includes(:agreements).where(agreements: { other_party_id: id }))
-  end
-
   # Methods
   def full_name
     "#{first_name} #{last_name}"
   end
 
-  def unread_notifications_count
-    notifications.unread.count
-  end
-
-  def all_agreements
-    Agreement.where("initiator_id = ? OR other_party_id = ?", id, id)
-  end
-
   def avatar_url
-    if avatar.attached?
-      avatar
-    else
-      # Generate initials avatar and convert to base64 data URL
-      initials = "#{first_name&.first}#{last_name&.first}".upcase
-      color = Digest::MD5.hexdigest(initials)[0..5]
-      svg = <<~SVG
-        <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-          <rect width="200" height="200" fill="##{color}"/>
-          <text x="50%" y="50%" font-family="Arial" font-size="80" fill="white" text-anchor="middle" dominant-baseline="middle">#{initials}</text>
-        </svg>
-      SVG
-      "data:image/svg+xml;base64,#{Base64.strict_encode64(svg)}"
-    end
+    @avatar_service ||= AvatarService.new(self)
+    @avatar_service.url
   end
 
   def initials
-    "#{first_name&.first}#{last_name&.first}".upcase
+    @avatar_service ||= AvatarService.new(self)
+    @avatar_service.initials
   end
 
   def selected_project

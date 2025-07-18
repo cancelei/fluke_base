@@ -11,13 +11,13 @@
         </div>
         <div class="hidden lg:ml-6 lg:flex lg:space-x-8">
           <% if user_signed_in? %>
-            <%= link_to "Dashboard", dashboard_path, class: "inline-flex items-center border-b-2 #{current_page?(dashboard_path) ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Projects", projects_path, class: "inline-flex items-center border-b-2 #{controller_name == 'projects' && action_name == 'index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Explore Projects", explore_projects_path, class: "inline-flex items-center border-b-2 #{controller_name == 'projects' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Explore People", explore_people_path, class: "inline-flex items-center border-b-2 #{controller_name == 'people' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Agreements", agreements_path, class: "inline-flex items-center border-b-2 #{controller_name == 'agreements' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Messages", conversations_path, class: "inline-flex items-center border-b-2 #{controller_name == 'conversations' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Roles", roles_path, class: "inline-flex items-center border-b-2 #{controller_name == 'roles' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
+            <%= navbar_link "Dashboard", dashboard_path %>
+            <%= navbar_link "Projects", projects_path, current_condition: -> { controller_name == 'projects' && action_name == 'index' } %>
+            <%= navbar_link "Explore Projects", explore_projects_path, current_condition: -> { controller_name == 'projects' && action_name == 'explore' } %>
+            <%= navbar_link "Explore People", explore_people_path, current_condition: -> { controller_name == 'people' && action_name == 'explore' } %>
+            <%= navbar_link "Agreements", agreements_path, current_condition: -> { controller_name == 'agreements' } %>
+            <%= navbar_link "Messages", conversations_path, current_condition: -> { controller_name == 'conversations' } %>
+            <%= navbar_link "Roles", roles_path, current_condition: -> { controller_name == 'roles' } %>
             
             <% if current_user.projects.any? || current_user.received_agreements.any?  || current_user.initiated_agreements.any? %>
             <div class="relative" data-controller="dropdown">

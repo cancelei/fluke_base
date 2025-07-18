@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
 
   rescue_from CanCan::AccessDenied, with: :user_not_authorized
 
-  helper_method :selected_project, :acting_as_mentor?
+  helper_method :selected_project, :acting_as_mentor?, :present
 
   protected
 
@@ -72,5 +72,14 @@ class ApplicationController < ActionController::Base
   def user_not_authorized
     flash[:alert] = "You are not authorized to perform this action."
     redirect_back(fallback_location: root_path)
+  end
+
+  def present(object, with: nil)
+    if with
+      with.new(object, view_context)
+    else
+      presenter_class = "#{object.class.name}Presenter".constantize
+      presenter_class.new(object, view_context)
+    end
   end
 end

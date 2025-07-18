@@ -1,8 +1,9 @@
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
   <div class="px-4 py-6 sm:px-0">
+    <% presenter = present(@project) %>
     <div class="mb-6 flex justify-between items-center">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900"><%= display_project_name(@project, current_user) %></h1>
+        <h1 class="text-2xl font-bold text-gray-900"><%= presenter.display_name(current_user) %></h1>
         <div class="flex flex-wrap gap-2 mt-1">
           <% if @project.category.present? && field_visible_to_user?(@project, :category, current_user) %>
             <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
@@ -10,7 +11,9 @@
             </span>
           <% end %>
           
-          <%= display_collaboration_badges(@project, current_user) %>
+          <%= presenter.collaboration_badges %>
+          <%= presenter.stage_badge %>
+          <%= presenter.funding_status_badge %>
         </div>
       </div>
       
@@ -78,7 +81,7 @@
       <div class="px-4 py-5 sm:px-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900">Project Details</h3>
         <p class="mt-1 max-w-2xl text-sm text-gray-500">
-          Created by <%= link_to @project.user.full_name, entrepreneur_path(@project.user), class: "text-indigo-600 hover:text-indigo-900 underline" %> on <%= @project.created_at.strftime("%B %d, %Y") %>
+          <%= presenter.owner_display %> · <%= presenter.created_timeframe %>
         </p>
       </div>
       
@@ -130,7 +133,7 @@
           <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Team Size</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <%= render_project_field(@project, :team_size, current_user) %>
+              <%= presenter.team_size_display %>
             </dd>
           </div>
         </dl>

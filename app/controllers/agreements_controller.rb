@@ -7,15 +7,11 @@ class AgreementsController < ApplicationController
   before_action :authorize_agreement_action, only: %i[accept reject counter_offer cancel]
 
   def index
-    @my_agreements = current_user.my_agreements
-      .includes(:project, :initiator, :other_party)
-      .order(created_at: :desc)
+    query = AgreementsQuery.new(current_user, params)
+    @my_agreements = query.my_agreements
+    @other_party_agreements = query.other_party_agreements
 
-    @other_party_agreements = current_user.other_party_agreements
-      .includes(:project, :initiator, :other_party)
-      .order(created_at: :desc)
-
-    filter_by_status!(@my_agreements, @other_party_agreements)
+    @my_agreements, @other_party_agreements = query.filter_by_status(@my_agreements, @other_party_agreements)
   end
 
   def show
@@ -39,50 +35,83 @@ class AgreementsController < ApplicationController
       redirect_to agreements_path
       return
     end
-    @agreement = Agreement.new
 
     set_project_from_params_or_session
+
+    form_params = {
+      project_id: params[:project_id] || @project&.id,
+      other_party_id: params[:other_party_id],
+      counter_to_id: params[:counter_to_id]
+    }
+
+    @agreement_form = AgreementForm.new(form_params)
 
     if params[:counter_to_id].present?
       original_agreement = Agreement.find(params[:counter_to_id])
       @initiator_details = original_agreement.initiator_meta
-      @agreement.countered_to(params[:counter_to_id])
     end
 
     @other_party = User.find_by_id(params[:other_party_id])
-    @milestone_ids = @agreement.milestone_ids || []
+    @milestone_ids = @agreement_form.milestone_ids_array
   end
 
   def edit
     authorize! :edit, @agreement
-    @milestone_ids = @agreement.milestone_ids || []
+
+    # Initialize form object with current agreement data
+    @agreement_form = AgreementForm.new(
+      project_id: @agreement.project_id,
+      initiator_id: @agreement.initiator_id,
+      other_party_id: @agreement.other_party_id,
+      agreement_type: @agreement.agreement_type,
+      payment_type: @agreement.payment_type,
+      start_date: @agreement.start_date,
+      end_date: @agreement.end_date,
+      tasks: @agreement.tasks,
+      weekly_hours: @agreement.weekly_hours,
+      hourly_rate: @agreement.hourly_rate,
+      equity_percentage: @agreement.equity_percentage,
+      milestone_ids: @agreement.milestone_ids,
+      counter_to_id: @agreement.counter_to_id,
+      status: @agreement.status,
+      initiator_meta: @agreement.initiator_meta,
+      counter_offer_turn_id: @agreement.counter_offer_turn_id
+    )
+
+    @milestone_ids = @agreement_form.milestone_ids_array
     handle_edit_counter_offer
     set_project_and_mentor_for_edit
     handle_counter_offer_for_edit
   end
 
   def create
+    # Get initiator meta from old agreement if available
     project_id = params.dig("agreement", "project_id").to_i
+    initiator_meta = nil
     if project_id.present?
       old_agreement = Project.find_by_id(project_id).agreements.order(id: :desc).first
+      initiator_meta = old_agreement&.initiator_meta
     end
 
-    @agreement = Agreement.new(agreement_params)
-    if old_agreement.present?
-      @agreement.initiator_meta = old_agreement.initiator_meta
-    end
+    # Set default initiator meta if not present
+    initiator_meta = { "id" => current_user.id, "role" => current_user.current_role&.name } if initiator_meta.blank?
 
-    @agreement.initiator_meta = { "id" => current_user.id, "role" => current_user.current_role&.name } if @agreement.initiator_meta.compact_blank.blank?
-    @agreement.counter_offer_turn_id = @agreement.other_party_id
+    form_params = agreement_params.merge(
+      initiator_id: current_user.id,
+      initiator_meta: initiator_meta
+    )
 
-    if @agreement.save
+        @agreement_form = AgreementForm.new(form_params)
+
+    if @agreement_form.save
+      @agreement = @agreement_form.agreement
       notify_and_message_other_party(:create)
-      # Notification and messaging can be handled by a callback or another service if needed
       redirect_to @agreement, notice: "Agreement was successfully created."
     else
-      Rails.logger.debug @agreement&.errors&.full_messages&.inspect
-      @agreement&.errors&.full_messages&.each { |error| flash[:alert] = error }
-      @project = @agreement&.project
+      Rails.logger.debug @agreement_form.errors.full_messages.inspect
+      @agreement_form.errors.full_messages.each { |error| flash[:alert] = error }
+      @project = @agreement_form.project
+      @agreement = Agreement.new  # For authorization checks in the form
       render :new, status: :unprocessable_entity
     end
   end
@@ -90,7 +119,10 @@ class AgreementsController < ApplicationController
   def update
     authorize! :edit, @agreement
 
-    if @agreement.update(agreement_params)
+    @agreement_form = AgreementForm.new(agreement_params)
+
+    if @agreement_form.valid?
+      @agreement_form.update_agreement(@agreement)
       notify_and_message_other_party(:update)
       redirect_to @agreement, notice: "Agreement was successfully updated."
     else

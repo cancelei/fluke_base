@@ -54,7 +54,7 @@ class Project < ApplicationRecord
   # Get available branches from GitHub logs
   # @return [Array<String>] List of branch names
   def available_branches
-    github_branches.pluck(:id, :branch_name).compact.sort
+    github_service.available_branches
   end
 
   # Get summary of GitHub contributions by user
@@ -170,32 +170,22 @@ class Project < ApplicationRecord
   # @param user [User] The user to check
   # @return [Boolean] True if user can view logs
   def can_view_github_logs?(user)
-    return false unless user
-
-    # Project owner can always view
-    return true if user_id == user.id
-
-    # Check for accepted agreements
-    agreements.accepted.exists?(other_party_id: user.id)
+    github_service.can_view_logs?(user)
   end
 
   # Get recent GitHub logs
   # @param limit [Integer] Number of logs to return
   # @return [ActiveRecord::Relation] Recent GitHub logs
   def recent_github_logs(limit = 20)
-    github_logs.includes(:user).order(commit_date: :desc).limit(limit)
+    github_service.recent_logs(limit)
   end
 
   def contributions_summary
-    github_logs.select("user_id, COUNT(*) as commit_count, SUM(lines_added) as total_added, SUM(lines_removed) as total_removed")
-              .group(:user_id)
-              .includes(:user)
+    github_service.contributions_summary_basic
   end
 
-  def can_view_github_logs?(user)
-    return false if user.nil? || repository_url.blank?
-    user_id == user.id ||
-    agreements.active.exists?([ "(initiator_id = :user_id OR other_party_id = :user_id)", { user_id: user.id } ])
+  def can_access_repository?(user)
+    github_service.can_access_repository?(user)
   end
 
   # Scopes
@@ -216,17 +206,17 @@ class Project < ApplicationRecord
     collaboration_type == SEEKING_COFOUNDER || collaboration_type == SEEKING_BOTH
   end
 
-  # Public field methods - data access only, presentation logic moved to helper
+  # Public field methods - delegated to visibility service
   def field_public?(field_name)
-    return false unless public_fields.is_a?(Array)
-    public_fields.include?(field_name.to_s)
+    visibility_service.field_public?(field_name)
   end
 
   def visible_to_user?(field_name, user)
-    return true if user && (user_id == user.id)
-    return true if field_public?(field_name)
-    return true if user && agreements.exists?(other_party_id: user.id)
-    false
+    visibility_service.field_visible_to_user?(field_name, user)
+  end
+
+  def get_field_value(field_name, user)
+    visibility_service.get_field_value(field_name, user)
   end
 
   # Methods
@@ -257,10 +247,18 @@ class Project < ApplicationRecord
   # Check if project is connected to GitHub
   # @return [Boolean] True if the project has a repository URL set
   def github_connected?
-    repository_url.present?
+    github_service.connected?
   end
 
   private
+
+  def github_service
+    @github_service ||= ProjectGithubService.new(self)
+  end
+
+  def visibility_service
+    @visibility_service ||= ProjectVisibilityService.new(self)
+  end
 
   def set_defaults
     self.stage ||= IDEA

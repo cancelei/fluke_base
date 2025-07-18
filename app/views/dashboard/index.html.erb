@@ -17,21 +17,22 @@
         <ul role="list" class="divide-y divide-gray-200">
           <% if @projects.present? %>
             <% @projects.each do |project| %>
+              <% project_presenter = present(project) %>
               <li class="px-4 py-4 sm:px-6">
                 <div class="flex items-center justify-between">
-                  <p class="truncate text-sm font-medium text-indigo-600"><%= link_to project.name, project_path(project) %></p>
+                  <p class="truncate text-sm font-medium text-indigo-600"><%= link_to project_presenter.display_name(current_user), project_path(project) %></p>
                   <div class="ml-2 flex flex-shrink-0">
-                    <p class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800"><%= project.stage.capitalize %></p>
+                    <%= project_presenter.stage_badge %>
                   </div>
                 </div>
                 <div class="mt-2 sm:flex sm:justify-between">
                   <div class="sm:flex">
                     <p class="flex items-center text-sm text-gray-500">
-                      <span><%= project.description.truncate(100) if project.description %></span>
+                      <span><%= project_presenter.display_description(current_user, truncate: true, length: 100) %></span>
                     </p>
                   </div>
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <p><%= project.milestones.count %> milestones</p>
+                    <p><%= project_presenter.milestones_summary %></p>
                   </div>
                 </div>
               </li>
@@ -70,27 +71,24 @@
         <ul role="list" class="divide-y divide-gray-200">
           <% if @agreements.present? %>
             <% @agreements.each do |agreement| %>
+              <% agreement_presenter = present(agreement) %>
               <li class="px-4 py-4 sm:px-6">
                 <div class="flex items-center justify-between">
                   <p class="truncate text-sm font-medium text-indigo-600">
-                    <%= link_to "Agreement for #{agreement.project.name}", agreement_path(agreement) %>
+                    <%= agreement_presenter.project_link %>
                   </p>
                   <div class="ml-2 flex flex-shrink-0">
-                    <p class="inline-flex rounded-full bg-<%= agreement.status == 'active' ? 'green' : 'yellow' %>-100 px-2 text-xs font-semibold leading-5 text-<%= agreement.status == 'active' ? 'green' : 'yellow' %>-800"><%= agreement.status.capitalize %></p>
+                    <%= agreement_presenter.status_badge %>
                   </div>
                 </div>
                 <div class="mt-2 sm:flex sm:justify-between">
                   <div class="sm:flex">
                     <p class="flex items-center text-sm text-gray-500">
-                      <% if current_user.id == agreement.initiator_id %>
-                        <span>Other Party: <%= agreement.other_party.full_name %></span>
-                      <% else %>
-                        <span>Initiator: <%= agreement.initiator.full_name %></span>
-                      <% end %>
+                      <span><%= agreement_presenter.parties_display %></span>
                     </p>
                   </div>
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <p>Valid until: <%= agreement.end_date.strftime("%b %d, %Y") %></p>
+                    <p><%= agreement_presenter.time_remaining %></p>
                   </div>
                 </div>
               </li>

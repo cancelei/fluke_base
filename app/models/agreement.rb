@@ -104,13 +104,13 @@ class Agreement < ApplicationRecord
     project.milestones.where(id: milestone_ids)
   end
 
-  # Time tracking methods
+  # Time tracking methods - delegated to calculations service
   def total_hours_logged
-    time_logs.completed.sum(:hours_spent).round(2)
+    calculations_service.total_hours_logged
   end
 
   def current_time_log
-    time_logs.in_progress.last
+    calculations_service.current_time_log
   end
 
   scope :not_rejected_or_cancelled, -> { where.not(status: [ REJECTED, CANCELLED ]) }
@@ -167,59 +167,32 @@ class Agreement < ApplicationRecord
 
   # Returns the latest counter offer for this agreement
   def latest_counter_offer
-    # If this is an original agreement, find counter offers made to it
-    if counter_to_id.nil?
-      Agreement.where(id: id).order(created_at: :desc).first
-    else
-      # If this is a counter offer, find newer counter offers made to the original agreement
-      original_agreement = Agreement.find(counter_to_id)
-      original_agreement.counter_offers.order(created_at: :desc).first
-    end
+    status_service.latest_counter_offer
   end
 
-  # Status update methods
+  # Status update methods - delegated to status service
   def accept!
-    return false unless pending?
-    update(status: ACCEPTED)
+    status_service.accept!
   end
 
   def reject!
-    return false unless pending?
-    update(status: REJECTED)
+    status_service.reject!
   end
 
   def complete!
-    return false unless active?
-    update(status: COMPLETED)
+    status_service.complete!
   end
 
   def cancel!
-    return false unless pending?
-    update(status: CANCELLED)
+    status_service.cancel!
   end
 
   def counter_offer!(counter_agreement)
-    return false unless pending?
-
-    # Mark this agreement as countered
-    update(status: COUNTERED)
-
-    # Link the new agreement to this one
-    counter_agreement.counter_to_id = self.id
-    counter_agreement.status = PENDING
-
-    counter_agreement.save
+    status_service.counter_offer!(counter_agreement)
   end
 
   def payment_details
-    case payment_type
-    when HOURLY
-      "#{hourly_rate}$/hour"
-    when EQUITY
-      "#{equity_percentage}% equity"
-    when HYBRID
-      "#{hourly_rate}$/hour + #{equity_percentage}% equity"
-    end
+    calculations_service.payment_details
   end
 
   def can_view_full_project_details?(user)
@@ -229,27 +202,32 @@ class Agreement < ApplicationRecord
   end
 
   def calculate_total_cost
-    return nil unless hourly_rate.present? && weekly_hours.present?
-    return 0 if hourly_rate == 0
-
-    weeks = duration_in_weeks
-    hourly_rate * weekly_hours * weeks
+    calculations_service.total_cost
   end
 
   def duration_in_weeks
-    return 0 unless start_date.present? && end_date.present?
-    ((end_date - start_date).to_f / 7).ceil
+    calculations_service.duration_in_weeks
   end
 
   def has_counter_offers?
-    counter_offers.exists?
+    status_service.has_counter_offers?
   end
 
   def most_recent_counter_offer
-    counter_offers.order(created_at: :desc).first
+    status_service.most_recent_counter_offer
   end
 
   def is_counter_offer?
     counter_to_id.present?
+  end
+
+  private
+
+  def status_service
+    @status_service ||= AgreementStatusService.new(self)
+  end
+
+  def calculations_service
+    @calculations_service ||= AgreementCalculationsService.new(self)
   end
 end

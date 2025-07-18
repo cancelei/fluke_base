@@ -1,11 +1,12 @@
+<% presenter = present(@agreement) %>
 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
   <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
     <div>
       <h3 class="text-lg leading-6 font-medium text-gray-900">
-        <%= @agreement.agreement_type %> Agreement for <%= @project.name %>
+        <%= presenter.agreement_type_badge %> Agreement for <%= presenter.project_link %>
       </h3>
       <p class="mt-1 max-w-2xl text-sm text-gray-500">
-        Status: <span class="<%= @agreement.active? ? 'text-green-600' : (@agreement.pending? ? 'text-yellow-600' : 'text-red-600') %> font-medium"><%= @agreement.status %></span>
+        Status: <%= presenter.status_badge %>
       </p>
     </div>
     
@@ -18,35 +19,35 @@
         <div class="text-yellow-600">Note: This agreement has a counter offer from another person</div>
       <% end %>
       
-      <% if can?(:accept, @agreement) %>
+      <% if presenter.can_be_accepted_by?(current_user) %>
         <%= button_to "Accept Agreement", accept_agreement_path(@agreement), 
             method: :patch, 
             class: "btn-success", 
             data: { turbo_confirm: "Are you sure you want to accept this agreement?" } %>
       <% end %>
       
-      <% if can?(:reject, @agreement) %>
+      <% if presenter.can_be_rejected_by?(current_user) %>
         <%= button_to "Reject Agreement", reject_agreement_path(@agreement), 
             method: :patch, 
             class: "btn-danger", 
             data: { turbo_confirm: "Are you sure you want to reject this agreement?" } %>
       <% end %>
       
-      <% if can?(:counter_offer, @agreement) %>
+      <% if presenter.can_make_counter_offer?(current_user) %>
         <%= button_to "Counter Offer", counter_offer_agreement_path(@agreement), 
             method: :post, 
             class: "btn-warning", 
             data: { turbo_confirm: "Are you sure you want to make a counter offer?" } %>
       <% end %>
       
-      <% if can?(:cancel, @agreement) && !@agreement.countered? %>
+      <% if presenter.can_be_cancelled_by?(current_user) %>
         <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement), 
             method: :patch, 
             class: "btn-danger", 
             data: { turbo_confirm: "Are you sure you want to cancel this agreement?" } %>
       <% end %>
       
-      <% if can?(:complete, @agreement) && @agreement.active? %>
+      <% if presenter.can_be_completed_by?(current_user) %>
         <%= button_to "Mark as Completed", complete_agreement_path(@agreement), 
             method: :patch, 
             class: "btn-success", 
@@ -86,86 +87,36 @@
       <% end %>
       
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">1st Party</dt>
+        <dt class="text-sm font-medium text-gray-500">Parties</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= @agreement.initiator.full_name %>
-          <% if @agreement.initiator == current_user %>
-            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
-          <% end %>
-          <% if @project.user == @agreement.initiator %>
-            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Entrepreneur</span>
-          <% else %>
-            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Mentor</span>
-          <% end %>
-        </dd>
-      </div>
-
-      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">2nd Party</dt>
-        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= @agreement.other_party.full_name %>
-          <% if @agreement.other_party == current_user %>
-            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
-          <% end %>
-          <% if @project.user == @agreement.other_party %>
-            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Entrepreneur</span>
-          <% else %>
-            <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">Mentor</span>
-          <% end %>
+          <%= presenter.parties_display %>
         </dd>
       </div>
       
       <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Duration</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= @agreement.start_date.strftime("%b %d, %Y") %> - <%= @agreement.end_date.strftime("%b %d, %Y") %>
-          (<%= distance_of_time_in_words(@agreement.start_date, @agreement.end_date) %>)
+          <%= presenter.duration_display %>
         </dd>
       </div>
       
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Weekly Commitment</dt>
+        <dt class="text-sm font-medium text-gray-500">Total Commitment</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <% if @agreement.weekly_hours.present? %>
-            <%= @agreement.weekly_hours %> hours per week
-          <% else %>
-            Not specified
-          <% end %>
+          <%= presenter.total_commitment_display %>
         </dd>
       </div>
       
       <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500">Payment Type</dt>
+        <dt class="text-sm font-medium text-gray-500">Payment Details</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <% if @agreement.payment_type.present? %>
-            <%= @agreement.payment_details %>
-            
-            <% if @agreement.active? && (@agreement.payment_type == Agreement::HOURLY || @agreement.payment_type == Agreement::HYBRID) && @total_cost.present? %>
-              <div class="mt-2 bg-gray-50 p-3 rounded-md">
-                <h4 class="font-medium text-gray-700">Financial Summary</h4>
-                <div class="grid grid-cols-2 gap-2 mt-2">
-                  <div>
-                    <span class="text-xs text-gray-500">Total Weeks:</span>
-                    <p><%= @duration_weeks %> weeks</p>
-                  </div>
-                  <div>
-                    <span class="text-xs text-gray-500">Weekly Hours:</span>
-                    <p><%= @agreement.weekly_hours %> hours</p>
-                  </div>
-                  <div>
-                    <span class="text-xs text-gray-500">Total Hours:</span>
-                    <p><%= @agreement.weekly_hours * @duration_weeks %> hours</p>
-                  </div>
-                  <div>
-                    <span class="text-xs text-gray-500">Total Cost:</span>
-                    <p class="font-semibold">$<%= number_with_precision(@total_cost, precision: 2, delimiter: ',') %></p>
-                  </div>
-                </div>
-              </div>
-            <% end %>
-          <% else %>
-            Not specified
-          <% end %>
+          <%= presenter.payment_type_badge %>
+          <div class="mt-2 text-sm text-gray-600">
+            <%= presenter.formatted_payment_details %>
+          </div>
+          <div class="mt-2 text-sm text-gray-600">
+            <%= presenter.financial_summary %>
+          </div>
         </dd>
       </div>
       
@@ -180,51 +131,26 @@
         </dd>
       </div>
       
-      <% if @project.milestones.any? %>
-        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Milestones</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Title
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Due Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <% @project.milestones.where(id: @agreement.milestone_ids).each do |milestone| %>
-                    <tr>
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">
-                          <%= milestone.title %>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4">
-                        <div class="text-sm text-gray-500">
-                          <%= milestone.description %>
-                        </div>
-                      </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">
-                          <%= milestone.due_date.strftime('%b %d, %Y') if milestone.due_date %>
-                        </div>
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          </dd>
-        </div>
-      <% end %>
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Milestones Progress</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <%= presenter.milestone_progress %>
+        </dd>
+      </div>
+      
+      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Progress Summary</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <%= presenter.progress_summary %>
+        </dd>
+      </div>
+      
+      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Time Remaining</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <%= presenter.time_remaining %>
+        </dd>
+      </div>
 
       <% if @agreement.terms.present? %>
         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -262,24 +188,7 @@
         <div class="bg-yellow-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-yellow-800">Negotiation History</dt>
           <dd class="mt-1 text-sm text-yellow-700 sm:col-span-2 sm:mt-0">
-            <% if @agreement.is_counter_offer? %>
-              <p>This is a counter offer to a previous agreement proposal.</p>
-              <%= link_to "View original proposal", agreement_path(@agreement.counter_to_id), class: "text-indigo-600 hover:text-indigo-900" %>
-            <% end %>
-            
-            <% if @agreement.has_counter_offers? %>
-              <div class="mt-2">
-                <p>This agreement has received counter offers:</p>
-                <ul class="list-disc list-inside ml-4 mt-1">
-                  <% @agreement.counter_offers.each do |counter| %>
-                    <li>
-                      <%= link_to "Counter offer from #{counter.initiator_id == current_user.id ? 'you' : counter.initiator.full_name} on #{counter.created_at.strftime('%b %d, %Y')}", agreement_path(counter), class: "text-indigo-600 hover:text-indigo-900" %>
-                      <%= " (#{counter.status})" %>
-                    </li>
-                  <% end %>
-                </ul>
-              </div>
-            <% end %>
+            <%= presenter.counter_offer_info %>
           </dd>
         </div>
       <% end %>
@@ -331,7 +240,7 @@
           Meetings
         </h3>
         <p class="mt-1 max-w-2xl text-sm text-gray-500">
-          Schedule and past meetings for this agreement
+          <%= presenter.meetings_summary %>
         </p>
       </div>
       

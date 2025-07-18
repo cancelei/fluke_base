@@ -51,14 +51,14 @@ class ProjectsController < ApplicationController
       return
     end
 
-
-    @project = Project.new
+    @project_form = ProjectForm.new(user_id: current_user.id)
   end
 
   def create
-    @project = current_user.projects.new(project_params)
+    @project_form = ProjectForm.new(project_params.merge(user_id: current_user.id))
 
-    if @project.save
+    if @project_form.save
+      @project = @project_form.project
       GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
       redirect_to @project, notice: "Project was successfully created."
     else
@@ -68,11 +68,30 @@ class ProjectsController < ApplicationController
 
   def edit
     authorize! :update, @project
+
+    @project_form = ProjectForm.new(
+      name: @project.name,
+      description: @project.description,
+      stage: @project.stage,
+      category: @project.category,
+      current_stage: @project.current_stage,
+      target_market: @project.target_market,
+      funding_status: @project.funding_status,
+      team_size: @project.team_size,
+      collaboration_type: @project.collaboration_type,
+      repository_url: @project.repository_url,
+      public_fields: @project.public_fields,
+      user_id: @project.user_id
+    )
   end
 
   def update
     authorize! :update, @project
-    if @project.update(project_params)
+
+    @project_form = ProjectForm.new(project_params)
+
+    if @project_form.valid?
+      @project_form.update_project(@project)
       redirect_to @project, notice: "Project was successfully updated."
     else
       render :edit, status: :unprocessable_entity

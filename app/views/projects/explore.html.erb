@@ -3,63 +3,48 @@
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-semibold text-gray-900">Explore Projects</h1>
       
-      <%= form_with url: explore_projects_path, method: :get, class: "flex space-x-2" do |f| %>
-        <%= f.text_field :search, value: params[:search], placeholder: "Search projects...", class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-        
-        <%= f.select :category, 
-            [["All Categories", ""], 
-             ["Technology", "Technology"], 
-             ["Health", "Health"], 
-             ["Education", "Education"],
-             ["Finance", "Finance"],
-             ["Other", "Other"]],
-            { selected: params[:category] },
-            { class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
-            
-        <%= f.select :collaboration_type, 
-            [["All Types", ""], 
-             ["Looking for Mentor", "mentor"], 
-             ["Looking for Co-Founder", "co_founder"]],
-            { selected: params[:collaboration_type] },
-            { class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
-        
-        <%= f.submit "Search", class: "inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
-      <% end %>
+      <%= search_form explore_projects_path, 
+          search_placeholder: "Search projects...",
+          filters: [
+            {
+              name: :category,
+              type: :select,
+              options: [["All Categories", ""], 
+                       ["Technology", "Technology"], 
+                       ["Health", "Health"], 
+                       ["Education", "Education"],
+                       ["Finance", "Finance"],
+                       ["Other", "Other"]]
+            },
+            {
+              name: :collaboration_type,
+              type: :select,
+              options: [["All Types", ""], 
+                       ["Looking for Mentor", "mentor"], 
+                       ["Looking for Co-Founder", "co_founder"]]
+            }
+          ],
+          form_options: { class: "flex space-x-2" } %>
     </div>
     
     <% if @projects.any? %>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <% @projects.each do |project| %>
+          <% presenter = present(project) %>
           <%= link_to project_path(project), class: "relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400 transition cursor-pointer group", style: "text-decoration: none; color: inherit; display: block;" do %>
             <div class="min-w-0 flex-1">
               <div class="flex justify-between items-start">
                 <span class="absolute inset-0" aria-hidden="true"></span>
-                <h3 class="text-sm font-medium text-gray-900 group-hover:underline"> <%= project.name %> </h3>
+                <h3 class="text-sm font-medium text-gray-900 group-hover:underline"> <%= presenter.display_name(current_user) %> </h3>
                 
                 <div class="flex flex-col items-end space-y-1">
-                  <% if project.category.present? %>
-                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                      <%= project.category %>
-                    </span>
-                  <% end %>
-                  
-                  <% if project.collaboration_type.present? %>
-                    <% if project.seeking_mentor? %>
-                      <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-700/10">
-                        Seeking Mentor
-                      </span>
-                    <% end %>
-                    
-                    <% if project.seeking_cofounder? %>
-                      <span class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
-                        Seeking Co-Founder
-                      </span>
-                    <% end %>
-                  <% end %>
+                  <%= presenter.stage_badge %>
+                  <%= presenter.collaboration_badges %>
+                  <%= presenter.funding_status_badge %>
                 </div>
               </div>
               
-              <p class="mt-1 text-sm text-gray-500 line-clamp-2"><%= project.description %></p>
+              <p class="mt-1 text-sm text-gray-500 line-clamp-2"><%= presenter.display_description(current_user, truncate: true, length: 100) %></p>
               
               <div class="mt-2 flex items-center">
                 <div class="flex-shrink-0">
@@ -71,10 +56,10 @@
                 </div>
                 <div class="ml-3">
                   <p class="text-sm font-medium text-gray-700">
-                    <%= project.user.full_name %>
+                    <%= presenter.owner_display %>
                   </p>
                   <p class="text-xs text-gray-500">
-                    Created <%= time_ago_in_words(project.created_at) %> ago
+                    <%= presenter.created_timeframe %>
                   </p>
                 </div>
               </div>

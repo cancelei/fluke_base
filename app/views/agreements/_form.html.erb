@@ -1,13 +1,13 @@
 <% 
   @milestones = Milestone.where(project_id: @project.id) || []
-  @milestone_ids = @agreement.milestone_ids || []
+  @milestone_ids = @agreement_form&.milestone_ids_array || []
 %>
 
 <div data-controller="agreement-form">
-  <%= form_with(model: @agreement, class: "space-y-6") do |form| %>
+  <%= form_with(model: agreement, class: "space-y-6") do |form| %>
       <%= form.hidden_field :project_id, value: @project.id if @project %>
       <%= form.hidden_field :initiator_id, value: current_user.id %>
-      <%= form.hidden_field :other_party_id, value: @agreement.other_party_id.presence || params[:other_party_id] %>
+      <%= form.hidden_field :other_party_id, value: agreement.other_party_id.presence || params[:other_party_id] %>
       <%= form.hidden_field :counter_to_id, value: params[:counter_to_id] %>
       
       <% if current_user.id != @project&.user_id %>
@@ -131,7 +131,7 @@
                 %>
             <%= label_tag "milestone_#{index}", milestone.title, class: "inline-block text-sm font-medium text-gray-700 ml-2 mr-4" %>
           <% end %>
-          <% if @agreement.errors[:milestone_ids] %>
+          <% if agreement.errors[:milestone_ids] %>
             <p class="mt-2 text-sm text-red-600">
               Select at least one milestone
             </p>
@@ -147,9 +147,9 @@
       </div>
 
     <div class="mt-6 flex justify-end space-x-3">
-      <% if @agreement.new_record? && @project %>
+      <% if !agreement.persisted? && @project %>
         <%= form.submit "Create Agreement", class: "btn-primary" %>
-      <% elsif !@agreement.new_record? %>
+      <% elsif agreement.persisted? %>
         <% if can?(:edit, @agreement) && !@agreement.countered? %>
           <%= form.submit "Update Agreement", class: "btn-primary" %>
         <% end %>

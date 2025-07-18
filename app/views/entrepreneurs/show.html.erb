@@ -1,14 +1,9 @@
 <div class="bg-white shadow-sm rounded-lg overflow-hidden">
   <div class="px-4 py-5 sm:px-6 bg-indigo-50">
     <div class="flex items-center">
+      <% presenter = present(@entrepreneur) %>
       <div class="flex-shrink-0 h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center">
-        <% if @entrepreneur.avatar.attached? %>
-          <%= image_tag @entrepreneur.avatar, class: "h-16 w-16 rounded-full" %>
-        <% else %>
-          <svg class="h-10 w-10 text-indigo-300" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-        <% end %>
+        <%= presenter.avatar_image_tag(class: "h-16 w-16 rounded-full") %>
       </div>
       <div class="ml-4">
         <h3 class="text-xl font-medium leading-6 text-gray-900"><%= @entrepreneur.full_name %></h3>
@@ -32,7 +27,7 @@
         <div class="mt-6">
           <h3 class="text-lg font-medium text-gray-900 mb-2">Active Projects</h3>
           <p class="text-sm text-gray-700">
-            <strong><%= @entrepreneur.my_agreements.active.count %></strong> active project(s) with ongoing mentor or co-founder contracts.
+            <strong><%= presenter.agreements_count %></strong> agreements with mentors and co-founders.
           </p>
         </div>
         <div class="mt-6">
