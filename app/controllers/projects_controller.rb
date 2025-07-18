@@ -99,6 +99,7 @@ class ProjectsController < ApplicationController
   end
 
   def destroy
+    current_user.update(selected_project_id: nil) if current_user.selected_project_id == @project.id
     authorize! :destroy, @project
     @project.destroy
     redirect_to projects_path, notice: "Project was successfully deleted."

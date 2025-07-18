@@ -51,8 +51,9 @@ class ApplicationController < ActionController::Base
       end
     else
       # Set @selected_project from session if not set by params
-      selected_project_id = session[:selected_project_id] || current_user.selected_project_id
-      @selected_project = current_user.projects.find_by(id: selected_project_id) if selected_project_id.present?
+      selected_project_id =  current_user.selected_project_id || session[:selected_project_id]
+      @selected_project = current_user.projects.find_by(id: selected_project_id) if selected_project_id.present? && !current_user.has_role?(:mentor)
+      @selected_project = current_user.initiated_agreements.where(project_id: selected_project_id, status: "Accepted")&.first&.project if selected_project_id.present? && current_user.has_role?(:mentor)
 
       if @selected_project.nil? && current_user.projects.any? && !acting_as_mentor?
         @selected_project = current_user.projects.first

@@ -34,7 +34,7 @@
   <% end %>
   
   <!-- Custom Filter Block -->
-  <% if block_given? %>
+  <% if block %>
     <%= capture(f, &block) %>
   <% end %>
   

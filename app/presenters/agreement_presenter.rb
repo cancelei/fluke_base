@@ -1,4 +1,6 @@
 class AgreementPresenter < ApplicationPresenter
+  include Rails.application.routes.url_helpers
+
   def status_badge
     status_class = case status
     when Agreement::ACCEPTED
@@ -150,7 +152,7 @@ class AgreementPresenter < ApplicationPresenter
   end
 
   def project_link
-    link_to project.name, project_path(project),
+    h.link_to project.name, h.project_path(project),
             class: "text-blue-600 hover:text-blue-800 font-medium"
   end
 

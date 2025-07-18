@@ -25,7 +25,7 @@
             </div>
             <% end %>
 
-            <% if current_user.selected_project_id.present? || current_user.received_agreements.any?  || current_user.initiated_agreements.any? %>
+            <% if current_user.selected_project_id.present? && (current_user.received_agreements.any?  || current_user.initiated_agreements.any?) %>
               <div class="relative inline-block text-left ml-4" data-controller="dropdown">
                 <button type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50" id="milestone-menu" aria-haspopup="true" aria-expanded="true"  data-action="click->dropdown#toggle">
                   Milestones

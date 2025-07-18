@@ -49,7 +49,7 @@ module ApplicationHelper
   end
 
   def search_form(url, options = {}, &block)
-    render "shared/search_form", url: url, **options, &block
+    render partial: "shared/search_form", locals: { url: url, **options, block: block }
   end
 
   def navbar_link(text, path, options = {})

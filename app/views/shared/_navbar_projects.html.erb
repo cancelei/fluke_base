@@ -1,5 +1,5 @@
 <%= turbo_frame_tag 'navbar-projects' do %>
-  <% selected_project_id = session[:selected_project_id] || current_user.selected_project_id %>
+  <% selected_project_id = current_user.selected_project_id || session[:selected_project_id] %>
   <% selected_project ||= Project.find_by(id: selected_project_id) if selected_project_id.present? %>
   <% if session[:acting_as_mentor] %>
     <button type="button" class="h-16 inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700" data-action="click->dropdown#toggle">
