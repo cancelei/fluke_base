@@ -55,7 +55,8 @@
     <div class="mt-2 text-sm text-gray-500">
       <p>
         <strong>Note:</strong> This meeting will be scheduled between
-        <%= current_user.id == @agreement.initiator_id ? "you and #{@agreement.other_party.full_name}" : "you and #{@agreement.initiator.full_name}" %>.
+        <% presenter = present(@agreement) %>
+        <%= presenter.parties_display %>.
       </p>
     </div>
 

@@ -43,17 +43,16 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <% @my_agreements.each do |agreement| %>
+              <% presenter = present(agreement) %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">
-                    <%= link_to agreement.project.name, agreement.project, class: "text-indigo-600 hover:text-indigo-900" %>
+                    <%= presenter.project_link %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= agreement.agreement_type %></div>
-                  <% if agreement.payment_type %>
-                    <div class="text-xs text-gray-500"><%= agreement.payment_type %></div>
-                  <% end %>
+                  <%= presenter.agreement_type_badge %>
+                  <%= presenter.payment_type_badge %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">
@@ -61,13 +60,13 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <%= render "agreement_status", agreement: agreement %>
+                  <%= presenter.status_badge %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <%= agreement.start_date.strftime("%b %d, %Y") %>
+                  <%= presenter.created_timeframe %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <%= render "time_logs/remaining_time_progress", agreement: agreement, project: agreement.project, current_log: nil %>
+                  <%= presenter.time_remaining %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <%= render "agreement_actions", agreement: agreement %>
@@ -107,11 +106,12 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <% @other_party_agreements.each do |agreement| %>
+              <% presenter = present(agreement) %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">
                     <% if agreement.active? || agreement.completed? %>
-                      <%= link_to agreement.project.name, agreement.project, class: "text-indigo-600 hover:text-indigo-900" %>
+                      <%= presenter.project_link %>
                     <% else %>
                       <span class="text-gray-500"><%= agreement.project.name %></span>
                       <span class="text-xs text-gray-400">(limited access)</span>
@@ -119,19 +119,19 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= agreement.agreement_type %></div>
+                  <%= presenter.agreement_type_badge %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900"><%= agreement.project.user.full_name %></div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <%= render "agreement_status", agreement: agreement %>
+                  <%= presenter.status_badge %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <%= render "agreement_payment", agreement: agreement %>
+                  <%= presenter.payment_type_badge %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <%= render "time_logs/remaining_time_progress", agreement: agreement, project: agreement.project, current_log: nil %>
+                  <%= presenter.time_remaining %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <%= render "agreement_actions", agreement: agreement %>

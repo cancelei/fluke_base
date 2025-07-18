@@ -1,3 +1,4 @@
+<% presenter = present(agreement) %>
 <%= link_to "View", agreement, class: "text-indigo-600 hover:text-indigo-900" %>
 
 <% if agreement.pending? %>
@@ -5,8 +6,10 @@
     <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 text-indigo-600 hover:text-indigo-900" %>
     <%= link_to "Cancel", agreement_path(agreement), method: :delete, data: { confirm: "Are you sure you want to cancel this agreement?" }, class: "ml-3 text-red-600 hover:text-red-900" %>
   <% end %>
-  <% if agreement.initiator_id != current_user.id %>
+  <% if presenter.can_be_accepted_by?(current_user) %>
     <%= button_to "Accept", accept_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+  <% end %>
+  <% if presenter.can_be_rejected_by?(current_user) %>
     <%= button_to "Decline", reject_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
   <% end %>
 <% end %> 

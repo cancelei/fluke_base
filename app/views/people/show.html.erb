@@ -1,31 +1,16 @@
 <div class="max-w-5xl mx-auto py-8">
   <!-- Hero/Profile Header -->
   <div class="bg-white shadow rounded-lg p-8 flex flex-col md:flex-row items-center md:items-start gap-8 relative">
+    <% presenter = present(@person) %>
     <div class="flex-shrink-0">
-      <% if @person.avatar.attached? %>
-        <%= image_tag @person.avatar, class: "h-32 w-32 rounded-full object-cover border-4 border-indigo-100" %>
-      <% else %>
-        <span class="h-32 w-32 rounded-full bg-indigo-100 flex items-center justify-center">
-          <svg class="h-20 w-20 text-indigo-300" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-        </span>
-      <% end %>
+      <%= presenter.avatar_image_tag(class: "h-32 w-32 rounded-full object-cover border-4 border-indigo-100") %>
     </div>
     <div class="flex-1 w-full">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <div>
           <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <%= @person.full_name %>
-            <% @person.roles.each do |role| %>
-              <% color = role.name == 'Mentor' ? 'bg-blue-100 text-blue-700' : role.name == 'Entrepreneur' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' %>
-              <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ml-1 <%= color %>">
-                <%= role.name.capitalize %>
-                <% if current_user.current_role == role %>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                    <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
-                  </svg>
-                <% end %>
-              </span>
-            <% end %>
+            <%= presenter.display_name %>
+            <%= presenter.role_badges %>
           </h1>
           <p class="mt-2 text-gray-600"><%= @person.bio.presence || (current_user == @person ? link_to('Add a bio', edit_profile_path, class: 'text-indigo-600 underline') : 'No bio provided.') %></p>
         </div>
@@ -82,7 +67,22 @@
     <!-- About -->
     <section id="about" class="mb-8">
       <h2 class="text-lg font-semibold text-gray-900 mb-2">About</h2>
-      <p class="text-gray-700"><%= @person.bio.presence || (current_user == @person ? link_to('Add a bio', edit_profile_path, class: 'text-indigo-600 underline') : 'No bio provided.') %></p>
+      <p class="text-gray-700"><%= presenter.formatted_bio || (current_user == @person ? link_to('Add a bio', edit_profile_path, class: 'text-indigo-600 underline') : 'No bio provided.') %></p>
+      
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h3 class="text-sm font-medium text-gray-500">Member Since</h3>
+          <p class="text-lg font-semibold text-gray-900"><%= presenter.member_since %></p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h3 class="text-sm font-medium text-gray-500">Projects</h3>
+          <p class="text-lg font-semibold text-gray-900"><%= presenter.projects_count %></p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h3 class="text-sm font-medium text-gray-500">Agreements</h3>
+          <p class="text-lg font-semibold text-gray-900"><%= presenter.agreements_count %></p>
+        </div>
+      </div>
     </section>
 
     <!-- Achievements -->
@@ -135,7 +135,8 @@
             <li class="py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <span class="font-medium text-gray-800"><%= agreement.project&.name || 'Project' %></span>
-                <span class="ml-2 text-xs text-gray-500">(<%= agreement.status.capitalize %>)</span>
+                <% presenter = present(agreement) %>
+                <span class="ml-2 text-xs text-gray-500">(<%= presenter.status_badge %>)</span>
               </div>
               <div class="text-xs text-gray-500 mt-1 sm:mt-0">
                 <%= agreement.created_at.strftime('%b %d, %Y') %>

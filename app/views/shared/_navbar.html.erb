@@ -11,13 +11,23 @@
         </div>
         <div class="hidden lg:ml-6 lg:flex lg:space-x-8">
           <% if user_signed_in? %>
-            <%= link_to "Dashboard", dashboard_path, class: "inline-flex items-center border-b-2 #{current_page?(dashboard_path) ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Projects", projects_path, class: "inline-flex items-center border-b-2 #{controller_name == 'projects' && action_name == 'index' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Explore Projects", explore_projects_path, class: "inline-flex items-center border-b-2 #{controller_name == 'projects' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Explore People", explore_people_path, class: "inline-flex items-center border-b-2 #{controller_name == 'people' && action_name == 'explore' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Agreements", agreements_path, class: "inline-flex items-center border-b-2 #{controller_name == 'agreements' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Messages", conversations_path, class: "inline-flex items-center border-b-2 #{controller_name == 'conversations' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
-            <%= link_to "Roles", roles_path, class: "inline-flex items-center border-b-2 #{controller_name == 'roles' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} px-1 pt-1 text-sm font-medium" %>
+            <%= navbar_link "Dashboard", dashboard_path %>
+            <%= navbar_link "Projects", projects_path, current_condition: -> { controller_name == 'projects' && action_name == 'index' } %>
+            <div class="relative flex items-center" data-controller="dropdown">
+              <div>
+                <button type="button" class="block w-20 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-action="click->dropdown#toggle">
+                  Explore                  
+                </button>
+              </div>
+              <div class="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu" style="top: 57px;
+              width: 150px;
+              right: -82px;">
+                <%= link_to "People", explore_people_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+                <%= link_to "Projects", explore_projects_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+              </div>
+            </div>
+            <%= navbar_link "Agreements", agreements_path, current_condition: -> { controller_name == 'agreements' } %>
+            <%= navbar_link "Messages", conversations_path, current_condition: -> { controller_name == 'conversations' } %>
             
             <% if current_user.projects.any? || current_user.received_agreements.any?  || current_user.initiated_agreements.any? %>
             <div class="relative" data-controller="dropdown">
@@ -25,7 +35,7 @@
             </div>
             <% end %>
 
-            <% if current_user.selected_project_id.present? || current_user.received_agreements.any?  || current_user.initiated_agreements.any? %>
+            <% if current_user.selected_project_id.present? && (current_user.received_agreements.any?  || current_user.initiated_agreements.any?) %>
               <div class="relative inline-block text-left ml-4" data-controller="dropdown">
                 <button type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50" id="milestone-menu" aria-haspopup="true" aria-expanded="true"  data-action="click->dropdown#toggle">
                   Milestones
@@ -84,6 +94,7 @@
             </div>
             <div class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
               <%= link_to "Your Profile", profile_show_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+              <%= link_to "Roles", roles_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
               <%= link_to "Settings", profile_edit_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
               <%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
             </div>

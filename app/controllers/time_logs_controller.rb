@@ -12,6 +12,7 @@ class TimeLogsController < ApplicationController
     @time_log.status = "completed"
 
     if @time_log.save
+      @milestone.update(status: "in_progress")
       redirect_to time_logs_path(@project), notice: "Time log created successfully."
     else
       redirect_to time_logs_path(@project), alert: @time_log.errors.full_messages.to_sentence

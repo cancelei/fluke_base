@@ -1,0 +1,43 @@
+<%
+  # Setup defaults
+  form_options = local_assigns[:form_options] || {}
+  form_class = form_options[:class] || "flex flex-wrap gap-2 mb-6"
+  search_placeholder = local_assigns[:search_placeholder] || "Search..."
+  submit_text = local_assigns[:submit_text] || "Search"
+  filters = local_assigns[:filters] || []
+%>
+
+<%= form_with url: url, method: :get, class: form_class, **form_options do |f| %>
+  <!-- Search Input -->
+  <%= f.text_field :search, 
+      value: params[:search], 
+      placeholder: search_placeholder, 
+      class: "form-input" %>
+  
+  <!-- Dynamic Filters -->
+  <% filters.each do |filter| %>
+    <% if filter[:type] == :select %>
+      <%= f.select filter[:name], 
+          filter[:options], 
+          { selected: params[filter[:name]] }, 
+          { class: "form-input" } %>
+    <% elsif filter[:type] == :text %>
+      <%= f.text_field filter[:name], 
+          value: params[filter[:name]], 
+          placeholder: filter[:placeholder], 
+          class: "form-input" %>
+    <% elsif filter[:type] == :date %>
+      <%= f.date_field filter[:name], 
+          value: params[filter[:name]], 
+          class: "form-input" %>
+    <% end %>
+  <% end %>
+  
+  <!-- Custom Filter Block -->
+  <% if block %>
+    <%= capture(f, &block) %>
+  <% end %>
+  
+  <!-- Submit Button -->
+  <%= f.submit submit_text, class: "btn btn-primary" %>
+<% end %> 

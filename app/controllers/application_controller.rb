@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
 
   rescue_from CanCan::AccessDenied, with: :user_not_authorized
 
-  helper_method :selected_project, :acting_as_mentor?
+  helper_method :selected_project, :acting_as_mentor?, :present
 
   protected
 
@@ -51,8 +51,9 @@ class ApplicationController < ActionController::Base
       end
     else
       # Set @selected_project from session if not set by params
-      selected_project_id = session[:selected_project_id] || current_user.selected_project_id
-      @selected_project = current_user.projects.find_by(id: selected_project_id) if selected_project_id.present?
+      selected_project_id =  current_user.selected_project_id || session[:selected_project_id]
+      @selected_project = current_user.projects.find_by(id: selected_project_id) if selected_project_id.present? && !current_user.has_role?(:mentor)
+      @selected_project = current_user.initiated_agreements.where(project_id: selected_project_id, status: "Accepted")&.first&.project if selected_project_id.present? && current_user.has_role?(:mentor)
 
       if @selected_project.nil? && current_user.projects.any? && !acting_as_mentor?
         @selected_project = current_user.projects.first
@@ -72,5 +73,14 @@ class ApplicationController < ActionController::Base
   def user_not_authorized
     flash[:alert] = "You are not authorized to perform this action."
     redirect_back(fallback_location: root_path)
+  end
+
+  def present(object, with: nil)
+    if with
+      with.new(object, view_context)
+    else
+      presenter_class = "#{object.class.name}Presenter".constantize
+      presenter_class.new(object, view_context)
+    end
   end
 end

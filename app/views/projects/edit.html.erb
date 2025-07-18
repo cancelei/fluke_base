@@ -4,5 +4,5 @@
     <p class="mt-1 text-sm text-gray-500">Update your project details.</p>
   </div>
   
-  <%= render 'form', project: @project %>
+  <%= render 'form', project: @project_form, submit_text: "Update Project", url: project_path(@project), method: :patch %>
 </div>
