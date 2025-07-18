@@ -88,7 +88,7 @@ class ProjectsController < ApplicationController
   def update
     authorize! :update, @project
 
-    @project_form = ProjectForm.new(project_params)
+    @project_form = ProjectForm.new(project_params.merge(user_id: @project.user_id))
 
     if @project_form.valid?
       @project_form.update_project(@project)

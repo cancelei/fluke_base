@@ -1,4 +1,8 @@
 class ProjectForm < ApplicationForm
+  # Make this form object use 'project' as the param key for Rails forms
+  def self.model_name
+    ActiveModel::Name.new(self, nil, "Project")
+  end
   attribute :name, :string
   attribute :description, :string
   attribute :stage, :string
@@ -6,7 +10,7 @@ class ProjectForm < ApplicationForm
   attribute :current_stage, :string
   attribute :target_market, :string
   attribute :funding_status, :string
-  attribute :team_size, :integer
+  attribute :team_size, :string
   attribute :collaboration_type, :string
   attribute :repository_url, :string
   attribute :public_fields, :string
