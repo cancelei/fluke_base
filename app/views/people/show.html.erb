@@ -3,7 +3,13 @@
   <div class="bg-white shadow rounded-lg p-8 flex flex-col md:flex-row items-center md:items-start gap-8 relative">
     <% presenter = present(@person) %>
     <div class="flex-shrink-0">
-      <%= presenter.avatar_image_tag(class: "h-32 w-32 rounded-full object-cover border-4 border-indigo-100") %>
+    <% if @person.avatar.attached? %>
+      <%= image_tag @person.avatar, class: "h-24 w-24 text-indigo-300 rounded-full" %>
+    <% else %>
+      <svg class="h-24 w-24 text-indigo-300 rounded-full" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    <% end %>
     </div>
     <div class="flex-1 w-full">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
@@ -12,7 +18,7 @@
             <%= presenter.display_name %>
             <%= presenter.role_badges %>
           </h1>
-          <p class="mt-2 text-gray-600"><%= @person.bio.presence || (current_user == @person ? link_to('Add a bio', edit_profile_path, class: 'text-indigo-600 underline') : 'No bio provided.') %></p>
+
         </div>
         <%= link_to new_agreement_path(project_id: current_user.selected_project_id, other_party_id: @person.id), class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" do %>
           <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -58,7 +64,6 @@
       <a href="#achievements" class="text-sm font-medium text-gray-700 hover:text-indigo-700 pb-2 border-b-2 border-transparent hover:border-indigo-500">Achievements</a>
       <a href="#track" class="text-sm font-medium text-gray-700 hover:text-indigo-700 pb-2 border-b-2 border-transparent hover:border-indigo-500">Track Record</a>
       <a href="#projects" class="text-sm font-medium text-gray-700 hover:text-indigo-700 pb-2 border-b-2 border-transparent hover:border-indigo-500">Projects</a>
-      <a href="#agreements" class="text-sm font-medium text-gray-700 hover:text-indigo-700 pb-2 border-b-2 border-transparent hover:border-indigo-500">Agreements</a>
       <% if current_user == @person %>
         <a href="<%= profile_edit_path %>" class="text-sm font-medium text-indigo-700 pb-2 border-b-2 border-indigo-500">Edit Profile</a>
       <% end %>
@@ -94,7 +99,7 @@
     <!-- Track Record -->
     <section id="track" class="mb-8">
       <h2 class="text-lg font-semibold text-gray-900 mb-2">Track Record</h2>
-      <%= render partial: 'shared/track_record', locals: { user: @person, user_role: @person.roles.first&.name&.to_sym || :all } %>
+      <%= render partial: 'shared/track_record', locals: { user: @person, user_role: @person.roles.first&.name&.to_sym || :all, agreements: @person.received_agreements } %>
     </section>
 
     <!-- Projects -->
@@ -122,30 +127,6 @@
         </div>
       <% else %>
         <p class="text-gray-500">No projects found for this user.</p>
-      <% end %>
-    </section>
-
-    <!-- Agreements -->
-    <section id="agreements" class="mb-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-2">Agreements</h2>
-      <% agreements = @person.all_agreements.order(created_at: :desc).limit(10) %>
-      <% if agreements.any? %>
-        <ul class="divide-y divide-gray-100">
-          <% agreements.each do |agreement| %>
-            <li class="py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <span class="font-medium text-gray-800"><%= agreement.project&.name || 'Project' %></span>
-                <% presenter = present(agreement) %>
-                <span class="ml-2 text-xs text-gray-500">(<%= presenter.status_badge %>)</span>
-              </div>
-              <div class="text-xs text-gray-500 mt-1 sm:mt-0">
-                <%= agreement.created_at.strftime('%b %d, %Y') %>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="text-gray-500">No agreements found for this user.</p>
       <% end %>
     </section>
   </div>
