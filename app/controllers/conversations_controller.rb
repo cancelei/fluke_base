@@ -1,6 +1,7 @@
 class ConversationsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_conversation, only: [ :show ]
+  after_action :delete_empty_conversations, only: [ :show ]
 
   def index
     @conversations = Conversation.involving(current_user)
@@ -52,5 +53,10 @@ class ConversationsController < ApplicationController
     unless @conversation
       redirect_to conversations_path, alert: "Conversation not found" and return
     end
+  end
+
+  def delete_empty_conversations
+    convo_service = ConversationQuery.new(current_user)
+    convo_service.empty_conversations
   end
 end

@@ -8,6 +8,7 @@ class MessagesController < ApplicationController
 
     respond_to do |format|
       if @message.save
+        @conversation.reload
         # Broadcast the message to the other user
         if @conversation.sender != current_user
           Turbo::StreamsChannel.broadcast_append_to(

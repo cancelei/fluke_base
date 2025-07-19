@@ -5,3 +5,8 @@
 <%= turbo_stream.update "new_message_form" do %>
   <%= render "messages/form", conversation: @conversation, message: Message.new %>
 <% end %> 
+
+<%= turbo_stream.remove "conversation_#{@conversation.id}_item" %>
+<%= turbo_stream.prepend "conversations_list" do %>
+  <%= render "conversations/conversation_item", conversation: @conversation, current_conversation: @conversation, current_user: current_user %>
+<% end %>
