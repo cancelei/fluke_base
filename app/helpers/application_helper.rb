@@ -63,4 +63,69 @@ module ApplicationHelper
 
     link_to text, path, class: css_classes, **options.except(:current_condition)
   end
+
+  # Enhanced navbar helper methods for modern design
+
+  def enhanced_navbar_link(text, path, icon_path, options = {})
+    current_condition = options[:current_condition] || -> { current_page?(path) }
+    is_current = current_condition.call
+    badge_count = options[:badge_count]
+
+    base_classes = "group relative inline-flex items-center space-x-2 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200"
+    css_classes = is_current ? "#{base_classes} bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700" : "#{base_classes} text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900"
+    icon_color = is_current ? "text-blue-500" : "text-gray-400 group-hover:text-blue-500"
+
+    link_content = capture do
+      concat tag.div(class: "flex items-center space-x-2") {
+        concat tag.svg(class: "w-4 h-4 #{icon_color} transition-colors", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24") {
+          tag.path("stroke-linecap": "round", "stroke-linejoin": "round", "stroke-width": "2", d: strip_tags(icon_path))
+        }
+        concat tag.span(strip_tags(text))
+      }
+      concat tag.span(strip_tags(badge_count.to_s), class: "absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-red-500 rounded-full") if badge_count.present? && badge_count > 0
+    end
+
+    link_to link_content, path, class: css_classes, **options.except(:current_condition, :badge_count)
+  end
+
+  def enhanced_dropdown_link(text, path, icon_path, options = {})
+    link_content = capture do
+      concat tag.svg(class: "w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24") {
+        tag.path("stroke-linecap": "round", "stroke-linejoin": "round", "stroke-width": "2", d: strip_tags(icon_path))
+      }
+      concat tag.span(strip_tags(text))
+    end
+
+    link_to link_content, path, class: "group flex items-center space-x-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 transition-all duration-200", **options
+  end
+
+  def enhanced_mobile_link(text, path, icon_path, options = {})
+    badge_count = options[:badge_count]
+
+    link_content = capture do
+      concat tag.svg(class: "w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24") {
+        tag.path("stroke-linecap": "round", "stroke-linejoin": "round", "stroke-width": "2", d: strip_tags(icon_path))
+      }
+      concat tag.span(strip_tags(text))
+    end
+
+    base_content = link_to link_content, path, class: "group flex items-center space-x-3 rounded-xl px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 transition-all duration-200", **options.except(:badge_count)
+
+    if badge_count.present? && badge_count > 0
+      tag.div(class: "relative") do
+        concat base_content
+        concat tag.span(strip_tags(badge_count.to_s), class: "absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-red-500 rounded-full")
+      end
+    else
+      base_content
+    end
+  end
+
+  def smooth_scroll_link(text, anchor)
+    link_to text, anchor, class: "inline-flex items-center rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 transition-all duration-200", data: { behavior: "smooth" }
+  end
+
+  def mobile_smooth_scroll_link(text, anchor)
+    link_to text, anchor, class: "block rounded-xl px-3 py-3 text-base font-medium text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 transition-all duration-200", data: { behavior: "smooth" }
+  end
 end

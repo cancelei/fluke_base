@@ -1,5 +1,15 @@
-<%= page_header("Projects", "A list of all your projects.", ui_button("New Project", new_project_path, variant: :primary, icon: "plus")) %>
-  
+<% new_project_button = capture do %>
+  <%= link_to new_project_path, class: "group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25" do %>
+    <svg class="-ml-0.5 mr-2 h-5 w-5 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+    </svg>
+    <span class="relative z-10">New Project</span>
+  <% end %>
+<% end %>
+
+<%= page_header("Projects", "A list of all your projects.", new_project_button) %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
   <% if @projects.present? %>
     <div class="mt-8 flow-root">
       <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
