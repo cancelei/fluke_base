@@ -98,10 +98,11 @@ class AgreementsController < ApplicationController
 
     form_params = agreement_params.merge(
       initiator_id: current_user.id,
-      initiator_meta: initiator_meta
+      initiator_meta: initiator_meta,
+      milestone_ids: params[:agreement][:milestone_ids]
     )
 
-        @agreement_form = AgreementForm.new(form_params)
+    @agreement_form = AgreementForm.new(form_params)
 
     if @agreement_form.save
       @agreement = @agreement_form.agreement
@@ -390,11 +391,7 @@ class AgreementsController < ApplicationController
     end
 
     def agreement_params
-      params.require(:agreement).permit(
-        :project_id, :other_party_id, :agreement_type, :payment_type,
-        :start_date, :end_date, :tasks, :terms, :weekly_hours, :hourly_rate, :equity_percentage,
-        :counter_to_id, :initiator_id, milestone_ids: []
-      )
+      params.require(:agreement).permit(:project_id, :initiator_id, :other_party_id, :agreement_type, :payment_type, :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage, :counter_to_id, :status, :initiator_meta, :counter_offer_turn_id, :terms, milestone_ids: [])
     end
 
     def authorize_agreement_action

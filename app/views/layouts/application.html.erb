@@ -35,7 +35,7 @@
 
     <%= render 'shared/milestone_bar' %>
     
-    <main class="<%= controller_name == 'home' && action_name == 'index' ? '' : 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6' %>">
+    <main class="<%= controller_name == 'home' && action_name == 'index' ? '' : 'mx-auto px-4 sm:px-6 lg:px-8 py-6 w-[90%]' %>">
       <%= yield %>
     </main>
   </body>

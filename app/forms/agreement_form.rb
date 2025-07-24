@@ -15,6 +15,7 @@ class AgreementForm < ApplicationForm
   attribute :status, :string, default: Agreement::PENDING
   attribute :initiator_meta, :string
   attribute :counter_offer_turn_id, :integer
+  attribute :terms, :string
 
   validates :project_id, :initiator_id, :other_party_id, :agreement_type, :payment_type, presence: true
   validates :start_date, :end_date, :tasks, :weekly_hours, presence: true
@@ -33,11 +34,11 @@ class AgreementForm < ApplicationForm
   def initialize(attributes = {})
     super
     self.agreement_type = determine_agreement_type if agreement_type.blank?
-    self.milestone_ids = parse_milestone_ids(milestone_ids)
+    self.milestone_ids = parse_milestone_ids(attributes["milestone_ids"])
   end
 
   def milestone_ids_array
-    @milestone_ids_array ||= Array(milestone_ids).map(&:to_i).reject(&:zero?)
+    @milestone_ids_array ||= parse_milestone_ids(attributes["milestone_ids"])
   end
 
   def milestone_ids=(value)
@@ -131,10 +132,21 @@ class AgreementForm < ApplicationForm
 
   def parse_milestone_ids(value)
     case value
-    when String
-      value.split(",").map(&:strip).map(&:to_i).reject(&:zero?)
+    when nil
+      []
     when Array
       value.map(&:to_i).reject(&:zero?)
+    when String
+      return [] if value.blank?
+      # Try JSON first
+      begin
+        parsed = JSON.parse(value)
+        return parsed.map(&:to_i).reject(&:zero?) if parsed.is_a?(Array)
+      rescue JSON::ParserError
+        # Not JSON, fall through
+      end
+      # Handle comma-separated string
+      value.split(",").map(&:strip).map(&:to_i).reject(&:zero?)
     else
       []
     end

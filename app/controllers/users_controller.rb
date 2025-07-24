@@ -56,7 +56,10 @@ class UsersController < ApplicationController
       if role.name == "Mentor"
         current_user.update!(current_role_id: role.id, selected_project_id: nil)
       else
-        current_user.update(current_role_id: role.id)
+        projects = Project.where(user_id: current_user.id)
+        selected_project_id = projects.first&.id.presence
+
+        current_user.update!(current_role_id: role.id, selected_project_id: selected_project_id)
       end
       respond_to do |format|
         format.turbo_stream do
