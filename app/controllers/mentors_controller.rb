@@ -30,12 +30,7 @@ class MentorsController < ApplicationController
       return
     end
 
-    # Create a new agreement with the mentor
-    @agreement = Agreement.new(
-      other_party_id: @mentor.id,
-      initiator_id: current_user.id,
-      status: Agreement::PENDING
-    )
+    # Agreement creation now handled by AgreementForm with participants
 
     # Redirect to the new agreement form with mentor pre-filled
     redirect_to new_agreement_path(

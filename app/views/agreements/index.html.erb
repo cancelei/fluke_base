@@ -56,7 +56,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">
-                    <%= agreement.initiator_id == current_user.id ? agreement.other_party.full_name : agreement.initiator.full_name %>
+                    <%= agreement.initiator&.id == current_user.id ? agreement.other_party&.full_name : agreement.initiator&.full_name %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">

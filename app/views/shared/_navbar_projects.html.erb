@@ -66,7 +66,7 @@
           </div>
           <div class="py-2 max-h-64 overflow-y-auto">
             <% selected_project = Project.find(current_user.selected_project_id) %>
-            <% (current_user.id == selected_project.user_id ? selected_project.milestones : Milestone.where(id: selected_project.agreements.where("initiator_id = ? OR other_party_id = ?", current_user.id, current_user.id).active.pluck(:milestone_ids).flatten)).each do |milestone| %>
+            <% (current_user.id == selected_project.user_id ? selected_project.milestones : Milestone.where(id: selected_project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).active.pluck(:milestone_ids).flatten)).each do |milestone| %>
               <% active_log = selected_project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id) %>
               <div class="flex items-center justify-between px-4 py-3 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-200">
                 <div class="flex items-center space-x-3">

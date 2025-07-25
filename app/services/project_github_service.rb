@@ -58,8 +58,8 @@ class ProjectGithubService
     # Project owner can always view
     return true if @project.user_id == user.id
 
-    # Check for accepted agreements
-    @project.agreements.accepted.exists?(other_party_id: user.id)
+    # Check for accepted agreements using AgreementParticipants
+    @project.agreements.accepted.joins(:agreement_participants).exists?(agreement_participants: { user_id: user.id })
   end
 
   def contributions_summary_basic
@@ -71,7 +71,7 @@ class ProjectGithubService
   def can_access_repository?(user)
     return false if user.nil? || @project.repository_url.blank?
     @project.user_id == user.id ||
-    @project.agreements.active.exists?([ "(initiator_id = :user_id OR other_party_id = :user_id)", { user_id: user.id } ])
+    @project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: user.id })
   end
 
   private

@@ -104,8 +104,7 @@ if Rails.env.development?
         status: [ Agreement::PENDING, Agreement::ACCEPTED, Agreement::COMPLETED ].sample,
         start_date: Date.today,
         end_date: 3.months.from_now,
-        initiator_id: entrepreneur.id,
-        other_party_id: mentors.sample.id,
+        # Agreement participants will be created via AgreementForm
         project: project,
         terms: "Weekly meetings, feedback on product development, introductions to potential customers.",
         payment_type: [ Agreement::HOURLY, Agreement::EQUITY, Agreement::HYBRID ].sample,
@@ -163,8 +162,7 @@ if Rails.env.development?
     status: Agreement::ACCEPTED,
     start_date: Date.today,
     end_date: 1.year.from_now,
-    initiator_id: entrepreneurs.first.id,
-    other_party_id: multi_role.id,
+    # Agreement participants will be created via AgreementForm
     project: project,
     terms: "50-50 equity split. Full-time commitment from both parties. Regular progress updates and weekly meetings.",
     payment_type: Agreement::EQUITY,

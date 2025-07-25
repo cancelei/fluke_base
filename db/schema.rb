@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_24_190825) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "agreement_participants", force: :cascade do |t|
+    t.bigint "agreement_id", null: false
+    t.bigint "user_id", null: false
+    t.string "user_role"
+    t.bigint "project_id", null: false
+    t.boolean "is_initiator", default: false
+    t.bigint "counter_agreement_id"
+    t.bigint "accept_or_counter_turn_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accept_or_counter_turn_id"], name: "idx_agreement_participants_on_turn"
+    t.index ["accept_or_counter_turn_id"], name: "index_agreement_participants_on_accept_or_counter_turn_id"
+    t.index ["agreement_id", "user_id"], name: "idx_agreement_participants_on_agreement_user", unique: true
+    t.index ["agreement_id"], name: "index_agreement_participants_on_agreement_id"
+    t.index ["counter_agreement_id"], name: "index_agreement_participants_on_counter_agreement_id"
+    t.index ["is_initiator"], name: "idx_agreement_participants_on_is_initiator"
+    t.index ["project_id"], name: "index_agreement_participants_on_project_id"
+    t.index ["user_id"], name: "index_agreement_participants_on_user_id"
+  end
+
   create_table "agreements", force: :cascade do |t|
     t.string "agreement_type"
     t.string "status"
@@ -58,15 +78,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
     t.text "tasks"
     t.integer "counter_to_id"
     t.integer "milestone_ids", default: [], array: true
-    t.bigint "initiator_id"
-    t.bigint "other_party_id"
     t.jsonb "initiator_meta", default: {"id"=>nil, "role"=>nil}, null: false
     t.jsonb "agreement_meta", default: [], array: true
     t.bigint "counter_offer_turn_id"
     t.index ["counter_offer_turn_id"], name: "index_agreements_on_counter_offer_turn_id"
     t.index ["counter_to_id"], name: "index_agreements_on_counter_to_id"
-    t.index ["initiator_id"], name: "index_agreements_on_initiator_id"
-    t.index ["other_party_id"], name: "index_agreements_on_other_party_id"
     t.index ["payment_type"], name: "index_agreements_on_payment_type"
     t.index ["project_id"], name: "index_agreements_on_project_id"
   end
@@ -381,10 +397,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "agreement_participants", "agreements"
+  add_foreign_key "agreement_participants", "agreements", column: "counter_agreement_id"
+  add_foreign_key "agreement_participants", "projects"
+  add_foreign_key "agreement_participants", "users"
+  add_foreign_key "agreement_participants", "users", column: "accept_or_counter_turn_id"
   add_foreign_key "agreements", "projects"
   add_foreign_key "agreements", "users", column: "counter_offer_turn_id"
-  add_foreign_key "agreements", "users", column: "initiator_id"
-  add_foreign_key "agreements", "users", column: "other_party_id"
   add_foreign_key "conversations", "users", column: "recipient_id"
   add_foreign_key "conversations", "users", column: "sender_id"
   add_foreign_key "github_branches", "projects"

@@ -27,8 +27,8 @@ class Ability
 
     # Allow mentors to see projects they have active agreements with
     can :read, Project do |project|
-      project.agreements.active.where(other_party_id: user.id).exists? ||
-      project.agreements.completed.where(other_party_id: user.id).exists?
+      project.agreements.active.joins(:agreement_participants).where(agreement_participants: { user_id: user.id }).exists? ||
+      project.agreements.completed.joins(:agreement_participants).where(agreement_participants: { user_id: user.id }).exists?
     end
   end
 
@@ -43,22 +43,22 @@ class Ability
     end
 
     can :edit, Agreement do |agreement|
-      # Allow editing if user is the initiator of the latest counter offer
-      agreement.latest_counter_offer&.initiator_id == user.id && !agreement.countered?
+      # Allow editing if user is the initiator and agreement is pending
+      agreement.pending? && agreement.initiator&.id == user.id
     end
 
     can :has_counter_offer, Agreement do |agreement|
-      agreement.counter_offers.exists?(other_party_id: agreement.initiator_id)
+      agreement.counter_offers.joins(:agreement_participants).exists?(agreement_participants: { user_id: agreement.initiator&.id })
     end
 
     can :accept, Agreement do |agreement|
-      # Only the receiver can accept a pending agreement
-      agreement.pending? && agreement.initiator_id != user.id
+      # Use turn-based system: only the user whose turn it is can accept
+      agreement.user_can_accept?(user)
     end
 
     can :reject, Agreement do |agreement|
-      # Only the receiver can reject a pending agreement
-      agreement.pending? && agreement.initiator_id != user.id
+      # Use turn-based system: only the user whose turn it is can reject
+      agreement.user_can_reject?(user)
     end
 
     can :cancel, Agreement do |agreement|
@@ -67,9 +67,8 @@ class Ability
     end
 
     can :counter_offer, Agreement do |agreement|
-      # Only the receiver can make a counter offer to a pending agreement
-      last_initiator = agreement.counter_offers.order(created_at: :desc).first&.initiator_id
-      can_make_counter_offer?(user, agreement, last_initiator)
+      # Use turn-based system: only the user whose turn it is can make a counter offer
+      agreement.user_can_make_counter_offer?(user)
     end
 
     can :complete, Agreement do |agreement|
@@ -86,13 +85,6 @@ class Ability
   end
 
   def is_party_to_agreement?(user, agreement)
-    agreement.initiator_id == user.id || agreement.other_party_id == user.id
-  end
-
-  def can_make_counter_offer?(user, agreement, last_initiator)
-    (agreement.pending? || agreement.countered?) && (
-      (agreement.other_party_id == user.id && agreement.initiator_id != user.id) ||
-      (agreement.initiator_id == user.id && agreement.other_party_id != user.id)
-    ) && ((last_initiator.present? && last_initiator != user.id) || agreement.initiator_id != user.id)
+    agreement.agreement_participants.exists?(user_id: user.id)
   end
 end

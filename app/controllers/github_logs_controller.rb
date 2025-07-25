@@ -15,7 +15,8 @@ class GithubLogsController < ApplicationController
       user_ids = []
       user_ids += @project.mentorships
                          .where(status: "Accepted")
-                         .pluck(:initiator_id, :other_party_id)
+                         .joins(:agreement_participants)
+                         .pluck("agreement_participants.user_id")
       user_ids.flatten.uniq
     end
 

@@ -15,15 +15,14 @@ class ProjectsController < ApplicationController
     @milestones = @project.milestones.order(created_at: :desc)
 
     # Check if the current user has an agreement with the project
-    @has_agreement = @project.agreements.active.exists?([
-      "(initiator_id = :user_id OR other_party_id = :user_id)",
-      { user_id: current_user.id }
-    ])
+    @has_agreement = @project.agreements.active.joins(:agreement_participants)
+      .exists?(agreement_participants: { user_id: current_user.id })
 
     # Load suggested mentors only for project owner
     if current_user.id == @project.user_id
       @suggested_mentors = User.with_role(:mentor)
-                             .where.not(id: @project.agreements.pluck(:other_party_id))
+                             .where.not(id: @project.agreements.joins(:agreement_participants)
+                                                                      .pluck("agreement_participants.user_id"))
                              .limit(3)
     else
       @suggested_mentors = []

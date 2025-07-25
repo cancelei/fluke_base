@@ -7,6 +7,19 @@ class TimeLogsController < ApplicationController
   before_action :ensure_no_active_time_log, only: [ :create_manual, :create ]
 
   def create_manual
+    # Check if milestone_id is provided
+    if params[:time_log][:milestone_id].blank?
+      redirect_to time_logs_path(@project), alert: "Please select a milestone before adding a manual time log."
+      return
+    end
+
+    # Find the milestone
+    @milestone = @project.milestones.find_by(id: params[:time_log][:milestone_id])
+    if @milestone.nil?
+      redirect_to time_logs_path(@project), alert: "Milestone not found. Please select a valid milestone."
+      return
+    end
+
     @time_log = @project.time_logs.new(time_log_params)
     @time_log.user = current_user
     @time_log.status = "completed"
@@ -28,7 +41,7 @@ class TimeLogsController < ApplicationController
     @date_range = (@selected_date - 3.days)..(@selected_date + 3.days)
 
     # Get milestones for the current project's project
-    @milestones = (@owner ? @project.milestones : Milestone.where(id: @project.agreements.where("initiator_id = ? OR other_party_id = ?", current_user.id, current_user.id).pluck(:milestone_ids).flatten))
+    @milestones = (@owner ? @project.milestones : Milestone.where(id: @project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).pluck(:milestone_ids).flatten))
 
     # Get time logs for the selected date
     @time_logs = @project.time_logs

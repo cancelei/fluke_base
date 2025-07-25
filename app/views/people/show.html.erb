@@ -39,7 +39,7 @@
           <%# Example: shared projects, skills, agreements %>
           <% shared_projects = current_user.projects & @person.projects %>
           <% shared_skills = (current_user.try(:skills) || []) & (@person.try(:skills) || []) %>
-          <% shared_agreements = current_user.all_agreements.where("initiator_id = ? OR other_party_id = ?", @person.id, @person.id) %>
+          <% shared_agreements = current_user.all_agreements.joins(:agreement_participants).where(agreement_participants: { user_id: @person.id }) %>
           <% if shared_projects.any? %>
             <div class="text-xs text-gray-700">Shared projects: <%= shared_projects.map(&:name).join(', ') %></div>
           <% end %>

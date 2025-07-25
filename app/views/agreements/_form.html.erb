@@ -4,10 +4,16 @@
 %>
 
 <div data-controller="agreement-form">
-  <%= form_with(model: agreement, class: "space-y-6") do |form| %>
+  <% form_options = if agreement.persisted?
+       { model: agreement, url: agreement_path(agreement), method: :patch, local: true, class: "space-y-6" }
+     else
+       { model: agreement, local: true, class: "space-y-6" }
+     end %>
+  <%= form_with(**form_options) do |form| %>
       <%= form.hidden_field :project_id, value: @project.id if @project %>
-      <%= form.hidden_field :initiator_id, value: current_user.id %>
-      <%= form.hidden_field :other_party_id, value: agreement.other_party_id.presence || params[:other_party_id] %>
+      <%= form.hidden_field :initiator_user_id, value: current_user.id %>
+      <% other_party_id = @agreement_form&.other_party_user_id || params[:other_party_id] %>
+      <%= form.hidden_field :other_party_user_id, value: other_party_id %>
       <%= form.hidden_field :counter_to_id, value: params[:counter_to_id] %>
       
       <% if current_user.id != @project&.user_id %>
@@ -148,27 +154,34 @@
 
     <div class="mt-6 flex justify-end space-x-3">
       <% if !agreement.persisted? && @project %>
-        <%= form.submit "Create Agreement", class: "btn-primary" %>
+        <% if params[:counter_to_id].present? %>
+          <%= form.submit "Counter Offer", class: "btn-warning" %>
+        <% else %>
+          <%= form.submit "Create Agreement", class: "btn-primary" %>
+        <% end %>
       <% elsif agreement.persisted? %>
+        <% # Get current user's participant to check permissions %>
+        <% current_participant = agreement.agreement_participants.find_by(user_id: current_user.id) %>
+        
         <% if can?(:edit, @agreement) && !@agreement.countered? %>
           <%= form.submit "Update Agreement", class: "btn-primary" %>
         <% end %>
         
-        <% if can?(:accept, @agreement) %>
+        <% if current_participant&.can_accept_agreement? %>
           <%= button_to "Accept Agreement", accept_agreement_path(@agreement), 
               method: :patch, 
               class: "btn-success",
               data: { turbo_confirm: "Are you sure you want to accept this agreement?" } %>
         <% end %>
         
-        <% if can?(:reject, @agreement) %>
+        <% if current_participant&.can_reject_agreement? %>
           <%= button_to "Reject Agreement", reject_agreement_path(@agreement), 
               method: :patch, 
               class: "btn-danger",
               data: { turbo_confirm: "Are you sure you want to reject this agreement?" } %>
         <% end %>
         
-        <% if can?(:counter_offer, @agreement) %>
+        <% if current_participant&.can_make_counter_offer? %>
           <%= button_to "Counter Offer", counter_offer_agreement_path(@agreement), 
               method: :post, 
               class: "btn-warning",

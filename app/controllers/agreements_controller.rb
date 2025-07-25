@@ -38,17 +38,36 @@ class AgreementsController < ApplicationController
 
     set_project_from_params_or_session
 
-    form_params = {
-      project_id: params[:project_id] || @project&.id,
-      other_party_id: params[:other_party_id],
-      counter_to_id: params[:counter_to_id]
-    }
-
-    @agreement_form = AgreementForm.new(form_params)
-
     if params[:counter_to_id].present?
+      # Handle counter offer case
       original_agreement = Agreement.find(params[:counter_to_id])
+      @project = original_agreement.project
       @initiator_details = original_agreement.initiator_meta
+
+      # Pre-populate form with original agreement data for counter offer
+      @agreement_form = AgreementForm.new(
+        project_id: original_agreement.project_id,
+        initiator_user_id: current_user.id,
+        other_party_user_id: params[:other_party_id],
+        agreement_type: original_agreement.agreement_type,
+        payment_type: original_agreement.payment_type,
+        start_date: original_agreement.start_date,
+        end_date: original_agreement.end_date,
+        tasks: original_agreement.tasks,
+        weekly_hours: original_agreement.weekly_hours,
+        hourly_rate: original_agreement.hourly_rate,
+        equity_percentage: original_agreement.equity_percentage,
+        milestone_ids: original_agreement.milestone_ids,
+        counter_to_id: params[:counter_to_id],
+        initiator_meta: original_agreement.initiator_meta
+      )
+    else
+      # Handle new agreement case
+      form_params = {
+        project_id: params[:project_id] || @project&.id,
+        other_party_user_id: params[:other_party_id]
+      }
+      @agreement_form = AgreementForm.new(form_params)
     end
 
     @other_party = User.find_by_id(params[:other_party_id])
@@ -57,12 +76,17 @@ class AgreementsController < ApplicationController
 
   def edit
     authorize! :edit, @agreement
+    @project = @agreement.project
+
+    # Get participants using AgreementParticipants
+    initiator = @agreement.agreement_participants.find_by(is_initiator: true)&.user
+    other_party = @agreement.agreement_participants.find_by(is_initiator: false)&.user
 
     # Initialize form object with current agreement data
     @agreement_form = AgreementForm.new(
       project_id: @agreement.project_id,
-      initiator_id: @agreement.initiator_id,
-      other_party_id: @agreement.other_party_id,
+      initiator_user_id: initiator&.id,
+      other_party_user_id: other_party&.id,
       agreement_type: @agreement.agreement_type,
       payment_type: @agreement.payment_type,
       start_date: @agreement.start_date,
@@ -79,9 +103,6 @@ class AgreementsController < ApplicationController
     )
 
     @milestone_ids = @agreement_form.milestone_ids_array
-    handle_edit_counter_offer
-    set_project_and_mentor_for_edit
-    handle_counter_offer_for_edit
   end
 
   def create
@@ -89,7 +110,7 @@ class AgreementsController < ApplicationController
     project_id = params.dig("agreement", "project_id").to_i
     initiator_meta = nil
     if project_id.present?
-      old_agreement = Project.find_by_id(project_id).agreements.order(id: :desc).first
+      old_agreement = Project.find_by_id(project_id)&.agreements&.order(id: :desc)&.first
       initiator_meta = old_agreement&.initiator_meta
     end
 
@@ -97,22 +118,36 @@ class AgreementsController < ApplicationController
     initiator_meta = { "id" => current_user.id, "role" => current_user.current_role&.name } if initiator_meta.blank?
 
     form_params = agreement_params.merge(
-      initiator_id: current_user.id,
+      initiator_user_id: current_user.id,
+      other_party_user_id: params.dig(:agreement, :other_party_user_id),
       initiator_meta: initiator_meta,
       milestone_ids: params[:agreement][:milestone_ids]
     )
 
+    Rails.logger.debug "Form params: #{form_params.inspect}"
     @agreement_form = AgreementForm.new(form_params)
+    Rails.logger.debug "Form valid? #{@agreement_form.valid?}"
+    Rails.logger.debug "Form errors: #{@agreement_form.errors.full_messages.inspect}" unless @agreement_form.valid?
 
     if @agreement_form.save
       @agreement = @agreement_form.agreement
-      notify_and_message_other_party(:create)
-      redirect_to @agreement, notice: "Agreement was successfully created."
+
+      # Determine success message based on whether it's a counter offer
+      if @agreement_form.is_counter_offer?
+        notice_message = "Counter offer was successfully created."
+        notify_and_message_other_party(:counter_offer)
+      else
+        notice_message = "Agreement was successfully created."
+        notify_and_message_other_party(:create)
+      end
+
+      redirect_to @agreement, notice: notice_message
     else
       Rails.logger.debug @agreement_form.errors.full_messages.inspect
       @agreement_form.errors.full_messages.each { |error| flash[:alert] = error }
       @project = @agreement_form.project
       @agreement = Agreement.new  # For authorization checks in the form
+      @milestone_ids = @agreement_form.milestone_ids_array
       render :new, status: :unprocessable_entity
     end
   end
@@ -120,15 +155,40 @@ class AgreementsController < ApplicationController
   def update
     authorize! :edit, @agreement
 
-    @agreement_form = AgreementForm.new(agreement_params)
-
-    if @agreement_form.valid?
-      @agreement_form.update_agreement(@agreement)
+    # Update the agreement directly with the form params
+    if @agreement.update(agreement_params)
       notify_and_message_other_party(:update)
       redirect_to @agreement, notice: "Agreement was successfully updated."
     else
       # Ensure @project is set for the form partial
       @project = @agreement.project
+
+      # Get participants for form display
+      initiator = @agreement.agreement_participants.find_by(is_initiator: true)&.user
+      other_party = @agreement.agreement_participants.find_by(is_initiator: false)&.user
+      @other_party = other_party
+
+      # Create form object for display with current agreement data
+      @agreement_form = AgreementForm.new(
+        project_id: @agreement.project_id,
+        initiator_user_id: initiator&.id,
+        other_party_user_id: other_party&.id,
+        agreement_type: @agreement.agreement_type,
+        payment_type: @agreement.payment_type,
+        start_date: @agreement.start_date,
+        end_date: @agreement.end_date,
+        tasks: @agreement.tasks,
+        weekly_hours: @agreement.weekly_hours,
+        hourly_rate: @agreement.hourly_rate,
+        equity_percentage: @agreement.equity_percentage,
+        milestone_ids: @agreement.milestone_ids,
+        counter_to_id: @agreement.counter_to_id,
+        status: @agreement.status,
+        initiator_meta: @agreement.initiator_meta,
+        counter_offer_turn_id: @agreement.counter_offer_turn_id
+      )
+      @milestone_ids = @agreement_form.milestone_ids_array
+
       render :edit, status: :unprocessable_entity
     end
   end
@@ -178,11 +238,14 @@ class AgreementsController < ApplicationController
   end
 
   def counter_offer
+    # Get the initiator using AgreementParticipants
+    initiator = @agreement.agreement_participants.find_by(is_initiator: true)&.user
+
     # Create a new agreement form based on the current one
     redirect_to new_agreement_path(
       project_id: @agreement.project_id,
       counter_to_id: @agreement.id,
-      other_party_id: @agreement.initiator_id
+      other_party_id: initiator&.id
     )
   end
 
@@ -197,12 +260,33 @@ class AgreementsController < ApplicationController
     end
 
     def duplicate_agreement_exists?
-      agreement = Agreement.where(other_party_id: params[:other_party_id], project_id: params[:project_id], initiator_id: current_user.id).where(status: [ Agreement::ACCEPTED, Agreement::PENDING ]).first
-      params[:counter_to_id].blank? && agreement.present?
+      return false if params[:counter_to_id].present? # Counter offers are allowed
+      return false unless params[:other_party_id].present? && params[:project_id].present?
+
+      # Check for existing agreements using the new AgreementParticipants structure
+      query = Agreement.joins(:agreement_participants)
+        .where(project_id: params[:project_id], status: [ Agreement::ACCEPTED, Agreement::PENDING ])
+        .where(agreement_participants: { user_id: [ current_user.id, params[:other_party_id] ] })
+        .group("agreements.id")
+        .having("COUNT(agreement_participants.id) = 2")
+
+      # Exclude current agreement if editing
+      if params[:id].present?
+        query = query.where.not(id: params[:id])
+      end
+
+      query.exists?
     end
 
     def duplicate_agreement_flash
-      agreement = Agreement.where(other_party_id: params[:other_party_id], project_id: params[:project_id], initiator_id: current_user.id).where(status: [ Agreement::ACCEPTED, Agreement::PENDING ]).first
+      # Find existing agreement using AgreementParticipants structure
+      agreement = Agreement.joins(:agreement_participants)
+        .where(project_id: params[:project_id], status: [ Agreement::ACCEPTED, Agreement::PENDING ])
+        .where(agreement_participants: { user_id: [ current_user.id, params[:other_party_id] ] })
+        .group("agreements.id")
+        .having("COUNT(agreement_participants.id) = 2")
+        .first
+
       "You currently have an agreement with this mentor for this project. View agreement <b><a href='#{agreement_path(agreement.id)}'>here</a></b>".html_safe
     end
 
@@ -251,9 +335,9 @@ class AgreementsController < ApplicationController
     # Centralized notification and message logic
     def notify_and_message_other_party(action)
       other_party = if @original_agreement&.present? && [ :create ].include?(action)
-        current_user.id == @original_agreement.initiator_id ? @original_agreement.other_party : @original_agreement.initiator
+        current_user.id == @original_agreement.initiator&.id ? @original_agreement.other_party : @original_agreement.initiator
       else
-        current_user.id == @agreement.initiator_id ? @agreement.other_party : @agreement.initiator
+        current_user.id == @agreement.initiator&.id ? @agreement.other_party : @agreement.initiator
       end
       case action
       when :create
@@ -330,8 +414,8 @@ class AgreementsController < ApplicationController
 
     def authorize_agreement
       authorized = (
-        current_user.id == @agreement.initiator_id ||
-        current_user.id == @agreement.other_party_id ||
+        current_user.id == @agreement.initiator&.id ||
+        current_user.id == @agreement.other_party&.id ||
         current_user.has_role?(:admin)
       )
 
@@ -340,7 +424,7 @@ class AgreementsController < ApplicationController
         original = @agreement.counter_to
         authorized = (
           original.present? &&
-          (current_user.id == original.initiator_id || current_user.id == original.other_party_id)
+          (current_user.id == original.initiator&.id || current_user.id == original.other_party&.id)
         )
       end
 
@@ -371,7 +455,7 @@ class AgreementsController < ApplicationController
 
       @project = Project.find(project_id)
 
-      if !(params[:other_party_id] || params.dig(:agreement, :other_party_id))
+      if !(params[:other_party_id] || params.dig(:agreement, :other_party_user_id))
         redirect_to projects_path, alert: "Select the other user to create agreement"
       end
     end
@@ -384,14 +468,14 @@ class AgreementsController < ApplicationController
         return
       end
 
-      unless (@agreement.pending? && current_user.id == @agreement.initiator_id) ||
-             (@agreement.pending? && current_user.id == @agreement.other_party_id && !@agreement.is_counter_offer?)
+      unless (@agreement.pending? && current_user.id == @agreement.initiator&.id) ||
+             (@agreement.pending? && current_user.id == @agreement.other_party&.id && !@agreement.is_counter_offer?)
         redirect_to @agreement, alert: "You cannot modify this agreement."
       end
     end
 
     def agreement_params
-      params.require(:agreement).permit(:project_id, :initiator_id, :other_party_id, :agreement_type, :payment_type, :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage, :counter_to_id, :status, :initiator_meta, :counter_offer_turn_id, :terms, milestone_ids: [])
+      params.require(:agreement).permit(:project_id, :agreement_type, :payment_type, :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage, :counter_to_id, :status, :initiator_meta, :counter_offer_turn_id, :terms, milestone_ids: [])
     end
 
     def authorize_agreement_action

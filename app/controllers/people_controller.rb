@@ -12,7 +12,7 @@ class PeopleController < ApplicationController
   end
 
   def show
-    @projects_involved = @person.projects + Project.joins(:agreements).where(agreements: { other_party_id: @person.id }).distinct
+    @projects_involved = @person.projects + Project.joins(agreements: :agreement_participants).where(agreement_participants: { user_id: @person.id }).distinct
   end
 
   private

@@ -23,9 +23,9 @@ class Agreement < ApplicationRecord
   #   countered: "Countered" }
   # Relationships
   belongs_to :project
-  belongs_to :initiator, class_name: "User", foreign_key: "initiator_id"
+  has_many :agreement_participants, dependent: :destroy
+  has_many :users, through: :agreement_participants
   belongs_to :counter_offer_turn, class_name: "User", foreign_key: "counter_offer_turn_id"
-  belongs_to :other_party, class_name: "User", foreign_key: "other_party_id"
   has_many :meetings, dependent: :destroy
   belongs_to :counter_to, class_name: "Agreement", foreign_key: "counter_to_id", optional: true
   has_many :counter_offers, class_name: "Agreement", foreign_key: "counter_to_id", dependent: :destroy
@@ -36,8 +36,6 @@ class Agreement < ApplicationRecord
 
   # Validations
   validates :project_id, presence: true
-  validates :initiator_id, presence: true
-  validates :other_party_id, presence: true
   validates :status, presence: true, inclusion: { in: [ PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED, COUNTERED ] }
   validates :agreement_type, presence: true, inclusion: { in: [ MENTORSHIP, CO_FOUNDER ] }
   validates :payment_type, presence: true, inclusion: { in: [ HOURLY, EQUITY, HYBRID ] }
@@ -87,7 +85,7 @@ class Agreement < ApplicationRecord
     end
 
     self.counter_to_id = original_agreement.id
-    attrs_to_copy = original_agreement.attributes.except("id", "created_at", "updated_at", "counter_to_id", "status", "initiator_id", "other_party_id")
+    attrs_to_copy = original_agreement.attributes.except("id", "created_at", "updated_at", "counter_to_id", "status")
     assign_attributes(attrs_to_copy)
   end
 
@@ -124,9 +122,71 @@ class Agreement < ApplicationRecord
     end
   end
 
+  # Helper methods for compatibility with existing code
+  def initiator
+    agreement_participants.find_by(is_initiator: true)&.user
+  end
+
+  def initiator_id
+    initiator&.id
+  end
+
+  def other_party
+    agreement_participants.find_by(is_initiator: false)&.user
+  end
+
+  def other_party_id
+    other_party&.id
+  end
+
+  def participants
+    agreement_participants.includes(:user)
+  end
+
+  def participant_for_user(user)
+    agreement_participants.find_by(user: user)
+  end
+
+  def user_can_accept_or_counter?(user)
+    participant = participant_for_user(user)
+    participant&.accept_or_counter_turn_id == user.id
+  end
+
+  # Turn-based system methods
+  def whose_turn?
+    # Find the participant whose turn it is to act
+    turn_user_id = agreement_participants.first&.accept_or_counter_turn_id
+    User.find_by(id: turn_user_id) if turn_user_id
+  end
+
+  def user_can_make_counter_offer?(user)
+    participant = participant_for_user(user)
+    participant&.can_make_counter_offer?
+  end
+
+  def user_can_accept?(user)
+    participant = participant_for_user(user)
+    participant&.can_accept_agreement?
+  end
+
+  def user_can_reject?(user)
+    participant = participant_for_user(user)
+    participant&.can_reject_agreement?
+  end
+
+  def pass_turn_to_user(user)
+    agreement_participants.update_all(accept_or_counter_turn_id: user.id)
+  end
+
+  def pass_turn_to_other_party(current_user)
+    other_participant = agreement_participants.where.not(user_id: current_user.id).first
+    pass_turn_to_user(other_participant.user) if other_participant
+  end
+
   # Custom validation: ensure entrepreneur and mentor are different users
   def different_entrepreneur_and_mentor
-    if initiator_id.present? && other_party_id.present? && initiator_id == other_party_id
+    participant_users = agreement_participants.map(&:user_id)
+    if participant_users.uniq.length != participant_users.length
       errors.add(:base, "Entrepreneur and mentor cannot be the same person")
     end
   end
@@ -196,8 +256,8 @@ class Agreement < ApplicationRecord
   end
 
   def can_view_full_project_details?(user)
-    return true if initiator_id == user.id
-    return true if other_party_id == user.id
+    return true if initiator&.id == user.id
+    return true if other_party&.id == user.id
     false
   end
 

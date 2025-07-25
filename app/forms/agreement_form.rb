@@ -1,7 +1,7 @@
 class AgreementForm < ApplicationForm
   attribute :project_id, :integer
-  attribute :initiator_id, :integer
-  attribute :other_party_id, :integer
+  attribute :initiator_user_id, :integer
+  attribute :other_party_user_id, :integer
   attribute :agreement_type, :string
   attribute :payment_type, :string
   attribute :start_date, :date
@@ -17,7 +17,7 @@ class AgreementForm < ApplicationForm
   attribute :counter_offer_turn_id, :integer
   attribute :terms, :string
 
-  validates :project_id, :initiator_id, :other_party_id, :agreement_type, :payment_type, presence: true
+  validates :project_id, :initiator_user_id, :other_party_user_id, :agreement_type, :payment_type, presence: true
   validates :start_date, :end_date, :tasks, :weekly_hours, presence: true
   validates :weekly_hours, numericality: { greater_than: 0, less_than_or_equal_to: 40 }
   validates :hourly_rate, presence: true, numericality: { greater_than_or_equal_to: 0 },
@@ -58,11 +58,11 @@ class AgreementForm < ApplicationForm
   end
 
   def initiator
-    @initiator ||= User.find(initiator_id) if initiator_id.present?
+    @initiator ||= User.find(initiator_user_id) if initiator_user_id.present?
   end
 
   def other_party
-    @other_party ||= User.find(other_party_id) if other_party_id.present?
+    @other_party ||= User.find(other_party_user_id) if other_party_user_id.present?
   end
 
   def counter_to
@@ -81,7 +81,15 @@ class AgreementForm < ApplicationForm
     @agreement = agreement
     @is_update = true
     assign_attributes_to_agreement
-    @agreement.save!
+
+    begin
+      @agreement.save!
+      Rails.logger.info "Agreement #{@agreement.id} successfully updated"
+    rescue => e
+      Rails.logger.error "Failed to update agreement #{@agreement.id}: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      raise e
+    end
   end
 
   private
@@ -101,8 +109,6 @@ class AgreementForm < ApplicationForm
   def assign_attributes_to_agreement
     @agreement.assign_attributes(
       project_id: project_id,
-      initiator_id: initiator_id,
-      other_party_id: other_party_id,
       agreement_type: agreement_type,
       payment_type: payment_type,
       start_date: start_date,
@@ -115,15 +121,72 @@ class AgreementForm < ApplicationForm
       counter_to_id: counter_to_id,
       status: status,
       initiator_meta: initiator_meta,
-      counter_offer_turn_id: counter_offer_turn_id || other_party_id
+      counter_offer_turn_id: counter_offer_turn_id || other_party_user_id
     )
+
+    # Create or update agreement participants
+    # For new agreements, create participants after saving
+    # For updates, recreate participants to ensure consistency
+    if @is_update && @agreement.persisted?
+      create_agreement_participants
+    elsif !@is_update
+      create_agreement_participants if @agreement.persisted? || @agreement.save
+    end
+  end
+
+  def create_agreement_participants
+    return unless @agreement.persisted?
+
+    # Clear existing participants if updating
+    @agreement.agreement_participants.destroy_all if @is_update
+
+    # For new agreements, the turn should go to the other party (receiver)
+    # For counter offers, use the specified counter_offer_turn_id
+    turn_user_id = is_counter_offer? ? counter_offer_turn_id : other_party_user_id
+
+    # Create initiator participant
+    initiator_role = determine_user_role(initiator_user_id)
+    @agreement.agreement_participants.create!(
+      user_id: initiator_user_id,
+      user_role: initiator_role,
+      project_id: project_id,
+      is_initiator: true,
+      counter_agreement_id: counter_to_id,
+      accept_or_counter_turn_id: turn_user_id
+    )
+
+    # Create other party participant
+    other_party_role = determine_user_role(other_party_user_id)
+    @agreement.agreement_participants.create!(
+      user_id: other_party_user_id,
+      user_role: other_party_role,
+      project_id: project_id,
+      is_initiator: false,
+      counter_agreement_id: counter_to_id,
+      accept_or_counter_turn_id: turn_user_id
+    )
+  end
+
+  def determine_user_role(user_id)
+    user = User.find(user_id)
+    # Get the user's primary role
+    user_role = user.user_roles.joins(:role).first&.role&.name
+    user_role || "Unknown"
   end
 
   def setup_counter_offer(agreement)
     original_agreement = counter_to
     agreement.initiator_meta = original_agreement.initiator_meta if original_agreement.initiator_meta.present?
-    agreement.counter_offer_turn_id = agreement.other_party_id
+
+    # Use turn-based system: pass turn to the other party
+    original_agreement.pass_turn_to_user(User.find(other_party_user_id))
     original_agreement.update!(status: Agreement::COUNTERED)
+
+    # Set up the new counter offer with proper turn management
+    agreement.agreement_participants.update_all(
+      accept_or_counter_turn_id: other_party_user_id,
+      counter_agreement_id: original_agreement.id
+    )
   end
 
   def determine_agreement_type
@@ -161,7 +224,7 @@ class AgreementForm < ApplicationForm
   end
 
   def different_parties
-    if initiator_id.present? && other_party_id.present? && initiator_id == other_party_id
+    if initiator_user_id.present? && other_party_user_id.present? && initiator_user_id == other_party_user_id
       errors.add(:base, "Initiator and other party cannot be the same person")
     end
   end
@@ -179,17 +242,26 @@ class AgreementForm < ApplicationForm
   end
 
   def no_duplicate_agreement
-    return unless project_id.present? && initiator_id.present? && other_party_id.present?
-    return if is_counter_offer? # Counter offers are allowed
+    return unless project_id.present? && initiator_user_id.present? && other_party_user_id.present?
 
-    existing = Agreement.where(
-      project_id: project_id,
-      initiator_id: initiator_id,
-      other_party_id: other_party_id,
-      status: [ Agreement::PENDING, Agreement::ACCEPTED ]
-    ).exists?
+    # Skip duplicate check for counter offers - they should be allowed
+    return if is_counter_offer?
 
-    if existing
+    # Check for existing agreements using the new AgreementParticipants structure
+    query = Agreement.joins(:agreement_participants)
+      .where(project_id: project_id, status: [ Agreement::ACCEPTED, Agreement::PENDING ])
+      .where(agreement_participants: { user_id: [ initiator_user_id, other_party_user_id ] })
+      .group("agreements.id")
+      .having("COUNT(agreement_participants.id) = 2")
+
+    # Exclude the current agreement if we're updating
+    if @is_update && @agreement&.persisted?
+      query = query.where.not(id: @agreement.id)
+    end
+
+    existing_agreement = query.first
+
+    if existing_agreement.present?
       errors.add(:base, "An agreement already exists between these parties for this project")
     end
   end

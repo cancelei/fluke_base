@@ -4,9 +4,9 @@ module UserAgreements
   included do
     # All agreements where user is a party
     has_many :initiated_agreements, class_name: "Agreement",
-             foreign_key: "initiator_id", dependent: :destroy
+             through: :agreement_participants, source: :agreement
     has_many :received_agreements, class_name: "Agreement",
-             foreign_key: "other_party_id", dependent: :destroy
+             through: :agreement_participants, source: :agreement
   end
 
   # Agreements where user is the entrepreneur (project owner)
@@ -18,8 +18,9 @@ module UserAgreements
   # Agreements where user is the mentor/co-founder (not project owner)
   def other_party_agreements
     Agreement.joins(:project)
-            .where("(agreements.initiator_id = ? OR agreements.other_party_id = ?) AND projects.user_id != ?",
-                  id, id, id)
+            .joins(:agreement_participants)
+            .where("agreement_participants.user_id = ? AND projects.user_id != ?",
+                  id, id)
   end
 
   # Alias for clarity when user is a mentor
@@ -33,12 +34,14 @@ module UserAgreements
   end
 
   def all_agreements
-    Agreement.where("initiator_id = ? OR other_party_id = ?", id, id)
+    Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: id })
   end
 
   def mentor_projects
     Project.includes(:agreements)
-           .where(agreements: { initiator_id: id })
-           .or(Project.includes(:agreements).where(agreements: { other_party_id: id }))
+           .joins(agreements: :agreement_participants)
+           .where(agreement_participants: { user_id: id, is_initiator: true })
+           .or(Project.joins(agreements: :agreement_participants)
+                   .where(agreement_participants: { user_id: id, is_initiator: false }))
   end
 end

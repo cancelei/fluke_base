@@ -4,8 +4,7 @@ FactoryBot.define do
     status { "MyString" }
     start_date { "2025-04-09" }
     end_date { "2025-04-09" }
-    initiator_id { 1 }
-    other_party_id { 1 }
+    # Agreement participants will be created via AgreementForm or test setup
     project { nil }
     terms { "MyText" }
   end
