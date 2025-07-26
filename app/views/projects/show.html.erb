@@ -77,20 +77,52 @@
       </div>
     </div>
     
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-      <div class="px-4 py-5 sm:px-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Project Details</h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500">
-          <%= presenter.owner_display %> · <%= presenter.created_timeframe %>
-        </p>
-      </div>
+    <%= turbo_frame_tag "project-details" do %>
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Project Details</h3>
+          <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            <%= presenter.owner_display %> · <%= presenter.created_timeframe %>
+          </p>
+        </div>
       
       <div class="border-t border-gray-200">
         <dl>
-          <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6" id="project-description-field">
             <dt class="text-sm font-medium text-gray-500">Description</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <%= render_formatted_field_value(@project, :description, current_user) %>
+              <% if current_user.id == @project.user_id %>
+                <div class="group">
+                  <div class="flex items-start">
+                    <div class="flex-1" id="project-description-display">
+                      <%= render_formatted_field_value(@project, :description, current_user) %>
+                    </div>
+                    <button type="button" class="ml-2 opacity-0 group-hover:opacity-100 text-indigo-600 hover:text-indigo-900" 
+                            onclick="editField('project-description', '<%= j(@project.description || '') %>', 'textarea')">
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="hidden" id="project-description-edit">
+                  <%= form_with model: @project, local: false, data: { turbo_frame: "project-details" } do |form| %>
+                    <div class="space-y-2">
+                      <%= form.text_area :description, rows: 4, class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+                      <div class="flex space-x-2">
+                        <button type="submit" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700">
+                          Save
+                        </button>
+                        <button type="button" onclick="cancelEdit('project-description')" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <%= render_formatted_field_value(@project, :description, current_user) %>
+              <% end %>
             </dd>
           </div>
           
@@ -138,7 +170,8 @@
           </div>
         </dl>
       </div>
-    </div>
+      </div>
+    <% end %>
     
     <% if @has_agreement || current_user.id == @project.user_id %>
       <!-- Milestones section only visible to project owner and users with agreements -->
@@ -163,16 +196,22 @@
                 <li class="px-4 py-4 sm:px-6">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                      <% if milestone.respond_to?(:completed?) && milestone.completed? || milestone.status == "completed" %>
+                      <% if milestone.completed? %>
                         <div class="flex-shrink-0 h-5 w-5 text-green-500">
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                           </svg>
                         </div>
+                      <% elsif milestone.in_progress? %>
+                        <div class="flex-shrink-0 h-5 w-5 text-yellow-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
                       <% else %>
                         <div class="flex-shrink-0 h-5 w-5 text-gray-400">
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9 12a1 1 0 102 0V8a1 1 0 10-2 0v4zm1-7a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
                           </svg>
                         </div>
                       <% end %>
@@ -181,10 +220,28 @@
                         <p class="text-sm text-gray-500">Due: <%= milestone.due_date.strftime("%b %d, %Y") %></p>
                       </div>
                     </div>
-                    <div class="ml-2 flex-shrink-0 flex">
-                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= (milestone.respond_to?(:completed?) && milestone.completed? || milestone.status == "completed") ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
-                        <%= (milestone.respond_to?(:completed?) && milestone.completed? || milestone.status == "completed") ? "Completed" : "In Progress" %>
+                    <div class="ml-2 flex-shrink-0 flex items-center space-x-2">
+                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= milestone.completed? ? 'bg-green-100 text-green-800' : milestone.in_progress? ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800' %>">
+                        <%= milestone.completed? ? "Completed" : milestone.in_progress? ? "In Progress" : "Not Started" %>
                       </p>
+                      
+                      <% if current_user.id == @project.user_id %>
+                        <div class="flex items-center space-x-1">
+                          <%= link_to edit_project_milestone_path(@project, milestone), class: "text-indigo-600 hover:text-indigo-900" do %>
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          <% end %>
+                          
+                          <button type="button" 
+                                  onclick="confirmDelete('<%= milestone.id %>', '<%= j(milestone.title) %>')" 
+                                  class="text-red-600 hover:text-red-900">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      <% end %>
                     </div>
                   </div>
                 </li>
@@ -240,3 +297,62 @@
     <% end %>
   </div>
 </div>
+
+<script>
+  function editField(fieldName, currentValue, inputType) {
+    const displayElement = document.getElementById(fieldName + '-display');
+    const editElement = document.getElementById(fieldName + '-edit');
+    
+    if (displayElement && editElement) {
+      displayElement.classList.add('hidden');
+      editElement.classList.remove('hidden');
+      
+      // Focus on the input field
+      const input = editElement.querySelector(inputType === 'textarea' ? 'textarea' : 'input');
+      if (input) {
+        input.focus();
+        if (inputType === 'text' || inputType === 'textarea') {
+          input.setSelectionRange(input.value.length, input.value.length);
+        }
+      }
+    }
+  }
+  
+  function editSelectField(fieldName, currentValue) {
+    editField(fieldName, currentValue, 'select');
+  }
+  
+  function cancelEdit(fieldName) {
+    const displayElement = document.getElementById(fieldName + '-display');
+    const editElement = document.getElementById(fieldName + '-edit');
+    
+    if (displayElement && editElement) {
+      displayElement.classList.remove('hidden');
+      editElement.classList.add('hidden');
+    }
+  }
+  
+  function confirmDelete(milestoneId, milestoneTitle) {
+    if (confirm(`Are you sure you want to delete the milestone "${milestoneTitle}"? This action cannot be undone.`)) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/projects/<%= @project.id %>/milestones/${milestoneId}`;
+      form.style.display = 'none';
+      
+      const methodInput = document.createElement('input');
+      methodInput.type = 'hidden';
+      methodInput.name = '_method';
+      methodInput.value = 'DELETE';
+      form.appendChild(methodInput);
+      
+      const tokenInput = document.createElement('input');
+      tokenInput.type = 'hidden';
+      tokenInput.name = 'authenticity_token';
+      tokenInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      form.appendChild(tokenInput);
+      
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+</script>
