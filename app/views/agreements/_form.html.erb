@@ -14,7 +14,7 @@
       <%= form.hidden_field :initiator_user_id, value: current_user.id %>
       <% other_party_id = @agreement_form&.other_party_user_id || params[:other_party_id] %>
       <%= form.hidden_field :other_party_user_id, value: other_party_id %>
-      <%= form.hidden_field :counter_to_id, value: params[:counter_to_id] %>
+      <%= form.hidden_field :counter_agreement_id, value: params[:counter_to_id] %>
       
       <% if current_user.id != @project&.user_id %>
         <div class="bg-blue-50 p-4 rounded-md mb-6">

@@ -25,14 +25,13 @@ class Agreement < ApplicationRecord
   belongs_to :project
   has_many :agreement_participants, dependent: :destroy
   has_many :users, through: :agreement_participants
-  belongs_to :counter_offer_turn, class_name: "User", foreign_key: "counter_offer_turn_id"
+
   has_many :meetings, dependent: :destroy
-  belongs_to :counter_to, class_name: "Agreement", foreign_key: "counter_to_id", optional: true
-  has_many :counter_offers, class_name: "Agreement", foreign_key: "counter_to_id", dependent: :destroy
+
   has_many :github_logs, dependent: :destroy
 
   before_validation :init_status, :init_agreement_type
-  before_save :update_countered_agreement
+
 
   # Validations
   validates :project_id, presence: true
@@ -68,26 +67,7 @@ class Agreement < ApplicationRecord
     self.agreement_type = self.weekly_hours.present? ? MENTORSHIP : CO_FOUNDER
   end
 
-  def init_counter_offer
-    countered_to(self.counter_to_id) if self.counter_to_id.present? && self.counter_to_id_changed?
-  end
 
-  def update_countered_agreement
-    counter_to&.update(status: COUNTERED) if counter_to_id_changed? && counter_to_id.present?
-  end
-
-  def countered_to(agreement_id)
-    original_agreement = self.class.find(agreement_id)
-
-    if !original_agreement.pending? && !original_agreement.countered?
-      errors.add(:base, "Cannot create a counter offer to an agreement that is not pending or countered")
-      return
-    end
-
-    self.counter_to_id = original_agreement.id
-    attrs_to_copy = original_agreement.attributes.except("id", "created_at", "updated_at", "counter_to_id", "status")
-    assign_attributes(attrs_to_copy)
-  end
 
   # Milestone methods
   def milestone_ids
@@ -278,7 +258,33 @@ class Agreement < ApplicationRecord
   end
 
   def is_counter_offer?
-    counter_to_id.present?
+    # Check if this agreement is a counter offer by looking at agreement_participants
+    agreement_participants.any?(&:counter_agreement_id)
+  end
+
+  def counter_to
+    # Get the original agreement this is a counter offer to
+    counter_agreement_id = agreement_participants.first&.counter_agreement_id
+    Agreement.find_by(id: counter_agreement_id) if counter_agreement_id
+  end
+
+  def counter_offers
+    # Get all agreements that are counter offers to this one
+    Agreement.joins(:agreement_participants)
+            .where(agreement_participants: { counter_agreement_id: id })
+            .distinct
+  end
+
+  def has_counter_offers?
+    counter_offers.exists?
+  end
+
+  def most_recent_counter_offer
+    counter_offers.order(created_at: :desc).first
+  end
+
+  def latest_counter_offer
+    most_recent_counter_offer
   end
 
   private

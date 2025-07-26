@@ -42,7 +42,7 @@ class AgreementsController < ApplicationController
       # Handle counter offer case
       original_agreement = Agreement.find(params[:counter_to_id])
       @project = original_agreement.project
-      @initiator_details = original_agreement.initiator_meta
+      # Initiator details will be handled through agreement_participants
 
       # Pre-populate form with original agreement data for counter offer
       @agreement_form = AgreementForm.new(
@@ -58,8 +58,7 @@ class AgreementsController < ApplicationController
         hourly_rate: original_agreement.hourly_rate,
         equity_percentage: original_agreement.equity_percentage,
         milestone_ids: original_agreement.milestone_ids,
-        counter_to_id: params[:counter_to_id],
-        initiator_meta: original_agreement.initiator_meta
+        counter_agreement_id: params[:counter_to_id]
       )
     else
       # Handle new agreement case
@@ -96,31 +95,17 @@ class AgreementsController < ApplicationController
       hourly_rate: @agreement.hourly_rate,
       equity_percentage: @agreement.equity_percentage,
       milestone_ids: @agreement.milestone_ids,
-      counter_to_id: @agreement.counter_to_id,
-      status: @agreement.status,
-      initiator_meta: @agreement.initiator_meta,
-      counter_offer_turn_id: @agreement.counter_offer_turn_id
+      counter_agreement_id: @agreement.agreement_participants.first&.counter_agreement_id,
+      status: @agreement.status
     )
 
     @milestone_ids = @agreement_form.milestone_ids_array
   end
 
   def create
-    # Get initiator meta from old agreement if available
-    project_id = params.dig("agreement", "project_id").to_i
-    initiator_meta = nil
-    if project_id.present?
-      old_agreement = Project.find_by_id(project_id)&.agreements&.order(id: :desc)&.first
-      initiator_meta = old_agreement&.initiator_meta
-    end
-
-    # Set default initiator meta if not present
-    initiator_meta = { "id" => current_user.id, "role" => current_user.current_role&.name } if initiator_meta.blank?
-
     form_params = agreement_params.merge(
       initiator_user_id: current_user.id,
       other_party_user_id: params.dig(:agreement, :other_party_user_id),
-      initiator_meta: initiator_meta,
       milestone_ids: params[:agreement][:milestone_ids]
     )
 
@@ -155,8 +140,16 @@ class AgreementsController < ApplicationController
   def update
     authorize! :edit, @agreement
 
-    # Update the agreement directly with the form params
-    if @agreement.update(agreement_params)
+    # Use AgreementForm to handle the update properly
+    form_params = agreement_params.merge(
+      initiator_user_id: @agreement.agreement_participants.find_by(is_initiator: true)&.user_id,
+      other_party_user_id: @agreement.agreement_participants.find_by(is_initiator: false)&.user_id,
+      milestone_ids: params[:agreement][:milestone_ids]
+    )
+
+    @agreement_form = AgreementForm.new(form_params)
+
+    if @agreement_form.update_agreement(@agreement)
       notify_and_message_other_party(:update)
       redirect_to @agreement, notice: "Agreement was successfully updated."
     else
@@ -182,11 +175,10 @@ class AgreementsController < ApplicationController
         hourly_rate: @agreement.hourly_rate,
         equity_percentage: @agreement.equity_percentage,
         milestone_ids: @agreement.milestone_ids,
-        counter_to_id: @agreement.counter_to_id,
-        status: @agreement.status,
-        initiator_meta: @agreement.initiator_meta,
-        counter_offer_turn_id: @agreement.counter_offer_turn_id
+        counter_agreement_id: @agreement.agreement_participants.first&.counter_agreement_id,
+        status: @agreement.status
       )
+
       @milestone_ids = @agreement_form.milestone_ids_array
 
       render :edit, status: :unprocessable_entity
@@ -475,7 +467,7 @@ class AgreementsController < ApplicationController
     end
 
     def agreement_params
-      params.require(:agreement).permit(:project_id, :agreement_type, :payment_type, :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage, :counter_to_id, :status, :initiator_meta, :counter_offer_turn_id, :terms, milestone_ids: [])
+      params.require(:agreement).permit(:project_id, :agreement_type, :payment_type, :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage, :counter_agreement_id, :status, :terms, milestone_ids: [])
     end
 
     def authorize_agreement_action

@@ -11,10 +11,8 @@ class AgreementForm < ApplicationForm
   attribute :hourly_rate, :decimal
   attribute :equity_percentage, :decimal
   attribute :milestone_ids, :string
-  attribute :counter_to_id, :integer
+  attribute :counter_agreement_id, :integer
   attribute :status, :string, default: Agreement::PENDING
-  attribute :initiator_meta, :string
-  attribute :counter_offer_turn_id, :integer
   attribute :terms, :string
 
   validates :project_id, :initiator_user_id, :other_party_user_id, :agreement_type, :payment_type, presence: true
@@ -66,11 +64,17 @@ class AgreementForm < ApplicationForm
   end
 
   def counter_to
-    @counter_to ||= Agreement.find(counter_to_id) if counter_to_id.present?
+    @counter_to ||= Agreement.find(counter_agreement_id) if counter_agreement_id.present?
   end
 
   def is_counter_offer?
-    counter_to_id.present?
+    counter_agreement_id.present?
+  end
+
+  # Helper method to check if this is a counter offer during validation
+  # This handles the case where counter_agreement_id might not be set yet
+  def is_counter_offer_validation?
+    counter_agreement_id.present?
   end
 
   def agreement
@@ -118,10 +122,7 @@ class AgreementForm < ApplicationForm
       hourly_rate: hourly_rate,
       equity_percentage: equity_percentage,
       milestone_ids: milestone_ids_array,
-      counter_to_id: counter_to_id,
-      status: status,
-      initiator_meta: initiator_meta,
-      counter_offer_turn_id: counter_offer_turn_id || other_party_user_id
+      status: status
     )
 
     # Create or update agreement participants
@@ -141,8 +142,7 @@ class AgreementForm < ApplicationForm
     @agreement.agreement_participants.destroy_all if @is_update
 
     # For new agreements, the turn should go to the other party (receiver)
-    # For counter offers, use the specified counter_offer_turn_id
-    turn_user_id = is_counter_offer? ? initiator_user_id : other_party_user_id
+    turn_user_id = other_party_user_id
 
     # Create initiator participant
     initiator_role = determine_user_role(initiator_user_id)
@@ -151,7 +151,7 @@ class AgreementForm < ApplicationForm
       user_role: initiator_role,
       project_id: project_id,
       is_initiator: true,
-      counter_agreement_id: counter_to_id,
+      counter_agreement_id: counter_agreement_id,
       accept_or_counter_turn_id: turn_user_id
     )
 
@@ -162,7 +162,7 @@ class AgreementForm < ApplicationForm
       user_role: other_party_role,
       project_id: project_id,
       is_initiator: false,
-      counter_agreement_id: counter_to_id,
+      counter_agreement_id: counter_agreement_id,
       accept_or_counter_turn_id: turn_user_id
     )
   end
@@ -179,17 +179,19 @@ class AgreementForm < ApplicationForm
   end
 
   def setup_counter_offer(agreement)
-    original_agreement = counter_to
-    agreement.initiator_meta = original_agreement.initiator_meta if original_agreement.initiator_meta.present?
+    return unless is_counter_offer?
 
-    # Use turn-based system: pass turn to the other party
+    original_agreement = counter_to
+    return unless original_agreement
+
+    # Update the original agreement status to COUNTERED
     original_agreement.update!(status: Agreement::COUNTERED)
 
-    # Set up the new counter offer with proper turn management
-    agreement.agreement_participants.update_all(
-      accept_or_counter_turn_id: other_party_user_id,
-      counter_agreement_id: original_agreement.id
-    )
+    # The counter_agreement_id is already set in create_agreement_participants
+    # Pass turn to the other party (the one who didn't make the counter offer)
+    agreement.pass_turn_to_other_party(User.find(initiator_user_id))
+
+    Rails.logger.info "Counter offer setup completed for agreement #{agreement.id} countering #{original_agreement.id}"
   end
 
   def determine_agreement_type
@@ -246,6 +248,9 @@ class AgreementForm < ApplicationForm
 
   def no_duplicate_agreement
     return unless project_id.present? && initiator_user_id.present? && other_party_user_id.present?
+
+    # Debug logging
+    Rails.logger.debug "no_duplicate_agreement validation: counter_agreement_id=#{counter_agreement_id}, is_counter_offer?=#{is_counter_offer?}"
 
     # Skip duplicate check for counter offers - they should be allowed
     return if is_counter_offer?
