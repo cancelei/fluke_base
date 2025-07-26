@@ -183,7 +183,6 @@ class AgreementForm < ApplicationForm
     agreement.initiator_meta = original_agreement.initiator_meta if original_agreement.initiator_meta.present?
 
     # Use turn-based system: pass turn to the other party
-    original_agreement.pass_turn_to_user(User.find(other_party_user_id))
     original_agreement.update!(status: Agreement::COUNTERED)
 
     # Set up the new counter offer with proper turn management
