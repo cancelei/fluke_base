@@ -142,7 +142,7 @@ class AgreementForm < ApplicationForm
 
     # For new agreements, the turn should go to the other party (receiver)
     # For counter offers, use the specified counter_offer_turn_id
-    turn_user_id = is_counter_offer? ? counter_offer_turn_id : other_party_user_id
+    turn_user_id = is_counter_offer? ? initiator_user_id : other_party_user_id
 
     # Create initiator participant
     initiator_role = determine_user_role(initiator_user_id)
@@ -170,7 +170,11 @@ class AgreementForm < ApplicationForm
   def determine_user_role(user_id)
     user = User.find(user_id)
     # Get the user's primary role
-    user_role = user.user_roles.joins(:role).first&.role&.name
+    if project.user_id == user_id
+      user_role = "Entrepreneur"
+    else
+      user_role = user.user_roles.joins(:role).first&.role&.name
+    end
     user_role || "Unknown"
   end
 
