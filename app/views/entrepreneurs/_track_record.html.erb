@@ -1,6 +1,0 @@
-<%# This partial shows track record for an entrepreneur. Replace with real logic as needed. %>
-<ul class="list-disc pl-5 text-sm text-gray-700">
-  <% entrepreneur.projects.each do |project| %>
-    <li><strong><%= project.name %></strong> - <%= project.stage.capitalize %> (<%= project.created_at.strftime('%Y') %>)</li>
-  <% end %>
-</ul>
