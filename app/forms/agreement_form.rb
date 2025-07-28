@@ -1,7 +1,7 @@
 class AgreementForm < ApplicationForm
   attribute :project_id, :integer
-  attribute :initiator_id, :integer
-  attribute :other_party_id, :integer
+  attribute :initiator_user_id, :integer
+  attribute :other_party_user_id, :integer
   attribute :agreement_type, :string
   attribute :payment_type, :string
   attribute :start_date, :date
@@ -11,12 +11,11 @@ class AgreementForm < ApplicationForm
   attribute :hourly_rate, :decimal
   attribute :equity_percentage, :decimal
   attribute :milestone_ids, :string
-  attribute :counter_to_id, :integer
+  attribute :counter_agreement_id, :integer
   attribute :status, :string, default: Agreement::PENDING
-  attribute :initiator_meta, :string
-  attribute :counter_offer_turn_id, :integer
+  attribute :terms, :string
 
-  validates :project_id, :initiator_id, :other_party_id, :agreement_type, :payment_type, presence: true
+  validates :project_id, :initiator_user_id, :other_party_user_id, :agreement_type, :payment_type, presence: true
   validates :start_date, :end_date, :tasks, :weekly_hours, presence: true
   validates :weekly_hours, numericality: { greater_than: 0, less_than_or_equal_to: 40 }
   validates :hourly_rate, presence: true, numericality: { greater_than_or_equal_to: 0 },
@@ -33,11 +32,11 @@ class AgreementForm < ApplicationForm
   def initialize(attributes = {})
     super
     self.agreement_type = determine_agreement_type if agreement_type.blank?
-    self.milestone_ids = parse_milestone_ids(milestone_ids)
+    self.milestone_ids = parse_milestone_ids(attributes["milestone_ids"])
   end
 
   def milestone_ids_array
-    @milestone_ids_array ||= Array(milestone_ids).map(&:to_i).reject(&:zero?)
+    @milestone_ids_array ||= parse_milestone_ids(attributes["milestone_ids"])
   end
 
   def milestone_ids=(value)
@@ -57,19 +56,25 @@ class AgreementForm < ApplicationForm
   end
 
   def initiator
-    @initiator ||= User.find(initiator_id) if initiator_id.present?
+    @initiator ||= User.find(initiator_user_id) if initiator_user_id.present?
   end
 
   def other_party
-    @other_party ||= User.find(other_party_id) if other_party_id.present?
+    @other_party ||= User.find(other_party_user_id) if other_party_user_id.present?
   end
 
   def counter_to
-    @counter_to ||= Agreement.find(counter_to_id) if counter_to_id.present?
+    @counter_to ||= Agreement.find(counter_agreement_id) if counter_agreement_id.present?
   end
 
   def is_counter_offer?
-    counter_to_id.present?
+    counter_agreement_id.present?
+  end
+
+  # Helper method to check if this is a counter offer during validation
+  # This handles the case where counter_agreement_id might not be set yet
+  def is_counter_offer_validation?
+    counter_agreement_id.present?
   end
 
   def agreement
@@ -80,7 +85,15 @@ class AgreementForm < ApplicationForm
     @agreement = agreement
     @is_update = true
     assign_attributes_to_agreement
-    @agreement.save!
+
+    begin
+      @agreement.save!
+      Rails.logger.info "Agreement #{@agreement.id} successfully updated"
+    rescue => e
+      Rails.logger.error "Failed to update agreement #{@agreement.id}: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      raise e
+    end
   end
 
   private
@@ -100,8 +113,6 @@ class AgreementForm < ApplicationForm
   def assign_attributes_to_agreement
     @agreement.assign_attributes(
       project_id: project_id,
-      initiator_id: initiator_id,
-      other_party_id: other_party_id,
       agreement_type: agreement_type,
       payment_type: payment_type,
       start_date: start_date,
@@ -111,18 +122,76 @@ class AgreementForm < ApplicationForm
       hourly_rate: hourly_rate,
       equity_percentage: equity_percentage,
       milestone_ids: milestone_ids_array,
-      counter_to_id: counter_to_id,
-      status: status,
-      initiator_meta: initiator_meta,
-      counter_offer_turn_id: counter_offer_turn_id || other_party_id
+      status: status
+    )
+
+    # Create or update agreement participants
+    # For new agreements, create participants after saving
+    # For updates, recreate participants to ensure consistency
+    if @is_update && @agreement.persisted?
+      create_agreement_participants
+    elsif !@is_update
+      create_agreement_participants if @agreement.persisted? || @agreement.save
+    end
+  end
+
+  def create_agreement_participants
+    return unless @agreement.persisted?
+
+    # Clear existing participants if updating
+    @agreement.agreement_participants.destroy_all if @is_update
+
+    # For new agreements, the turn should go to the other party (receiver)
+    turn_user_id = other_party_user_id
+
+    # Create initiator participant
+    initiator_role = determine_user_role(initiator_user_id)
+    @agreement.agreement_participants.create!(
+      user_id: initiator_user_id,
+      user_role: initiator_role,
+      project_id: project_id,
+      is_initiator: true,
+      counter_agreement_id: counter_agreement_id,
+      accept_or_counter_turn_id: turn_user_id
+    )
+
+    # Create other party participant
+    other_party_role = determine_user_role(other_party_user_id)
+    @agreement.agreement_participants.create!(
+      user_id: other_party_user_id,
+      user_role: other_party_role,
+      project_id: project_id,
+      is_initiator: false,
+      counter_agreement_id: counter_agreement_id,
+      accept_or_counter_turn_id: turn_user_id
     )
   end
 
+  def determine_user_role(user_id)
+    user = User.find(user_id)
+    # Get the user's primary role
+    if project.user_id == user_id
+      user_role = "Entrepreneur"
+    else
+      user_role = user.user_roles.joins(:role).first&.role&.name
+    end
+    user_role || "Unknown"
+  end
+
   def setup_counter_offer(agreement)
+    return unless is_counter_offer?
+
     original_agreement = counter_to
-    agreement.initiator_meta = original_agreement.initiator_meta if original_agreement.initiator_meta.present?
-    agreement.counter_offer_turn_id = agreement.other_party_id
+    return unless original_agreement
+
+    # Update the original agreement status to COUNTERED
     original_agreement.update!(status: Agreement::COUNTERED)
+
+    # The counter_agreement_id is already set in create_agreement_participants
+    # Pass turn to the other party (the one who didn't make the counter offer)
+    agreement.pass_turn_to_other_party(User.find(initiator_user_id))
+
+    Rails.logger.info "Counter offer setup completed for agreement #{agreement.id} countering #{original_agreement.id}"
   end
 
   def determine_agreement_type
@@ -131,10 +200,21 @@ class AgreementForm < ApplicationForm
 
   def parse_milestone_ids(value)
     case value
-    when String
-      value.split(",").map(&:strip).map(&:to_i).reject(&:zero?)
+    when nil
+      []
     when Array
       value.map(&:to_i).reject(&:zero?)
+    when String
+      return [] if value.blank?
+      # Try JSON first
+      begin
+        parsed = JSON.parse(value)
+        return parsed.map(&:to_i).reject(&:zero?) if parsed.is_a?(Array)
+      rescue JSON::ParserError
+        # Not JSON, fall through
+      end
+      # Handle comma-separated string
+      value.split(",").map(&:strip).map(&:to_i).reject(&:zero?)
     else
       []
     end
@@ -149,7 +229,7 @@ class AgreementForm < ApplicationForm
   end
 
   def different_parties
-    if initiator_id.present? && other_party_id.present? && initiator_id == other_party_id
+    if initiator_user_id.present? && other_party_user_id.present? && initiator_user_id == other_party_user_id
       errors.add(:base, "Initiator and other party cannot be the same person")
     end
   end
@@ -167,17 +247,29 @@ class AgreementForm < ApplicationForm
   end
 
   def no_duplicate_agreement
-    return unless project_id.present? && initiator_id.present? && other_party_id.present?
-    return if is_counter_offer? # Counter offers are allowed
+    return unless project_id.present? && initiator_user_id.present? && other_party_user_id.present?
 
-    existing = Agreement.where(
-      project_id: project_id,
-      initiator_id: initiator_id,
-      other_party_id: other_party_id,
-      status: [ Agreement::PENDING, Agreement::ACCEPTED ]
-    ).exists?
+    # Debug logging
+    Rails.logger.debug "no_duplicate_agreement validation: counter_agreement_id=#{counter_agreement_id}, is_counter_offer?=#{is_counter_offer?}"
 
-    if existing
+    # Skip duplicate check for counter offers - they should be allowed
+    return if is_counter_offer?
+
+    # Check for existing agreements using the new AgreementParticipants structure
+    query = Agreement.joins(:agreement_participants)
+      .where(project_id: project_id, status: [ Agreement::ACCEPTED, Agreement::PENDING ])
+      .where(agreement_participants: { user_id: [ initiator_user_id, other_party_user_id ] })
+      .group("agreements.id")
+      .having("COUNT(agreement_participants.id) = 2")
+
+    # Exclude the current agreement if we're updating
+    if @is_update && @agreement&.persisted?
+      query = query.where.not(id: @agreement.id)
+    end
+
+    existing_agreement = query.first
+
+    if existing_agreement.present?
       errors.add(:base, "An agreement already exists between these parties for this project")
     end
   end

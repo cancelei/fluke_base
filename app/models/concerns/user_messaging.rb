@@ -14,4 +14,21 @@ module UserMessaging
   def unread_notifications_count
     notifications.unread.count
   end
+
+    def unread_conversations_count
+    # Count conversations that have unread messages for this user
+    Conversation.involving(self)
+                .joins(:messages)
+                .where.not(messages: { user_id: self.id })
+                .where(messages: { read: false })
+                .distinct
+                .count
+  end
+
+  def all_conversations
+    # Return all conversations involving this user, ordered by most recent message
+    Conversation.involving(self)
+                .includes(:sender, :recipient, messages: :user)
+                .order_by_most_recent_message
+  end
 end

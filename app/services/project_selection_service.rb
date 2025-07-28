@@ -21,7 +21,7 @@ class ProjectSelectionService
 
   def update_user_selection
     if @user.current_role_id == 2 # Mentor
-      @user.update(selected_project_id: project.id, current_role_id: 1)
+      @user.update(selected_project_id: project.id)
     else
       @user.update(selected_project_id: project.id)
     end

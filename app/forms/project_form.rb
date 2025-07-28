@@ -22,7 +22,6 @@ class ProjectForm < ApplicationForm
     with: /(^$|^https?:\/\/github\.com\/[^\/]+\/[^\/]+$|^[^\/\s]+\/[^\/\s]+$)/,
     message: "must be a valid GitHub repository URL or in the format username/repository"
   }, allow_blank: true
-  validates :team_size, numericality: { greater_than: 0 }, allow_blank: true
 
   def initialize(attributes = {})
     super

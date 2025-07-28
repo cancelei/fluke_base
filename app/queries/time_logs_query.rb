@@ -11,8 +11,8 @@ class TimeLogsQuery
       project.milestones
     else
       milestone_ids = project.agreements
-                            .where("initiator_id = ? OR other_party_id = ?",
-                                   @current_user.id, @current_user.id)
+                            .joins(:agreement_participants)
+                            .where(agreement_participants: { user_id: @current_user.id })
                             .pluck(:milestone_ids)
                             .flatten
       Milestone.where(id: milestone_ids)

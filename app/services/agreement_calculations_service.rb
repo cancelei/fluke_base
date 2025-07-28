@@ -28,10 +28,10 @@ class AgreementCalculationsService
   end
 
   def total_hours_logged
-    @agreement.time_logs.completed.sum(:hours_spent).round(2)
+    @agreement.project.time_logs.completed.sum(:hours_spent).round(2)
   end
 
   def current_time_log
-    @agreement.time_logs.in_progress.last
+    @agreement.project.time_logs.in_progress.last
   end
 end

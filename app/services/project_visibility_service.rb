@@ -11,7 +11,7 @@ class ProjectVisibilityService
   def field_visible_to_user?(field_name, user)
     return true if user && (@project.user_id == user.id)
     return true if field_public?(field_name)
-    return true if user && @project.agreements.exists?(other_party_id: user.id)
+    return true if user && @project.agreements.joins(:agreement_participants).exists?(agreement_participants: { user_id: user.id })
     false
   end
 

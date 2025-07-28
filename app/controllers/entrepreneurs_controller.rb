@@ -26,11 +26,7 @@ class EntrepreneursController < ApplicationController
     end
 
     # Create a new agreement with the entrepreneur
-    @agreement = Agreement.new(
-      initiator_id: current_user.id,
-      other_party_id: @entrepreneur.id,
-      status: Agreement::PENDING
-    )
+    # Note: Agreement creation now handled by AgreementForm with participants
 
     # Redirect to the new agreement form with entrepreneur pre-filled
     redirect_to new_agreement_path(

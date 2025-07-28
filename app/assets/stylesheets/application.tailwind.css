@@ -170,3 +170,64 @@ input:checked ~ .dot {
   transform: translateX(100%);
   background-color: white;
 }
+
+/* Enhanced navbar styles */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Smooth scrolling with offset for sticky navbar */
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-padding-top: 4rem; /* Accounts for sticky navbar height */
+  }
+}
+
+/* Backdrop blur support */
+@supports (backdrop-filter: blur(12px)) {
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+  }
+}
+
+/* Enhanced dropdown animations */
+[data-dropdown-target="menu"] {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: top;
+}
+
+[data-dropdown-target="menu"].hidden {
+  transform: scale(0.95) translateY(-10px);
+  opacity: 0;
+}
+
+[data-dropdown-target="menu"]:not(.hidden) {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* Enhanced mobile menu animations */
+#mobile-menu {
+  transition: all 0.2s ease-out;
+}
+
+/* Enhanced navbar link hover states */
+.navbar-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.navbar-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.navbar-link:hover::before {
+  left: 100%;
+}

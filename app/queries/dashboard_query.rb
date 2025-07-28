@@ -12,9 +12,8 @@ class DashboardQuery
   end
 
   def upcoming_meetings(limit = 3)
-    Meeting.joins(:agreement)
-           .where("agreements.initiator_id = ? OR agreements.other_party_id = ?",
-                  @current_user.id, @current_user.id)
+    Meeting.joins(agreement: :agreement_participants)
+           .where(agreement_participants: { user_id: @current_user.id })
            .upcoming
            .limit(limit)
   end
@@ -25,7 +24,9 @@ class DashboardQuery
     # Find projects seeking mentors where user doesn't have an agreement
     Project.where("collaboration_type = ? OR collaboration_type = ?",
                   Project::SEEKING_MENTOR, Project::SEEKING_BOTH)
-           .where.not(id: Agreement.where(other_party_id: @current_user.id).select(:project_id))
+           .where.not(id: Agreement.joins(:agreement_participants)
+                                    .where(agreement_participants: { user_id: @current_user.id })
+                                    .select(:project_id))
            .limit(6)
   end
 
@@ -34,7 +35,9 @@ class DashboardQuery
       total_projects: @current_user.projects.count,
       active_agreements: @current_user.all_agreements.where(status: Agreement::ACCEPTED).count,
       total_agreements: @current_user.all_agreements.count,
-      other_party_agreements: Agreement.where(other_party_id: @current_user.id).count,
+      other_party_agreements: Agreement.joins(:agreement_participants)
+                                        .where(agreement_participants: { user_id: @current_user.id, is_initiator: false })
+                                        .count,
       mentor_seeking_projects: mentor_seeking_projects_count
     }
   end

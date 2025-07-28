@@ -2,6 +2,9 @@ class User < ApplicationRecord
   belongs_to :selected_project, class_name: "Project", optional: true
   belongs_to :current_role, class_name: "Role", optional: true
 
+  # Define agreement_participants association before UserAgreements concern
+  has_many :agreement_participants, dependent: :destroy
+
   include Roleable
   include UserAgreements
   include UserMessaging

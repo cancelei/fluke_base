@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_26_154458) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "agreement_participants", force: :cascade do |t|
+    t.bigint "agreement_id", null: false
+    t.bigint "user_id", null: false
+    t.string "user_role"
+    t.bigint "project_id", null: false
+    t.boolean "is_initiator", default: false
+    t.bigint "counter_agreement_id"
+    t.bigint "accept_or_counter_turn_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accept_or_counter_turn_id"], name: "idx_agreement_participants_on_turn"
+    t.index ["accept_or_counter_turn_id"], name: "index_agreement_participants_on_accept_or_counter_turn_id"
+    t.index ["agreement_id", "user_id"], name: "idx_agreement_participants_on_agreement_user", unique: true
+    t.index ["agreement_id"], name: "index_agreement_participants_on_agreement_id"
+    t.index ["counter_agreement_id"], name: "index_agreement_participants_on_counter_agreement_id"
+    t.index ["is_initiator"], name: "idx_agreement_participants_on_is_initiator"
+    t.index ["project_id"], name: "index_agreement_participants_on_project_id"
+    t.index ["user_id"], name: "index_agreement_participants_on_user_id"
+  end
+
   create_table "agreements", force: :cascade do |t|
     t.string "agreement_type"
     t.string "status"
@@ -56,19 +76,46 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
     t.decimal "equity_percentage", precision: 5, scale: 2
     t.integer "weekly_hours"
     t.text "tasks"
-    t.integer "counter_to_id"
     t.integer "milestone_ids", default: [], array: true
-    t.bigint "initiator_id"
-    t.bigint "other_party_id"
-    t.jsonb "initiator_meta", default: {"id"=>nil, "role"=>nil}, null: false
-    t.jsonb "agreement_meta", default: [], array: true
-    t.bigint "counter_offer_turn_id"
-    t.index ["counter_offer_turn_id"], name: "index_agreements_on_counter_offer_turn_id"
-    t.index ["counter_to_id"], name: "index_agreements_on_counter_to_id"
-    t.index ["initiator_id"], name: "index_agreements_on_initiator_id"
-    t.index ["other_party_id"], name: "index_agreements_on_other_party_id"
     t.index ["payment_type"], name: "index_agreements_on_payment_type"
     t.index ["project_id"], name: "index_agreements_on_project_id"
+  end
+
+  create_table "blockchain_transactions", force: :cascade do |t|
+    t.string "transaction_hash", limit: 66, null: false
+    t.string "from_address", limit: 42
+    t.string "to_address", limit: 42
+    t.string "transaction_type"
+    t.string "status", default: "pending"
+    t.bigint "block_number"
+    t.bigint "gas_used"
+    t.decimal "gas_price_gwei", precision: 10, scale: 2
+    t.jsonb "transaction_data", default: {}
+    t.bigint "blockchain_wallet_id"
+    t.bigint "escrow_contract_id"
+    t.bigint "escrow_milestone_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blockchain_wallet_id"], name: "index_blockchain_transactions_on_blockchain_wallet_id"
+    t.index ["escrow_contract_id"], name: "index_blockchain_transactions_on_escrow_contract_id"
+    t.index ["escrow_milestone_id"], name: "index_blockchain_transactions_on_escrow_milestone_id"
+    t.index ["status"], name: "index_blockchain_transactions_on_status"
+    t.index ["transaction_hash"], name: "index_blockchain_transactions_on_transaction_hash", unique: true
+    t.index ["transaction_type", "status"], name: "index_blockchain_transactions_on_transaction_type_and_status"
+  end
+
+  create_table "blockchain_wallets", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "address", limit: 42, null: false
+    t.string "network_type", default: "base_sepolia"
+    t.datetime "connected_at"
+    t.datetime "last_activity_at"
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["address"], name: "index_blockchain_wallets_on_address", unique: true
+    t.index ["user_id", "is_active"], name: "index_blockchain_wallets_on_user_id_and_is_active"
+    t.index ["user_id"], name: "index_blockchain_wallets_on_user_id"
   end
 
   create_table "conversations", force: :cascade do |t|
@@ -78,6 +125,45 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
     t.datetime "updated_at", null: false
     t.index ["recipient_id"], name: "index_conversations_on_recipient_id"
     t.index ["sender_id"], name: "index_conversations_on_sender_id"
+  end
+
+  create_table "escrow_contracts", force: :cascade do |t|
+    t.bigint "agreement_id", null: false
+    t.string "contract_address", limit: 42
+    t.string "contract_type", default: "usdc_escrow"
+    t.string "deployment_transaction_hash", limit: 66
+    t.bigint "deployment_block_number"
+    t.string "blockchain_network", default: "base_sepolia"
+    t.string "status", default: "pending"
+    t.jsonb "contract_metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agreement_id", "status"], name: "index_escrow_contracts_on_agreement_id_and_status"
+    t.index ["agreement_id"], name: "index_escrow_contracts_on_agreement_id"
+    t.index ["contract_address"], name: "index_escrow_contracts_on_contract_address", unique: true
+  end
+
+  create_table "escrow_milestones", force: :cascade do |t|
+    t.bigint "milestone_id", null: false
+    t.bigint "escrow_contract_id", null: false
+    t.integer "blockchain_index", null: false
+    t.decimal "usdc_amount", precision: 18, scale: 6
+    t.boolean "client_approved", default: false
+    t.boolean "freelancer_approved", default: false
+    t.boolean "funds_released", default: false
+    t.string "approval_transaction_hash_client", limit: 66
+    t.string "approval_transaction_hash_freelancer", limit: 66
+    t.string "release_transaction_hash", limit: 66
+    t.bigint "release_block_number"
+    t.datetime "approved_at_client"
+    t.datetime "approved_at_freelancer"
+    t.datetime "released_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["escrow_contract_id", "blockchain_index"], name: "idx_on_escrow_contract_id_blockchain_index_f147e7fe50", unique: true
+    t.index ["escrow_contract_id"], name: "index_escrow_milestones_on_escrow_contract_id"
+    t.index ["milestone_id", "escrow_contract_id"], name: "index_escrow_milestones_on_milestone_id_and_escrow_contract_id", unique: true
+    t.index ["milestone_id"], name: "index_escrow_milestones_on_milestone_id"
   end
 
   create_table "github_branch_logs", force: :cascade do |t|
@@ -153,7 +239,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
     t.bigint "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "usdc_amount", precision: 18, scale: 6, default: "0.0"
     t.index ["project_id"], name: "index_milestones_on_project_id"
+    t.index ["usdc_amount"], name: "index_milestones_on_usdc_amount"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -381,12 +469,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_13_173216) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "agreement_participants", "agreements"
+  add_foreign_key "agreement_participants", "agreements", column: "counter_agreement_id"
+  add_foreign_key "agreement_participants", "projects"
+  add_foreign_key "agreement_participants", "users"
+  add_foreign_key "agreement_participants", "users", column: "accept_or_counter_turn_id"
   add_foreign_key "agreements", "projects"
-  add_foreign_key "agreements", "users", column: "counter_offer_turn_id"
-  add_foreign_key "agreements", "users", column: "initiator_id"
-  add_foreign_key "agreements", "users", column: "other_party_id"
+  add_foreign_key "blockchain_transactions", "blockchain_wallets"
+  add_foreign_key "blockchain_transactions", "escrow_contracts"
+  add_foreign_key "blockchain_transactions", "escrow_milestones"
+  add_foreign_key "blockchain_wallets", "users"
   add_foreign_key "conversations", "users", column: "recipient_id"
   add_foreign_key "conversations", "users", column: "sender_id"
+  add_foreign_key "escrow_contracts", "agreements"
+  add_foreign_key "escrow_milestones", "escrow_contracts"
+  add_foreign_key "escrow_milestones", "milestones"
   add_foreign_key "github_branches", "projects"
   add_foreign_key "github_branches", "users"
   add_foreign_key "github_logs", "agreements"

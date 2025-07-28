@@ -1,8 +1,7 @@
-<div class="mx-auto max-w-3xl">
-  <div class="px-4 py-5 sm:px-6">
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Create New Project</h1>
-    <p class="mt-1 text-sm text-gray-500">Start a new project to track your business idea.</p>
-  </div>
+<div class="mx-auto max-w-4xl px-4 py-6">
+  <%= render 'form_header', 
+             title: "Create New Project", 
+             subtitle: "Start a new project to track your business idea and connect with mentors and co-founders." %>
   
   <%= render 'form', project: @project_form, submit_text: "Create Project", url: projects_path, method: :post %>
 </div>

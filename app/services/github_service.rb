@@ -217,7 +217,8 @@ class GithubService
 
       user_id = find_user_id(author_email, user_emails, user_github_identifiers, commit)
 
-      agreement = agreements.find { |a| [ a.initiator_id, a.other_party_id ].include?(user_id) }
+    # Find agreement that includes this user as a participant
+    agreement = agreements.find { |a| a.agreement_participants.any? { |p| p.user_id == user_id } }
 
       stats = commit.stats || {}
       changed_files = commit.files.map do |file|

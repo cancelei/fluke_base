@@ -6,13 +6,13 @@ class AgreementsQuery
 
   def my_agreements
     @current_user.my_agreements
-                 .includes(:project, :initiator, :other_party)
+                 .includes(:project, agreement_participants: :user)
                  .order(created_at: :desc)
   end
 
   def other_party_agreements
     @current_user.other_party_agreements
-                 .includes(:project, :initiator, :other_party)
+                 .includes(:project, agreement_participants: :user)
                  .order(created_at: :desc)
   end
 
@@ -37,11 +37,15 @@ class AgreementsQuery
   end
 
   def check_duplicate_agreement(other_party_id, project_id)
-    Agreement.where(
-      other_party_id: other_party_id,
-      project_id: project_id,
-      initiator_id: @current_user.id
-    ).where(status: [ Agreement::ACCEPTED, Agreement::PENDING ]).first
+    Agreement.joins(:agreement_participants)
+      .where(
+        project_id: project_id,
+        status: [ Agreement::ACCEPTED, Agreement::PENDING ]
+      )
+      .where(agreement_participants: { user_id: [ @current_user.id, other_party_id ] })
+      .group("agreements.id")
+      .having("COUNT(agreement_participants.id) = 2")
+      .first
   end
 
   def existing_agreements_for_project(project)
