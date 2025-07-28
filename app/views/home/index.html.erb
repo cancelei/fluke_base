@@ -74,7 +74,12 @@
               </span>
               <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
             <% end %>
-            <%= link_to "Watch Demo", "#demo-video", class: "inline-flex items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-white/20 hover:scale-105", data: { action: "click->hero-animation#playDemo" } %>
+            <button type="button" class="inline-flex items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-white/20 hover:scale-105" data-action="click->modal#open" data-modal-target-param="demo-modal">
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 5v10l7-5-7-5z"/>
+              </svg>
+              Watch Demo (Coming Soon)
+            </button>
           <% end %>
         </div>
 
@@ -339,6 +344,12 @@
                   </svg>
                   Digital signature integration
                 </div>
+                <div class="flex items-center text-sm text-gray-500">
+                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  Web3 Multi-Asset Escrow on Base
+                </div>
               </div>
             </div>
           </div>
@@ -387,8 +398,11 @@
       <div class="mt-20 text-center" data-scroll-reveal-target="element">
         <div class="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl px-6 py-3 border border-blue-200">
           <span class="text-gray-700 font-medium">Want to see it in action?</span>
-          <button class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:scale-105 transition-transform" data-action="click->scroll-reveal#showDemo">
-            Watch 2-min Demo
+          <button class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:scale-105 transition-transform" data-action="click->modal#open" data-modal-target-param="demo-modal">
+            <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M8 5v10l7-5-7-5z"/>
+            </svg>
+            Watch 2-min Demo (Coming Soon)
           </button>
         </div>
       </div>
@@ -662,7 +676,7 @@
   </div>
 
   <!-- How It Works Section -->
-  <div class="bg-gradient-to-br from-gray-900 to-indigo-900 py-24 sm:py-32 relative overflow-hidden">
+  <div id="how-it-works" class="bg-gradient-to-br from-gray-900 to-indigo-900 py-24 sm:py-32 relative overflow-hidden">
     <!-- Animated Background Elements -->
     <div class="absolute inset-0 opacity-10">
       <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-2xl animate-pulse"></div>
@@ -772,7 +786,7 @@
   </div>
 
   <!-- Enhanced Testimonials Section with Interactive Cards -->
-  <div class="bg-white py-24 sm:py-32" data-controller="testimonials">
+  <div id="testimonials" class="bg-white py-24 sm:py-32" data-controller="testimonials">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-3xl text-center mb-20">
         <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
@@ -921,6 +935,232 @@
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                   </svg>
                   Active Co-founder • Product launched successfully
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Testimonial Set 2 -->
+          <div class="w-full flex-shrink-0">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <!-- Testimonial 4 -->
+              <div class="group relative bg-gradient-to-br from-orange-50 to-red-50 rounded-3xl p-8 border border-orange-100 transition-all duration-300 hover:shadow-2xl hover:scale-105">
+                <div class="absolute top-6 right-6">
+                  <svg class="w-8 h-8 text-orange-500 opacity-50" fill="currentColor" viewBox="0 0 32 32">
+                    <path d="M12.219 10.594c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1zm7.562 0c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1z"/>
+                  </svg>
+                </div>
+                <div class="mb-6">
+                  <div class="flex mb-4">
+                    <% 5.times do %>
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    <% end %>
+                  </div>
+                  <p class="text-gray-700 leading-relaxed italic">
+                    "FlukeBase's milestone tracking system keeps our team focused and accountable. We've hit every target since launching our partnership through the platform."
+                  </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    J
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">Jessica Park</div>
+                    <div class="text-sm text-gray-600">Founder, EcoTech Solutions • $500K ARR</div>
+                  </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-gray-500">
+                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  Growing Startup • 100% milestone completion rate
+                </div>
+              </div>
+
+              <!-- Testimonial 5 -->
+              <div class="group relative bg-gradient-to-br from-teal-50 to-cyan-50 rounded-3xl p-8 border border-teal-100 transition-all duration-300 hover:shadow-2xl hover:scale-105">
+                <div class="absolute top-6 right-6">
+                  <svg class="w-8 h-8 text-teal-500 opacity-50" fill="currentColor" viewBox="0 0 32 32">
+                    <path d="M12.219 10.594c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1zm7.562 0c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1z"/>
+                  </svg>
+                </div>
+                <div class="mb-6">
+                  <div class="flex mb-4">
+                    <% 5.times do %>
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    <% end %>
+                  </div>
+                  <p class="text-gray-700 leading-relaxed italic">
+                    "The quality of mentors on FlukeBase is exceptional. My mentor helped me avoid costly mistakes and guided me to our first major client within 3 months."
+                  </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    D
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">David Thompson</div>
+                    <div class="text-sm text-gray-600">CEO, FinanceFlow • Series A funded</div>
+                  </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-gray-500">
+                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  Funded Startup • Mentor match success story
+                </div>
+              </div>
+
+              <!-- Testimonial 6 -->
+              <div class="group relative bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl p-8 border border-indigo-100 transition-all duration-300 hover:shadow-2xl hover:scale-105">
+                <div class="absolute top-6 right-6">
+                  <svg class="w-8 h-8 text-indigo-500 opacity-50" fill="currentColor" viewBox="0 0 32 32">
+                    <path d="M12.219 10.594c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1zm7.562 0c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1z"/>
+                  </svg>
+                </div>
+                <div class="mb-6">
+                  <div class="flex mb-4">
+                    <% 5.times do %>
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    <% end %>
+                  </div>
+                  <p class="text-gray-700 leading-relaxed italic">
+                    "I've been mentoring for 10 years, but FlukeBase's structured approach makes it so much more effective. Clear expectations and progress tracking benefit everyone."
+                  </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    L
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">Lisa Wang</div>
+                    <div class="text-sm text-gray-600">VP Engineering, TechCorp • 20+ mentees</div>
+                  </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-gray-500">
+                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  Elite Mentor • 5.0★ perfect rating
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Testimonial Set 3 -->
+          <div class="w-full flex-shrink-0">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <!-- Testimonial 7 -->
+              <div class="group relative bg-gradient-to-br from-rose-50 to-pink-50 rounded-3xl p-8 border border-rose-100 transition-all duration-300 hover:shadow-2xl hover:scale-105">
+                <div class="absolute top-6 right-6">
+                  <svg class="w-8 h-8 text-rose-500 opacity-50" fill="currentColor" viewBox="0 0 32 32">
+                    <path d="M12.219 10.594c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1zm7.562 0c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1z"/>
+                  </svg>
+                </div>
+                <div class="mb-6">
+                  <div class="flex mb-4">
+                    <% 5.times do %>
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    <% end %>
+                  </div>
+                  <p class="text-gray-700 leading-relaxed italic">
+                    "FlukeBase made it easy to find a co-founder who shares my vision and work ethic. The equity agreements are fair and transparent - no surprises or hidden terms."
+                  </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    R
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">Rachel Martinez</div>
+                    <div class="text-sm text-gray-600">Co-Founder, HealthTech Innovations • $1.2M raised</div>
+                  </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-gray-500">
+                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  Successful Partnership • Seed funding secured
+                </div>
+              </div>
+
+              <!-- Testimonial 8 -->
+              <div class="group relative bg-gradient-to-br from-amber-50 to-yellow-50 rounded-3xl p-8 border border-amber-100 transition-all duration-300 hover:shadow-2xl hover:scale-105">
+                <div class="absolute top-6 right-6">
+                  <svg class="w-8 h-8 text-amber-500 opacity-50" fill="currentColor" viewBox="0 0 32 32">
+                    <path d="M12.219 10.594c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1zm7.562 0c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1z"/>
+                  </svg>
+                </div>
+                <div class="mb-6">
+                  <div class="flex mb-4">
+                    <% 5.times do %>
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    <% end %>
+                  </div>
+                  <p class="text-gray-700 leading-relaxed italic">
+                    "The platform's communication tools and progress tracking helped us stay aligned even while working remotely. We launched our MVP 2 months ahead of schedule."
+                  </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    T
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">Tom Anderson</div>
+                    <div class="text-sm text-gray-600">CTO, RemoteWork Solutions • 50K+ users</div>
+                  </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-gray-500">
+                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  Fast Growth • MVP launched early
+                </div>
+              </div>
+
+              <!-- Testimonial 9 -->
+              <div class="group relative bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-8 border border-emerald-100 transition-all duration-300 hover:shadow-2xl hover:scale-105">
+                <div class="absolute top-6 right-6">
+                  <svg class="w-8 h-8 text-emerald-500 opacity-50" fill="currentColor" viewBox="0 0 32 32">
+                    <path d="M12.219 10.594c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1zm7.562 0c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1z"/>
+                  </svg>
+                </div>
+                <div class="mb-6">
+                  <div class="flex mb-4">
+                    <% 5.times do %>
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    <% end %>
+                  </div>
+                  <p class="text-gray-700 leading-relaxed italic">
+                    "FlukeBase's vetting process ensures you're working with serious, committed people. No time wasters - just dedicated professionals ready to build something great."
+                  </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    K
+                  </div>
+                  <div>
+                    <div class="font-semibold text-gray-900">Kevin Liu</div>
+                    <div class="text-sm text-gray-600">Founder, AI Analytics • YC Alumni</div>
+                  </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-gray-500">
+                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  YC Graduate • Quality network advocate
                 </div>
               </div>
             </div>
@@ -1198,6 +1438,60 @@
       </div>
     </div>
   </div>
+
+  <!-- Demo Video Modal -->
+  <div id="demo-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm" data-controller="modal">
+    <div class="relative w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl" data-modal-target="content">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-200">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M8 5v10l7-5-7-5z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-gray-900">FlukeBase Demo</h3>
+            <p class="text-sm text-gray-500">See how our platform works</p>
+          </div>
+        </div>
+        <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" data-action="click->modal#close">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Modal Body -->
+      <div class="p-8 text-center">
+        <div class="w-full aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center mb-6">
+          <div class="text-center">
+            <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 5v10l7-5-7-5z"/>
+              </svg>
+            </div>
+            <h4 class="text-2xl font-bold text-gray-900 mb-2">Demo Coming Soon!</h4>
+            <p class="text-gray-600 max-w-md mx-auto">
+              We're putting the finishing touches on our product demo video. It will be available very soon to show you exactly how FlukeBase can help you build your dream team.
+            </p>
+          </div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+          <button type="button" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg hover:scale-105 transition-all duration-200" data-action="click->modal#close">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12"/>
+            </svg>
+            Get Started Instead
+          </button>
+          <button type="button" class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200" data-action="click->modal#close">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Enhanced Custom CSS for animations and interactions -->
@@ -1336,6 +1630,11 @@
     scroll-behavior: smooth;
   }
   
+  /* Modal styles */
+  .modal-open {
+    display: flex !important;
+  }
+  
   /* Enhanced button hover states */
   .btn-primary {
     @apply inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25;
@@ -1397,3 +1696,50 @@
     }
   }
 </style>
+
+<script>
+  // Modal functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('demo-modal');
+    const openButtons = document.querySelectorAll('[data-action*="modal#open"]');
+    const closeButtons = document.querySelectorAll('[data-action*="modal#close"]');
+    
+    // Open modal
+    openButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        modal.classList.remove('hidden');
+        modal.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+    
+    // Close modal
+    closeButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        modal.classList.add('hidden');
+        modal.classList.remove('modal-open');
+        document.body.style.overflow = 'auto';
+      });
+    });
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('modal-open');
+        document.body.style.overflow = 'auto';
+      }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+        modal.classList.remove('modal-open');
+        document.body.style.overflow = 'auto';
+      }
+    });
+  });
+</script>
