@@ -170,10 +170,11 @@ class GithubService
   end
 
   def load_users
-    @agreements = project.agreements.active.includes(:initiator, :other_party)
+    @agreements = project.agreements.active.includes(agreement_participants: :user)
 
     # Preload all related users and their GitHub usernames
-    related_users = ([ project.user ] + agreements.map(&:initiator) + agreements.map(&:other_party)).compact.uniq
+    agreement_users = agreements.flat_map { |agreement| agreement.agreement_participants.map(&:user) }
+    related_users = ([ project.user ] + agreement_users).compact.uniq
 
     # Create a hash of email => user_id for quick lookup
     @user_emails = {}
