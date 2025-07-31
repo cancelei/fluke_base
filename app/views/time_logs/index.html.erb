@@ -332,7 +332,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">
-                    <ul>
+                    <ul id="milestone_<%= milestone.id %>_time_logs_started">
                       <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
                         <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
                       <% end %>
