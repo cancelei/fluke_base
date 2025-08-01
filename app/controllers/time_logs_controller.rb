@@ -53,7 +53,7 @@ class TimeLogsController < ApplicationController
               partial: "time_logs/manual_form",
               locals: { time_log_manual: TimeLog.new, milestones: @milestones }
             ),
-            turbo_stream.update("milestone_#{@milestone.id}",
+            turbo_stream.replace("milestone_#{@milestone.id}",
               partial: "time_logs/milestone_row",
               locals: { milestone: @milestone, project: @project, active_log: nil }
             ),
@@ -178,7 +178,7 @@ class TimeLogsController < ApplicationController
       respond_to do |format|
         format.turbo_stream do
           render turbo_stream: [
-            turbo_stream.update("milestone_#{@milestone.id}",
+            turbo_stream.replace("milestone_#{@milestone.id}",
               partial: "time_logs/milestone_row",
               locals: { milestone: @milestone, project: @project, active_log: @time_log }
             ),
@@ -227,7 +227,7 @@ class TimeLogsController < ApplicationController
       respond_to do |format|
         format.turbo_stream do
           render turbo_stream: [
-            turbo_stream.update("milestone_#{@time_log.milestone_id}",
+            turbo_stream.replace("milestone_#{@time_log.milestone_id}",
               partial: "time_logs/milestone_row",
               locals: { milestone: @time_log.milestone, project: @project, active_log: nil }
             ),
