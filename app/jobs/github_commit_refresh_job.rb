@@ -49,6 +49,12 @@ class GithubCommitRefreshJob < ApplicationJob
         )
 
         Rails.logger.info "Stored #{commits.size} commits for branch '#{branch}' in project '#{@project.name}'"
+
+        Turbo::StreamsChannel.broadcast_replace_to(
+          "project_#{@project.id}_github_commits",
+          target: "github-commits-reload",
+          partial: "github_logs/github_commits_reload"
+        )
       rescue => e
         puts "Error storing commits: #{e.message}\n#{e.backtrace.join("\n")}"
       end
