@@ -18,7 +18,7 @@
                     <%= "%02d:%02d:%02d" % [hours, minutes, seconds] %>
                   </span>
                   <div class="flex items-center ml-4">
-                    <%= button_to stop_tracking_time_logs_path(selected_project, milestone_id: milestone.id), method: :post, class: "px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700", form: { data: { turbo: false, timer_target: "stopButton", action: "click->timer#stopTimer" } } do %>
+                    <%= button_to stop_tracking_time_logs_path(selected_project, milestone_id: milestone.id), method: :post, class: "px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700", form: { data: { turbo: true, timer_target: "stopButton", action: "click->timer#stopTimer" } } do %>
                         ⏹️ Stop
                     <% end %>
                     <button type="button" data-timer-target="playButton" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-action="click->timer#startTimer">
