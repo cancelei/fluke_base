@@ -4,38 +4,52 @@
       <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
         GitHub Activity for <%= @project.name %>
       </h2>
-      
+
       <% if @available_branches&.any? %>
         <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="flex items-center mb-2 lg:mb-0">
             <label for="branch" class="mr-2 text-sm font-medium text-gray-700">Branch:</label>
             <div class="relative">
               <div class="relative" data-controller="dropdown">
-                <button type="button" class="flex items-center w-full rounded-md bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" data-action="click->dropdown#toggle">
-                  <span class="mr-2"><%= @selected_branch.present? ? (@available_branches.find { |id, _val| id == @selected_branch.to_i }&.last || 'main') : 'All Branches' %></span>
+                <button type="button"
+                  class="flex items-center w-full rounded-md bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  data-action="click->dropdown#toggle">
+                  <span class="mr-2">
+                    <%= @selected_branch.present? ? (@available_branches.find { |id, _val| id==@selected_branch.to_i
+                      }&.last || 'main' ) : 'All Branches' %>
+                  </span>
                   <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clip-rule="evenodd" />
                   </svg>
                 </button>
-                <div class="absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
-                  <%= link_to "All Branches", project_github_logs_path(@project, branch: nil, user_name: @user_name, agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
-                  <% @available_branches.each do |id, branch| %>
-                    <%= link_to (branch.presence || 'main'), project_github_logs_path(@project, branch: id, user_name: @user_name, agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
-                  <% end %>
+                <div
+                  class="absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden"
+                  data-dropdown-target="menu">
+                  <%= link_to "All Branches" , project_github_logs_path(@project, branch: nil, user_name: @user_name,
+                    agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    %>
+                    <% @available_branches.each do |id, branch| %>
+                      <%= link_to (branch.presence || 'main' ), project_github_logs_path(@project, branch: id,
+                        user_name: @user_name, agreement_only: @agreement_only),
+                        class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
+                        <% end %>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="flex items-center mb-2 lg:mb-0">
-            <a href="<%= project_github_logs_path(@project, branch: @selected_branch, user_name: @user_name, agreement_only: @agreement_only ? nil : true) %>" class="flex items-center">
+            <a href="<%= project_github_logs_path(@project, branch: @selected_branch, user_name: @user_name, agreement_only: @agreement_only ? nil : true) %>"
+              class="flex items-center">
               <div class="flex items-center justify-center w-full">
-  
+
                 <label for="toggleB" class="flex items-center cursor-pointer">
                   <!-- toggle -->
                   <div class="relative">
                     <!-- input -->
-                    <input type="checkbox" id="toggleB" class="sr-only" <%= 'checked' if @agreement_only %>>
+                    <input type="checkbox" id="toggleB" class="sr-only" <%='checked' if @agreement_only %>>
                     <!-- line -->
                     <div class="block bg-indigo-600 w-14 h-8 rounded-full"></div>
                     <!-- dot -->
@@ -46,11 +60,11 @@
                     Agreement Commits
                   </div>
                 </label>
-              
+
               </div>
-              <input id="agreement_only" name="agreement_only" type="checkbox" value="1" 
-                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" 
-                    <%= 'checked' if @agreement_only %> hidden>
+              <input id="agreement_only" name="agreement_only" type="checkbox" value="1"
+                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" <%='checked' if
+                @agreement_only %> hidden>
             </a>
           </div>
 
@@ -58,64 +72,87 @@
             <label for="user_name" class="mb-1 sm:mb-0 sm:mr-2 text-sm font-medium text-gray-700">User Name:</label>
             <div class="relative w-full sm:w-auto">
               <div class="relative" data-controller="dropdown">
-                <button type="button" class="flex items-center justify-between w-full sm:w-auto sm:min-w-[140px] md:min-w-[180px] rounded-md bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" data-action="click->dropdown#toggle">
-                  <span class="mr-2 truncate max-w-[200px]"><%= @user_name.presence || 'All Users' %></span>
+                <button type="button"
+                  class="flex items-center justify-between w-full sm:w-auto sm:min-w-[140px] md:min-w-[180px] rounded-md bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  data-action="click->dropdown#toggle">
+                  <span class="mr-2 truncate max-w-[200px]">
+                    <%= @user_name.presence || 'All Users' %>
+                  </span>
                   <svg class="h-5 w-5 flex-shrink-0 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clip-rule="evenodd" />
                   </svg>
                 </button>
-                <div class="absolute left-0 right-0 sm:right-auto z-10 mt-2 w-full sm:w-auto max-w-[250px] origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden" data-dropdown-target="menu">
-                  <%= link_to "All Users", project_github_logs_path(@project, branch: @selected_branch, user_name: nil, agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 truncate" %>
-                  <% @available_users.each do |name| %>
-                    <%= link_to name, project_github_logs_path(@project, branch: @selected_branch, user_name: name, agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 truncate" %>
-                  <% end %>
+                <div
+                  class="absolute left-0 right-0 sm:right-auto z-10 mt-2 w-full sm:w-auto max-w-[250px] origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden"
+                  data-dropdown-target="menu">
+                  <%= link_to "All Users" , project_github_logs_path(@project, branch: @selected_branch, user_name: nil,
+                    agreement_only: @agreement_only),
+                    class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 truncate" %>
+                    <% @available_users.each do |name| %>
+                      <%= link_to name, project_github_logs_path(@project, branch: @selected_branch, user_name: name,
+                        agreement_only: @agreement_only),
+                        class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 truncate" %>
+                        <% end %>
                 </div>
               </div>
             </div>
           </div>
 
-          
+
           <div class="flex items-end mb-2 lg:mb-0">
             <% if @selected_branch || @agreement_only || @user_name %>
-            <%= link_to 'Clear Filters', project_github_logs_path(@project), 
-                class: 'ml-2 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500' %>
-          <% end %>
+              <%= link_to 'Clear Filters' , project_github_logs_path(@project),
+                class: 'ml-2 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                %>
+                <% end %>
           </div>
         </div>
-      <% end %>
-      <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
-        <div class="mt-2 flex items-center text-sm text-gray-500">
-          <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-          </svg>
-          Last updated: <%= time_ago_in_words(@last_updated) if @last_updated.present? %> ago
-        </div>
-        <div class="mt-2 flex items-center text-sm text-gray-500">
-          <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <%= number_with_delimiter(@total_commits) %> total commits
-        </div>
-      </div>
+        <% end %>
+          <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+            <div class="mt-2 flex items-center text-sm text-gray-500">
+              <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                  clip-rule="evenodd" />
+              </svg>
+              Last updated: <%= time_ago_in_words(@last_updated) if @last_updated.present? %> ago
+            </div>
+            <div class="mt-2 flex items-center text-sm text-gray-500">
+              <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <%= number_with_delimiter(@total_commits) %> total commits
+            </div>
+          </div>
     </div>
     <div class="mt-5 flex flex-col items-center justify-between lg:mt-0 lg:ml-4 h-20">
-      <% if @project.user == current_user || @project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id }) %>
+      <% if @project.user==current_user ||
+        @project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id }) %>
         <span class="hidden sm:block">
-          <%= button_to refresh_project_github_logs_path(branch: @selected_branch, user_name: @user_name, agreement_only: @agreement_only),
-                    method: :post,
-                    class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
-                    data: { confirm: "Are you sure you want to refresh the commits? This may take a few minutes." } do %>
+          <%= button_to refresh_project_github_logs_path(branch: @selected_branch, user_name: @user_name,
+            agreement_only: @agreement_only), method: :post,
+            class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                        data: { confirm: "Are you sure you want to refresh the commits? This may take a few minutes." } do %>
             <svg class="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v3a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+              <path fill-rule="evenodd"
+                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v3a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                clip-rule="evenodd" />
             </svg>
             Refresh Commits
           <% end %>
         </span>
         <span class="hidden sm:block">
-          <%= link_to project_path(@project), 
-                    class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ml-3" do %>
-            <svg class="mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          <%= link_to project_path(@project), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ml-3" do %>
+            <svg class="mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+              fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clip-rule="evenodd" />
             </svg>
             Back to Project
           <% end %>
@@ -132,348 +169,369 @@
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
             <dt class="text-sm font-medium text-gray-500 truncate">Total Commits</dt>
-            <dd class="mt-1 text-3xl font-semibold text-gray-900"><%= number_with_delimiter(@total_commits) %></dd>
+            <dd class="mt-1 text-3xl font-semibold text-gray-900">
+              <%= number_with_delimiter(@total_commits) %>
+            </dd>
           </div>
           <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
             <dt class="text-sm font-medium text-gray-500 truncate">Lines Added</dt>
-            <dd class="mt-1 text-3xl font-semibold text-green-600">+<%= number_with_delimiter(@total_additions) %></dd>
+            <dd class="mt-1 text-3xl font-semibold text-green-600">+<%= number_with_delimiter(@total_additions) %>
+            </dd>
           </div>
           <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
             <dt class="text-sm font-medium text-gray-500 truncate">Lines Removed</dt>
-            <dd class="mt-1 text-3xl font-semibold text-red-600">-<%= number_with_delimiter(@total_deletions) %></dd>
+            <dd class="mt-1 text-3xl font-semibold text-red-600">-<%= number_with_delimiter(@total_deletions) %>
+            </dd>
           </div>
         </dl>
       </div>
     </div>
   <% end %>
 
-  <!-- Contributions Summary -->
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
-    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="text-lg leading-6 font-medium text-gray-900">Contributions Summary</h3>
-          <p class="mt-1 max-w-2xl text-sm text-gray-500">
-            Overview of all contributions to the repository
-          </p>
+      <!-- Contributions Summary -->
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg leading-6 font-medium text-gray-900">Contributions Summary</h3>
+              <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                Overview of all contributions to the repository
+              </p>
+            </div>
+            <div class="text-sm text-gray-500">
+              <% if @last_updated.present? %>
+                Last activity: <%= time_ago_in_words(@last_updated) %> ago
+                  <% end %>
+            </div>
+          </div>
         </div>
-        <div class="text-sm text-gray-500">
-          <% if @last_updated.present? %>
-            Last activity: <%= time_ago_in_words(@last_updated) %> ago
-          <% end %>
-        </div>
-      </div>
-    </div>
-    
-    <% if @contributions&.any? %>
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contributor</th>
-              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Commits</th>
-              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Changes</th>
-              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Net</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <% @contributions.each do |contribution| 
-              net_changes = (contribution[:total_added] || 0) - (contribution[:total_removed] || 0)
-              net_class = net_changes.positive? ? 'text-green-600' : net_changes.negative? ? 'text-red-600' : 'text-gray-500'
-              user = contribution[:user]
-            %>
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10">
-                      <%= image_tag user.avatar_url.presence || 'https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png',
-                                  class: 'h-10 w-10 rounded-full',
-                                  alt: user.full_name,
-                                  onerror: "this.onerror=null; this.src='https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png" %>
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">
-                        <%= user.full_name %>
-                        <% if user == @project.user %>
-                          <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
-                            Owner
-                          </span>
-                        <% end %>
-                      </div>
-                      <% if user.github_username.present? %>
-                        <div class="text-sm text-gray-500 flex items-center">
-                          <svg class="h-4 w-4 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
-                          </svg>
-                          <%= link_to user.github_username, 
-                                    "https://github.com/#{user.github_username}", 
-                                    target: "_blank", 
-                                    class: "text-indigo-600 hover:text-indigo-900 hover:underline" %>
-                        </div>
-                      <% end %>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    <%= number_with_delimiter(contribution[:commit_count] || 0) %>
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center justify-center space-x-4">
-                    <div class="text-sm text-green-600 font-medium">
-                      +<%= number_with_delimiter(contribution[:total_added] || 0) %>
-                    </div>
-                    <div class="text-sm text-red-600 font-medium">
-                      -<%= number_with_delimiter(contribution[:total_removed] || 0) %>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">
-                  <span class="text-sm font-medium <%= net_class %>">
-                    <%= number_with_delimiter(net_changes) %>
-                  </span>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    <% else %>
-      <div class="px-6 py-12 text-center">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No contributions yet</h3>
-        <p class="mt-1 text-sm text-gray-500">
-          <% if @project.user == current_user || @project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id }) %>
-            Click the "Refresh Commits" button to fetch contributions from GitHub.
-          <% else %>
-            This project doesn't have any GitHub activity yet.
-          <% end %>
-        </p>
-      </div>
-    <% end %>
-  </div>
 
-  <!-- Recent Commits -->
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <div class="px-4 py-5 sm:px-6">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Commits</h3>
-        <% if @recent_commits&.any? %>
-          <div class="text-sm text-gray-500">
-            Showing <%= @recent_commits.size %> of <%= @recent_commits.total_count %> commits
-          </div>
-        <% end %>
-      </div>
-    </div>
-    
-    <% if @recent_commits&.any? %>
-      <div class="border-t border-gray-200">
-        <ul class="divide-y divide-gray-200">
-          <% associated_time_log = nil %>
-          <% @recent_commits.each do |commit| %>
-            <% if commit.time_log && commit.time_log != associated_time_log %>
-              <% associated_time_log = commit.time_log %>
-              <li class="px-6 py-4 bg-blue-50 border-l-4 border-blue-400">
-              <div class="flex items-center space-x-3">
-                <svg class="h-5 w-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <div>
-                <div class="text-sm font-semibold text-blue-800">
-                  Time Log
-                </div>
-                <div class="text-xs text-blue-700 mt-1">
-                  <span>
-                  <strong>Duration:</strong>
-                  <%= distance_of_time_in_words(associated_time_log.started_at, associated_time_log.ended_at || associated_time_log.started_at) %>
-                  </span>
-                  <% if associated_time_log.started_at %>
-                  <span class="ml-2">
-                    <strong>Started:</strong>
-                    <%= associated_time_log.started_at.strftime("%b %d, %Y %I:%M%p") %>
-                  </span>
-                  <% end %>
-                  <% if associated_time_log.ended_at %>
-                  <span class="ml-2">
-                    <strong>Ended:</strong>
-                    <%= associated_time_log.ended_at.strftime("%b %d, %Y %I:%M%p") %>
-                  </span>
-                  <% end %>
-                  <% if associated_time_log.hours_spent.present? && associated_time_log.hours_spent > 0 %>
-                  <span class="ml-2">
-                    <strong>Hours Spent:</strong>
-                    <%= associated_time_log.hours_spent %>h
-                  </span>
-                  <% end %>
-                  <% if associated_time_log.status.present? %>
-                  <span class="ml-2">
-                    <strong>Status:</strong>
-                    <%= associated_time_log.status.humanize %>
-                  </span>
-                  <% end %>
-                </div>
-                <% if associated_time_log.description.present? %>
-                  <div class="mt-2 text-xs text-blue-600 bg-blue-100 rounded p-2">
-                  <strong>Description:</strong>
-                  <%= simple_format(associated_time_log.description) %>
-                  </div>
-                <% end %>
-                </div>
-              </div>
-              </li>
-            <% end %>
-            <% associated_time_log = commit.time_log %>
-            <li class="px-6 py-4 hover:bg-gray-50 <%= "border-l-4 border-blue-400" if associated_time_log %>">
-              <div class="flex items-start">
-                <div class="flex-shrink-0 h-10 w-10">
-                  <%= image_tag commit.user&.avatar_url.presence || 'https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png',
-                              class: 'h-10 w-10 rounded-full',
-                              alt: commit.user&.full_name,
-                              onerror: "this.onerror=null; this.src='https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png'" %>
-                </div>
-                <div class="ml-4 flex-1 min-w-0">
-                  <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-gray-900 truncate">
-                      <%= commit.user&.full_name || "#{commit.unregistered_user_name} (Unknown User)" %>
-                      <% if commit.user == @project.user %>
-                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
-                          Owner
-                        </span>
-                      <% end %>
-                    </p>
-                    <div class="ml-2 flex-shrink-0 flex items-center">
-                      <a href="<%= commit.commit_url %>"
-                         target="_blank"
-                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
-                         title="View on GitHub">
-                        <svg class="h-3 w-3 mr-1 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
-                          <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
-                        </svg>
-                        <%= commit.commit_sha[0..6] %>
-                      </a>
-                      <div class="text-xs text-gray-500 ms-2">
-                        <%= commit.commit_date.strftime("%b %d, %Y %I:%M%p") %>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="mt-1 text-sm text-gray-800">
-                    <%= link_to commit.commit_message.split("\n").first,
-                                commit.commit_url,
-                                target: "_blank",
-                                class: "text-indigo-600 hover:text-indigo-900 hover:underline break-words" %>
-                  </div>
-                  <% if commit.commit_message.include?("\n") %>
-                    <div class="mt-1 p-2 text-xs text-gray-500 bg-gray-50 rounded overflow-hidden">
-                      <div class="line-clamp-2">
-                        <%= simple_format(commit.commit_message.split("\n")[1..-1].join("\n"), {}, wrapper_tag: "span") %>
-                      </div>
-                    </div>
-                  <% end %>
-                  <div class="mt-2 flex items-center text-xs text-gray-500">
-                    <div class="flex items-center">
-                      <svg class="h-3 w-3 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <svg class="mr-1.5 h-3.5 w-3.5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 5.47a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72v5.69a.75.75 0 001.5 0v-5.69l1.72 1.72a.75.75 0 101.06-1.06l-3-3z" clip-rule="evenodd" />
-                      </svg>
-                      <span class="font-medium text-green-600"><%= commit.lines_added %></span>
-                    </div>
-                    <span class="inline-flex items-center">
-                      <svg class="mr-1.5 h-3.5 w-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 14.03a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72V6.75a.75.75 0 011.5 0v7.69l1.72-1.72a.75.75 0 111.06 1.06l-3 3z" clip-rule="evenodd" />
-                      </svg>
-                      <span class="font-medium text-red-600"><%= commit.lines_removed %></span>
-                    </span>
-                  </div>
-                  
-                  <% if commit.changed_files.present? %>
-                    <div class="mt-3 w-full" data-controller="github-log">
-                      <button type="button" 
-                              class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                              data-action="click->github-log#toggleChanges"
-                              data-github-log-target="toggleButton">
-                        <svg class="-ml-0.5 mr-1.5 h-4 w-4 text-gray-500 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                        Show changes
-                      </button>
-                      
-                      <div class="mt-2" data-github-log-target="changesContainer">
-                        <% commit.changed_files.each do |change| %>
-                          <div class="mt-2 p-3 border border-gray-200 rounded-md bg-gray-50">
-                            <div class="flex justify-between items-center">
-                              <span class="text-xs font-medium text-gray-700"><%= change['filename'] %></span>
-                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= change['status'] == 'added' ? 'green' : change['status'] == 'removed' ? 'red' : 'blue' %>-100 text-<%= change['status'] == 'added' ? 'green' : change['status'] == 'removed' ? 'red' : 'blue' %>-800 capitalize">
-                                <%= change['status'] %>
-                              </span>
-                            </div>
-                            <% if change['patch'].present? %>
-                              <pre class="mt-2 p-2 text-xs bg-gray-800 text-gray-100 rounded-md overflow-x-auto"><code><%= change['patch'].gsub('\n', "\n") %></code></pre>
-                            <% end %>
-                            <div class="mt-2 flex space-x-4 text-xs text-gray-500">
-                              <span class="inline-flex items-center">
-                                <svg class="h-3.5 w-3.5 text-green-500 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                  <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 5.47a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72v5.69a.75.75 0 001.5 0v-5.69l1.72 1.72a.75.75 0 101.06-1.06l-3-3z" clip-rule="evenodd" />
-                                </svg>
-                                +<%= change['additions'] %>
-                              </span>
-                              <span class="inline-flex items-center">
-                                <svg class="h-3.5 w-3.5 text-red-500 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                  <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 14.03a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72V6.75a.75.75 0 011.5 0v7.69l1.72-1.72a.75.75 0 111.06 1.06l-3 3z" clip-rule="evenodd" />
-                                </svg>
-                                -<%= change['deletions'] %>
-                              </span>
-                            </div>
+        <% if @contributions&.any? %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contributor
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Commits
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Changes
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Net</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% @contributions.each do |contribution| %>
+                    <%
+                      net_changes= (contribution[:total_added] || 0) - (contribution[:total_removed] || 0)
+                      net_class = net_changes.positive? ? 'text-green-600' : 'text-red-600'
+                      net_changes.negative? ? 'text-red-600' : 'text-gray-500'
+                      user = contribution[:user]
+                    %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10">
+                          <%= image_tag user.avatar_url.presence || 'https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png' ,
+                            class: 'h-10 w-10 rounded-full' , alt: user.full_name,
+                            onerror: "this.onerror=null; this.src='https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png"
+                            %>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-medium text-gray-900">
+                            <%= user.full_name %>
+                              <% if user==@project.user %>
+                                <span
+                                  class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                                  Owner
+                                </span>
+                                <% end %>
                           </div>
-                        <% end %>
+                          <% if user.github_username.present? %>
+                            <div class="text-sm text-gray-500 flex items-center">
+                              <svg class="h-4 w-4 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd"
+                                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                  clip-rule="evenodd" />
+                              </svg>
+                              <%= link_to user.github_username, "https://github.com/#{user.github_username}" ,
+                                target: "_blank" , class: "text-indigo-600 hover:text-indigo-900 hover:underline" %>
+                            </div>
+                            <% end %>
+                        </div>
                       </div>
-                    </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                      <span
+                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                        <%= number_with_delimiter(contribution[:commit_count] || 0) %>
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center justify-center space-x-4">
+                        <div class="text-sm text-green-600 font-medium">
+                          +<%= number_with_delimiter(contribution[:total_added] || 0) %>
+                        </div>
+                        <div class="text-sm text-red-600 font-medium">
+                          -<%= number_with_delimiter(contribution[:total_removed] || 0) %>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                      <span class="text-sm font-medium <%= net_class %>">
+                        <%= number_with_delimiter(net_changes) %>
+                      </span>
+                    </td>
+                  </tr>
                   <% end %>
-                </div>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-      
-      <!-- Pagination for commits -->
-      <div class="px-6 py-4 border-t border-gray-200">
-        <%= render partial: 'shared/pagination', locals: { records: @recent_commits } %>
-      </div>
-    </div>
-  <% else %>
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-      <div class="px-4 py-12 sm:p-12 text-center">
-        <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748.057 1.08.254l7.25 4.067c.5.282.828.762.94 1.31.113.55.003 1.13-.3 1.6-.3.474-.78.83-1.33.97l-7.45 1.36c-.51.1-1.05.05-1.53-.14-.48-.19-.88-.53-1.13-.97l-2.1-3.45" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13.5A8.5 8.5 0 0 1 11.5 5H15m-3.5 14.5c-4.694 0-8.5-3.806-8.5-8.5s3.806-8.5 8.5-8.5 8.5 3.806 8.5 8.5c0 .864-.13 1.698-.37 2.487" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9z" />
-        </svg>
-        <h3 class="mt-4 text-lg font-medium text-gray-900">No GitHub activity found</h3>
-        <p class="mt-2 text-sm text-gray-500">
-          <% if @project.user == current_user || @project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id }) %>
-            Click the button below to fetch commits from the repository.
-          <% else %>
-            This project doesn't have any GitHub activity yet or the repository is not properly configured.
-          <% end %>
-        </p>
-        
-        <% if @project.user == current_user || @project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id }) %>
-          
-          <div class="mt-4 text-sm text-gray-500">
-            <p class="mb-2">Make sure:</p>
-            <ul class="list-disc text-left max-w-md mx-auto space-y-1">
-              <li>The repository URL is correctly set in project settings</li>
-              <li>You have the necessary permissions to access the repository</li>
-              <li>The repository has at least one commit</li>
-            </ul>
+              </tbody>
+            </table>
           </div>
-        <% end %>
+          <% else %>
+            <div class="px-6 py-12 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No contributions yet</h3>
+              <p class="mt-1 text-sm text-gray-500">
+                <% if @project.user==current_user ||
+                  @project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id:
+                  current_user.id }) %>
+                  Click the "Refresh Commits" button to fetch contributions from GitHub.
+                  <% else %>
+                    This project doesn't have any GitHub activity yet.
+                    <% end %>
+              </p>
+            </div>
+            <% end %>
       </div>
-    </div>
-  <% end %>
+
+      <!-- Recent Commits -->
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Commits</h3>
+            <% if @recent_commits&.any? %>
+              <div class="text-sm text-gray-500">
+                Showing <%= @recent_commits.size %> of <%= @recent_commits.total_count %> commits
+              </div>
+              <% end %>
+          </div>
+        </div>
+      </div>
+
+    <%= turbo_stream_from "github_logs" %>
+      <div class="border-t border-gray-200">
+        <%= turbo_frame_tag "github_logs" do %>
+          <% if @recent_commits&.any? %>
+            <ul class="divide-y divide-gray-200">
+              <% associated_time_log=nil %>
+                <% @recent_commits.each do |commit| %>
+                  <% if commit.time_log && commit.time_log !=associated_time_log %>
+                    <% associated_time_log=commit.time_log %>
+                      <li class="px-6 py-4 bg-blue-50 border-l-4 border-blue-400">
+                        <div class="flex items-center space-x-3">
+                          <svg class="h-5 w-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <div>
+                            <div class="text-sm font-semibold text-blue-800">
+                              Time Log
+                            </div>
+                            <div class="text-xs text-blue-700 mt-1">
+                              <span>
+                                <strong>Duration:</strong>
+                                <%= distance_of_time_in_words(associated_time_log.started_at,
+                                  associated_time_log.ended_at || associated_time_log.started_at) %>
+                              </span>
+                              <% if associated_time_log.started_at %>
+                                <span class="ml-2">
+                                  <strong>Started:</strong>
+                                  <%= associated_time_log.started_at.strftime("%b %d, %Y %I:%M%p") %>
+                                </span>
+                                <% end %>
+                                  <% if associated_time_log.ended_at %>
+                                    <span class="ml-2">
+                                      <strong>Ended:</strong>
+                                      <%= associated_time_log.ended_at.strftime("%b %d, %Y %I:%M%p") %>
+                                    </span>
+                                    <% end %>
+                                      <% if associated_time_log.hours_spent.present? &&
+                                        associated_time_log.hours_spent> 0 %>
+                                        <span class="ml-2">
+                                          <strong>Hours Spent:</strong>
+                                          <%= associated_time_log.hours_spent %>h
+                                        </span>
+                                        <% end %>
+                                          <% if associated_time_log.status.present? %>
+                                            <span class="ml-2">
+                                              <strong>Status:</strong>
+                                              <%= associated_time_log.status.humanize %>
+                                            </span>
+                                            <% end %>
+                            </div>
+                            <% if associated_time_log.description.present? %>
+                              <div class="mt-2 text-xs text-blue-600 bg-blue-100 rounded p-2">
+                                <strong>Description:</strong>
+                                <%= simple_format(associated_time_log.description) %>
+                              </div>
+                              <% end %>
+                          </div>
+                        </div>
+                      </li>
+                      <% end %>
+                        <% associated_time_log=commit.time_log %>
+                          <li class="px-6 py-4 hover:bg-gray-50 <%= " border-l-4 border-blue-400" if
+                            associated_time_log %>">
+                            <div class="flex items-start">
+                              <div class="flex-shrink-0 h-10 w-10">
+                                <%= image_tag commit.user&.avatar_url.presence || 'https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png', class: 'h-10 w-10 rounded-full' , alt: commit.user&.full_name,
+                                  onerror: "this.onerror=null; this.src='https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png'"
+                                  %>
+                              </div>
+                              <div class="ml-4 flex-1 min-w-0">
+                                <div class="flex items-center justify-between">
+                                  <p class="text-sm font-medium text-gray-900 truncate">
+                                    <%= commit.user&.full_name || "#{commit.unregistered_user_name} (Unknown User)"
+                                      %>
+                                      <% if commit.user==@project.user %>
+                                        <span
+                                          class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                                          Owner
+                                        </span>
+                                        <% end %>
+                                  </p>
+                                  <div class="ml-2 flex-shrink-0 flex items-center">
+                                    <a href="<%= commit.commit_url %>" target="_blank"
+                                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
+                                      title="View on GitHub">
+                                      <svg class="h-3 w-3 mr-1 text-gray-500" fill="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path fill-rule="evenodd"
+                                          d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                          clip-rule="evenodd" />
+                                      </svg>
+                                      <%= commit.commit_sha[0..6] %>
+                                    </a>
+                                    <div class="text-xs text-gray-500 ms-2">
+                                      <%= commit.commit_date.strftime("%b %d, %Y %I:%M%p") %>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="mt-1 text-sm text-gray-800">
+                                  <%= link_to commit.commit_message.split("\n").first, commit.commit_url,
+                                    target: "_blank" ,
+                                    class: "text-indigo-600 hover:text-indigo-900 hover:underline break-words" %>
+                                </div>
+                                <% if commit.commit_message.include?("\n") %>
+                                  <div class="mt-1 p-2 text-xs text-gray-500 bg-gray-50 rounded overflow-hidden">
+                                    <div class="line-clamp-2">
+                                      <%= simple_format(commit.commit_message.split("\n")[1..-1].join("\n"), {},
+                                        wrapper_tag: "span" ) %>
+                                    </div>
+                                  </div>
+                                  <% end %>
+                                    <div class="mt-2 flex items-center text-xs text-gray-500">
+                                      <div class="flex items-center">
+                                        <svg class="h-3 w-3 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24"
+                                          stroke="currentColor">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <svg class="mr-1.5 h-3.5 w-3.5 text-green-600" fill="currentColor"
+                                          viewBox="0 0 24 24">
+                                          <path fill-rule="evenodd"
+                                            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 5.47a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72v5.69a.75.75 0 001.5 0v-5.69l1.72 1.72a.75.75 0 101.06-1.06l-3-3z"
+                                            clip-rule="evenodd" />
+                                        </svg>
+                                        <span class="font-medium text-green-600">
+                                          <%= commit.lines_added %>
+                                        </span>
+                                      </div>
+                                      <span class="inline-flex items-center">
+                                        <svg class="mr-1.5 h-3.5 w-3.5 text-red-600" fill="currentColor"
+                                          viewBox="0 0 24 24">
+                                          <path fill-rule="evenodd"
+                                            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 14.03a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72V6.75a.75.75 0 011.5 0v7.69l1.72-1.72a.75.75 0 111.06 1.06l-3 3z"
+                                            clip-rule="evenodd" />
+                                        </svg>
+                                        <span class="font-medium text-red-600">
+                                          <%= commit.lines_removed %>
+                                        </span>
+                                      </span>
+                                    </div>
+
+                                    <% if commit.changed_files.present? %>
+                                      <div class="mt-3 w-full" data-controller="github-log">
+                                        <button type="button"
+                                          class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                          data-action="click->github-log#toggleChanges"
+                                          data-github-log-target="toggleButton">
+                                          <svg
+                                            class="-ml-0.5 mr-1.5 h-4 w-4 text-gray-500 transition-transform duration-200"
+                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                              clip-rule="evenodd" />
+                                          </svg>
+                                          Show changes
+                                        </button>
+
+                                        <div class="mt-2" data-github-log-target="changesContainer">
+                                          <% commit.changed_files.each do |change| %>
+                                            <div class="mt-2 p-3 border border-gray-200 rounded-md bg-gray-50">
+                                              <div class="flex justify-between items-center">
+                                                <span class="text-xs font-medium text-gray-700">
+                                                  <%= change['filename'] %>
+                                                </span>
+                                                <span
+                                                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= change['status'] == 'added' ? 'green' : change['status'] == 'removed' ? 'red' : 'blue' %>-100 text-<%= change['status'] == 'added' ? 'green' : change['status'] == 'removed' ? 'red' : 'blue' %>-800 capitalize">
+                                                  <%= change['status'] %>
+                                                </span>
+                                              </div>
+                                              <% if change['patch'].present? %>
+                                                <pre
+                                                  class="mt-2 p-2 text-xs bg-gray-800 text-gray-100 rounded-md overflow-x-auto"><code><%= change['patch'].gsub('\n', "\n") %></code></pre>
+                                                <% end %>
+                                                  <div class="mt-2 flex space-x-4 text-xs text-gray-500">
+                                                    <span class="inline-flex items-center">
+                                                      <svg class="h-3.5 w-3.5 text-green-500 mr-1"
+                                                        fill="currentColor" viewBox="0 0 24 24">
+                                                        <path fill-rule="evenodd"
+                                                          d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 5.47a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72v5.69a.75.75 0 001.5 0v-5.69l1.72 1.72a.75.75 0 101.06-1.06l-3-3z"
+                                                          clip-rule="evenodd" />
+                                                      </svg>
+                                                      +<%= change['additions'] %>
+                                                    </span>
+                                                    <span class="inline-flex items-center">
+                                                      <svg class="h-3.5 w-3.5 text-red-500 mr-1" fill="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path fill-rule="evenodd"
+                                                          d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 14.03a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72V6.75a.75.75 0 011.5 0v7.69l1.72-1.72a.75.75 0 111.06 1.06l-3 3z"
+                                                          clip-rule="evenodd" />
+                                                      </svg>
+                                                      -<%= change['deletions'] %>
+                                                    </span>
+                                                  </div>
+                                            </div>
+                                            <% end %>
+                                        </div>
+                                      </div>
+                                      <% end %>
+                              </div>
+                            </div>
+                          </li>
+                          <% end %>
+            </ul>
+            <% end %>
+      </div>
+      <% end %>
 </div>

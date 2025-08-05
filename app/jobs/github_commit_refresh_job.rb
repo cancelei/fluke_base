@@ -1,4 +1,5 @@
 class GithubCommitRefreshJob < ApplicationJob
+  include BulkInsert
   queue_as :default
 
   rescue_from(StandardError) do |exception|
@@ -49,6 +50,8 @@ class GithubCommitRefreshJob < ApplicationJob
         )
 
         Rails.logger.info "Stored #{commits.size} commits for branch '#{branch}' in project '#{@project.name}'"
+        Turbo::StreamsChannel.broadcast_prepend_to "github_logs", target: "github_logs", partial: "github_logs/github_log"
+        Rails.logger.info "Broadcasted #{commits.size} commits for branch '#{branch}' in project '#{@project.name}'"
 
         Turbo::StreamsChannel.broadcast_replace_to(
           "project_#{@project.id}_github_commits",
