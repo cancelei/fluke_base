@@ -29,11 +29,14 @@ class GithubLogsController < ApplicationController
     # Get recent commits for the activity feed with user preloading and pagination
     @recent_commits = recent_commits_query.page(params[:page]).per(15)
 
-    # Build base query for statistics
-    stats_query = @project.github_logs.includes(:user, :github_branch_logs)
-    stats_query = stats_query.where(github_branch_logs: { github_branch_id: @selected_branch }) if @selected_branch.present? && @selected_branch.to_i != 0
+    # Build base query for statistics - avoid double-counting commits in multiple branches
+    stats_query = @project.github_logs
+    stats_query = stats_query.joins(:github_branch_logs).where(github_branch_logs: { github_branch_id: @selected_branch }) if @selected_branch.present? && @selected_branch.to_i != 0
     stats_query = stats_query.where(unregistered_user_name: @user_name) if @user_name.present?
     stats_query = stats_query.where(user_id: agreement_user_ids) if @agreement_only
+
+    # Use distinct to avoid double-counting commits that appear in multiple branches
+    stats_query = stats_query.distinct
 
     # Calculate statistics
     @total_commits = stats_query.count

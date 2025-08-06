@@ -6,7 +6,16 @@ class GithubFetchBranchesJob < ApplicationJob
 
     if branches.empty?
       Rails.logger.warn "No branches found for project #{project_id}"
+      broadcast_empty_state
       return
+    end
+
+    # Check if this is the first time gathering data for this repository
+    is_first_time = @project.github_branches.empty?
+
+    if is_first_time
+      # Broadcast initial template for smooth updates
+      broadcast_initial_template
     end
 
     branches.each do |branch|
@@ -19,5 +28,41 @@ class GithubFetchBranchesJob < ApplicationJob
   rescue => e
     Rails.logger.error "Error in GithubFetchBranchesJob: #{e.message}\n#{e.backtrace.join("\n")}"
     raise e
+  end
+
+  private
+
+  def broadcast_initial_template
+    # Broadcast loading state for new repositories
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "project_#{@project.id}_github_commits",
+      target: "github_logs",
+      partial: "github_logs/loading_state",
+      locals: { project: @project }
+    )
+
+    # Initialize empty stats that will be updated as data arrives
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "project_#{@project.id}_github_commits",
+      target: "github_stats",
+      partial: "github_logs/stats_section",
+      locals: {
+        total_commits: 0,
+        total_additions: 0,
+        total_deletions: 0,
+        last_updated: Time.current,
+        project: @project
+      }
+    )
+  end
+
+  def broadcast_empty_state
+    # Broadcast empty state when no branches are found
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "project_#{@project.id}_github_commits",
+      target: "github_logs",
+      partial: "github_logs/empty_state",
+      locals: { project: @project }
+    )
   end
 end

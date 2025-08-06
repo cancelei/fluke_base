@@ -1,0 +1,109 @@
+<li class="px-6 py-4 hover:bg-gray-50 <%= "border-l-4 border-blue-400" if associated_time_log %>">
+  <div class="flex items-start">
+    <div class="flex-shrink-0 h-10 w-10">
+      <%= image_tag commit.user&.avatar_url.presence || 'https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png',
+                    class: 'h-10 w-10 rounded-full',
+                    alt: commit.user&.full_name,
+                    onerror: "this.onerror=null; this.src='https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png'" %>
+    </div>
+    <div class="ml-4 flex-1 min-w-0">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-900 truncate">
+          <%= commit.user&.full_name || "#{commit.unregistered_user_name} (Unknown User)" %>
+          <% if commit.user == project.user %>
+            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+              Owner
+            </span>
+          <% end %>
+        </p>
+        <div class="ml-2 flex-shrink-0 flex items-center">
+          <a href="<%= commit.commit_url %>" target="_blank"
+             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
+             title="View on GitHub">
+            <svg class="h-3 w-3 mr-1 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+            </svg>
+            <%= commit.commit_sha[0..6] %>
+          </a>
+          <div class="text-xs text-gray-500 ms-2">
+            <%= commit.commit_date.strftime("%b %d, %Y %I:%M%p") %>
+          </div>
+        </div>
+      </div>
+      <div class="mt-1 text-sm text-gray-800">
+        <%= link_to commit.commit_message.split("\n").first,
+                    commit.commit_url,
+                    target: "_blank",
+                    class: "text-indigo-600 hover:text-indigo-900 hover:underline break-words" %>
+      </div>
+      <% if commit.commit_message.include?("\n") %>
+        <div class="mt-1 p-2 text-xs text-gray-500 bg-gray-50 rounded overflow-hidden">
+          <div class="line-clamp-2">
+            <%= simple_format(commit.commit_message.split("\n")[1..-1].join("\n"), {}, wrapper_tag: "span") %>
+          </div>
+        </div>
+      <% end %>
+      <div class="mt-2 flex items-center text-xs text-gray-500">
+        <div class="flex items-center">
+          <svg class="h-3 w-3 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <svg class="mr-1.5 h-3.5 w-3.5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 5.47a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72v5.69a.75.75 0 001.5 0v-5.69l1.72 1.72a.75.75 0 101.06-1.06l-3-3z" clip-rule="evenodd" />
+          </svg>
+          <span class="font-medium text-green-600"><%= commit.lines_added %></span>
+        </div>
+        <span class="inline-flex items-center">
+          <svg class="mr-1.5 h-3.5 w-3.5 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 14.03a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72V6.75a.75.75 0 011.5 0v7.69l1.72-1.72a.75.75 0 111.06 1.06l-3 3z" clip-rule="evenodd" />
+          </svg>
+          <span class="font-medium text-red-600"><%= commit.lines_removed %></span>
+        </span>
+      </div>
+      
+      <% if commit.changed_files.present? %>
+        <div class="mt-3 w-full" data-controller="github-log">
+          <button type="button" 
+                  class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  data-action="click->github-log#toggleChanges"
+                  data-github-log-target="toggleButton">
+            <svg class="-ml-0.5 mr-1.5 h-4 w-4 text-gray-500 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+            Show changes
+          </button>
+          
+          <div class="mt-2" data-github-log-target="changesContainer">
+            <% commit.changed_files.each do |change| %>
+              <div class="mt-2 p-3 border border-gray-200 rounded-md bg-gray-50">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-medium text-gray-700"><%= change['filename'] %></span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= change['status'] == 'added' ? 'green' : change['status'] == 'removed' ? 'red' : 'blue' %>-100 text-<%= change['status'] == 'added' ? 'green' : change['status'] == 'removed' ? 'red' : 'blue' %>-800 capitalize">
+                    <%= change['status'] %>
+                  </span>
+                </div>
+                <% if change['patch'].present? %>
+                  <pre class="mt-2 p-2 text-xs bg-gray-800 text-gray-100 rounded-md overflow-x-auto"><code><%= change['patch'].gsub('\n', "\n") %></code></pre>
+                <% end %>
+                <div class="mt-2 flex space-x-4 text-xs text-gray-500">
+                  <span class="inline-flex items-center">
+                    <svg class="h-3.5 w-3.5 text-green-500 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 5.47a.75.75 0 00-1.06 0l-3 3a.75.75 0 101.06 1.06l1.72-1.72v5.69a.75.75 0 001.5 0v-5.69l1.72 1.72a.75.75 0 101.06-1.06l-3-3z" clip-rule="evenodd" />
+                    </svg>
+                    +<%= change['additions'] %>
+                  </span>
+                  <span class="inline-flex items-center">
+                    <svg class="h-3.5 w-3.5 text-red-500 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.53 14.03a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72V6.75a.75.75 0 011.5 0v7.69l1.72-1.72a.75.75 0 111.06 1.06l-3 3z" clip-rule="evenodd" />
+                    </svg>
+                    -<%= change['deletions'] %>
+                  </span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</li> 

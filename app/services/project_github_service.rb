@@ -45,75 +45,26 @@ class ProjectGithubService
                MAX(github_logs.commit_date) as last_commit_date")
       .group("github_logs.unregistered_user_name")
 
-    # Combine both queries
+    # Combine results
     all_contributions = registered_contributions.to_a + unregistered_contributions.to_a
-
-    # Format the results
-    format_contributions(all_contributions)
-  end
-
-  def can_view_logs?(user)
-    return false unless user
-
-    # Project owner can always view
-    return true if @project.user_id == user.id
-
-    # Check for accepted agreements using AgreementParticipants
-    @project.agreements.accepted.joins(:agreement_participants).exists?(agreement_participants: { user_id: user.id })
+    all_contributions.sort_by { |c| -c.commit_count.to_i }
   end
 
   def contributions_summary_basic
-    @project.github_logs.select("user_id, COUNT(*) as commit_count, SUM(lines_added) as total_added, SUM(lines_removed) as total_removed")
-              .group(:user_id)
-              .includes(:user)
+    @project.github_contributions
+  end
+
+  def can_view_logs?(user)
+    # Project owner can always view logs
+    return true if @project.user == user
+
+    # Users with active agreements can view logs
+    @project.agreements.active.joins(:agreement_participants)
+            .exists?(agreement_participants: { user_id: user.id })
   end
 
   def can_access_repository?(user)
-    return false if user.nil? || @project.repository_url.blank?
-    @project.user_id == user.id ||
-    @project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: user.id })
-  end
-
-  private
-
-  def format_contributions(all_contributions)
-    all_contributions.map do |c|
-      user = if c.user_id.present?
-        User.find(c.user_id)
-      else
-        # Create a simple object that responds to the methods the view expects
-        unregistered_user = OpenStruct.new(
-          id: nil,
-          name: c.unregistered_user_name,
-          github_username: c.unregistered_user_name,
-          unregistered: true
-        )
-
-        # Define methods needed by the view
-        def unregistered_user.avatar_url
-          nil
-        end
-
-        def unregistered_user.full_name
-          name
-        end
-
-        def unregistered_user.owner?(_project)
-          false
-        end
-
-        unregistered_user
-      end
-
-      {
-        user: user,
-        commit_count: c.commit_count.to_i,
-        total_added: c.total_added.to_i,
-        total_removed: c.total_removed.to_i,
-        net_changes: c.total_added.to_i - c.total_removed.to_i,
-        first_commit_date: c.first_commit_date,
-        last_commit_date: c.last_commit_date
-      }
-    end
+    # Same logic as can_view_logs for now
+    can_view_logs?(user)
   end
 end

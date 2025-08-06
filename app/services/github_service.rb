@@ -55,14 +55,19 @@ class GithubService
         end
       end
 
-      db_branch = GithubBranch.find_by(branch_name: branch)
-
+      db_branch = GithubBranch.find_by(project_id: project.id, branch_name: branch)
+      unless db_branch
+        Rails.logger.error "No database branch found for #{branch}"
+        return []
+      end
 
       puts "Processing commits for branch #{db_branch.branch_name}"
-      process_commits(project, all_commits, user_emails, user_github_identifiers, agreements, client, repo_path, db_branch.id)
-    else
-      []
+      processed_commits = process_commits(project, all_commits, user_emails, user_github_identifiers, agreements, client, repo_path, db_branch.id)
+
+      return processed_commits
     end
+
+    []
   rescue Octokit::Error => e
     Rails.logger.error "GitHub API Error: #{e.message}"
     []

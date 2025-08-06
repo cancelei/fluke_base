@@ -1,5 +1,4 @@
 class GithubCommitRefreshJob < ApplicationJob
-  include BulkInsert
   queue_as :default
 
   rescue_from(StandardError) do |exception|
@@ -30,36 +29,98 @@ class GithubCommitRefreshJob < ApplicationJob
 
     Rails.logger.info "Fetching commits for branch #{branch} in project #{@project.id}"
     service = GithubService.new(@project, access_token, branch: branch)
-    commits = service.fetch_commits
-    commit_shas = commits.map { |c| c[:commit_sha] }
-    branch_id = GithubBranch.find_by(project_id: @project.id, branch_name: branch).id
-    Rails.logger.info "Found #{commits.length} commits for branch #{branch}"
-    puts commits.length
-    return 0 if commits.blank?
-      begin
-        GithubLog.upsert_all(
-          commits.map { |c| c.merge(project_id: @project.id) },
-          unique_by: [ :project_id, :commit_sha ]
-        )
-        log_ids = GithubLog.where(project_id: @project.id, commit_sha: commit_shas).pluck(:id)
-        github_branch_logs = log_ids.map { |id| { github_branch_id: branch_id, github_log_id: id } }
-        puts github_branch_logs
-        GithubBranchLog.upsert_all(
-          github_branch_logs,
-          unique_by: [ :github_branch_id, :github_log_id ]
-        )
+    commits_data = service.fetch_commits
 
-        Rails.logger.info "Stored #{commits.size} commits for branch '#{branch}' in project '#{@project.name}'"
-        Turbo::StreamsChannel.broadcast_prepend_to "github_logs", target: "github_logs", partial: "github_logs/github_log"
-        Rails.logger.info "Broadcasted #{commits.size} commits for branch '#{branch}' in project '#{@project.name}'"
+    # The service returns the processed commits data, not the raw commits
+    if commits_data.blank?
+      Rails.logger.info "No commits returned from service for branch #{branch}"
+      return 0
+    end
 
-        Turbo::StreamsChannel.broadcast_replace_to(
-          "project_#{@project.id}_github_commits",
-          target: "github-commits-reload",
-          partial: "github_logs/github_commits_reload"
-        )
-      rescue => e
-        puts "Error storing commits: #{e.message}\n#{e.backtrace.join("\n")}"
-      end
+    # Find or create the branch record
+    db_branch = GithubBranch.find_by(project_id: @project.id, branch_name: branch)
+    unless db_branch
+      Rails.logger.error "Branch record not found for #{branch} in project #{@project.id}"
+      return 0
+    end
+
+    begin
+      # Store commits in database
+      commit_shas = commits_data.map { |c| c[:commit_sha] }
+      Rails.logger.info "Storing #{commits_data.length} commits for branch #{branch}"
+
+      GithubLog.upsert_all(
+        commits_data.map { |c| c.merge(project_id: @project.id) },
+        unique_by: [ :project_id, :commit_sha ]
+      )
+
+      # Create branch-log relationships
+      log_ids = GithubLog.where(project_id: @project.id, commit_sha: commit_shas).pluck(:id)
+      github_branch_logs = log_ids.map { |id| { github_branch_id: db_branch.id, github_log_id: id } }
+
+      GithubBranchLog.upsert_all(
+        github_branch_logs,
+        unique_by: [ :github_branch_id, :github_log_id ]
+      )
+
+      Rails.logger.info "Stored #{commits_data.size} commits for branch '#{branch}' in project '#{@project.name}'"
+
+      # Broadcast updated GitHub logs data
+      broadcast_github_updates
+
+      Rails.logger.info "Broadcasted #{commits_data.size} commits for branch '#{branch}' in project '#{@project.name}'"
+
+      commits_data.size
+    rescue => e
+      Rails.logger.error "Error storing commits: #{e.message}\n#{e.backtrace.join("\n")}"
+      0
+    end
+  end
+
+  def broadcast_github_updates
+    # Recalculate stats and recent commits
+    recent_commits = @project.github_logs.includes(:user, :github_branch_logs).order(commit_date: :desc).limit(15)
+    total_commits = @project.github_logs.count
+    total_additions = @project.github_logs.sum(:lines_added) || 0
+    total_deletions = @project.github_logs.sum(:lines_removed) || 0
+    last_updated = recent_commits.first&.commit_date || Time.current
+    contributions = @project.github_contributions
+
+    # Broadcast the updated GitHub logs list
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "project_#{@project.id}_github_commits",
+      target: "github_logs",
+      partial: "github_logs/commits_list",
+      locals: {
+        recent_commits: recent_commits,
+        project: @project
+      }
+    )
+
+    # Broadcast updated stats
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "project_#{@project.id}_github_commits",
+      target: "github_stats",
+      partial: "github_logs/stats_section",
+      locals: {
+        total_commits: total_commits,
+        total_additions: total_additions,
+        total_deletions: total_deletions,
+        last_updated: last_updated,
+        project: @project
+      }
+    )
+
+    # Broadcast updated contributions summary
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "project_#{@project.id}_github_commits",
+      target: "contributions_summary",
+      partial: "github_logs/contributions_section",
+      locals: {
+        contributions: contributions,
+        last_updated: last_updated,
+        project: @project
+      }
+    )
   end
 end
