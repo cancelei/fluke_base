@@ -58,6 +58,7 @@ RUN bundle exec bootsnap precompile app/ lib/
 RUN SECRET_KEY_BASE_DUMMY=1 \
     DATABASE_URL="postgresql://postgres:postgres@localhost/fluke_base_development" \
     SKIP_DB_INITIALIZER=true \
+    ./bin/rails tailwindcss:build \
     ./bin/rails assets:precompile
 
 # Final stage for app image
