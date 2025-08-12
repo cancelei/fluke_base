@@ -1,12 +1,13 @@
 class GithubService
-  attr_reader :project, :access_token, :branch, :repo_path, :client, :user_emails, :user_github_identifiers, :agreements
+  attr_reader :project, :access_token, :branch, :repo_path, :client, :user_emails, :user_github_identifiers, :agreements, :since
 
   # Initialize the service with project, access token, and optional branch
-  def initialize(project, access_token = nil, branch: nil)
+  def initialize(project, access_token = nil, branch: nil, since: nil)
     @project = project
     @access_token = access_token
     @branch = branch
     @repo_path = extract_repo_path(project.repository_url)
+    @since = since
 
     @client = github_client(access_token)
   end
@@ -32,7 +33,8 @@ class GithubService
           commits = client.commits(repo_path, {
             sha: branch,
             per_page: per_page,
-            page: page
+            page: page,
+            since: since
           })
 
           break if commits.empty?

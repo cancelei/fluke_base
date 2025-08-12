@@ -27,20 +27,21 @@ class GithubCommitRefreshJob < ApplicationJob
   def fetch_and_store_commits(access_token = nil, branch: nil)
     return 0 if @project.repository_url.blank?
 
+    db_branch = GithubBranch.find_by(project_id: @project.id, branch_name: branch)
+
+    # Find or create the branch record
+    unless db_branch
+      Rails.logger.error "Branch record not found for #{branch} in project #{@project.id}"
+      return 0
+    end
+
     Rails.logger.info "Fetching commits for branch #{branch} in project #{@project.id}"
-    service = GithubService.new(@project, access_token, branch: branch)
+    service = GithubService.new(@project, access_token, branch: branch, since: db_branch.latest_commit&.commit_date)
     commits_data = service.fetch_commits
 
     # The service returns the processed commits data, not the raw commits
     if commits_data.blank?
       Rails.logger.info "No commits returned from service for branch #{branch}"
-      return 0
-    end
-
-    # Find or create the branch record
-    db_branch = GithubBranch.find_by(project_id: @project.id, branch_name: branch)
-    unless db_branch
-      Rails.logger.error "Branch record not found for #{branch} in project #{@project.id}"
       return 0
     end
 
