@@ -1,0 +1,56 @@
+<ul class="divide-y divide-gray-200">
+  <% associated_time_log = nil %>
+  <% recent_commits.each do |commit| %>
+    <% if commit.time_log && commit.time_log != associated_time_log %>
+      <% associated_time_log = commit.time_log %>
+      <li class="px-6 py-4 bg-blue-50 border-l-4 border-blue-400">
+        <div class="flex items-center space-x-3">
+          <svg class="h-5 w-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <div>
+            <div class="text-sm font-semibold text-blue-800">Time Log</div>
+            <div class="text-xs text-blue-700 mt-1">
+              <span>
+                <strong>Duration:</strong>
+                <%= distance_of_time_in_words(associated_time_log.started_at, associated_time_log.ended_at || associated_time_log.started_at) %>
+              </span>
+              <% if associated_time_log.started_at %>
+                <span class="ml-2">
+                  <strong>Started:</strong>
+                  <%= associated_time_log.started_at.strftime("%b %d, %Y %I:%M%p") %>
+                </span>
+              <% end %>
+              <% if associated_time_log.ended_at %>
+                <span class="ml-2">
+                  <strong>Ended:</strong>
+                  <%= associated_time_log.ended_at.strftime("%b %d, %Y %I:%M%p") %>
+                </span>
+              <% end %>
+              <% if associated_time_log.hours_spent.present? && associated_time_log.hours_spent > 0 %>
+                <span class="ml-2">
+                  <strong>Hours Spent:</strong>
+                  <%= associated_time_log.hours_spent %>h
+                </span>
+              <% end %>
+              <% if associated_time_log.status.present? %>
+                <span class="ml-2">
+                  <strong>Status:</strong>
+                  <%= associated_time_log.status.humanize %>
+                </span>
+              <% end %>
+            </div>
+            <% if associated_time_log.description.present? %>
+              <div class="mt-2 text-xs text-blue-600 bg-blue-100 rounded p-2">
+                <strong>Description:</strong>
+                <%= simple_format(associated_time_log.description) %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </li>
+    <% end %>
+    <% associated_time_log = commit.time_log %>
+    <%= render 'github_logs/commit_item', commit: commit, associated_time_log: associated_time_log, project: project %>
+  <% end %>
+</ul> 

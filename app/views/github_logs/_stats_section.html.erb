@@ -1,0 +1,44 @@
+<% if total_commits > 0 %>
+  <div class="bg-gray-50 px-4 py-5 sm:p-6 sm:rounded-lg">
+    <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+        <dt class="text-sm font-medium text-gray-500 truncate">Total Commits</dt>
+        <dd class="mt-1 text-3xl font-semibold text-gray-900">
+          <%= number_with_delimiter(total_commits) %>
+        </dd>
+      </div>
+      <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+        <dt class="text-sm font-medium text-gray-500 truncate">Lines Added</dt>
+        <dd class="mt-1 text-3xl font-semibold text-green-600">+<%= number_with_delimiter(total_additions) %>
+        </dd>
+      </div>
+      <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+        <dt class="text-sm font-medium text-gray-500 truncate">Lines Removed</dt>
+        <dd class="mt-1 text-3xl font-semibold text-red-600">-<%= number_with_delimiter(total_deletions) %>
+        </dd>
+      </div>
+    </dl>
+  </div>
+<% else %>
+  <div class="bg-gray-50 px-4 py-5 sm:p-6 sm:rounded-lg">
+    <div class="text-center">
+      <div class="animate-pulse">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Commits</dt>
+            <dd class="mt-1 text-3xl font-semibold text-gray-900">-</dd>
+          </div>
+          <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">Lines Added</dt>
+            <dd class="mt-1 text-3xl font-semibold text-green-600">-</dd>
+          </div>
+          <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">Lines Removed</dt>
+            <dd class="mt-1 text-3xl font-semibold text-red-600">-</dd>
+          </div>
+        </div>
+      </div>
+      <p class="mt-4 text-sm text-gray-500">Fetching repository statistics...</p>
+    </div>
+  </div>
+<% end %> 

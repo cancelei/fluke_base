@@ -9,14 +9,30 @@ class TimeLogsController < ApplicationController
   def create_manual
     # Check if milestone_id is provided
     if params[:time_log][:milestone_id].blank?
-      redirect_to time_logs_path(@project), alert: "Please select a milestone before adding a manual time log."
+              respond_to do |format|
+          format.turbo_stream do
+            render turbo_stream: turbo_stream.update("flash_messages",
+              partial: "shared/flash_messages",
+              locals: { alert: "Please select a milestone before adding a manual time log." }
+            )
+          end
+        format.html { redirect_to time_logs_path(@project), alert: "Please select a milestone before adding a manual time log." }
+      end
       return
     end
 
     # Find the milestone
     @milestone = @project.milestones.find_by(id: params[:time_log][:milestone_id])
     if @milestone.nil?
-      redirect_to time_logs_path(@project), alert: "Milestone not found. Please select a valid milestone."
+              respond_to do |format|
+          format.turbo_stream do
+            render turbo_stream: turbo_stream.update("flash_messages",
+              partial: "shared/flash_messages",
+              locals: { alert: "Milestone not found. Please select a valid milestone." }
+            )
+          end
+        format.html { redirect_to time_logs_path(@project), alert: "Milestone not found. Please select a valid milestone." }
+      end
       return
     end
 
@@ -26,9 +42,57 @@ class TimeLogsController < ApplicationController
 
     if @time_log.save
       @milestone.update(status: "in_progress")
-      redirect_to time_logs_path(@project), notice: "Time log created successfully."
+
+      # Reload data for updated views
+      reload_data_for_views
+
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.update("manual_time_log_form",
+              partial: "time_logs/manual_form",
+              locals: { time_log_manual: TimeLog.new, milestones: @milestones }
+            ),
+            turbo_stream.replace("milestone_#{@milestone.id}",
+              partial: "time_logs/milestone_row",
+              locals: { milestone: @milestone, project: @project, active_log: nil }
+            ),
+            turbo_stream.update("pending_confirmation_section",
+              partial: "time_logs/pending_confirmation_section",
+              locals: {
+                milestones_pending_confirmation: @milestones_pending_confirmation,
+                project: @project,
+                owner: @owner
+              }
+            ),
+            turbo_stream.update("remaining_time_progress",
+              partial: "remaining_time_progress",
+              locals: { project: @project, current_log: nil, owner: @owner }
+            ),
+                        turbo_stream.update("flash_messages",
+              partial: "shared/flash_messages",
+              locals: { notice: "Time log created successfully." }
+            )
+          ]
+        end
+        format.html { redirect_to time_logs_path(@project), notice: "Time log created successfully." }
+      end
     else
-      redirect_to time_logs_path(@project), alert: @time_log.errors.full_messages.to_sentence
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.update("manual_time_log_form",
+              partial: "time_logs/manual_form",
+              locals: { time_log_manual: @time_log, milestones: @milestones }
+            ),
+                        turbo_stream.update("flash_messages",
+              partial: "shared/flash_messages",
+              locals: { alert: @time_log.errors.full_messages.to_sentence }
+            )
+          ]
+        end
+        format.html { redirect_to time_logs_path(@project), alert: @time_log.errors.full_messages.to_sentence }
+      end
     end
   end
 
@@ -54,6 +118,46 @@ class TimeLogsController < ApplicationController
     @time_logs_completed = @milestones
                             .includes(:time_logs)
                             .where(status: Milestone::COMPLETED, time_logs: { status: "completed" })
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream do
+        render turbo_stream: [
+          turbo_stream.update("date_header",
+            partial: "time_logs/date_header",
+            locals: { selected_date: @selected_date }
+          ),
+          turbo_stream.update("date_carousel",
+            partial: "time_logs/date_carousel",
+            locals: { selected_date: @selected_date, date_range: @date_range, project: @project }
+          ),
+          turbo_stream.update("milestones_section",
+            partial: "time_logs/milestones_section",
+            locals: { milestones: @milestones, project: @project, selected_date: @selected_date }
+          ),
+          turbo_stream.update("pending_confirmation_section",
+            partial: "time_logs/pending_confirmation_section",
+            locals: {
+              milestones_pending_confirmation: @milestones_pending_confirmation,
+              project: @project,
+              owner: @owner
+            }
+          ),
+          turbo_stream.update("completed_tasks_section",
+            partial: "time_logs/completed_tasks_section",
+            locals: {
+              time_logs_completed: @time_logs_completed,
+              project: @project,
+              owner: @owner
+            }
+          ),
+          turbo_stream.update("remaining_time_progress",
+            partial: "remaining_time_progress",
+            locals: { project: @project, current_log: current_tracking_log, owner: @owner }
+          )
+        ]
+      end
+    end
   end
 
   def create
@@ -66,19 +170,104 @@ class TimeLogsController < ApplicationController
 
     if @time_log.save
       session[:progress_milestone_id] = @time_log.milestone_id
-      Milestone.find_by_id(@time_log.milestone_id).update(status: "in_progress")
-      redirect_to time_logs_path(@project), notice: "Started tracking time for this milestone."
+      @milestone.update(status: "in_progress")
+
+      # Reload data for updated views
+      reload_data_for_views
+
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("milestone_#{@milestone.id}",
+              partial: "time_logs/milestone_row",
+              locals: { milestone: @milestone, project: @project, active_log: @time_log }
+            ),
+                                    turbo_stream.update("current_tracking_container",
+              partial: "time_logs/current_tracking",
+              locals: { current_log: @time_log, project: @project }
+            ),
+            turbo_stream.update("milestone_bar_container",
+              partial: "shared/milestone_bar"
+            ),
+            turbo_stream.update("navbar_milestones_list",
+              partial: "shared/navbar_milestones_list"
+            ),
+            turbo_stream.update("remaining_time_progress",
+              partial: "remaining_time_progress",
+              locals: { project: @project, current_log: @time_log, owner: @owner }
+            ),
+                        turbo_stream.update("flash_messages",
+              partial: "shared/flash_messages",
+              locals: { notice: "Started tracking time for this milestone." }
+            )
+          ]
+        end
+        format.html { redirect_to time_logs_path(@project), notice: "Started tracking time for this milestone." }
+      end
     else
-      redirect_to time_logs_path(@project), alert: @time_log.errors.full_messages.to_sentence
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.update("flash_messages",
+            partial: "shared/flash_messages",
+            locals: { alert: @time_log.errors.full_messages.to_sentence }
+          )
+        end
+        format.html { redirect_to time_logs_path(@project), alert: @time_log.errors.full_messages.to_sentence }
+      end
     end
   end
 
   def stop_tracking
     if @time_log.complete!
       session[:progress_milestone_id] = nil
-      redirect_to time_logs_path(@project), notice: "Stopped tracking time."
+
+      # Reload data for updated views
+      reload_data_for_views
+
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("milestone_#{@time_log.milestone_id}",
+              partial: "time_logs/milestone_row",
+              locals: { milestone: @time_log.milestone, project: @project, active_log: nil }
+            ),
+                        turbo_stream.update("current_tracking_container", ""),
+            turbo_stream.update("milestone_bar_container",
+              partial: "shared/milestone_bar"
+            ),
+            turbo_stream.update("navbar_milestones_list",
+              partial: "shared/navbar_milestones_list"
+            ),
+            turbo_stream.update("pending_confirmation_section",
+              partial: "time_logs/pending_confirmation_section",
+              locals: {
+                milestones_pending_confirmation: @milestones_pending_confirmation,
+                project: @project,
+                owner: @owner
+              }
+            ),
+            turbo_stream.update("remaining_time_progress",
+              partial: "remaining_time_progress",
+              locals: { project: @project, current_log: nil, owner: @owner }
+            ),
+                        turbo_stream.update("flash_messages",
+              partial: "shared/flash_messages",
+              locals: { notice: "Stopped tracking time." }
+            )
+          ]
+        end
+        format.html { redirect_to time_logs_path(@project), notice: "Stopped tracking time." }
+      end
     else
-      redirect_to time_logs_path(@project), alert: @time_log.errors.full_messages.to_sentence
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.update("flash_messages",
+            partial: "shared/flash_messages",
+            locals: { alert: @time_log.errors.full_messages.to_sentence }
+          )
+        end
+        format.html { redirect_to time_logs_path(@project), alert: @time_log.errors.full_messages.to_sentence }
+      end
     end
   end
 
@@ -110,6 +299,26 @@ class TimeLogsController < ApplicationController
                             .where("DATE(time_logs.started_at) = ?", @selected_date)
 
     @time_logs_manual = TimeLog.where(milestone_id: nil, user_id: @selected_user&.id || current_user.id)
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: [
+          turbo_stream.update("filter_results",
+            partial: "time_logs/filter_results",
+            locals: {
+              time_logs: @time_logs,
+              milestones_pending_confirmation: @milestones_pending_confirmation,
+              time_logs_completed: @time_logs_completed,
+              time_logs_manual: @time_logs_manual,
+              selected_date: @selected_date,
+              selected_project: @selected_project,
+              selected_user: @selected_user
+            }
+          )
+        ]
+      end
+      format.html
+    end
   end
 
   private
@@ -120,7 +329,15 @@ class TimeLogsController < ApplicationController
 
   def ensure_no_active_time_log
     if time_log_in_progress
-      redirect_to time_logs_path(@project), alert: "You already have a time log in progress."
+      respond_to do |format|
+        format.turbo_stream do
+                    render turbo_stream: turbo_stream.update("flash_messages",
+            partial: "shared/flash_messages",
+            locals: { alert: "You already have a time log in progress." }
+          )
+        end
+        format.html { redirect_to time_logs_path(@project), alert: "You already have a time log in progress." }
+      end
     end
   end
 
@@ -138,17 +355,45 @@ class TimeLogsController < ApplicationController
   def set_milestone
     @milestone = @project.milestones.find(params[:milestone_id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to time_logs_path(@project), alert: "Milestone not found."
+    respond_to do |format|
+      format.turbo_stream do
+                render turbo_stream: turbo_stream.update("flash_messages",
+          partial: "shared/flash_messages",
+          locals: { alert: "Milestone not found." }
+        )
+      end
+      format.html { redirect_to time_logs_path(@project), alert: "Milestone not found." }
+    end
   end
 
   def set_time_log
     @time_log = @project.time_logs.in_progress.find_by(milestone: @milestone)
     return if @time_log.present?
 
-    redirect_to time_logs_path(@project), alert: "No active time log found for this milestone."
+    respond_to do |format|
+      format.turbo_stream do
+                render turbo_stream: turbo_stream.update("flash_messages",
+          partial: "shared/flash_messages",
+          locals: { alert: "No active time log found for this milestone." }
+        )
+      end
+      format.html { redirect_to time_logs_path(@project), alert: "No active time log found for this milestone." }
+    end
   end
 
   def time_log_in_progress
     @project.time_logs.in_progress.where(user_id: current_user.id).exists?
+  end
+
+  def current_tracking_log
+    @project.time_logs.where(user_id: current_user.id).in_progress.last
+  end
+
+  def reload_data_for_views
+    @owner = current_user.id == @project.user_id
+    @milestones = (@owner ? @project.milestones : Milestone.where(id: @project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).pluck(:milestone_ids).flatten))
+    @milestones_pending_confirmation = @milestones
+                                         .includes(:time_logs)
+                                         .where(status: "in_progress", time_logs: { status: "completed" })
   end
 end

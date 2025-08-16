@@ -1,12 +1,12 @@
 <!-- FlukeBase Modern Landing Page -->
-<div class="bg-white">
+<div class="bg-white overflow-x-hidden">
   <!-- Hero Section with Enhanced Interactivity -->
   <div class="relative isolate overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-800 to-purple-900 min-h-screen flex items-center">
     <!-- Enhanced Background Animation -->
-    <div class="absolute inset-0 opacity-30">
-      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
-      <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-float animation-delay-2000"></div>
-      <div class="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-float animation-delay-4000"></div>
+    <div class="absolute inset-0 opacity-30 overflow-hidden">
+      <div class="absolute top-1/4 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
+      <div class="absolute top-1/3 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-float animation-delay-2000"></div>
+      <div class="absolute bottom-1/4 left-1/3 w-64 h-64 sm:w-96 sm:h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-float animation-delay-4000"></div>
     </div>
     
     <!-- Animated Grid Pattern -->
@@ -30,7 +30,7 @@
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
             </svg>
           </div>
-          <span class="text-white font-medium">🚀 1000+ successful matches</span>
+          <span class="text-white font-medium">🚀 <%= @total_agreements || 1000 %>+ successful matches</span>
           <div class="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
         </div>
 
@@ -86,16 +86,16 @@
         <!-- Trust Signals -->
         <div class="mt-12 flex flex-col items-center" data-hero-animation-target="trust">
           <p class="text-sm text-gray-300 mb-6">Trusted by teams from</p>
-          <div class="flex flex-wrap items-center justify-center gap-8 opacity-60">
-            <div class="flex items-center space-x-2 bg-white/10 rounded-lg px-4 py-2">
+          <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-8 opacity-60 px-4">
+            <div class="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2 sm:px-4">
               <div class="w-6 h-6 bg-white/30 rounded"></div>
               <span class="text-white text-sm">Y Combinator</span>
             </div>
-            <div class="flex items-center space-x-2 bg-white/10 rounded-lg px-4 py-2">
+            <div class="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2 sm:px-4">
               <div class="w-6 h-6 bg-white/30 rounded"></div>
               <span class="text-white text-sm">Techstars</span>
             </div>
-            <div class="flex items-center space-x-2 bg-white/10 rounded-lg px-4 py-2">
+            <div class="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2 sm:px-4">
               <div class="w-6 h-6 bg-white/30 rounded"></div>
               <span class="text-white text-sm">500 Startups</span>
             </div>
@@ -104,11 +104,11 @@
           <!-- Quick Stats Bar -->
           <div class="mt-8 grid grid-cols-3 gap-8 text-center">
             <div class="text-white">
-              <div class="text-2xl font-bold">95%</div>
+              <div class="text-2xl font-bold"><%= @mentor_satisfaction_rate || 95 %>%</div>
               <div class="text-sm text-gray-300">Success Rate</div>
             </div>
             <div class="text-white">
-              <div class="text-2xl font-bold">48hrs</div>
+              <div class="text-2xl font-bold"><%= @initiated_agreements_this_week > 0 ? "#{(@initiated_agreements_this_week * 7 / 7)}hrs" : "48hrs" %></div>
               <div class="text-sm text-gray-300">Avg Match Time</div>
             </div>
             <div class="text-white">
@@ -239,21 +239,26 @@
         </div>
 
         <!-- Social Proof Bar -->
-        <div class="mt-12 text-center">
-          <div class="inline-flex items-center space-x-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl px-8 py-4 border border-blue-100">
-            <div class="flex items-center space-x-2 text-sm text-gray-600">
+        <div class="mt-12 text-center px-4">
+          <div class="inline-flex flex-wrap items-center justify-center gap-4 sm:gap-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl px-4 sm:px-8 py-4 border border-blue-100">
+            <div class="flex items-center space-x-2 text-sm text-gray-600 mb-2 sm:mb-0">
               <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              <strong>42</strong> matches made this week
+              <strong><%= @initiated_agreements_this_week || 0 %></strong> agreements made this week
             </div>
-            <div class="w-px h-4 bg-gray-300"></div>
-            <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <div class="hidden sm:block w-px h-4 bg-gray-300"></div>
+            <div class="flex items-center space-x-2 text-sm text-gray-600 mb-2 sm:mb-0">
               <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-              <strong>89%</strong> mentor satisfaction
+              <strong><%= @mentor_satisfaction_rate || 89 %>%</strong> mentor satisfaction
             </div>
-            <div class="w-px h-4 bg-gray-300"></div>
-            <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <div class="hidden sm:block w-px h-4 bg-gray-300"></div>
+            <div class="flex items-center space-x-2 text-sm text-gray-600 mb-2 sm:mb-0">
               <span class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-              <strong>3.2x</strong> faster to market
+              <strong><%= @projects_with_help_ratio || 3.2 %>x</strong> faster to market
+            </div>
+            <div class="hidden sm:block w-px h-4 bg-gray-300"></div>
+            <div class="flex items-center space-x-2 text-sm text-gray-600">
+              <span class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+              <strong><%= @total_agreements || 0 %></strong> total agreements
             </div>
           </div>
         </div>
@@ -678,9 +683,9 @@
   <!-- How It Works Section -->
   <div id="how-it-works" class="bg-gradient-to-br from-gray-900 to-indigo-900 py-24 sm:py-32 relative overflow-hidden">
     <!-- Animated Background Elements -->
-    <div class="absolute inset-0 opacity-10">
-      <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-2xl animate-pulse"></div>
-      <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-2xl animate-pulse animation-delay-2000"></div>
+    <div class="absolute inset-0 opacity-10 overflow-hidden">
+      <div class="absolute top-1/4 left-1/4 w-48 h-48 sm:w-64 sm:h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-2xl animate-pulse"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-48 h-48 sm:w-64 sm:h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-2xl animate-pulse animation-delay-2000"></div>
     </div>
     
     <div class="mx-auto max-w-7xl px-6 lg:px-8 relative">
@@ -797,8 +802,8 @@
         </p>
         
         <!-- Rating Summary -->
-        <div class="mt-8 flex justify-center items-center space-x-8">
-          <div class="text-center">
+        <div class="mt-8 flex flex-wrap justify-center items-center space-x-4 sm:space-x-8 px-4">
+          <div class="text-center mb-4 sm:mb-0">
             <div class="flex justify-center space-x-1 mb-2">
               <% 5.times do %>
                 <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -808,12 +813,12 @@
             </div>
             <p class="text-sm text-gray-600"><strong>4.9/5</strong> average rating</p>
           </div>
-          <div class="w-px h-12 bg-gray-300"></div>
-          <div class="text-center">
-            <p class="text-2xl font-bold text-gray-900">1,247</p>
+          <div class="hidden sm:block w-px h-12 bg-gray-300"></div>
+          <div class="text-center mb-4 sm:mb-0">
+            <p class="text-2xl font-bold text-gray-900"><%= @completed_agreements || 1247 %></p>
             <p class="text-sm text-gray-600">Success stories</p>
           </div>
-          <div class="w-px h-12 bg-gray-300"></div>
+          <div class="hidden sm:block w-px h-12 bg-gray-300"></div>
           <div class="text-center">
             <p class="text-2xl font-bold text-gray-900">94%</p>
             <p class="text-sm text-gray-600">Would recommend</p>
@@ -1372,10 +1377,10 @@
   <!-- Final CTA Section -->
   <div class="relative isolate overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 py-24 sm:py-32">
     <!-- Background Effects -->
-    <div class="absolute inset-0 opacity-20">
+    <div class="absolute inset-0 opacity-20 overflow-hidden">
       <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-600/30 to-purple-600/30"></div>
-      <div class="absolute top-1/3 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-      <div class="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000"></div>
+      <div class="absolute top-1/3 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+      <div class="absolute bottom-1/3 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000"></div>
     </div>
     
     <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center relative z-10">
@@ -1410,15 +1415,15 @@
       </div>
       
       <!-- Trust Indicators -->
-      <div class="mt-16 flex flex-col items-center">
-        <div class="flex items-center space-x-6 text-gray-300 text-sm mb-4">
-          <div class="flex items-center space-x-2">
+      <div class="mt-16 flex flex-col items-center px-4">
+        <div class="flex flex-wrap items-center justify-center space-x-4 sm:space-x-6 text-gray-300 text-sm mb-4">
+          <div class="flex items-center space-x-2 mb-2 sm:mb-0">
             <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
             </svg>
             <span>Free to start</span>
           </div>
-          <div class="flex items-center space-x-2">
+          <div class="flex items-center space-x-2 mb-2 sm:mb-0">
             <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
             </svg>
@@ -1678,6 +1683,42 @@
     .text-7xl {
       font-size: 3.5rem;
       line-height: 1.1;
+    }
+    
+    /* Prevent horizontal overflow */
+    body, html {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    
+    /* Ensure containers don't exceed viewport width */
+    .container, .mx-auto {
+      max-width: 100%;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    /* Fix for absolute positioned elements */
+    .absolute {
+      max-width: 100vw;
+    }
+    
+    /* Responsive grid adjustments */
+    .grid-cols-3 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    
+    /* Better button spacing on mobile */
+    .flex-col.sm\\:flex-row > * + * {
+      margin-top: 0.5rem;
+    }
+    
+    @media (min-width: 640px) {
+      .flex-col.sm\\:flex-row > * + * {
+        margin-top: 0;
+        margin-left: 1rem;
+      }
     }
   }
   

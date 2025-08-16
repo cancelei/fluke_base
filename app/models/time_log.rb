@@ -25,6 +25,7 @@ class TimeLog < ApplicationRecord
 
   # Callbacks
   before_save :calculate_hours_spent
+  after_update_commit :broadcast_time_log
 
   # Check if time log is completed
   def completed?
@@ -66,5 +67,17 @@ class TimeLog < ApplicationRecord
     if started_at > Time.zone.now
       errors.add(:started_at, "cannot be in the future")
     end
+  end
+
+  def broadcast_time_log
+    return unless saved_change_to_status? && status == "completed"
+
+    # <%= turbo_stream_from "milestone_#{milestone_id}_time_logs_started" %> add the same with id in the broadcast
+    broadcast_replace_later_to(
+      "milestone_#{milestone_id}_time_logs_started",
+      target: "time_log_#{id}",
+      partial: "time_logs/time_log",
+      locals: { time_log: self }
+    )
   end
 end

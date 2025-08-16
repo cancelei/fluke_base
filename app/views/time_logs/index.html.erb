@@ -1,6 +1,11 @@
 <div class="max-w-7xl mx-auto py-4 sm:px-6 lg:px-8">
   <div class="px-4 sm:px-0">
     
+    <!-- Flash Messages -->
+    <div id="flash_messages">
+      <%= render 'shared/flash_messages' %>
+    </div>
+    
     <!-- Modern Header Section -->
     <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl mb-6">
       <div class="px-6 py-6 sm:px-8">
@@ -29,172 +34,36 @@
           </div>
           
           <!-- Date Display -->
-          <div class="flex-shrink-0">
-            <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-lg px-4 py-2">
-              <p class="text-sm font-medium text-gray-700">Selected Date</p>
-              <p class="text-lg font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                <%= @selected_date.strftime('%B %d, %Y') %>
-              </p>
-            </div>
-          </div>
+          <%= render 'time_logs/date_header', selected_date: @selected_date %>
         </div>
       </div>
     </div>
 
     <!-- Date Carousel -->
-    <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 mb-6">
-      <div class="px-6 py-5">
-        <h2 class="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
-          Select Date
-        </h2>
-        <div class="flex justify-between items-center overflow-x-auto pb-2 gap-2">
-          <% @date_range.each do |date| %>
-            <%= link_to time_logs_path(@project, date: date),
-                        class: "flex-shrink-0 text-center transition-all duration-200 #{date == @selected_date ? 'text-blue-600' : 'text-gray-600 hover:text-blue-500'}" do %>
-              <div class="w-16 p-3 rounded-xl <%= date == @selected_date ? 'bg-gradient-to-r from-blue-50 to-purple-50 shadow-md ring-1 ring-blue-200' : 'hover:bg-gray-50 hover:shadow-sm' %>">
-                <div class="text-xs font-medium uppercase tracking-wide"><%= date.strftime('%a') %></div>
-                <div class="text-xl font-bold mt-1"><%= date.day %></div>
-                <% if date == Date.current %>
-                  <div class="h-1.5 w-1.5 mx-auto mt-1 rounded-full bg-blue-600"></div>
-                <% end %>
-              </div>
-            <% end %>
-          <% end %>
-        </div>
-      </div>
-    </div>
+    <%= render 'time_logs/date_carousel', selected_date: @selected_date, date_range: @date_range, project: @project %>
 
 
 
     <!-- Current Time Log (if any) -->
-    <% if @project.time_logs.where(user_id: current_user.id).in_progress.exists? %>
-      <% current_log = @project.time_logs.in_progress.last %>
-      <div class="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-6 mb-6 shadow-lg">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <div class="h-10 w-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
-                <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                </svg>
-              </div>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-semibold text-blue-900">
-                Currently tracking: <span class="text-blue-700"><%= current_log.milestone.title %></span>
-              </p>
-              <p class="text-xs text-blue-600 mt-1">
-                Started <%= time_ago_in_words(current_log.started_at) %> ago
-              </p>
-            </div>
-          </div>
-          <div class="flex-shrink-0">
-            <%= button_to 'Stop Tracking', stop_tracking_time_logs_path(@project, milestone_id: current_log.milestone_id),
-                          method: :post,
-                          class: 'inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 shadow-md hover:shadow-lg transition-all duration-200' %>
-          </div>
-        </div>
-      </div>
-    <% end %>
-
-  <%= render "remaining_time_progress", project: @project, current_log: current_log, owner: @owner %>
-
-    <!-- All Milestones Section -->
-    <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 mb-6">
-      <div class="px-6 py-5 bg-gradient-to-r from-purple-50/50 to-indigo-50/50 border-b border-gray-100/50">
-        <div class="flex justify-between items-center">
-          <h3 class="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent flex items-center">
-            <svg class="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-            </svg>
-            Milestones for <%= @selected_date.strftime('%B %d, %Y') %>
-          </h3>
-        </div>
-        <p class="mt-1 text-sm text-gray-600">
-          Track time for milestones in this project
-        </p>
-      </div>
-      <div class="divide-y divide-gray-100/50">
-        <% @milestones.not_completed.each do |milestone| %>
-          <div class="px-6 py-4 hover:bg-gray-50/30 transition-colors duration-200">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center flex-1">
-                <div class="flex-shrink-0">
-                  <% if milestone.status == 'completed' %>
-                    <div class="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                  <% elsif milestone.status == 'in_progress' %>
-                    <div class="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                      <svg class="h-4 w-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                  <% else %>
-                    <div class="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
-                      <svg class="h-4 w-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                  <% end %>
-                </div>
-                <div class="ml-4 flex-1">
-                  <div class="text-sm font-semibold text-gray-900">
-                    <%= milestone.title %>
-                  </div>
-                  <div class="mt-1 flex items-center text-xs text-gray-600 space-x-4">
-                    <span class="flex items-center">
-                      <svg class="h-3 w-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      Due: <%= milestone.due_date.strftime('%B %d, %Y') %>
-                    </span>
-                    <span class="px-2 py-1 rounded-full text-xs font-medium <%= milestone.status == 'completed' ? 'bg-green-100 text-green-800' : milestone.status == 'in_progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800' %>">
-                      <%= milestone.status.humanize %>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div class="ml-4 flex-shrink-0">
-                <% active_log = @project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id) %>
-                <% if active_log %>
-                  <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800">
-                    <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-                    </svg>
-                    In Progress
-                  </span>
-                <% else %>
-                  <%# Only show start tracking if there's no active log for this milestone in any project %>
-                  <% if TimeLog.in_progress.where(milestone_id: milestone.id, user_id: current_user.id).where.not(project_id: @project.id).empty? %>
-                    <%= button_to time_logs_path(@project, milestone_id: milestone.id, date: @selected_date),
-                                  method: :post,
-                                  class: 'inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200',
-                                  data: { confirm: 'Start tracking time for this milestone?' } do %>
-                      <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-9-4V8a2 2 0 012-2h8a2 2 0 012 2v2M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      Start Tracking
-                    <% end %>
-                  <% else %>
-                    <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                      Being tracked elsewhere
-                    </span>
-                  <% end %>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        <% end %>
-      </div>
+    <div id="current_tracking_container">
+      <% if @project.time_logs.where(user_id: current_user.id).in_progress.exists? %>
+        <% current_log = @project.time_logs.in_progress.last %>
+        <%= render 'time_logs/current_tracking', current_log: current_log, project: @project %>
+      <% end %>
     </div>
 
+  <div id="remaining_time_progress">
+    <%= render "remaining_time_progress", project: @project, current_log: current_log, owner: @owner %>
+  </div>
+
+    <!-- All Milestones Section -->
+    <%= render 'time_logs/milestones_section', milestones: @milestones, project: @project, selected_date: @selected_date %>
+
     <!-- Manual Time Log Entry -->
-    <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 mb-6">
+    <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 mb-6" 
+         data-controller="time-log">
       <button type="button" 
-              onclick="toggleManualTimeLogForm()" 
+              data-action="click->time-log#toggleForm"
               class="w-full px-6 py-4 bg-gradient-to-r from-orange-50/50 to-red-50/50 hover:from-orange-100/50 hover:to-red-100/50 transition-all duration-200 rounded-2xl flex items-center justify-between group">
         <div class="flex items-center">
           <svg class="h-5 w-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,291 +73,28 @@
             Add Manual Time Log
           </h3>
         </div>
-        <svg id="manual-time-log-chevron" class="h-5 w-5 text-orange-600 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg data-time-log-target="chevron" 
+             class="h-5 w-5 text-orange-600 transform transition-transform duration-200" 
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       
-      <div id="manual-time-log-form" class="hidden border-t border-gray-100/50">
-        <div class="px-6 py-6">
-          <%= form_with(model: @time_log_manual, url: create_manual_time_logs_path(@project), method: :post, local: true) do |f| %>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <%= f.hidden_field :manual_entry, value: true %>
-              
-              <div class="md:col-span-2">
-                <%= f.label :description, class: "block text-sm font-semibold text-gray-700 mb-2" %>
-                <%= f.text_area :description, class: "w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", rows: 3, placeholder: "Describe the work performed..." %>
-              </div>
-
-              <div>
-                <%= f.label :started_at, "Start Time", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-                <%= f.datetime_field :started_at,
-                                     class: "w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
-              </div>
-              
-              <div>
-                <%= f.label :ended_at, "End Time", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-                <%= f.datetime_field :ended_at,
-                                     class: "w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
-                                     max: Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
-              </div>
-
-              <div class="md:col-span-2">
-                <%= f.label :milestone_id, "Milestone", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-                <%= f.collection_select :milestone_id, @milestones, :id, :title,
-                      { include_blank: "Select a milestone..." },
-                      { class: "w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
-              </div>
-            </div>
-            <div class="mt-6">
-              <%= f.submit "Add Time Log", class: "inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 shadow-lg hover:shadow-xl transition-all duration-200" %>
-            </div>
-          <% end %>
-        </div>
+      <div data-time-log-target="form" class="hidden">
+        <%= render 'time_logs/manual_form', time_log_manual: @time_log_manual, milestones: @milestones %>
       </div>
     </div>
 
-    <script>
-      function toggleManualTimeLogForm() {
-        const form = document.getElementById('manual-time-log-form');
-        const chevron = document.getElementById('manual-time-log-chevron');
-        
-        if (form.classList.contains('hidden')) {
-          form.classList.remove('hidden');
-          chevron.style.transform = 'rotate(180deg)';
-        } else {
-          form.classList.add('hidden');
-          chevron.style.transform = 'rotate(0deg)';
-        }
-      }
-    </script>
-
-    <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20">
-      <div class="px-6 py-5 bg-gradient-to-r from-orange-50/50 to-red-50/50 border-b border-gray-100/50">
-        <h3 class="text-lg font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent flex items-center">
-          <svg class="h-5 w-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Time Logs Pending Confirmation
-        </h3>
-      </div>
-      <div class="overflow-hidden">
-        <% if @milestones_pending_confirmation.any? %>
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-100/50">
-              <thead class="bg-gradient-to-r from-gray-50/50 to-gray-100/50">
-              <tr>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  User
-                </th>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Milestone
-                </th>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Due Date
-                </th>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Started
-                </th>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Ended
-                </th>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Duration
-                </th>
-                <% if @owner %>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Action
-                  </th>
-                <% end %>
-              </tr>
-              </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-          <% time_log_users = @owner ? @project.time_logs.map(&:user).uniq : [current_user, @project.user].compact %>
-          <% time_log_users.each do |user| %>
-            <% @milestones_pending_confirmation.each do |milestone| %>
-              <% next unless milestone.time_logs.where(user: user).any? %>
-
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-indigo-600 truncate">
-                    <%= user.full_name %>
-                    <% if user.id == @project.user_id %> 
-                      <div class="'ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600">
-                        owner
-                      </div>
-                    <% end %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-indigo-600 truncate">
-                    <%= milestone.title %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
-                    <%= milestone.due_date.strftime('%b %d, %Y %I:%M %p') %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
-                    <ul>
-                      <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
-                        <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
-                      <% end %>
-                    </ul>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
-                    <ul>
-                      <% milestone.time_logs.where(user:).each do |log| %>
-                        <li>
-                          <%= log.ended_at&.strftime('%b %d, %Y %I:%M %p') || "-" %>
-                            <% if log.manual_entry %>
-                            <div class="relative group ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600 cursor-pointer">
-                              m
-                              <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white border border-gray-300 rounded shadow-lg p-2 text-gray-700 text-xs z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                              <strong>Justification:</strong>
-                              <div><%= log.description.presence || "No justification provided." %></div>
-                              </div>
-                            </div>
-                            <% end %>
-                        </li>
-                      <% end %>
-                    </ul>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
-                  <%= hours_spend > 0 ? "#{hours_spend} hours" : 'Less than an hour' %>
-                </td>
-                <td>
-                  <% if @owner %>
-                    <%= button_to 'Mark as Completed', confirm_project_milestone_path(@project, milestone),
-                                  method: :post,
-                                  class: 'ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
-                    %>
-                  <% end %>
-                </td>
-              </tr>
-            <% end %>
-          <% end %>
-          </tbody>
-        </table>
-      <% else %>
-        <div class="px-4 py-4 text-center text-gray-500">
-          No time logs found. Start tracking time for a milestone above.
-        </div>
-      <% end %>
-    </div>
-  </div>
-</div>
+    <%= render 'time_logs/pending_confirmation_section', 
+               milestones_pending_confirmation: @milestones_pending_confirmation,
+               project: @project,
+               owner: @owner %>
 
 
-<div class="bg-white shadow overflow-hidden sm:rounded-lg">
-  <div class="px-4 py-5 sm:px-6">
-    <h3 class="text-lg leading-6 font-medium text-gray-900">
-      Time Logs for Completed Tasks
-    </h3>
-  </div>
-  <div class="border-t border-gray-200">
-    <% if @time_logs_completed.any? %>
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-        <tr>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            User
-          </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Milestone
-          </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Due Date
-          </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Started
-          </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Ended
-          </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Duration
-          </th>
-        </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-        <% time_log_users = @owner ? @project.time_logs.map(&:user).uniq : [current_user, @project.user].compact %>
-        <% time_log_users.each do |user| %>
-          <% @time_logs_completed.each do |milestone| %>
-              <% next unless milestone.time_logs.where(user: user).any? %>
-
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-indigo-600 truncate">
-                    <%= user.full_name %>
-                    <% if user.id == @project.user_id %> 
-                      <div class="'ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600">
-                        owner
-                      </div>
-                    <% end %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-indigo-600 truncate">
-                    <%= milestone.title %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
-                    <%= milestone.due_date.strftime('%b %d, %Y %I:%M %p') %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
-                    <ul>
-                      <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
-                        <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
-                      <% end %>
-                    </ul>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
-                    <ul>
-                      <% milestone.time_logs.where(user:).each do |log| %>
-                        <li>
-                          <%= log.ended_at&.strftime('%b %d, %Y %I:%M %p') || "-" %>
-                          <% if log.manual_entry %>
-                            <div class="relative group ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600 cursor-pointer">
-                              m
-                              <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white border border-gray-300 rounded shadow-lg p-2 text-gray-700 text-xs z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                              <strong>Justification:</strong>
-                              <div><%= log.description.presence || "No justification provided." %></div>
-                              </div>
-                            </div>
-                            <% end %>
-                        </li>
-                      <% end %>
-                    </ul>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
-                  <%= hours_spend > 0 ? "#{hours_spend} hours" : 'Less than an hour' %>
-                </td>
-              </tr>
-            <% end %>
-        <% end %>
-        </tbody>
-      </table>
-    <% else %>
-      <div class="px-4 py-4 text-center text-gray-500">
-        No time logs found. Start tracking time for a milestone above.
-      </div>
-    <% end %>
-  </div>
-</div>
+<%= render 'time_logs/completed_tasks_section', 
+           time_logs_completed: @time_logs_completed,
+           project: @project,
+           owner: @owner %>
 </div>
 
 </div>

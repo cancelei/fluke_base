@@ -33,7 +33,9 @@
       <% end %>
     <% end %>
 
-    <%= render 'shared/milestone_bar' %>
+    <div id="milestone_bar_container">
+      <%= render 'shared/milestone_bar' %>
+    </div>
     
     <main class="<%= controller_name == 'home' && action_name == 'index' ? '' : 'mx-auto px-4 sm:px-6 lg:px-8 py-6 w-[90%]' %>">
       <%= yield %>

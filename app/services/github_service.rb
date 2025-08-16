@@ -1,12 +1,13 @@
 class GithubService
-  attr_reader :project, :access_token, :branch, :repo_path, :client, :user_emails, :user_github_identifiers, :agreements
+  attr_reader :project, :access_token, :branch, :repo_path, :client, :user_emails, :user_github_identifiers, :agreements, :since
 
   # Initialize the service with project, access token, and optional branch
-  def initialize(project, access_token = nil, branch: nil)
+  def initialize(project, access_token = nil, branch: nil, since: nil)
     @project = project
     @access_token = access_token
     @branch = branch
     @repo_path = extract_repo_path(project.repository_url)
+    @since = since
 
     @client = github_client(access_token)
   end
@@ -32,7 +33,8 @@ class GithubService
           commits = client.commits(repo_path, {
             sha: branch,
             per_page: per_page,
-            page: page
+            page: page,
+            since: since
           })
 
           break if commits.empty?
@@ -55,14 +57,19 @@ class GithubService
         end
       end
 
-      db_branch = GithubBranch.find_by(branch_name: branch)
-
+      db_branch = GithubBranch.find_by(project_id: project.id, branch_name: branch)
+      unless db_branch
+        Rails.logger.error "No database branch found for #{branch}"
+        return []
+      end
 
       puts "Processing commits for branch #{db_branch.branch_name}"
-      process_commits(project, all_commits, user_emails, user_github_identifiers, agreements, client, repo_path, db_branch.id)
-    else
-      []
+      processed_commits = process_commits(project, all_commits, user_emails, user_github_identifiers, agreements, client, repo_path, db_branch.id)
+
+      return processed_commits
     end
+
+    []
   rescue Octokit::Error => e
     Rails.logger.error "GitHub API Error: #{e.message}"
     []
@@ -170,10 +177,11 @@ class GithubService
   end
 
   def load_users
-    @agreements = project.agreements.active.includes(:initiator, :other_party)
+    @agreements = project.agreements.active.includes(agreement_participants: :user)
 
     # Preload all related users and their GitHub usernames
-    related_users = ([ project.user ] + agreements.map(&:initiator) + agreements.map(&:other_party)).compact.uniq
+    agreement_users = agreements.flat_map { |agreement| agreement.agreement_participants.map(&:user) }
+    related_users = ([ project.user ] + agreement_users).compact.uniq
 
     # Create a hash of email => user_id for quick lookup
     @user_emails = {}

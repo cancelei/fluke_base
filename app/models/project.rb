@@ -63,30 +63,34 @@ class Project < ApplicationRecord
   def github_contributions(branch: nil, agreement_only: false, agreement_user_ids: nil, user_name: nil)
     return [] unless github_logs.exists?
 
+    # Start with base github_logs query
+    logs_query = github_logs
+
+    # Apply branch filter if specified - join only when needed
+    if branch.present? && branch.to_i != 0
+      logs_query = logs_query.joins(:github_branch_logs)
+                             .where(github_branch_logs: { github_branch_id: branch })
+    end
+
     # Apply agreement filter if needed
-    if agreement_only
-      registered_query = github_logs.joins(:user, :github_branch_logs)
-                                 .where(users: { id: agreement_user_ids })
-      unregistered_query = github_logs.none  # Exclude unregistered users when filtering by agreement
-    else
-      registered_query = github_logs.joins(:user, :github_branch_logs).where.not(users: { id: nil })
-      unregistered_query = github_logs.joins(:github_branch_logs).where(user_id: nil).where.not(unregistered_user_name: [ nil, "" ])
+    if agreement_only && agreement_user_ids.present?
+      logs_query = logs_query.where(user_id: agreement_user_ids)
     end
 
     # Apply user_name filter if needed
-    if user_name
-      registered_query = registered_query.where(unregistered_user_name: user_name)
-      unregistered_query = unregistered_query.where(unregistered_user_name: user_name)
+    if user_name.present?
+      logs_query = logs_query.where(unregistered_user_name: user_name)
     end
 
-    # Filter by branch if specified
-    if branch.present? && branch.to_i != 0
-      registered_query = registered_query.where(github_branch_logs: { github_branch_id: branch })
-      unregistered_query = unregistered_query.where(github_branch_logs: { github_branch_id: branch })
-    end
+    # Get unique logs to avoid double-counting commits that appear in multiple branches
+    unique_logs = logs_query.distinct
 
-    # Get registered users' contributions
-    registered_contributions = registered_query
+    # Separate registered and unregistered users
+    registered_logs = unique_logs.joins(:user).where.not(users: { id: nil })
+    unregistered_logs = unique_logs.where(user_id: nil).where.not(unregistered_user_name: [ nil, "" ])
+
+    # Calculate registered users' contributions
+    registered_contributions = registered_logs
       .group("users.id", "users.first_name", "users.last_name", "users.email", "users.avatar", "users.github_username")
       .select(
         "users.id as user_id",
@@ -103,8 +107,8 @@ class Project < ApplicationRecord
         "MAX(github_logs.commit_date) as last_commit_date"
       )
 
-    # Get unregistered users' contributions
-    unregistered_contributions = unregistered_query
+    # Calculate unregistered users' contributions
+    unregistered_contributions = unregistered_logs
       .group("github_logs.unregistered_user_name")
       .select(
         "NULL as user_id",
@@ -147,7 +151,7 @@ class Project < ApplicationRecord
           name
         end
 
-        def unregistered_user.owner?(_project)
+        def unregistered_user.owner?(project)
           false
         end
 

@@ -231,3 +231,21 @@ html {
 .navbar-link:hover::before {
   left: 100%;
 }
+
+@media screen and (max-width: 768px) {
+  #conversation_list {
+      width: 80%;
+      position: fixed;
+      top: 0;
+      left: -100%;
+      z-index: 10;
+      background-color: white;
+      height: 100vh;
+      overflow-y: auto;
+  }
+  
+  #conversation_list.active {
+      padding-top: 100px;
+      left: 0;
+  }
+  }

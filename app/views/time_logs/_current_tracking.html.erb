@@ -1,0 +1,26 @@
+<div id="current_tracking_section" class="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-6 mb-6 shadow-lg">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center">
+      <div class="flex-shrink-0">
+        <div class="h-10 w-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
+          <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+      </div>
+      <div class="ml-4">
+        <p class="text-sm font-semibold text-blue-900">
+          Currently tracking: <span class="text-blue-700"><%= current_log.milestone.title %></span>
+        </p>
+        <p class="text-xs text-blue-600 mt-1">
+          Started <%= time_ago_in_words(current_log.started_at) %> ago
+        </p>
+      </div>
+    </div>
+    <div class="flex-shrink-0">
+      <%= button_to 'Stop Tracking', stop_tracking_time_logs_path(project, milestone_id: current_log.milestone_id),
+                    method: :post,
+                    class: 'inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 shadow-md hover:shadow-lg transition-all duration-200' %>
+    </div>
+  </div>
+</div> 

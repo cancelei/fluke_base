@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+# This script can be used as a fallback to start SolidQueue workers
+# if the Puma plugin approach doesn't work in production
+
+require "bundler/setup"
+require_relative "../config/environment"
+
+# Start SolidQueue supervisor
+puts "Starting SolidQueue workers..."
+puts "Configuration: #{SolidQueue.supervisor.configuration.inspect}"
+
+begin
+  SolidQueue.supervisor.start
+rescue Interrupt
+  puts "\nGracefully shutting down SolidQueue workers..."
+  SolidQueue.supervisor.stop
+rescue => e
+  puts "Error starting SolidQueue: #{e.message}"
+  puts e.backtrace
+  exit 1
+end 

@@ -3,4 +3,8 @@ class GithubBranch < ApplicationRecord
   belongs_to :user
   has_many :github_branch_logs
   has_many :github_logs, through: :github_branch_logs
+
+  def latest_commit
+    github_logs.order(commit_date: :desc).first
+  end
 end

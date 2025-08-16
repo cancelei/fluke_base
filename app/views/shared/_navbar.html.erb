@@ -83,9 +83,9 @@
               </div>
               <div class="hidden sm:block text-left">
                 <div class="text-sm font-semibold text-gray-900"><%= current_user.full_name %></div>
-                <div class="text-xs text-gray-500">
+                <div class="text-xs text-gray-500" id="current_role">
                   <% if current_user.roles.any? %>
-                    <%= current_user.roles.first.name.humanize %>
+                    <%= (current_user.current_role || current_user.roles.first).name.humanize %>
                   <% else %>
                     Member
                   <% end %>
@@ -98,15 +98,15 @@
 
             <div class="absolute right-0 z-10 mt-3 origin-top-right rounded-2xl bg-white/95 backdrop-blur-md py-2 shadow-xl ring-1 ring-gray-200/50 border border-gray-100 hidden w-full" data-dropdown-target="menu">
               <div class="px-4 py-3 border-b border-gray-100">
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2">
                   <% if current_user.avatar.attached? %>
                     <%= image_tag current_user.avatar, class: "h-10 w-10 rounded-lg object-cover" %>
                   <% else %>
                     <img src="<%= current_user.avatar_url %>" class="h-10 w-10 rounded-lg object-cover" />
                   <% end %>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-900"><%= current_user.full_name %></p>
-                    <p class="text-xs text-gray-500"><%= current_user.email %></p>
+                  <div class="w-[calc(100%-48px)]">
+                    <p class="text-sm font-semibold text-gray-900 truncate"><%= current_user.full_name %></p>
+                    <p class="text-xs text-gray-500 truncate"><%= current_user.email %></p>
                   </div>
                 </div>
               </div>

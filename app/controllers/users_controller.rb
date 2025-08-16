@@ -73,6 +73,10 @@ class UsersController < ApplicationController
               "project-context",
               partial: "shared/project_context_nav",
               locals: { selected_project: current_user.selected_project }
+            ),
+            turbo_stream.update(
+              "current_role",
+              html: role.name.humanize
             )
           ]
         end
