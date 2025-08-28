@@ -6,14 +6,14 @@
   </svg>
   <h3 class="mt-4 text-lg font-medium text-gray-900">No GitHub activity found</h3>
   <p class="mt-2 text-sm text-gray-500">
-    <% if project.user == current_user || project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id }) %>
+    <% if defined?(current_user) && current_user && (project.user == current_user || project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id })) %>
       The repository might be empty or there was an issue accessing it.
     <% else %>
       This project doesn't have any GitHub activity yet or the repository is not properly configured.
     <% end %>
   </p>
   
-  <% if project.user == current_user || project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id }) %>
+  <% if defined?(current_user) && current_user && (project.user == current_user || project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id })) %>
     <div class="mt-4 text-sm text-gray-500">
       <p class="mb-2">Make sure:</p>
       <ul class="list-disc text-left max-w-md mx-auto space-y-1">
