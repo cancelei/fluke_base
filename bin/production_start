@@ -1,0 +1,40 @@
+#!/bin/bash -e
+
+# Production startup script that runs both Rails server and SolidQueue
+# This script ensures both processes start and handles graceful shutdown
+
+echo "Starting Flukebase production services..."
+
+# Function to handle cleanup on exit
+cleanup() {
+    echo "Shutting down services..."
+    kill $QUEUE_PID $WEB_PID 2>/dev/null || true
+    wait $QUEUE_PID $WEB_PID 2>/dev/null || true
+    echo "Services stopped."
+}
+
+# Set up signal handlers
+trap cleanup SIGTERM SIGINT
+
+# Start SolidQueue in background
+echo "Starting SolidQueue worker..."
+bin/rails solid_queue:start &
+QUEUE_PID=$!
+
+# Give SolidQueue a moment to start
+sleep 2
+
+# Start Rails server in background
+echo "Starting Rails server..."
+./bin/thrust ./bin/rails server &
+WEB_PID=$!
+
+# Wait for both processes
+echo "Flukebase is running (Web: $WEB_PID, Queue: $QUEUE_PID)"
+echo "Press Ctrl+C to stop all services"
+
+# Wait for either process to exit
+wait $WEB_PID $QUEUE_PID
+
+# If we get here, one process has exited, so clean up
+cleanup

@@ -99,6 +99,8 @@ USER rails:rails
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/start.sh"]
 
-# Start server via Thruster by default, this can be overwritten at runtime
+# Start both Rails server and SolidQueue worker via production startup script
+# The bin/production_start script supervises both processes with graceful shutdown handling
+# Alternative: Use ["./bin/thrust", "./bin/rails", "server"] for web-only deployment
 EXPOSE 80
-CMD ["./bin/thrust", "./bin/rails", "server"]
+CMD ["./bin/production_start"]
