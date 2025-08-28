@@ -62,7 +62,7 @@ class GithubFetchBranchesJob < ApplicationJob
       "project_#{@project.id}_github_commits",
       target: "github_logs",
       partial: "github_logs/empty_state",
-      locals: { project: @project }
+      locals: { project: @project, job_context: true }
     )
   end
 end
