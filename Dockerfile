@@ -60,6 +60,9 @@ RUN SECRET_KEY_BASE_DUMMY=1 \
     SKIP_DB_INITIALIZER=true \
     ./bin/rails assets:precompile
 
+# Install SolidQueue (generates migration files)
+RUN bundle exec rails solid_queue:install
+
 # Final stage for app image
 FROM base
 
