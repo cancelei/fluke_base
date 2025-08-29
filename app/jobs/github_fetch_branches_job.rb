@@ -20,11 +20,15 @@ class GithubFetchBranchesJob < ApplicationJob
 
     branches.each do |branch|
       if branch[:branch_name].present?
-        GithubCommitRefreshJob.perform_later(@project.id, access_token, branch[:branch_name])
+        Rails.logger.info "Enqueuing GithubCommitRefreshJob for project #{project_id}, branch: #{branch[:branch_name]}"
+        job = GithubCommitRefreshJob.perform_later(@project.id, access_token, branch[:branch_name])
+        Rails.logger.info "Job enqueued with ID: #{job.job_id}"
       else
         Rails.logger.error "Branch name is blank for branch in project #{project_id}"
       end
     end
+    
+    Rails.logger.info "Finished enqueuing #{branches.size} commit refresh jobs for project #{project_id}"
   rescue => e
     Rails.logger.error "Error in GithubFetchBranchesJob: #{e.message}\n#{e.backtrace.join("\n")}"
     raise e
