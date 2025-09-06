@@ -13,6 +13,7 @@ class ProjectForm < ApplicationForm
   attribute :team_size, :string
   attribute :collaboration_type, :string
   attribute :repository_url, :string
+  attribute :project_link, :string
   attribute :public_fields, :string
   attribute :user_id, :integer
 
@@ -95,6 +96,7 @@ class ProjectForm < ApplicationForm
       team_size: team_size,
       collaboration_type: collaboration_type,
       repository_url: repository_url,
+      project_link: project_link,
       public_fields: public_fields_array,
       user_id: user_id
     )

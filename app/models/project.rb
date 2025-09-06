@@ -37,6 +37,7 @@ class Project < ApplicationRecord
   PUBLIC_FIELD_OPTIONS = %w[
     name description stage category current_stage
     target_market funding_status team_size collaboration_type
+    project_link
   ]
 
   # Associations

@@ -79,6 +79,7 @@ class ProjectsController < ApplicationController
       team_size: @project.team_size,
       collaboration_type: @project.collaboration_type,
       repository_url: @project.repository_url,
+      project_link: @project.project_link,
       public_fields: @project.public_fields,
       user_id: @project.user_id
     )
@@ -111,6 +112,6 @@ class ProjectsController < ApplicationController
   end
 
   def project_params
-    params.require(:project).permit(:name, :description, :stage, :category, :current_stage, :target_market, :funding_status, :team_size, :collaboration_type, :repository_url, public_fields: [])
+    params.require(:project).permit(:name, :description, :stage, :category, :current_stage, :target_market, :funding_status, :team_size, :collaboration_type, :repository_url, :project_link, public_fields: [])
   end
 end

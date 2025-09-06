@@ -101,6 +101,20 @@
                        prefix: "github.com/",
                        placeholder: "username/repository"
                      } %>
+                     
+          <!-- Project Link -->
+          <%= render 'form_field', 
+                     form: form, 
+                     field_name: :project_link, 
+                     project: project, 
+                     label: "Project Link",
+                     field_type: :url_field, 
+                     col_span: 6,
+                     help_text: "Add hosted project link",
+                     options: {
+                       prefix: "https://",
+                       placeholder: "example.com"
+                     } %>
 
           <!-- Section Header -->
           <div class="sm:col-span-6">

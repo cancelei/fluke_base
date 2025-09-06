@@ -187,6 +187,32 @@
             </div>
           <% end %>
           
+          <!-- Project Link -->
+          <% if @project.project_link.present? && field_visible_to_user?(@project, :project_link, current_user) %>
+            <div class="px-6 py-4 hover:bg-gray-50/30 transition-colors duration-200">
+              <div class="sm:grid sm:grid-cols-3 sm:gap-6">
+                <dt class="text-sm font-semibold text-gray-700 flex items-center">
+                  <svg class="h-4 w-4 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  Project Link
+                </dt>
+                <dd class="mt-2 text-sm sm:mt-0 sm:col-span-2">
+                  <% project_url = @project.project_link.start_with?('http') ? @project.project_link : "https://#{@project.project_link}" %>
+                  <%= link_to project_url, target: "_blank", rel: "noopener noreferrer", class: "inline-flex items-center px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 text-sm font-medium" do %>
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <%= @project.project_link %>
+                    <svg class="h-3 w-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  <% end %>
+                </dd>
+              </div>
+            </div>
+          <% end %>
+          
           <!-- Current Stage -->
           <div class="px-6 py-4 hover:bg-gray-50/30 transition-colors duration-200">
             <div class="sm:grid sm:grid-cols-3 sm:gap-6">
