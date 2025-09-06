@@ -44,12 +44,20 @@ class Admin::SolidQueueJobsController < ApplicationController
         else
           # For non-failed jobs or jobs without retry_job method, just run it again
           # Safely handle class_name to prevent remote code execution
-          if ActiveJob::Base.descendants.map(&:to_s).include?(@job.class_name)
-            job_class = @job.class_name.constantize
+          # Get the job class name from the database record
+          job_class_name = @job.class_name
+
+          # Create a whitelist of allowed job classes
+          allowed_job_classes = ActiveJob::Base.descendants.map(&:to_s)
+
+          if allowed_job_classes.include?(job_class_name)
+            # Only constantize if the class is in our whitelist
+            job_class = Object.const_get(job_class_name)
             job_class.perform_later(*@job.arguments)
             redirect_back fallback_location: admin_solid_queue_jobs_path, notice: "Job has been queued for execution."
           else
-            redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Invalid job class: #{@job.class_name}"
+            Rails.logger.error "Attempted to run non-whitelisted job class: #{job_class_name}"
+            redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Invalid job class: #{job_class_name}"
           end
         end
       rescue => e
