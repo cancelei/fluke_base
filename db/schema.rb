@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_26_154458) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_06_181141) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -182,6 +182,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_154458) do
     t.string "branch_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "commits_fetched_at"
+    t.string "last_commit_sha"
+    t.boolean "is_fully_fetched"
     t.index ["project_id", "branch_name", "user_id"], name: "idx_on_project_id_branch_name_user_id_fcdce7d2d8", unique: true
     t.index ["project_id"], name: "index_github_branches_on_project_id"
     t.index ["user_id"], name: "index_github_branches_on_user_id"
@@ -202,7 +205,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_154458) do
     t.jsonb "changed_files", default: [], array: true
     t.string "unregistered_user_name"
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
+    t.index ["commit_sha"], name: "index_github_logs_on_commit_sha"
     t.index ["project_id", "commit_sha"], name: "index_github_logs_on_project_commit_sha", unique: true
+    t.index ["project_id", "commit_sha"], name: "index_github_logs_on_project_id_and_commit_sha", unique: true
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
   end
@@ -328,6 +333,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_154458) do
     t.string "concurrency_key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "failed_at"
+    t.text "error"
     t.index ["active_job_id"], name: "index_solid_queue_jobs_on_active_job_id"
     t.index ["class_name"], name: "index_solid_queue_jobs_on_class_name"
     t.index ["finished_at"], name: "index_solid_queue_jobs_on_finished_at"
@@ -462,6 +469,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_154458) do
     t.string "github_username"
     t.string "github_token"
     t.boolean "show_project_context_nav", default: false, null: false
+    t.string "linkedin"
+    t.string "x"
+    t.string "youtube"
+    t.string "facebook"
+    t.string "tiktok"
     t.index ["current_role_id"], name: "index_users_on_current_role_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

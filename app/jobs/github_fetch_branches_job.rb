@@ -27,7 +27,7 @@ class GithubFetchBranchesJob < ApplicationJob
         Rails.logger.error "Branch name is blank for branch in project #{project_id}"
       end
     end
-    
+
     Rails.logger.info "Finished enqueuing #{branches.size} commit refresh jobs for project #{project_id}"
   rescue => e
     Rails.logger.error "Error in GithubFetchBranchesJob: #{e.message}\n#{e.backtrace.join("\n")}"
