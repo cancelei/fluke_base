@@ -3,7 +3,14 @@ class User < ApplicationRecord
   belongs_to :current_role, class_name: "Role", optional: true
 
   # Define agreement_participants association before UserAgreements concern
-  has_many :agreement_participants, dependent: :destroy
+  # This must be defined before any has_many :through associations that use it
+  has_many :agreement_participants, dependent: :delete_all
+
+  # Define initiated and received agreements explicitly here instead of in the concern
+  has_many :initiated_agreements, -> { where(agreement_participants: { is_initiator: true }) },
+           through: :agreement_participants, source: :agreement
+  has_many :received_agreements, -> { where(agreement_participants: { is_initiator: false }) },
+           through: :agreement_participants, source: :agreement
 
   include Roleable
   include UserAgreements

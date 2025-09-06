@@ -2,11 +2,12 @@ module UserAgreements
   extend ActiveSupport::Concern
 
   included do
-    # All agreements where user is a party
-    has_many :initiated_agreements, class_name: "Agreement",
-             through: :agreement_participants, source: :agreement
-    has_many :received_agreements, class_name: "Agreement",
-             through: :agreement_participants, source: :agreement
+    # Ensure agreement_participants is defined first
+    # (This is already defined in the User model, but we'll make it explicit here)
+    # has_many :agreement_participants, dependent: :destroy
+
+    # All agreements where user is a party - using conditions instead of separate associations
+    has_many :agreements, -> { distinct }, through: :agreement_participants
   end
 
   # Agreements where user is the entrepreneur (project owner)

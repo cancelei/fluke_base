@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,17 +45,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
   create_table "agreement_participants", force: :cascade do |t|
     t.bigint "agreement_id", null: false
     t.bigint "user_id", null: false
-    t.string "user_role"
+    t.string "user_role", null: false
     t.bigint "project_id", null: false
     t.boolean "is_initiator", default: false
     t.bigint "counter_agreement_id"
     t.bigint "accept_or_counter_turn_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["accept_or_counter_turn_id"], name: "idx_agreement_participants_on_turn"
     t.index ["accept_or_counter_turn_id"], name: "index_agreement_participants_on_accept_or_counter_turn_id"
     t.index ["agreement_id", "user_id"], name: "idx_agreement_participants_on_agreement_user", unique: true
-    t.index ["agreement_id"], name: "index_agreement_participants_on_agreement_id"
     t.index ["counter_agreement_id"], name: "index_agreement_participants_on_counter_agreement_id"
     t.index ["is_initiator"], name: "idx_agreement_participants_on_is_initiator"
     t.index ["project_id"], name: "index_agreement_participants_on_project_id"
@@ -63,19 +61,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
   end
 
   create_table "agreements", force: :cascade do |t|
-    t.string "agreement_type"
-    t.string "status"
-    t.date "start_date"
-    t.date "end_date"
+    t.string "agreement_type", null: false
+    t.string "status", null: false
+    t.date "start_date", null: false
+    t.date "end_date", null: false
     t.bigint "project_id", null: false
     t.text "terms"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "payment_type"
+    t.string "payment_type", null: false
     t.decimal "hourly_rate", precision: 10, scale: 2
     t.decimal "equity_percentage", precision: 5, scale: 2
-    t.integer "weekly_hours"
-    t.text "tasks"
+    t.integer "weekly_hours", null: false
+    t.text "tasks", null: false
     t.integer "milestone_ids", default: [], array: true
     t.index ["payment_type"], name: "index_agreements_on_payment_type"
     t.index ["project_id"], name: "index_agreements_on_project_id"
@@ -115,7 +113,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.datetime "updated_at", null: false
     t.index ["address"], name: "index_blockchain_wallets_on_address", unique: true
     t.index ["user_id", "is_active"], name: "index_blockchain_wallets_on_user_id_and_is_active"
-    t.index ["user_id"], name: "index_blockchain_wallets_on_user_id"
   end
 
   create_table "conversations", force: :cascade do |t|
@@ -123,7 +120,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.bigint "recipient_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["recipient_id"], name: "index_conversations_on_recipient_id"
+    t.index ["recipient_id", "sender_id"], name: "index_conversations_on_recipient_and_sender", unique: true
     t.index ["sender_id"], name: "index_conversations_on_sender_id"
   end
 
@@ -139,7 +136,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["agreement_id", "status"], name: "index_escrow_contracts_on_agreement_id_and_status"
-    t.index ["agreement_id"], name: "index_escrow_contracts_on_agreement_id"
     t.index ["contract_address"], name: "index_escrow_contracts_on_contract_address", unique: true
   end
 
@@ -161,9 +157,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["escrow_contract_id", "blockchain_index"], name: "idx_on_escrow_contract_id_blockchain_index_f147e7fe50", unique: true
-    t.index ["escrow_contract_id"], name: "index_escrow_milestones_on_escrow_contract_id"
     t.index ["milestone_id", "escrow_contract_id"], name: "index_escrow_milestones_on_milestone_id_and_escrow_contract_id", unique: true
-    t.index ["milestone_id"], name: "index_escrow_milestones_on_milestone_id"
   end
 
   create_table "github_branch_logs", force: :cascade do |t|
@@ -172,13 +166,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["github_branch_id", "github_log_id"], name: "index_github_branch_logs_on_github_branch_id_and_github_log_id", unique: true
-    t.index ["github_branch_id"], name: "index_github_branch_logs_on_github_branch_id"
     t.index ["github_log_id"], name: "index_github_branch_logs_on_github_log_id"
   end
 
   create_table "github_branches", force: :cascade do |t|
-    t.bigint "project_id"
-    t.bigint "user_id"
+    t.bigint "project_id", null: false
+    t.bigint "user_id", null: false
     t.string "branch_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -186,19 +179,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.string "last_commit_sha"
     t.boolean "is_fully_fetched"
     t.index ["project_id", "branch_name", "user_id"], name: "idx_on_project_id_branch_name_user_id_fcdce7d2d8", unique: true
-    t.index ["project_id"], name: "index_github_branches_on_project_id"
     t.index ["user_id"], name: "index_github_branches_on_user_id"
   end
 
   create_table "github_logs", force: :cascade do |t|
     t.bigint "project_id", null: false
     t.bigint "agreement_id"
-    t.bigint "user_id"
-    t.string "commit_sha"
+    t.bigint "user_id", null: false
+    t.string "commit_sha", null: false
     t.text "commit_message"
     t.integer "lines_added"
     t.integer "lines_removed"
-    t.datetime "commit_date"
+    t.datetime "commit_date", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "commit_url"
@@ -206,22 +198,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.string "unregistered_user_name"
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
     t.index ["commit_sha"], name: "index_github_logs_on_commit_sha"
-    t.index ["project_id", "commit_sha"], name: "index_github_logs_on_project_commit_sha", unique: true
-    t.index ["project_id", "commit_sha"], name: "index_github_logs_on_project_id_and_commit_sha", unique: true
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
   end
 
   create_table "meetings", force: :cascade do |t|
-    t.string "title"
+    t.string "title", null: false
     t.text "description"
-    t.datetime "start_time"
-    t.datetime "end_time"
+    t.datetime "start_time", null: false
+    t.datetime "end_time", null: false
     t.bigint "agreement_id", null: false
     t.string "google_calendar_event_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["agreement_id"], name: "index_meetings_on_agreement_id"
+    t.index ["google_calendar_event_id"], name: "index_meetings_on_google_calendar_event_id"
   end
 
   create_table "messages", force: :cascade do |t|
@@ -237,10 +228,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
   end
 
   create_table "milestones", force: :cascade do |t|
-    t.string "title"
+    t.string "title", null: false
     t.text "description"
-    t.date "due_date"
-    t.string "status"
+    t.date "due_date", null: false
+    t.string "status", null: false
     t.bigint "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -251,8 +242,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
 
   create_table "notifications", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.string "title"
-    t.text "message"
+    t.string "title", null: false
+    t.text "message", null: false
     t.string "url"
     t.datetime "read_at"
     t.datetime "created_at", null: false
@@ -261,9 +252,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
   end
 
   create_table "projects", force: :cascade do |t|
-    t.string "name"
-    t.text "description"
-    t.string "stage"
+    t.string "name", null: false
+    t.text "description", null: false
+    t.string "stage", null: false
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -280,9 +271,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
   end
 
   create_table "roles", force: :cascade do |t|
-    t.string "name"
+    t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index "lower((name)::text)", name: "index_roles_on_lower_name", unique: true
   end
 
   create_table "solid_cable_messages", force: :cascade do |t|
@@ -293,7 +285,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.index ["channel"], name: "index_solid_cable_messages_on_channel"
     t.index ["channel_hash"], name: "index_solid_cable_messages_on_channel_hash"
     t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
-    t.index ["id"], name: "index_solid_cable_messages_on_id", unique: true
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
@@ -310,7 +301,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
 
   create_table "solid_queue_claimed_executions", force: :cascade do |t|
     t.bigint "job_id", null: false
-    t.bigint "process_id"
+    t.bigint "process_id", null: false
     t.datetime "created_at", null: false
     t.index ["job_id"], name: "index_solid_queue_claimed_executions_on_job_id", unique: true
     t.index ["process_id", "job_id"], name: "index_solid_queue_claimed_executions_on_process_id_and_job_id"
@@ -385,7 +376,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
   create_table "solid_queue_recurring_tasks", force: :cascade do |t|
     t.string "key", null: false
     t.string "schedule", null: false
-    t.string "command", limit: 2048
+    t.text "command"
     t.string "class_name"
     t.text "arguments"
     t.string "queue_name"
@@ -429,8 +420,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.bigint "project_id"
+    t.bigint "project_id", null: false
     t.boolean "manual_entry", default: false
+    t.index ["milestone_id"], name: "index_time_logs_on_milestone_id"
     t.index ["project_id", "milestone_id"], name: "index_time_logs_on_project_id_and_milestone_id"
     t.index ["user_id"], name: "index_time_logs_on_user_id"
   end
@@ -451,14 +443,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.string "first_name"
-    t.string "last_name"
+    t.string "first_name", null: false
+    t.string "last_name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "onboarded", default: false
     t.text "bio"
     t.string "avatar"
-    t.integer "selected_project_id"
+    t.bigint "selected_project_id"
     t.float "years_of_experience"
     t.float "hourly_rate"
     t.string "industries", default: [], array: true
@@ -468,7 +460,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.text "business_info"
     t.bigint "current_role_id"
     t.string "github_username"
-    t.string "github_token"
+    t.string "github_token", limit: 255
     t.boolean "show_project_context_nav", default: false, null: false
     t.string "linkedin"
     t.string "x"
@@ -478,6 +470,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
     t.index ["current_role_id"], name: "index_users_on_current_role_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["selected_project_id"], name: "index_users_on_selected_project_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -497,6 +490,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
   add_foreign_key "escrow_contracts", "agreements"
   add_foreign_key "escrow_milestones", "escrow_contracts"
   add_foreign_key "escrow_milestones", "milestones"
+  add_foreign_key "github_branch_logs", "github_branches", on_delete: :cascade
+  add_foreign_key "github_branch_logs", "github_logs", on_delete: :cascade
   add_foreign_key "github_branches", "projects"
   add_foreign_key "github_branches", "users"
   add_foreign_key "github_logs", "agreements"
@@ -510,7 +505,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
   add_foreign_key "projects", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "solid_queue_claimed_executions", "solid_queue_processes", column: "process_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "solid_queue_processes", "solid_queue_processes", column: "supervisor_id", on_delete: :nullify
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
@@ -519,5 +516,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_203205) do
   add_foreign_key "time_logs", "users"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
+  add_foreign_key "users", "projects", column: "selected_project_id", on_delete: :nullify
   add_foreign_key "users", "roles", column: "current_role_id"
 end

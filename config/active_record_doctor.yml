@@ -1,0 +1,14 @@
+---
+detectors:
+  undefined_table_references:
+    ignore:
+    - ActionMailbox::InboundEmail
+    - ActionText::EncryptedRichText
+    - ActionText::RichText
+    - Pay::Charge
+    - Pay::Customer
+    - Pay::Merchant
+    - Pay::PaymentMethod
+    - Pay::Subscription
+    - Pay::Webhook
+    - SolidCache::Entry

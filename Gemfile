@@ -81,6 +81,9 @@ group :development do
 
   # ERB linting
   gem "erb_lint", require: false
+
+  # Database schema analysis and optimization
+  gem "active_record_doctor"
 end
 
 group :test do
