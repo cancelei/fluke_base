@@ -200,7 +200,9 @@
         <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Commits</h3>
         <% if @recent_commits&.any? %>
           <div class="text-sm text-gray-500">
-            Showing <%= @recent_commits.size %> of <%= @recent_commits.total_count %> commits
+            <% start_index = (@recent_commits.current_page - 1) * @recent_commits.limit_value + 1 %>
+            <% end_index = [@recent_commits.current_page * @recent_commits.limit_value, @recent_commits.total_count].min %>
+            Showing <%= start_index %>-<%= end_index %> of <%= @recent_commits.total_count %> commits
           </div>
         <% end %>
       </div>
