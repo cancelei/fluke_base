@@ -3,3 +3,6 @@ Rails.application.config.solid_queue.connects_to = { database: { writing: :prima
 
 # Configure mailers queue
 Rails.application.config.action_mailer.deliver_later_queue_name = :mailers
+
+# Configure logging
+Rails.application.config.solid_queue.logger = Rails.logger

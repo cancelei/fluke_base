@@ -1,10 +1,16 @@
-# production:
-#   periodic_cleanup:
-#     class: CleanSoftDeletedRecordsJob
-#     queue: background
-#     args: [ 1000, { batch_size: 500 } ]
-#     schedule: every hour
-#   periodic_command:
-#     command: "SoftDeletedRecord.due.delete_all"
-#     priority: 2
-#     schedule: at 5am every day
+production:
+  clear_solid_queue_finished_jobs:
+    class: SolidQueue::Jobs::ClearFinishedJobsJob
+    queue: default
+    priority: 10
+    schedule: every day at midnight
+  # Example tasks (commented out)
+  # periodic_cleanup:
+  #   class: CleanSoftDeletedRecordsJob
+  #   queue: background
+  #   args: [ 1000, { batch_size: 500 } ]
+  #   schedule: every hour
+  # periodic_command:
+  #   command: "SoftDeletedRecord.due.delete_all"
+  #   priority: 2
+  #   schedule: at 5am every day
