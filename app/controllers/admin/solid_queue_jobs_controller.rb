@@ -51,10 +51,22 @@ class Admin::SolidQueueJobsController < ApplicationController
           allowed_job_classes = ActiveJob::Base.descendants.map(&:to_s)
 
           if allowed_job_classes.include?(job_class_name)
-            # Only constantize if the class is in our whitelist
-            job_class = Object.const_get(job_class_name)
-            job_class.perform_later(*@job.arguments)
-            redirect_back fallback_location: admin_solid_queue_jobs_path, notice: "Job has been queued for execution."
+            begin
+              # Use a safer approach to resolve the class
+              job_class = job_class_name.safe_constantize
+
+              # Additional validation that the class is actually a job class
+              if job_class && job_class < ActiveJob::Base
+                job_class.perform_later(*@job.arguments)
+                redirect_back fallback_location: admin_solid_queue_jobs_path, notice: "Job has been queued for execution."
+              else
+                Rails.logger.error "Invalid job class type: #{job_class_name}"
+                redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Invalid job class type: #{job_class_name}"
+              end
+            rescue => e
+              Rails.logger.error "Error resolving job class: #{e.message}"
+              redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Error resolving job class: #{e.message}"
+            end
           else
             Rails.logger.error "Attempted to run non-whitelisted job class: #{job_class_name}"
             redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Invalid job class: #{job_class_name}"

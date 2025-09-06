@@ -200,13 +200,26 @@
                 <dd class="mt-2 text-sm sm:mt-0 sm:col-span-2">
                   <%
                     # Safely handle project_link to prevent XSS
+                    project_url = nil
                     if @project.project_link.present?
-                      # Ensure URL starts with http:// or https://
-                      project_url = @project.project_link.start_with?("http") ? @project.project_link : "https://#{@project.project_link}"
-                      # Validate URL format
-                      project_url = URI.parse(project_url).kind_of?(URI::HTTP) ? project_url : nil
-                    else
-                      project_url = nil
+                      begin
+                        # Normalize URL - ensure it starts with http:// or https://
+                        raw_url = @project.project_link.strip
+                        normalized_url = raw_url.start_with?("http://", "https://") ? raw_url : "https://#{raw_url}"
+
+                        # Parse and validate URL
+                        uri = URI.parse(normalized_url)
+
+                        # Only allow HTTP or HTTPS schemes
+                        if uri.is_a?(URI::HTTP) && [ "http", "https" ].include?(uri.scheme)
+                          # Convert back to string and sanitize
+                          project_url = ERB::Util.html_escape(uri.to_s)
+                        end
+                      rescue URI::InvalidURIError => e
+                        # Log invalid URL
+                        Rails.logger.warn "Invalid project URL: #{e.message}"
+                        project_url = nil
+                      end
                     end
                   %>
                   <% if project_url.present? %>
