@@ -198,7 +198,18 @@
                   Project Link
                 </dt>
                 <dd class="mt-2 text-sm sm:mt-0 sm:col-span-2">
-                  <% project_url = @project.project_link.start_with?('http') ? @project.project_link : "https://#{@project.project_link}" %>
+                  <% 
+                    # Safely handle project_link to prevent XSS
+                    if @project.project_link.present?
+                      # Ensure URL starts with http:// or https://
+                      project_url = @project.project_link.start_with?('http') ? @project.project_link : "https://#{@project.project_link}"
+                      # Validate URL format
+                      project_url = URI.parse(project_url).kind_of?(URI::HTTP) ? project_url : nil
+                    else
+                      project_url = nil
+                    end
+                  %>
+                  <% if project_url.present? %>
                   <%= link_to project_url, target: "_blank", rel: "noopener noreferrer", class: "inline-flex items-center px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 text-sm font-medium" do %>
                     <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />

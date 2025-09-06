@@ -68,7 +68,7 @@
       <%= button_to 'Message', conversations_path(recipient_id: user.id), 
           method: :post, 
           data: {turbo: false}, 
-          class: "cta-btn btn-sm btn-secondary <%= colors[:message_btn] %> relative z-10" %>
+          class: "cta-btn btn-sm btn-secondary #{colors[:message_btn]} relative z-10" %>
     <% end %>
   </div>
 </div> 

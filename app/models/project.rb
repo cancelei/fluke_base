@@ -15,7 +15,7 @@ class Project < ApplicationRecord
   validates :stage, presence: true
   validates :collaboration_type, inclusion: { in: [ "mentor", "co_founder", "both", nil ] }
   validates :repository_url, format: {
-    with: /(^$|^https?:\/\/github\.com\/[^\/]+\/[^\/]+$|^[^\/\s]+\/[^\/\s]+$)/,
+    with: /\A(\z|https?:\/\/github\.com\/[^\/]+\/[^\/]+\z|[^\/\s]+\/[^\/\s]+\z)/,
     message: "must be a valid GitHub repository URL or in the format username/repository"
   }, allow_blank: true
 

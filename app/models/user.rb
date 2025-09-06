@@ -19,7 +19,7 @@ class User < ApplicationRecord
 
   # Validations
   validates :github_token, length: { maximum: 255 }, allow_blank: true
-  validates :github_username, format: { with: /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i, message: "is not a valid GitHub username", allow_blank: true, multiline: true }
+  validates :github_username, format: { with: /\A[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\z/i, message: "is not a valid GitHub username", allow_blank: true }
   validates :first_name, :last_name, presence: true
 
   # Virtual attribute for role selection in forms

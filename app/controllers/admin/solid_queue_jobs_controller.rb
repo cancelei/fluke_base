@@ -43,9 +43,14 @@ class Admin::SolidQueueJobsController < ApplicationController
           end
         else
           # For non-failed jobs or jobs without retry_job method, just run it again
-          job_class = @job.class_name.constantize
-          job_class.perform_later(*@job.arguments)
-          redirect_back fallback_location: admin_solid_queue_jobs_path, notice: "Job has been queued for execution."
+          # Safely handle class_name to prevent remote code execution
+          if ActiveJob::Base.descendants.map(&:to_s).include?(@job.class_name)
+            job_class = @job.class_name.constantize
+            job_class.perform_later(*@job.arguments)
+            redirect_back fallback_location: admin_solid_queue_jobs_path, notice: "Job has been queued for execution."
+          else
+            redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Invalid job class: #{@job.class_name}"
+          end
         end
       rescue => e
         Rails.logger.error "Error retrying job: #{e.message}\n#{e.backtrace.join("\n")}"
