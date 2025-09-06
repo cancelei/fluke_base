@@ -43,34 +43,14 @@ class Admin::SolidQueueJobsController < ApplicationController
           end
         else
           # For non-failed jobs or jobs without retry_job method, just run it again
-          # Safely handle class_name to prevent remote code execution
-          # Get the job class name from the database record
-          job_class_name = @job.class_name
+          # Use safe_constantize_job method to prevent remote code execution
+          job_class = safe_constantize_job(@job.class_name)
 
-          # Create a whitelist of allowed job classes
-          allowed_job_classes = ActiveJob::Base.descendants.map(&:to_s)
-
-          # First check if the class name is in our whitelist before attempting to constantize it
-          if allowed_job_classes.include?(job_class_name)
-            begin
-              # Now it's safe to constantize since we've verified it's in our whitelist
-              job_class = job_class_name.constantize
-
-              # Additional validation that the class is actually a job class
-              if job_class && job_class < ActiveJob::Base
-                job_class.perform_later(*@job.arguments)
-                redirect_back fallback_location: admin_solid_queue_jobs_path, notice: "Job has been queued for execution."
-              else
-                Rails.logger.error "Invalid job class type: #{job_class_name}"
-                redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Invalid job class type: #{job_class_name}"
-              end
-            rescue => e
-              Rails.logger.error "Error resolving job class: #{e.message}"
-              redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Error resolving job class: #{e.message}"
-            end
+          if job_class
+            job_class.perform_later(*@job.arguments)
+            redirect_back fallback_location: admin_solid_queue_jobs_path, notice: "Job has been queued for execution."
           else
-            Rails.logger.error "Attempted to run non-whitelisted job class: #{job_class_name}"
-            redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Invalid job class: #{job_class_name}"
+            redirect_back fallback_location: admin_solid_queue_jobs_path, alert: "Invalid job class: #{@job.class_name}"
           end
         end
       rescue => e
@@ -113,5 +93,36 @@ class Admin::SolidQueueJobsController < ApplicationController
     @job = SolidQueue::Job.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to admin_solid_queue_jobs_path, alert: "Job not found."
+  end
+
+  # Safely constantize a job class name by checking against a whitelist
+  # Returns the job class if valid, nil otherwise
+  def safe_constantize_job(class_name)
+    return nil if class_name.blank?
+
+    # Create a whitelist of allowed job classes
+    allowed_job_classes = ActiveJob::Base.descendants.map(&:to_s)
+
+    # Only proceed if the class name is in our whitelist
+    if allowed_job_classes.include?(class_name)
+      begin
+        # Now it's safe to constantize since we've verified it's in our whitelist
+        job_class = class_name.constantize
+
+        # Additional validation that the class is actually a job class
+        if job_class && job_class < ActiveJob::Base
+          job_class
+        else
+          Rails.logger.error "Invalid job class type: #{class_name}"
+          nil
+        end
+      rescue => e
+        Rails.logger.error "Error resolving job class: #{e.message}"
+        nil
+      end
+    else
+      Rails.logger.error "Attempted to run non-whitelisted job class: #{class_name}"
+      nil
+    end
   end
 end
