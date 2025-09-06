@@ -15,11 +15,10 @@
   <% end %>
 </div>
 
-  <%= render 'time_logs/filter_results', 
+  <%= render "time_logs/filter_results",
                milestones_pending_confirmation: @milestones_pending_confirmation,
                time_logs_completed: @time_logs_completed,
                time_logs_manual: @time_logs_manual,
                selected_user: @selected_user,
                selected_project: @selected_project,
                selected_date: @selected_date %>
-

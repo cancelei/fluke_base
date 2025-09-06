@@ -1,5 +1,5 @@
-<div class="<%= options[:container_class] || 'text-center py-12' %>">
-  <div class="<%= options[:icon_container_class] || 'mx-auto h-12 w-12 text-gray-400' %>">
+<div class="<%= options[:container_class] || "text-center py-12" %>">
+  <div class="<%= options[:icon_container_class] || "mx-auto h-12 w-12 text-gray-400" %>">
     <% if options[:icon] %>
       <%= ui_icon(options[:icon], class: "mx-auto h-12 w-12") %>
     <% elsif options[:custom_icon] %>
@@ -10,27 +10,27 @@
       </svg>
     <% end %>
   </div>
-  
-  <h3 class="<%= options[:title_class] || 'mt-2 text-lg font-medium text-gray-900' %>">
+
+  <h3 class="<%= options[:title_class] || "mt-2 text-lg font-medium text-gray-900" %>">
     <%= title %>
   </h3>
-  
-  <p class="<%= options[:description_class] || 'mt-1 text-sm text-gray-500' %>">
+
+  <p class="<%= options[:description_class] || "mt-1 text-sm text-gray-500" %>">
     <%= description %>
   </p>
-  
+
   <% if action_text && action_url %>
-    <div class="<%= options[:action_container_class] || 'mt-6' %>">
+    <div class="<%= options[:action_container_class] || "mt-6" %>">
       <% if options[:action_method] == :button %>
-        <%= button_to action_text, action_url, 
+        <%= button_to action_text, action_url,
             method: options[:button_method] || :get,
             class: options[:action_class] || "btn btn-primary",
             data: options[:action_data] || {} %>
       <% else %>
-        <%= link_to action_text, action_url, 
+        <%= link_to action_text, action_url,
             class: options[:action_class] || "btn btn-primary",
             data: options[:action_data] || {} %>
       <% end %>
     </div>
   <% end %>
-</div> 
+</div>

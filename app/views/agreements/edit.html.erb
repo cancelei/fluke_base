@@ -29,7 +29,7 @@
                         <% if @mentor.avatar.attached? %>
                           <%= image_tag @mentor.avatar, class: "h-12 w-12 rounded-full" %>
                         <% else %>
-                          <img src="<%= @mentor.avatar_url %>" class="h-12 w-12 rounded-full" />
+                          <img src="<%= @mentor.avatar_url %>" class="h-12 w-12 rounded-full">
                         <% end %>
                         <div>
                           <p class="text-sm font-medium text-gray-900"><%= @mentor.full_name %></p>

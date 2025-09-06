@@ -2,7 +2,7 @@
   # Set defaults based on role
   role = local_assigns[:role] || user.current_role&.name || user.roles.first&.name
   colors = user_card_color_scheme(role)
-  
+
   # Options for customization
   options = local_assigns[:options] || {}
   avatar_height = options[:avatar_height] || "h-40"
@@ -12,10 +12,10 @@
   custom_stats = options[:custom_stats]
 %>
 
-<div class="card <%= colors[:container] %> cursor-pointer group relative hover:shadow-md transition" 
-     data-url="<%= person_path(user) %>" 
+<div class="card <%= colors[:container] %> cursor-pointer group relative hover:shadow-md transition"
+     data-url="<%= person_path(user) %>"
      onclick="if(event.target.closest('.cta-btn')){return;} window.location=this.dataset.url;">
-  
+
   <!-- Avatar Section -->
   <div class="<%= avatar_height %> <%= colors[:avatar_bg] %> flex items-center justify-center">
     <% if user.avatar.attached? %>
@@ -26,7 +26,7 @@
       </svg>
     <% end %>
   </div>
-  
+
   <!-- Content Section -->
   <div class="card-body">
     <h3 class="text-lg font-semibold text-gray-900 truncate flex items-center gap-2">
@@ -37,11 +37,11 @@
         </span>
       <% end %>
     </h3>
-    
+
     <p class="text-sm text-gray-500 truncate mt-1">
       <%= user.bio.presence || default_bio_for_role(role) %>
     </p>
-    
+
     <!-- Role-specific content -->
     <% if custom_content %>
       <%= custom_content %>
@@ -50,7 +50,7 @@
         <%= render_role_specific_content(user, role) %>
       </div>
     <% end %>
-    
+
     <!-- Custom stats -->
     <% if custom_stats %>
       <div class="mt-2 text-xs text-gray-600">
@@ -58,17 +58,17 @@
       </div>
     <% end %>
   </div>
-  
+
   <!-- Footer Section -->
   <div class="card-footer <%= colors[:footer_border] %> flex items-center justify-between">
     <span class="text-sm font-medium <%= colors[:footer_text] %> transition group-hover:underline select-none">
       View Profile
     </span>
     <% if show_message_button %>
-      <%= button_to 'Message', conversations_path(recipient_id: user.id), 
-          method: :post, 
-          data: {turbo: false}, 
+      <%= button_to "Message", conversations_path(recipient_id: user.id),
+          method: :post,
+          data: { turbo: false },
           class: "cta-btn btn-sm btn-secondary #{colors[:message_btn]} relative z-10" %>
     <% end %>
   </div>
-</div> 
+</div>

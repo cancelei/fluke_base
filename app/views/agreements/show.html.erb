@@ -9,7 +9,7 @@
         Status: <%= presenter.status_badge %>
       </p>
     </div>
-    
+
     <div class="mt-6 flex flex-wrap justify-start space-x-3">
       <% if can?(:edit, @agreement) %>
         <%= link_to "Edit Agreement", edit_agreement_path(@agreement), class: "btn-primary" %>
@@ -18,49 +18,49 @@
       <% if can?(:has_counter_offer, @agreement) %>
         <div class="text-yellow-600">Note: This agreement has a counter offer from another person</div>
       <% end %>
-      
+
       <% if presenter.can_be_accepted_by?(current_user) %>
-        <%= button_to "Accept Agreement", accept_agreement_path(@agreement), 
-            method: :patch, 
-            class: "btn-success", 
+        <%= button_to "Accept Agreement", accept_agreement_path(@agreement),
+            method: :patch,
+            class: "btn-success",
             data: { turbo_confirm: "Are you sure you want to accept this agreement?" } %>
       <% end %>
-      
+
       <% if presenter.can_be_rejected_by?(current_user) %>
-        <%= button_to "Reject Agreement", reject_agreement_path(@agreement), 
-            method: :patch, 
-            class: "btn-danger", 
+        <%= button_to "Reject Agreement", reject_agreement_path(@agreement),
+            method: :patch,
+            class: "btn-danger",
             data: { turbo_confirm: "Are you sure you want to reject this agreement?" } %>
       <% end %>
-      
+
       <% if presenter.can_make_counter_offer?(current_user) %>
-        <%= button_to "Counter Offer", counter_offer_agreement_path(@agreement), 
-            method: :post, 
-            class: "btn-warning", 
+        <%= button_to "Counter Offer", counter_offer_agreement_path(@agreement),
+            method: :post,
+            class: "btn-warning",
             data: { turbo_confirm: "Are you sure you want to make a counter offer?" } %>
       <% end %>
-      
+
       <% if presenter.can_be_cancelled_by?(current_user) %>
-        <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement), 
-            method: :patch, 
-            class: "btn-danger", 
+        <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement),
+            method: :patch,
+            class: "btn-danger",
             data: { turbo_confirm: "Are you sure you want to cancel this agreement?" } %>
       <% end %>
-      
+
       <% if presenter.can_be_completed_by?(current_user) %>
-        <%= button_to "Mark as Completed", complete_agreement_path(@agreement), 
-            method: :patch, 
-            class: "btn-success", 
+        <%= button_to "Mark as Completed", complete_agreement_path(@agreement),
+            method: :patch,
+            class: "btn-success",
             data: { turbo_confirm: "Are you sure you want to mark this agreement as completed?" } %>
       <% end %>
-      
+
       <% if @agreement.active? && (current_user == @agreement.initiator || current_user == @agreement.other_party) %>
-        <%= link_to "Time Logs", time_logs_path(@agreement.project), 
+        <%= link_to "Time Logs", time_logs_path(@agreement.project),
             class: "btn-primary" %>
       <% end %>
     </div>
   </div>
-  
+
   <div class="border-t border-gray-200">
     <dl>
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -69,7 +69,7 @@
           <%= link_to @project.name, @project, class: "text-indigo-600 hover:text-indigo-900" %>
         </dd>
       </div>
-      
+
       <% if @agreement.active? && @project.repository_url.present? %>
         <% repo = format_github_repo(@project.repository_url) %>
         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -85,28 +85,28 @@
           </dd>
         </div>
       <% end %>
-      
+
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Parties</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
           <%= presenter.parties_display %>
         </dd>
       </div>
-      
+
       <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Duration</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
           <%= presenter.duration_display %>
         </dd>
       </div>
-      
+
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Total Commitment</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
           <%= presenter.total_commitment_display %>
         </dd>
       </div>
-      
+
       <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Payment Details</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
@@ -119,7 +119,7 @@
           </div>
         </dd>
       </div>
-      
+
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Tasks and Responsibilities</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
@@ -130,21 +130,21 @@
           <% end %>
         </dd>
       </div>
-      
+
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Milestones Progress</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
           <%= presenter.milestone_progress %>
         </dd>
       </div>
-      
+
       <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Progress Summary</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
           <%= presenter.progress_summary %>
         </dd>
       </div>
-      
+
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Time Remaining</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
@@ -208,13 +208,13 @@
               </h3>
               <div class="mt-2 text-sm text-yellow-700">
                 <p>
-                  This agreement is no longer active because a counter offer has been made. 
+                  This agreement is no longer active because a counter offer has been made.
                   You should review the latest counter offer.
                 </p>
-                
+
                 <% if @agreement.counter_offers.any? %>
                   <div class="mt-4">
-                    <%= link_to "View Latest Counter Offer", agreement_path(@agreement.counter_offers.order(created_at: :desc).first), 
+                    <%= link_to "View Latest Counter Offer", agreement_path(@agreement.counter_offers.order(created_at: :desc).first),
                         class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" %>
                   </div>
                 <% end %>
@@ -243,7 +243,7 @@
           <%= presenter.meetings_summary %>
         </p>
       </div>
-      
+
       <% if @agreement.active? %>
         <%= link_to new_agreement_meeting_path(@agreement), class: "inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" do %>
           <svg class="-ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -253,7 +253,7 @@
         <% end %>
       <% end %>
     </div>
-    
+
     <div class="border-t border-gray-200">
       <div class="relative overflow-x-auto">
         <% if @meetings.any? %>
@@ -318,7 +318,7 @@
 <% agreement_chain = [] %>
 <% current = @agreement %>
 <% while current.counter_to.present? %>
-  <% agreement_chain << [current, current.counter_to] %>
+  <% agreement_chain << [ current, current.counter_to ] %>
   <% current = current.counter_to %>
 <% end %>
 <% agreement_chain.each_with_index do |(agreement, previous_agreement), idx| %>

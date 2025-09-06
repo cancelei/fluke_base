@@ -1,13 +1,13 @@
 <% if notifications.any? %>
   <% notifications.each do |notification| %>
-    <li id="notification_<%= notification.id %>" class="<%= notification.read? ? 'bg-white' : 'bg-blue-50' %>">
+    <li id="notification_<%= notification.id %>" class="<%= notification.read? ? "bg-white" : "bg-blue-50" %>">
       <div class="px-4 py-4 sm:px-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <% if !notification.read? %>
               <div class="flex-shrink-0 h-2 w-2 rounded-full bg-indigo-600 mr-2"></div>
             <% end %>
-            
+
             <p class="text-sm font-medium text-indigo-600 truncate">
               <%= notification.title %>
             </p>
@@ -27,7 +27,7 @@
           <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
             <div class="flex space-x-2">
               <%= link_to "View", notification_path(notification), class: "text-indigo-600 hover:text-indigo-900" %>
-              
+
               <% unless notification.read? %>
                 <%= button_to "Mark as read", mark_as_read_notification_path(notification), method: :post, class: "text-gray-600 hover:text-gray-900" %>
               <% end %>
@@ -41,4 +41,4 @@
   <li class="px-4 py-6 text-center text-gray-500">
     You don't have any notifications.
   </li>
-<% end %> 
+<% end %>

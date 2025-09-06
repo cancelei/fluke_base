@@ -1,24 +1,22 @@
 <div class="bg-white overflow-hidden shadow rounded-lg">
   <div class="px-4 py-5 sm:p-6">
     <h2 class="text-lg font-medium text-gray-900 mb-4">Entrepreneur Onboarding</h2>
-    
-    
+
     <%= form_with model: current_user, url: "/complete_onboarding", method: :post, class: "space-y-6" do |f| %>
       <%= f.hidden_field :role_name, value: @role_name %>
 
       <div>
         <%= f.label :business_stage, "What stage is your business in?", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-2">
-          <%= f.select :business_stage, 
+          <%= f.select :business_stage,
             [
-              ["Idea", "idea"], 
-              ["MVP / Prototype", "mvp"], 
-              ["Early Growth", "growth"], 
-              ["Scaling", "scaling"]
+              [ "Idea", "idea" ],
+              [ "MVP / Prototype", "mvp" ],
+              [ "Early Growth", "growth" ],
+              [ "Scaling", "scaling" ]
             ],
             { include_blank: "Select a stage" },
-            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }
-          %>
+            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
         </div>
       </div>
 
@@ -27,16 +25,15 @@
         <div class="mt-2">
           <%= f.select :industries,
             [
-              ["Technology", "technology"], 
-              ["Healthcare", "healthcare"], 
-              ["Finance", "finance"], 
-              ["Education", "education"],
-              ["E-commerce", "ecommerce"],
-              ["Other", "other"]
+              [ "Technology", "technology" ],
+              [ "Healthcare", "healthcare" ],
+              [ "Finance", "finance" ],
+              [ "Education", "education" ],
+              [ "E-commerce", "ecommerce" ],
+              [ "Other", "other" ]
             ],
             { include_blank: "Select an industry" },
-            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }
-          %>
+            { class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
         </div>
       </div>
 
@@ -44,11 +41,11 @@
         <%= f.label :help_seekings, "What are you seeking help with?", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-2 space-y-2">
           <%= f.collection_check_boxes :help_seekings, [
-                ["Business Strategy", "business_strategy"],
-                ["Product Development", "product_development"],
-                ["Marketing & Sales", "marketing"],
-                ["Funding & Investment", "funding"],
-                ["Operations & Scaling", "operations"]
+                [ "Business Strategy", "business_strategy" ],
+                [ "Product Development", "product_development" ],
+                [ "Marketing & Sales", "marketing" ],
+                [ "Funding & Investment", "funding" ],
+                [ "Operations & Scaling", "operations" ]
               ], :last, :first do |cb| %>
             <div class="flex items-start">
               <%= cb.check_box(class: "h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1") %>

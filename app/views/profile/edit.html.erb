@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold tracking-tight text-gray-900">Edit Profile</h1>
     <p class="mt-1 text-sm text-gray-500">Update your personal information.</p>
   </div>
-  
+
   <%= form_with(model: @user, url: profile_update_path, method: :patch, class: "mx-auto mt-4", multipart: true) do |form| %>
     <% if @user.errors.any? %>
       <div class="bg-red-50 p-4 rounded-md mb-6">
@@ -14,7 +14,7 @@
             </svg>
           </div>
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">There <%= @user.errors.count == 1 ? 'is' : 'are' %> <%= pluralize(@user.errors.count, "error") %> with your profile:</h3>
+            <h3 class="text-sm font-medium text-red-800">There <%= @user.errors.count == 1 ? "is" : "are" %> <%= pluralize(@user.errors.count, "error") %> with your profile:</h3>
             <div class="mt-2 text-sm text-red-700">
               <ul role="list" class="list-disc space-y-1 pl-5">
                 <% @user.errors.full_messages.each do |message| %>
@@ -33,7 +33,7 @@
           <% if @user.avatar.attached? %>
             <%= image_tag @user.avatar, class: "h-16 w-16 rounded-full" %>
           <% else %>
-            <img src="<%= @user.avatar_url %>" class="h-16 w-16 rounded-full" />
+            <img src="<%= @user.avatar_url %>" class="h-16 w-16 rounded-full">
           <% end %>
         </div>
         <div class="flex-1">
@@ -95,7 +95,6 @@
         </div>
       </div>
 
-
       <div>
         <%= form.label :bio, class: "block text-sm font-medium leading-6 text-gray-900" %>
         <div class="mt-2">
@@ -106,7 +105,7 @@
       <div>
         <%= form.label :skills, "Expertise", class: "block text-sm font-medium leading-6 text-gray-900" %>
         <div class="flex flex-wrap items-center mt-2 space-y-2">
-          <% skills = ["Ruby", "Rails", "JavaScript", "React", "DevOps", "UI/UX", "Product Management", "Testing", "Other"] %>
+          <% skills = [ "Ruby", "Rails", "JavaScript", "React", "DevOps", "UI/UX", "Product Management", "Testing", "Other" ] %>
           <% skills.each do |exp| %>
             <div class="w-[25%]">
               <%= check_box_tag "user[skills][]", exp, (@user.respond_to?(:skills) && @user.skills&.include?(exp)), id: "user_skills_#{exp.parameterize}", multiple: true %>
@@ -119,7 +118,7 @@
       <div id="social-media" class="border-t border-gray-200 pt-6 mb-6">
         <h3 class="text-base font-semibold leading-6 text-gray-900">Social Media Links</h3>
         <p class="mt-1 text-sm text-gray-500">Add your social media profiles to connect with others</p>
-        
+
         <div class="mt-4 space-y-4">
           <div>
             <%= form.label :linkedin, "LinkedIn", class: "block text-sm font-medium leading-6 text-gray-900" %>
@@ -128,7 +127,7 @@
               <%= form.text_field :linkedin, class: "block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6", placeholder: "username" %>
             </div>
           </div>
-          
+
           <div>
             <%= form.label :x, "X (Twitter)", class: "block text-sm font-medium leading-6 text-gray-900" %>
             <div class="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
@@ -136,7 +135,7 @@
               <%= form.text_field :x, class: "block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6", placeholder: "username" %>
             </div>
           </div>
-          
+
           <div>
             <%= form.label :youtube, "YouTube", class: "block text-sm font-medium leading-6 text-gray-900" %>
             <div class="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
@@ -144,7 +143,7 @@
               <%= form.text_field :youtube, class: "block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6", placeholder: "@channel" %>
             </div>
           </div>
-          
+
           <div>
             <%= form.label :facebook, "Facebook", class: "block text-sm font-medium leading-6 text-gray-900" %>
             <div class="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
@@ -152,7 +151,7 @@
               <%= form.text_field :facebook, class: "block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6", placeholder: "username" %>
             </div>
           </div>
-          
+
           <div>
             <%= form.label :tiktok, "TikTok", class: "block text-sm font-medium leading-6 text-gray-900" %>
             <div class="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
@@ -162,7 +161,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="border-t border-gray-200 pt-6 mb-6">
         <h3 class="text-base font-semibold leading-6 text-gray-900">Interface Preferences</h3>
         <div class="mt-4 max-w-xl space-y-4">
@@ -177,7 +176,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="flex justify-end gap-x-3">
         <%= link_to "Cancel", profile_show_path, class: "rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
         <%= form.submit "Update Profile", class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>

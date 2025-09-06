@@ -4,18 +4,18 @@
   <div class="filters">
     <div class="filter-group">
       <label for="queue">Queue:</label>
-      <%= f.select :queue, 
-                  [['All Queues', '']] + 
-                  SolidQueue::Job.select(:queue_name).distinct.pluck(:queue_name).map { |q| [q, q] },
+      <%= f.select :queue,
+                  [ [ "All Queues", "" ] ] +
+                  SolidQueue::Job.select(:queue_name).distinct.pluck(:queue_name).map { |q| [ q, q ] },
                   { selected: params[:queue] },
                   onchange: "this.form.submit()" %>
     </div>
-    
+
     <div class="filter-group">
       <label for="priority">Priority:</label>
-      <%= f.select :priority, 
-                  [['All Priorities', '']] + 
-                  [['High (1)', '1'], ['Medium (2)', '2'], ['Low (3)', '3']],
+      <%= f.select :priority,
+                  [ [ "All Priorities", "" ] ] +
+                  [ [ "High (1)", "1" ], [ "Medium (2)", "2" ], [ "Low (3)", "3" ] ],
                   { selected: params[:priority] },
                   onchange: "this.form.submit()" %>
     </div>
@@ -23,25 +23,25 @@
     <div class="filter-group">
       <label for="status">Status:</label>
       <%= f.select :status,
-                  [['All Statuses', '']] +
-                  [['Pending', 'pending'], ['Failed', 'failed'], ['Completed', 'completed'], ['Running', 'running']],
+                  [ [ "All Statuses", "" ] ] +
+                  [ [ "Pending", "pending" ], [ "Failed", "failed" ], [ "Completed", "completed" ], [ "Running", "running" ] ],
                   { selected: params[:status] },
                   onchange: "this.form.submit()" %>
     </div>
 
     <div class="filter-group">
       <label for="sort">Sort:</label>
-      <%= f.select :sort, 
-                  [['Newest First', 'desc'], ['Oldest First', 'asc']],
-                  { selected: params[:sort] || 'desc' },
+      <%= f.select :sort,
+                  [ [ "Newest First", "desc" ], [ "Oldest First", "asc" ] ],
+                  { selected: params[:sort] || "desc" },
                   onchange: "this.form.submit()" %>
     </div>
 
     <div class="filter-group">
       <label for="per_page">Per Page:</label>
-      <%= f.select :per_page, 
-                  [['25', '25'], ['50', '50'], ['100', '100']],
-                  { selected: params[:per_page] || '25' },
+      <%= f.select :per_page,
+                  [ [ "25", "25" ], [ "50", "50" ], [ "100", "100" ] ],
+                  { selected: params[:per_page] || "25" },
                   onchange: "this.form.submit()" %>
     </div>
   </div>
@@ -101,13 +101,13 @@
             <td><%= job.arguments&.dig("arguments") %></td>
             <td class="actions">
               <% if job.failed? || (job.arguments && job.arguments['exception_executions']&.any?) %>
-                <%= link_to "Retry", retry_admin_solid_queue_job_path(job), 
+                <%= link_to "Retry", retry_admin_solid_queue_job_path(job),
                            method: :post,
                            class: "retry-btn",
                            data: { confirm: "Are you sure you want to retry this job?" } %>
                 <span class="action-separator">|</span>
               <% end %>
-              <%= link_to "Delete", admin_solid_queue_job_path(job), 
+              <%= link_to "Delete", admin_solid_queue_job_path(job),
                          method: :delete,
                          data: { confirm: "Are you sure you want to delete this job?" },
                          class: "delete-btn" %>

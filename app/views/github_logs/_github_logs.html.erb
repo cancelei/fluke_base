@@ -16,7 +16,7 @@
                   data-action="click->dropdown#toggle">
                   <span class="mr-2">
                     <%= @selected_branch.present? ? (@available_branches.find { |id, _val| id==@selected_branch.to_i
-                      }&.last || 'main' ) : 'All Branches' %>
+                      }&.last || "main") : "All Branches" %>
                   </span>
                   <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
@@ -27,11 +27,10 @@
                 <div
                   class="absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden"
                   data-dropdown-target="menu">
-                  <%= link_to "All Branches" , project_github_logs_path(@project, branch: nil, user_name: @user_name,
-                    agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    %>
+                  <%= link_to "All Branches", project_github_logs_path(@project, branch: nil, user_name: @user_name,
+                    agreement_only: @agreement_only), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
                     <% @available_branches.each do |id, branch| %>
-                      <%= link_to (branch.presence || 'main' ), project_github_logs_path(@project, branch: id,
+                      <%= link_to (branch.presence || "main"), project_github_logs_path(@project, branch: id,
                         user_name: @user_name, agreement_only: @agreement_only),
                         class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
                         <% end %>
@@ -50,7 +49,7 @@
                   <div class="relative">
                     <!-- input -->
                     <input type="checkbox" id="toggleB" class="sr-only" <%= "checked" if @agreement_only %>
-                      disabled />
+                      disabled>
                     <!-- line -->
                     <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
                     <!-- dot -->
@@ -73,7 +72,7 @@
                   class="flex items-center w-full rounded-md bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   data-action="click->dropdown#toggle">
                   <span class="mr-2 truncate">
-                    <%= @user_name.present? ? @user_name : 'All Users' %>
+                    <%= @user_name.present? ? @user_name : "All Users" %>
                   </span>
                   <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
@@ -84,7 +83,7 @@
                 <div
                   class="absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 hidden"
                   data-dropdown-target="menu">
-                  <%= link_to "All Users" , project_github_logs_path(@project, branch: @selected_branch, user_name: nil,
+                  <%= link_to "All Users", project_github_logs_path(@project, branch: @selected_branch, user_name: nil,
                     agreement_only: @agreement_only),
                     class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 truncate" %>
                     <% @available_users.each do |name| %>
@@ -99,9 +98,8 @@
 
           <div class="flex items-end mb-2 lg:mb-0">
             <% if @selected_branch || @agreement_only || @user_name %>
-              <%= link_to 'Clear Filters' , project_github_logs_path(@project),
-                class: 'ml-2 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-                %>
+              <%= link_to "Clear Filters", project_github_logs_path(@project),
+                class: "ml-2 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
                 <% end %>
           </div>
         </div>
@@ -159,7 +157,7 @@
 
   <!-- GitHub Statistics Section -->
   <div id="github_stats">
-    <%= render 'github_logs/stats_section', 
+    <%= render "github_logs/stats_section",
         total_commits: @total_commits,
         total_additions: @total_additions,
         total_deletions: @total_deletions,
@@ -186,7 +184,7 @@
     </div>
 
     <div id="contributions_summary">
-      <%= render 'github_logs/contributions_section',
+      <%= render "github_logs/contributions_section",
           contributions: @contributions,
           last_updated: @last_updated,
           project: @project %>
@@ -201,7 +199,7 @@
         <% if @recent_commits&.any? %>
           <div class="text-sm text-gray-500">
             <% start_index = (@recent_commits.current_page - 1) * @recent_commits.limit_value + 1 %>
-            <% end_index = [@recent_commits.current_page * @recent_commits.limit_value, @recent_commits.total_count].min %>
+            <% end_index = [ @recent_commits.current_page * @recent_commits.limit_value, @recent_commits.total_count ].min %>
             Showing <%= start_index %>-<%= end_index %> of <%= @recent_commits.total_count %> commits
           </div>
         <% end %>
@@ -211,9 +209,9 @@
     <div class="border-t border-gray-200">
       <div id="github_logs">
         <% if @recent_commits&.any? %>
-          <%= render 'github_logs/commits_list', recent_commits: @recent_commits, project: @project %>
+          <%= render "github_logs/commits_list", recent_commits: @recent_commits, project: @project %>
         <% else %>
-          <%= render 'github_logs/empty_state', project: @project %>
+          <%= render "github_logs/empty_state", project: @project %>
         <% end %>
       </div>
     </div>
@@ -221,7 +219,7 @@
     <!-- Pagination for commits -->
     <% if @recent_commits&.any? %>
       <div class="px-6 py-4 border-t border-gray-200">
-        <%= render partial: 'shared/pagination', locals: { records: @recent_commits } %>
+        <%= render partial: "shared/pagination", locals: { records: @recent_commits } %>
       </div>
     <% end %>
   </div>

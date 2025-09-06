@@ -4,6 +4,6 @@
     <% presenter = present(@agreement) %>
     For agreement: <%= presenter.agreement_type_badge %> - <%= presenter.project_link %>
   </div>
-  
-  <%= render 'form', meeting: @meeting %>
+
+  <%= render "form", meeting: @meeting %>
 </div>

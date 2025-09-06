@@ -4,14 +4,13 @@
     total_pages:   total number of pages
     per_page:      number of items to fetch per page
     remote:        data-remote
-    paginator:     the paginator that renders the pagination tags inside
--%>
+    paginator:     the paginator that renders the pagination tags inside -%>
 <%= paginator.render do -%>
   <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0 mt-6">
     <div class="hidden md:flex md:flex-1 md:items-center md:justify-between">
       <div>
         <p class="text-sm text-gray-700">
-          Showing 
+          Showing
           <span class="font-medium"><%= page_entries_info %></span>
         </p>
       </div>

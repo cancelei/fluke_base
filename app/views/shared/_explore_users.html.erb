@@ -6,9 +6,9 @@
     </div>
     <div class="mt-4 sm:mt-0">
       <div class="inline-flex rounded-md shadow-sm" role="group">
-        <%= link_to 'All', explore_people_path, class: "px-4 py-2 text-sm font-medium border border-gray-200 #{params[:role].nil? ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} first:rounded-l-md last:rounded-r-md" %>
-        <%= link_to 'Entrepreneurs', explore_people_path(role: Role::ENTREPRENEUR), class: "px-4 py-2 text-sm font-medium border-t border-b border-gray-200 #{params[:role] == Role::ENTREPRENEUR ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}" %>
-        <%= link_to 'Mentors', explore_people_path(role: Role::MENTOR), class: "px-4 py-2 text-sm font-medium border border-gray-200 #{params[:role] == Role::MENTOR ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} last:rounded-r-md" %>
+        <%= link_to "All", explore_people_path, class: "px-4 py-2 text-sm font-medium border border-gray-200 #{params[:role].nil? ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} first:rounded-l-md last:rounded-r-md" %>
+        <%= link_to "Entrepreneurs", explore_people_path(role: Role::ENTREPRENEUR), class: "px-4 py-2 text-sm font-medium border-t border-b border-gray-200 #{params[:role] == Role::ENTREPRENEUR ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}" %>
+        <%= link_to "Mentors", explore_people_path(role: Role::MENTOR), class: "px-4 py-2 text-sm font-medium border border-gray-200 #{params[:role] == Role::MENTOR ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} last:rounded-r-md" %>
       </div>
     </div>
   </div>
@@ -17,11 +17,11 @@
     <% users.each do |user| %>
       <% primary_role = user.current_role&.name || user.roles.first&.name %>
       <% if primary_role == Role::MENTOR %>
-        <%= render partial: 'shared/mentor_card', locals: { user: user } %>
+        <%= render partial: "shared/mentor_card", locals: { user: user } %>
       <% elsif primary_role == Role::ENTREPRENEUR %>
-        <%= render partial: 'shared/entrepreneur_card', locals: { user: user } %>
+        <%= render partial: "shared/entrepreneur_card", locals: { user: user } %>
       <% else %>
-        <%= render partial: 'shared/user_card', locals: { user: user, user_role: :all } %>
+        <%= render partial: "shared/user_card", locals: { user: user, user_role: :all } %>
       <% end %>
     <% end %>
   </div>
@@ -38,6 +38,6 @@
 
   <!-- Pagination using our shared component -->
   <div class="mt-6">
-    <%= render partial: 'shared/pagination', locals: { records: users } %>
+    <%= render partial: "shared/pagination", locals: { records: users } %>
   </div>
 </div>

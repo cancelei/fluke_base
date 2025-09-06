@@ -1,11 +1,11 @@
 <div class="max-w-7xl mx-auto py-4 sm:px-6 lg:px-8">
   <div class="px-4 sm:px-0">
-    
+
     <!-- Flash Messages -->
     <div id="flash_messages">
-      <%= render 'shared/flash_messages' %>
+      <%= render "shared/flash_messages" %>
     </div>
-    
+
     <!-- Modern Header Section -->
     <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl mb-6">
       <div class="px-6 py-6 sm:px-8">
@@ -20,7 +20,7 @@
                   </svg>
                 </div>
               </div>
-              
+
               <!-- Header Info -->
               <div class="flex-1 min-w-0">
                 <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -32,23 +32,21 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Date Display -->
-          <%= render 'time_logs/date_header', selected_date: @selected_date %>
+          <%= render "time_logs/date_header", selected_date: @selected_date %>
         </div>
       </div>
     </div>
 
     <!-- Date Carousel -->
-    <%= render 'time_logs/date_carousel', selected_date: @selected_date, date_range: @date_range, project: @project %>
-
-
+    <%= render "time_logs/date_carousel", selected_date: @selected_date, date_range: @date_range, project: @project %>
 
     <!-- Current Time Log (if any) -->
     <div id="current_tracking_container">
       <% if @project.time_logs.where(user_id: current_user.id).in_progress.exists? %>
         <% current_log = @project.time_logs.in_progress.last %>
-        <%= render 'time_logs/current_tracking', current_log: current_log, project: @project %>
+        <%= render "time_logs/current_tracking", current_log: current_log, project: @project %>
       <% end %>
     </div>
 
@@ -57,12 +55,12 @@
   </div>
 
     <!-- All Milestones Section -->
-    <%= render 'time_logs/milestones_section', milestones: @milestones, project: @project, selected_date: @selected_date %>
+    <%= render "time_logs/milestones_section", milestones: @milestones, project: @project, selected_date: @selected_date %>
 
     <!-- Manual Time Log Entry -->
-    <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 mb-6" 
+    <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 mb-6"
          data-controller="time-log">
-      <button type="button" 
+      <button type="button"
               data-action="click->time-log#toggleForm"
               class="w-full px-6 py-4 bg-gradient-to-r from-orange-50/50 to-red-50/50 hover:from-orange-100/50 hover:to-red-100/50 transition-all duration-200 rounded-2xl flex items-center justify-between group">
         <div class="flex items-center">
@@ -73,25 +71,24 @@
             Add Manual Time Log
           </h3>
         </div>
-        <svg data-time-log-target="chevron" 
-             class="h-5 w-5 text-orange-600 transform transition-transform duration-200" 
+        <svg data-time-log-target="chevron"
+             class="h-5 w-5 text-orange-600 transform transition-transform duration-200"
              fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      
+
       <div data-time-log-target="form" class="hidden">
-        <%= render 'time_logs/manual_form', time_log_manual: @time_log_manual, milestones: @milestones %>
+        <%= render "time_logs/manual_form", time_log_manual: @time_log_manual, milestones: @milestones %>
       </div>
     </div>
 
-    <%= render 'time_logs/pending_confirmation_section', 
+    <%= render "time_logs/pending_confirmation_section",
                milestones_pending_confirmation: @milestones_pending_confirmation,
                project: @project,
                owner: @owner %>
 
-
-<%= render 'time_logs/completed_tasks_section', 
+<%= render "time_logs/completed_tasks_section",
            time_logs_completed: @time_logs_completed,
            project: @project,
            owner: @owner %>

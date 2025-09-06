@@ -1,13 +1,13 @@
 <% if previous_agreement.present? %>
   <% changes = {} %>
-  <% # List the fields you want to track %>
+# List the fields you want to track %>
   <% [
     :hourly_rate, :equity_percentage, :weekly_hours, :start_date, :end_date, :payment_type, :tasks, :terms, :milestone_ids
   ].each do |field| %>
     <% prev = previous_agreement.send(field) %>
     <% curr = agreement.send(field) %>
     <% if prev != curr %>
-      <% changes[field] = [prev, curr] %>
+      <% changes[field] = [ prev, curr ] %>
     <% end %>
   <% end %>
 

@@ -44,7 +44,7 @@
             </li>
           <% end %>
         </ul>
-        
+
         <% if current_user.has_role?(:mentor) %>
           <div class="px-6 py-6 sm:px-8 bg-gradient-to-r from-blue-50/80 to-purple-50/80 border-t border-blue-100/50">
             <div class="flex flex-col items-center justify-center space-y-3">
@@ -156,7 +156,7 @@
         </div>
         <%= link_to "See all", explore_projects_path, class: "text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline" %>
       </div>
-      
+
       <% if @explorable_projects.present? %>
         <div class="border-t border-gray-200/50">
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 p-6">
@@ -166,11 +166,11 @@
                   <h3 class="text-sm font-semibold text-gray-900 truncate"><%= display_project_name(project, current_user) %></h3>
                   <%= display_project_stage_badge(project, current_user) %>
                 </div>
-                
+
                 <div class="mt-3">
                   <%= display_project_description(project, current_user, truncate: true, class: "text-sm text-gray-600 line-clamp-2") %>
                 </div>
-                
+
                 <div class="mt-4 flex items-center justify-between">
                   <div class="flex items-center">
                     <span class="inline-block h-7 w-7 rounded-lg overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 ring-1 ring-gray-200">
@@ -180,12 +180,12 @@
                     </span>
                     <p class="ml-2 text-xs font-medium text-gray-600"><%= project.user.full_name %></p>
                   </div>
-                  
+
                   <%= link_to project_path(project), class: "text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline" do %>
                     View Project
                   <% end %>
                 </div>
-                
+
                 <%= display_collaboration_badges(project, current_user) %>
               </div>
             <% end %>

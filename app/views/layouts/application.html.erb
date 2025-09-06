@@ -13,9 +13,9 @@
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-    <link rel="icon" type="image/png" sizes="32x32" href="<%= asset_path 'logo.png' %>">
-    <link rel="icon" type="image/png" sizes="16x16" href="<%= asset_path 'logo.png' %>">
-    <link rel="apple-touch-icon" sizes="180x180" href="<%= asset_path 'logo.png' %>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<%= asset_path "logo.png" %>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<%= asset_path "logo.png" %>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<%= asset_path "logo.png" %>">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
@@ -24,20 +24,20 @@
   </head>
 
   <body class="min-h-screen bg-gray-50">
-    <%= render 'shared/navbar' %>
-    <%= render 'shared/toast_messages' %>
-    
+    <%= render "shared/navbar" %>
+    <%= render "shared/toast_messages" %>
+
     <%= turbo_frame_tag "project-context" do %>
       <% if user_signed_in? && @selected_project.present? %>
-        <%= render 'shared/project_context_nav', selected_project: @selected_project %>
+        <%= render "shared/project_context_nav", selected_project: @selected_project %>
       <% end %>
     <% end %>
 
     <div id="milestone_bar_container">
-      <%= render 'shared/milestone_bar' %>
+      <%= render "shared/milestone_bar" %>
     </div>
-    
-    <main class="<%= controller_name == 'home' && action_name == 'index' ? '' : 'mx-auto px-4 sm:px-6 lg:px-8 py-6 w-[90%]' %>">
+
+    <main class="<%= controller_name == "home" && action_name == "index" ? "" : "mx-auto px-4 sm:px-6 lg:px-8 py-6 w-[90%]" %>">
       <%= yield %>
     </main>
   </body>

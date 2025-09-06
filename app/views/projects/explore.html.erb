@@ -9,32 +9,32 @@
             <p class="mt-2 text-sm text-gray-600">Discover innovative projects looking for collaboration and mentorship</p>
           </div>
         </div>
-      
-        <%= search_form explore_projects_path, 
+
+        <%= search_form explore_projects_path,
             search_placeholder: "Search projects...",
             filters: [
               {
                 name: :category,
                 type: :select,
-                options: [["All Categories", ""], 
-                         ["Technology", "Technology"], 
-                         ["Health", "Health"], 
-                         ["Education", "Education"],
-                         ["Finance", "Finance"],
-                         ["Other", "Other"]]
+                options: [ [ "All Categories", "" ],
+                         [ "Technology", "Technology" ],
+                         [ "Health", "Health" ],
+                         [ "Education", "Education" ],
+                         [ "Finance", "Finance" ],
+                         [ "Other", "Other" ] ]
               },
               {
                 name: :collaboration_type,
                 type: :select,
-                options: [["All Types", ""], 
-                         ["Looking for Mentor", "mentor"], 
-                         ["Looking for Co-Founder", "co_founder"]]
+                options: [ [ "All Types", "" ],
+                         [ "Looking for Mentor", "mentor" ],
+                         [ "Looking for Co-Founder", "co_founder" ] ]
               }
             ],
             form_options: { class: "flex flex-wrap gap-3" } %>
       </div>
     </div>
-    
+
     <% if @projects.any? %>
       <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <% @projects.each do |project| %>
@@ -43,21 +43,21 @@
             <div class="min-w-0 flex-1">
               <!-- Gradient overlay for hover effect -->
               <div class="absolute inset-0 bg-gradient-to-r from-blue-50/0 to-purple-50/0 group-hover:from-blue-50/30 group-hover:to-purple-50/30 transition-all duration-300 rounded-2xl"></div>
-              
+
               <div class="relative z-10">
                 <div class="flex justify-between items-start mb-4">
                   <span class="absolute inset-0" aria-hidden="true"></span>
                   <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-700 transition-colors duration-200"> <%= presenter.display_name(current_user) %> </h3>
-                  
+
                   <div class="flex flex-col items-end space-y-2">
                     <%= presenter.stage_badge %>
                     <%= presenter.collaboration_badges %>
                     <%= presenter.funding_status_badge %>
                   </div>
                 </div>
-                
+
                 <p class="text-sm text-gray-600 line-clamp-3 mb-4"><%= presenter.display_description(current_user, truncate: true, length: 120) %></p>
-                
+
                 <div class="flex items-center mb-4">
                   <div class="flex-shrink-0">
                     <span class="inline-block h-10 w-10 overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-purple-50 ring-2 ring-gray-200 group-hover:ring-blue-300 transition-all duration-200">
@@ -75,11 +75,11 @@
                     </p>
                   </div>
                 </div>
-                
+
                 <div class="flex items-center justify-between pt-4 border-t border-gray-100 group-hover:border-blue-200 transition-colors duration-200">
                   <span class="text-sm font-semibold text-blue-600 group-hover:text-blue-800 transition-colors duration-200">View Details</span>
                   <svg class="w-5 h-5 text-blue-500 group-hover:text-blue-700 group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </div>
               </div>
@@ -87,7 +87,7 @@
           <% end %>
         <% end %>
       </div>
-      
+
       <% if @projects.respond_to?(:total_pages) && @projects.total_pages > 1 %>
         <div class="mt-12 flex justify-center">
           <div class="bg-white/95 backdrop-blur-md shadow-lg ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl px-6 py-4">
@@ -109,4 +109,4 @@
       </div>
     <% end %>
   </div>
-</div> 
+</div>

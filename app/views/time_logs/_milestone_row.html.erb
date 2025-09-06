@@ -31,9 +31,9 @@
             <svg class="h-3 w-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            Due: <%= milestone.due_date.strftime('%B %d, %Y') %>
+            Due: <%= milestone.due_date.strftime("%B %d, %Y") %>
           </span>
-          <span class="px-2 py-1 rounded-full text-xs font-medium <%= milestone.status == 'completed' ? 'bg-green-100 text-green-800' : milestone.status == 'in_progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800' %>">
+          <span class="px-2 py-1 rounded-full text-xs font-medium <%= milestone.status == "completed" ? "bg-green-100 text-green-800" : milestone.status == "in_progress" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800" %>">
             <%= milestone.status.humanize %>
           </span>
         </div>
@@ -51,8 +51,8 @@
         <% if TimeLog.in_progress.where(milestone_id: milestone.id, user_id: current_user.id).where.not(project_id: project.id).empty? %>
           <%= button_to time_logs_path(project, milestone_id: milestone.id),
                         method: :post,
-                        class: 'inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200',
-                        data: { confirm: 'Start tracking time for this milestone?' } do %>
+                        class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200",
+                        data: { confirm: "Start tracking time for this milestone?" } do %>
             <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-9-4V8a2 2 0 012-2h8a2 2 0 012 2v2M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
@@ -66,4 +66,4 @@
       <% end %>
     </div>
   </div>
-</div> 
+</div>

@@ -39,7 +39,7 @@
           </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-          <% time_log_users = owner ? project.time_logs.map(&:user).uniq : [current_user, project.user].compact %>
+          <% time_log_users = owner ? project.time_logs.map(&:user).uniq : [ current_user, project.user ].compact %>
           <% time_log_users.each do |user| %>
             <% milestones_pending_confirmation.each do |milestone| %>
               <% next unless milestone.time_logs.where(user: user).any? %>
@@ -48,7 +48,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-indigo-600 truncate">
                     <%= user.full_name %>
-                    <% if user.id == project.user_id %> 
+                    <% if user.id == project.user_id %>
                       <div class="'ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600">
                         owner
                       </div>
@@ -62,14 +62,14 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">
-                    <%= milestone.due_date.strftime('%b %d, %Y %I:%M %p') %>
+                    <%= milestone.due_date.strftime("%b %d, %Y %I:%M %p") %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">
                     <ul>
                       <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
-                        <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
+                        <li><%= log.strftime("%b %d, %Y %I:%M %p") %></li>
                       <% end %>
                     </ul>
                   </div>
@@ -79,7 +79,7 @@
                     <ul>
                       <% milestone.time_logs.where(user:).each do |log| %>
                         <li>
-                          <%= log.ended_at&.strftime('%b %d, %Y %I:%M %p') || "-" %>
+                          <%= log.ended_at&.strftime("%b %d, %Y %I:%M %p") || "-" %>
                             <% if log.manual_entry %>
                             <div class="relative group ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600 cursor-pointer">
                               m
@@ -96,16 +96,15 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
-                  <%= hours_spend > 0 ? "#{hours_spend} hours" : 'Less than an hour' %>
+                  <%= hours_spend > 0 ? "#{hours_spend} hours" : "Less than an hour" %>
                 </td>
                 <td>
                   <% if owner %>
-                    <%= button_to 'Mark as Completed', confirm_project_milestone_path(project, milestone),
+                    <%= button_to "Mark as Completed", confirm_project_milestone_path(project, milestone),
                                   method: :post,
-                                  class: 'ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500',
+                                  class: "ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500",
                                   form: { data: { turbo: true } },
-                                  data: { confirm: 'Are you sure you want to mark this milestone as completed?' }
-                    %>
+                                  data: { confirm: "Are you sure you want to mark this milestone as completed?" } %>
                   <% end %>
                 </td>
               </tr>
@@ -120,4 +119,4 @@
       <% end %>
     </div>
   </div>
-</div> 
+</div>

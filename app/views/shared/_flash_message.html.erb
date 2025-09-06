@@ -1,11 +1,11 @@
-<div class="rounded-md <%= type == :notice ? 'bg-green-50' : 'bg-red-50' %> p-4 mb-6">
+<div class="rounded-md <%= type == :notice ? "bg-green-50" : "bg-red-50" %> p-4 mb-6">
   <div class="flex">
     <div class="flex-shrink-0">
       <%= render "shared/icons/#{type}" %>
     </div>
     <div class="ml-3">
-      <p class="text-sm font-medium <%= type == :notice ? 'text-green-800' : 'text-red-800' %>">
-        <%= raw message %>
+      <p class="text-sm font-medium <%= type == :notice ? "text-green-800" : "text-red-800" %>">
+        <%= message %>
       </p>
     </div>
   </div>

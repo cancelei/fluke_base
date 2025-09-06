@@ -11,7 +11,7 @@
           <div class="flex-shrink-0">
             <%= link_to new_project_path, class: "group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25" do %>
               <svg class="-ml-0.5 mr-2 h-5 w-5 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
               </svg>
               <span class="relative z-10">New Project</span>
             <% end %>
@@ -19,7 +19,7 @@
         </div>
       </div>
     </div>
-    
+
     <% if @projects.present? %>
       <!-- Modern Project Cards with Glass-morphism -->
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -28,7 +28,7 @@
           <div class="relative bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:ring-blue-300/50 group overflow-hidden">
             <!-- Gradient overlay for hover effect -->
             <div class="absolute inset-0 bg-gradient-to-r from-blue-50/0 to-purple-50/0 group-hover:from-blue-50/30 group-hover:to-purple-50/30 transition-all duration-300 rounded-2xl"></div>
-            
+
             <div class="relative z-10 p-6">
               <!-- Project Header with Icon -->
               <div class="flex items-start gap-4 mb-4">
@@ -53,26 +53,26 @@
                   </div>
                 </div>
               </div>
-              
+
               <!-- Project Description -->
               <% if project.description.present? && field_visible_to_user?(project, :description, current_user) %>
                 <p class="text-sm text-gray-600 mb-4 line-clamp-3">
                   <%= presenter.display_description(current_user, truncate: true, length: 120) %>
                 </p>
               <% end %>
-              
+
               <!-- Project Link -->
               <% if project.project_link.present? && field_visible_to_user?(project, :project_link, current_user) %>
                 <div class="flex items-center mb-4">
                   <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                   </svg>
-                  <a href="<%= project.project_link.start_with?('http') ? project.project_link : "https://#{project.project_link}" %>" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 hover:underline truncate max-w-[90%]">
+                  <a href="<%= project.project_link.start_with?("http") ? project.project_link : "https://#{project.project_link}" %>" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 hover:underline truncate max-w-[90%]">
                     <%= project.project_link %>
                   </a>
                 </div>
               <% end %>
-              
+
               <!-- Project Stats -->
               <div class="flex justify-between items-center mb-6 text-sm text-gray-500">
                 <div class="flex items-center space-x-4">
@@ -86,14 +86,14 @@
                     <svg class="h-4 w-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    <span><%= pluralize(project.agreements.count, 'agreement') %></span>
+                    <span><%= pluralize(project.agreements.count, "agreement") %></span>
                   </div>
                 </div>
                 <div class="text-xs text-gray-400">
                   <%= time_ago_in_words(project.updated_at) %> ago
                 </div>
               </div>
-              
+
               <!-- Prominent Action Buttons -->
               <div class="flex items-center justify-between pt-4 border-t border-gray-100">
                 <!-- Primary Action: View Project -->
@@ -104,7 +104,7 @@
                   </svg>
                   View Project
                 <% end %>
-                
+
                 <% if current_user.id == project.user_id %>
                   <!-- Secondary Actions for Owner -->
                   <div class="flex items-center space-x-2">
@@ -114,7 +114,7 @@
                       </svg>
                       Edit
                     <% end %>
-                    
+
                     <div class="relative" data-controller="dropdown">
                       <button type="button" class="inline-flex items-center px-2 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors duration-200" data-action="click->dropdown#toggle">
                         <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
@@ -122,7 +122,7 @@
                         </svg>
                       </button>
                       <div data-dropdown-target="menu" class="hidden absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
-                        <%= button_to "Delete", project_path(project), method: :delete, data: { turbo_confirm: 'Are you sure you want to delete this project?' }, class: "block w-full px-3 py-1 text-left text-sm leading-6 text-red-900 hover:bg-red-50" %>
+                        <%= button_to "Delete", project_path(project), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this project?" }, class: "block w-full px-3 py-1 text-left text-sm leading-6 text-red-900 hover:bg-red-50" %>
                       </div>
                     </div>
                   </div>
@@ -132,13 +132,13 @@
           </div>
         <% end %>
       </div>
-      
+
       <!-- Modern Quick Actions Bar -->
       <div class="mt-8 bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl">
         <div class="px-6 py-4 sm:px-8">
           <div class="flex items-center justify-between">
             <p class="text-sm text-gray-700">
-              Showing <span class="font-semibold text-gray-900"><%= @projects.count %></span> project<%= 's' if @projects.count != 1 %>
+              Showing <span class="font-semibold text-gray-900"><%= @projects.count %></span> project<%= "s" if @projects.count != 1 %>
             </p>
             <div class="flex items-center gap-x-4">
               <%= link_to explore_projects_path, class: "inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200" do %>
@@ -164,7 +164,7 @@
           <p class="text-sm text-gray-600 mb-6 max-w-md mx-auto">Get started by creating your first project. You can track milestones, manage agreements, and collaborate with others.</p>
           <%= link_to new_project_path, class: "inline-flex items-center rounded-xl border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105" do %>
             <svg class="-ml-0.5 mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
             </svg>
             Create Your First Project
           <% end %>

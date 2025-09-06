@@ -36,7 +36,7 @@
           <tbody class="bg-white divide-y divide-gray-200">
           <% milestones_pending_confirmation.each do |milestone| %>
           <% time_log_users = milestone.time_logs.map(&:user).uniq %>
-            <% (selected_user ? [selected_user] : time_log_users).each do |user| %>
+            <% (selected_user ? [ selected_user ] : time_log_users).each do |user| %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-indigo-600 truncate">
@@ -55,14 +55,14 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">
-                    <%= milestone.due_date.strftime('%b %d, %Y %I:%M %p') %>
+                    <%= milestone.due_date.strftime("%b %d, %Y %I:%M %p") %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">
                     <ul>
                       <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
-                        <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
+                        <li><%= log.strftime("%b %d, %Y %I:%M %p") %></li>
                       <% end %>
                     </ul>
                   </div>
@@ -71,14 +71,14 @@
                   <div class="text-sm text-gray-900">
                     <ul>
                       <% milestone.time_logs.where(user:).pluck(:ended_at).each do |log| %>
-                        <li><%= log&.strftime('%b %d, %Y %I:%M %p') || "-" %></li>
+                        <li><%= log&.strftime("%b %d, %Y %I:%M %p") || "-" %></li>
                       <% end %>
                     </ul>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
-                  <%= hours_spend > 0 ? "#{hours_spend} hours" : 'Less than an hour' %>
+                  <%= hours_spend > 0 ? "#{hours_spend} hours" : "Less than an hour" %>
                 </td>
               </tr>
             <% end %>
@@ -130,7 +130,7 @@
           <tbody class="bg-white divide-y divide-gray-200">
           <% time_logs_completed.each do |milestone| %>
             <% time_log_users = milestone.time_logs.map(&:user).uniq %>
-              <% (selected_user ? [selected_user] : time_log_users).each do |user| %>
+              <% (selected_user ? [ selected_user ] : time_log_users).each do |user| %>
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-medium text-indigo-600 truncate">
@@ -149,14 +149,14 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">
-                      <%= milestone.due_date.strftime('%b %d, %Y %I:%M %p') %>
+                      <%= milestone.due_date.strftime("%b %d, %Y %I:%M %p") %>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">
                       <ul>
                         <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
-                          <li><%= log.strftime('%b %d, %Y %I:%M %p') %></li>
+                          <li><%= log.strftime("%b %d, %Y %I:%M %p") %></li>
                         <% end %>
                       </ul>
                     </div>
@@ -165,14 +165,14 @@
                     <div class="text-sm text-gray-900">
                       <ul>
                         <% milestone.time_logs.where(user:).pluck(:ended_at).each do |log| %>
-                          <li><%= log&.strftime('%b %d, %Y %I:%M %p') || "-" %></li>
+                          <li><%= log&.strftime("%b %d, %Y %I:%M %p") || "-" %></li>
                         <% end %>
                       </ul>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
-                    <%= hours_spend > 0 ? "#{hours_spend} hours" : 'Less than an hour' %>
+                    <%= hours_spend > 0 ? "#{hours_spend} hours" : "Less than an hour" %>
                   </td>
                 </tr>
               <% end %>
@@ -191,16 +191,16 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">
-                  <%= log.started_at.strftime('%b %d, %Y %I:%M %p') %>
+                  <%= log.started_at.strftime("%b %d, %Y %I:%M %p") %>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">
-                  <%= log.ended_at.strftime('%b %d, %Y %I:%M %p') %>
+                  <%= log.ended_at.strftime("%b %d, %Y %I:%M %p") %>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <%= log.hours_spent > 0 ? "#{log.hours_spent} hours" : 'Less than an hour' %>
+                <%= log.hours_spent > 0 ? "#{log.hours_spent} hours" : "Less than an hour" %>
               </td>
             </tr>
           <% end %>
@@ -213,4 +213,4 @@
       <% end %>
     </div>
   </div>
-</div> 
+</div>

@@ -1,4 +1,4 @@
-<% 
+<%
   @milestones = Milestone.where(project_id: @project.id) || []
   @milestone_ids = @agreement_form&.milestone_ids_array || []
 %>
@@ -15,7 +15,7 @@
       <% other_party_id = @agreement_form&.other_party_user_id || params[:other_party_id] %>
       <%= form.hidden_field :other_party_user_id, value: other_party_id %>
       <%= form.hidden_field :counter_agreement_id, value: params[:counter_to_id] %>
-      
+
       <% if current_user.id != @project&.user_id %>
         <div class="bg-blue-50 p-4 rounded-md mb-6">
           <div class="flex">
@@ -37,7 +37,7 @@
           </div>
         </div>
       <% end %>
-      
+
       <div class="sm:col-span-3">
         <%= form.label :start_date, class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-1">
@@ -64,33 +64,33 @@
         <label class="block text-sm font-medium text-gray-700">Payment Type</label>
         <div class="mt-1 space-y-2">
           <div class="flex items-center">
-            <%= form.radio_button :payment_type, Agreement::HOURLY, 
-                data: { 
+            <%= form.radio_button :payment_type, Agreement::HOURLY,
+                data: {
                   action: "change->agreement-form#togglePaymentFields",
                   agreement_form_target: "paymentType"
-                }, 
+                },
                 class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
             <label for="agreement_payment_type_hourly" class="ml-3 block text-sm font-medium text-gray-700">
               Hourly Rate
             </label>
           </div>
           <div class="flex items-center">
-            <%= form.radio_button :payment_type, Agreement::EQUITY, 
-                data: { 
+            <%= form.radio_button :payment_type, Agreement::EQUITY,
+                data: {
                   action: "change->agreement-form#togglePaymentFields",
                   agreement_form_target: "paymentType"
-                }, 
+                },
                 class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
             <label for="agreement_payment_type_equity" class="ml-3 block text-sm font-medium text-gray-700">
               Equity Only
             </label>
           </div>
           <div class="flex items-center">
-            <%= form.radio_button :payment_type, Agreement::HYBRID, 
-                data: { 
+            <%= form.radio_button :payment_type, Agreement::HYBRID,
+                data: {
                   action: "change->agreement-form#togglePaymentFields",
                   agreement_form_target: "paymentType"
-                }, 
+                },
                 class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
             <label for="agreement_payment_type_hybrid" class="ml-3 block text-sm font-medium text-gray-700">
               Hybrid (Hourly + Equity)
@@ -122,19 +122,18 @@
       </div>
 
       <div class="sm:col-span-6">
-        
+
         <%= form.label :milestones, "Milestones", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-1">
-          <input type="hidden" data-agreement-form-target="milestoneField" />
+          <input type="hidden" data-agreement-form-target="milestoneField">
           <% @milestones.each_with_index do |milestone, index| %>
-            <%= check_box_tag "agreement[milestone_ids][]", milestone.id, @milestone_ids.include?(milestone.id), 
-                id: "milestone_#{index}", 
-                class: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500", 
-                data: { 
+            <%= check_box_tag "agreement[milestone_ids][]", milestone.id, @milestone_ids.include?(milestone.id),
+                id: "milestone_#{index}",
+                class: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500",
+                data: {
                   action: "change->agreement-form#updateMilestoneField",
                   agreement_form_target: "milestoneIds"
-                }
-                %>
+                } %>
             <%= label_tag "milestone_#{index}", milestone.title, class: "inline-block text-sm font-medium text-gray-700 ml-2 mr-4" %>
           <% end %>
           <% if agreement.errors[:milestone_ids] %>
@@ -160,41 +159,41 @@
           <%= form.submit "Create Agreement", class: "btn-primary" %>
         <% end %>
       <% elsif agreement.persisted? %>
-        <% # Get current user's participant to check permissions %>
+# Get current user's participant to check permissions %>
         <% current_participant = agreement.agreement_participants.find_by(user_id: current_user.id) %>
-        
+
         <% if can?(:edit, @agreement) && !@agreement.countered? %>
           <%= form.submit "Update Agreement", class: "btn-primary" %>
         <% end %>
-        
+
         <% if current_participant&.can_accept_agreement? %>
-          <%= button_to "Accept Agreement", accept_agreement_path(@agreement), 
-              method: :patch, 
+          <%= button_to "Accept Agreement", accept_agreement_path(@agreement),
+              method: :patch,
               class: "btn-success",
               data: { turbo_confirm: "Are you sure you want to accept this agreement?" } %>
         <% end %>
-        
+
         <% if current_participant&.can_reject_agreement? %>
-          <%= button_to "Reject Agreement", reject_agreement_path(@agreement), 
-              method: :patch, 
+          <%= button_to "Reject Agreement", reject_agreement_path(@agreement),
+              method: :patch,
               class: "btn-danger",
               data: { turbo_confirm: "Are you sure you want to reject this agreement?" } %>
         <% end %>
-        
+
         <% if current_participant&.can_make_counter_offer? %>
-          <%= button_to "Counter Offer", counter_offer_agreement_path(@agreement), 
-              method: :post, 
+          <%= button_to "Counter Offer", counter_offer_agreement_path(@agreement),
+              method: :post,
               class: "btn-warning",
               data: { turbo_confirm: "Are you sure you want to make a counter offer?" } %>
         <% end %>
-        
+
         <% if can?(:cancel, @agreement) && !@agreement.countered? %>
-          <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement), 
-              method: :patch, 
+          <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement),
+              method: :patch,
               class: "btn-danger",
               data: { turbo_confirm: "Are you sure you want to cancel this agreement?" } %>
         <% end %>
       <% end %>
     </div>
-  <% end %> 
+  <% end %>
 </div>

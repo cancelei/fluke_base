@@ -2,24 +2,24 @@
   <div class="px-4 py-6 sm:px-0">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-semibold text-gray-900">Notifications</h1>
-      
+
       <% if current_user.notifications.unread.exists? %>
         <%= button_to mark_all_as_read_notifications_path, method: :post, class: "text-sm text-indigo-600 hover:text-indigo-900" do %>
           Mark all as read
         <% end %>
       <% end %>
     </div>
-    
+
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200" id="notifications_container">
-        <%= render 'notifications', notifications: @notifications %>
+        <%= render "notifications", notifications: @notifications %>
       </ul>
     </div>
-    
+
     <% if @notifications.respond_to?(:total_pages) && @notifications.total_pages > 1 %>
       <div class="mt-6">
         <%= paginate @notifications %>
       </div>
     <% end %>
   </div>
-</div> 
+</div>

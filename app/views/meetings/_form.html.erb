@@ -1,4 +1,4 @@
-<%= form_with(model: [@agreement, meeting], class: "mx-auto mt-4") do |form| %>
+<%= form_with(model: [ @agreement, meeting ], class: "mx-auto mt-4") do |form| %>
   <% if meeting.errors.any? %>
     <div class="bg-red-50 p-4 rounded-md mb-6">
       <div class="flex">
@@ -8,7 +8,7 @@
           </svg>
         </div>
         <div class="ml-3">
-          <h3 class="text-sm font-medium text-red-800">There <%= meeting.errors.count == 1 ? 'is' : 'are' %> <%= pluralize(meeting.errors.count, "error") %> with this meeting:</h3>
+          <h3 class="text-sm font-medium text-red-800">There <%= meeting.errors.count == 1 ? "is" : "are" %> <%= pluralize(meeting.errors.count, "error") %> with this meeting:</h3>
           <div class="mt-2 text-sm text-red-700">
             <ul role="list" class="list-disc space-y-1 pl-5">
               <% meeting.errors.full_messages.each do |message| %>
@@ -51,7 +51,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="mt-2 text-sm text-gray-500">
       <p>
         <strong>Note:</strong> This meeting will be scheduled between
@@ -65,4 +65,4 @@
       <%= form.submit class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
     </div>
   </div>
-<% end %> 
+<% end %>

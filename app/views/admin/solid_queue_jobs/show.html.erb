@@ -1,35 +1,39 @@
 <!-- app/views/admin/solid_queue_jobs/show.html.erb -->
 <div class="solid-queue-job-detail">
   <h2>Job Details</h2>
-  
+
   <div class="job-info">
     <div class="info-row">
       <div class="label">ID:</div>
       <div class="value"><%= @job.id %></div>
     </div>
-    
+
     <div class="info-row">
       <div class="label">Queue:</div>
       <div class="value"><%= @job.queue_name %></div>
     </div>
-    
+
     <div class="info-row">
       <div class="label">Priority:</div>
       <div class="value">
         <% case @job.priority
-           when 0 %>Normal<% 
-           when 1 %>High<% 
-           when 2 %>Medium<% 
-           when 3 %>Low<% 
-           end %>
+           when 0 %>Normal<%
+           when 1
+                          %>High<%
+           when 2
+                                %>Medium<%
+           when 3
+                                        %>Low<%
+           end
+                                             %>
       </div>
     </div>
-    
+
     <div class="info-row">
       <div class="label">Job Class:</div>
       <div class="value"><%= @job.class_name %></div>
     </div>
-    
+
     <div class="info-row">
       <div class="label">Status:</div>
       <div class="value">
@@ -42,17 +46,17 @@
         <% end %>
       </div>
     </div>
-    
+
     <div class="info-row">
       <div class="label">Scheduled At:</div>
       <div class="value"><%= @job.scheduled_at.strftime("%Y-%m-%d %H:%M:%S") %></div>
     </div>
-    
+
     <div class="info-row">
       <div class="label">Created At:</div>
       <div class="value"><%= @job.created_at.strftime("%Y-%m-%d %H:%M:%S") %></div>
     </div>
-    
+
     <% if @job.arguments %>
       <div class="info-row">
         <div class="label">Arguments:</div>
@@ -61,16 +65,16 @@
         </div>
       </div>
     <% end %>
-    
+
     <% if @job.arguments && @job.arguments['exception_executions'] && !@job.arguments['exception_executions'].empty? %>
       <div class="info-row">
         <div class="label">Exception Details:</div>
         <div class="value">
-          <% @job.arguments['exception_executions'].each do |exception| %>
+          <% @job.arguments["exception_executions"].each do |exception| %>
             <div class="exception-detail">
-              <div class="exception-message"><%= exception['message'] %></div>
+              <div class="exception-message"><%= exception["message"] %></div>
               <div class="exception-backtrace">
-                <pre><%= exception['backtrace'].join("\n") %></pre>
+                <pre><%= exception["backtrace"].join("\n") %></pre>
               </div>
             </div>
           <% end %>
@@ -81,7 +85,7 @@
 
   <div class="actions">
     <%= link_to "Back to Jobs", admin_solid_queue_jobs_path, class: "back-btn" %>
-    <%= link_to "Delete", admin_solid_queue_job_path(@job), 
+    <%= link_to "Delete", admin_solid_queue_job_path(@job),
                method: :delete,
                data: { confirm: "Are you sure you want to delete this job?" },
                class: "delete-btn" %>
