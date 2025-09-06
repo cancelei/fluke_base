@@ -50,10 +50,11 @@ class Admin::SolidQueueJobsController < ApplicationController
           # Create a whitelist of allowed job classes
           allowed_job_classes = ActiveJob::Base.descendants.map(&:to_s)
 
+          # First check if the class name is in our whitelist before attempting to constantize it
           if allowed_job_classes.include?(job_class_name)
             begin
-              # Use a safer approach to resolve the class
-              job_class = job_class_name.safe_constantize
+              # Now it's safe to constantize since we've verified it's in our whitelist
+              job_class = job_class_name.constantize
 
               # Additional validation that the class is actually a job class
               if job_class && job_class < ActiveJob::Base
