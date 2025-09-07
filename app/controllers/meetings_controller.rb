@@ -66,19 +66,4 @@ class MeetingsController < ApplicationController
   def meeting_params
     params.require(:meeting).permit(:title, :description, :start_time, :end_time)
   end
-
-  # Google Calendar integration methods would go here
-  # def create_google_calendar_event(meeting)
-  #   # Initialize Google Calendar API client
-  #   # Create event in both attendees' calendars
-  #   # Return the created event object
-  # end
-
-  # def update_google_calendar_event(meeting)
-  #   # Update the existing Google Calendar event
-  # end
-
-  # def delete_google_calendar_event(meeting)
-  #   # Delete the Google Calendar event
-  # end
 end

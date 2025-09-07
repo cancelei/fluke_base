@@ -2,6 +2,10 @@ class User < ApplicationRecord
   belongs_to :selected_project, class_name: "Project", optional: true
   belongs_to :current_role, class_name: "Role", optional: true
 
+  # Define user_roles association first to avoid HasManyThroughOrderError
+  has_many :user_roles, dependent: :destroy
+  has_many :roles, through: :user_roles
+
   # Define agreement_participants association before UserAgreements concern
   # This must be defined before any has_many :through associations that use it
   has_many :agreement_participants, dependent: :delete_all
@@ -12,6 +16,7 @@ class User < ApplicationRecord
   has_many :received_agreements, -> { where(agreement_participants: { is_initiator: false }) },
            through: :agreement_participants, source: :agreement
 
+  # Now include concerns after all base associations are defined
   include Roleable
   include UserAgreements
   include UserMessaging

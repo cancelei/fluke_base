@@ -2,8 +2,8 @@ module Roleable
   extend ActiveSupport::Concern
 
   included do
-    has_many :user_roles, dependent: :destroy
-    has_many :roles, through: :user_roles
+    # Associations are now defined in the User model directly
+    # to avoid HasManyThroughOrderError
   end
 
   def has_role?(role_name)
