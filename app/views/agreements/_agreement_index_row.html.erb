@@ -1,0 +1,46 @@
+<% presenter = present(agreement) %>
+<tr>
+  <td class="px-6 py-4 whitespace-nowrap">
+    <div class="text-sm font-medium text-gray-900">
+      <% if agreement.active? || agreement.completed? %>
+        <%= presenter.project_link %>
+      <% elsif agreement.initiator&.id == current_user.id %>
+        <%= presenter.project_link %>
+      <% else %>
+        <span class="text-gray-500"><%= agreement.project.name %></span>
+        <span class="text-xs text-gray-400">(limited access)</span>
+      <% end %>
+    </div>
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap">
+    <%= presenter.agreement_type_badge %>
+    <% if agreement.initiator&.id == current_user.id %>
+      <%= presenter.payment_type_badge %>
+    <% end %>
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap">
+    <div class="text-sm text-gray-900">
+      <% if agreement.initiator&.id == current_user.id %>
+        <%= agreement.other_party&.full_name %>
+      <% else %>
+        <%= agreement.project.user.full_name %>
+      <% end %>
+    </div>
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap">
+    <%= render "agreement_status", agreement: agreement %>
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap">
+    <% if agreement.initiator&.id == current_user.id %>
+      <span class="text-sm text-gray-500"><%= presenter.created_timeframe %></span>
+    <% else %>
+      <%= presenter.payment_type_badge %>
+    <% end %>
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+    <%= presenter.time_remaining %>
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+    <%= render "agreement_actions", agreement: agreement %>
+  </td>
+</tr>

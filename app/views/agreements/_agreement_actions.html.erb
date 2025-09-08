@@ -1,15 +1,43 @@
-<% presenter = present(agreement) %>
-<%= link_to "View", agreement, class: "text-indigo-600 hover:text-indigo-900" %>
+<div id="<%= "#{dom_id(agreement)}_actions" %>">
+  <% presenter = present(agreement) %>
+  <%= link_to "View", agreement, class: "text-indigo-600 hover:text-indigo-900" %>
 
-<% if agreement.pending? %>
-  <% if agreement.initiator&.id == current_user.id %>
-    <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 text-indigo-600 hover:text-indigo-900" %>
-    <%= link_to "Cancel", agreement_path(agreement), method: :delete, data: { confirm: "Are you sure you want to cancel this agreement?" }, class: "ml-3 text-red-600 hover:text-red-900" %>
+  <% if agreement.pending? %>
+    <% if agreement.initiator&.id == current_user.id %>
+      <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 text-indigo-600 hover:text-indigo-900" %>
+      <%= button_to "Cancel", cancel_agreement_path(agreement),
+          method: :patch,
+          class: "ml-3 text-red-600 hover:text-red-900 inline",
+          data: {
+            turbo_confirm: "Are you sure you want to cancel this agreement?",
+            turbo_frame: dom_id(agreement)
+          } %>
+    <% end %>
+    <% if presenter.can_be_accepted_by?(current_user) %>
+      <%= button_to "Accept", accept_agreement_path(agreement),
+          method: :patch,
+          class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500",
+          data: {
+            turbo_confirm: "Are you sure you want to accept this agreement?",
+            turbo_frame: dom_id(agreement)
+          } %>
+    <% end %>
+    <% if presenter.can_be_rejected_by?(current_user) %>
+      <%= button_to "Decline", reject_agreement_path(agreement),
+          method: :patch,
+          class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+          data: {
+            turbo_confirm: "Are you sure you want to reject this agreement?",
+            turbo_frame: dom_id(agreement)
+          } %>
+    <% end %>
+  <% elsif agreement.active? && presenter.can_be_completed_by?(current_user) %>
+    <%= button_to "Mark as Completed", complete_agreement_path(agreement),
+        method: :patch,
+        class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+        data: {
+          turbo_confirm: "Are you sure you want to mark this agreement as completed?",
+          turbo_frame: dom_id(agreement)
+        } %>
   <% end %>
-  <% if presenter.can_be_accepted_by?(current_user) %>
-    <%= button_to "Accept", accept_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
-  <% end %>
-  <% if presenter.can_be_rejected_by?(current_user) %>
-    <%= button_to "Decline", reject_agreement_path(agreement), method: :patch, class: "ml-2 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-  <% end %>
-<% end %>
+</div>

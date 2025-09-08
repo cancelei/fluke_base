@@ -1,30 +1,65 @@
 class AgreementsController < ApplicationController
+  include ActionView::RecordIdentifier
+
   before_action :authenticate_user!
-  before_action :set_agreement, only: %i[show edit update destroy accept reject complete cancel counter_offer]
-  before_action :authorize_agreement, only: %i[show edit update destroy]
+  before_action :set_agreement, only: %i[show edit update destroy accept reject complete cancel counter_offer meetings_section github_section time_logs_section counter_offers_section]
+  before_action :authorize_agreement, only: %i[show edit update destroy meetings_section github_section time_logs_section counter_offers_section]
   before_action :check_project_ownership, only: %i[new create]
   before_action :ensure_can_modify, only: %i[edit update destroy]
   before_action :authorize_agreement_action, only: %i[accept reject counter_offer cancel]
 
   def index
-    query = AgreementsQuery.new(current_user, params)
-    @my_agreements = query.my_agreements
-    @other_party_agreements = query.other_party_agreements
+    @query = AgreementsQuery.new(current_user, filter_params)
+    @my_agreements = @query.my_agreements
+    @other_party_agreements = @query.other_party_agreements
 
-    @my_agreements, @other_party_agreements = query.filter_by_status(@my_agreements, @other_party_agreements)
+    respond_to do |format|
+      format.html
+      format.turbo_stream do
+        if params[:clear_filters]
+          redirect_to agreements_path
+        else
+          render :index
+        end
+      end
+    end
   end
 
   def show
     @project = @agreement.project
-    @meetings = @agreement.meetings.order(start_time: :asc) if @agreement.active? || @agreement.completed?
+    # Heavy data loading moved to lazy sections:
+    # - @meetings moved to meetings_section
+    # - GitHub logs moved to github_section
+    # - Time logs moved to time_logs_section
+    # - Counter offers moved to counter_offers_section
 
     # Check if the current user has permission to view full project details
     @can_view_full_details = @agreement.can_view_full_project_details?(current_user)
 
-    # Calculate financial details for all payment types
+    # Calculate financial details for all payment types (lightweight calculations only)
     if @agreement.active? || @agreement.completed?
       @total_cost = @agreement.calculate_total_cost
       @duration_weeks = @agreement.duration_in_weeks
+    end
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream do
+        if turbo_frame_request?
+          render turbo_stream: turbo_stream.replace(
+            dom_id(@agreement),
+            partial: "agreement_show_content",
+            locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details }
+          )
+        else
+          # For non-frame turbo stream requests, just replace the main content
+          render turbo_stream: turbo_stream.replace(
+            dom_id(@agreement),
+            partial: "agreement_show_content",
+            locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details }
+          )
+        end
+      end
     end
   end
 
@@ -126,7 +161,13 @@ class AgreementsController < ApplicationController
         notify_and_message_other_party(:create)
       end
 
-      redirect_to @agreement, notice: notice_message
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:notice] = notice_message
+          render :create
+        end
+        format.html { redirect_to @agreement, notice: notice_message }
+      end
     else
       Rails.logger.debug @agreement_form.errors.full_messages.inspect
       @agreement_form.errors.full_messages.each { |error| flash[:alert] = error }
@@ -194,18 +235,58 @@ class AgreementsController < ApplicationController
   def accept
     if @agreement.accept!
       notify_and_message_other_party(:accept)
-      redirect_to @agreement, notice: "Agreement was successfully accepted."
+
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:notice] = "Agreement was successfully accepted."
+          render turbo_stream: [
+            turbo_stream.replace(dom_id(@agreement), partial: "agreement_show_content", locals: { agreement: @agreement, project: @agreement.project, can_view_full_details: @agreement.can_view_full_project_details?(current_user) }),
+            turbo_stream.prepend("flash_messages", partial: "shared/flash_message", locals: { type: "notice", message: flash.now[:notice] })
+          ]
+        end
+        format.html { redirect_to @agreement, notice: "Agreement was successfully accepted." }
+      end
     else
-      redirect_to @agreement, alert: "Unable to accept agreement."
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:alert] = "Unable to accept agreement."
+          render turbo_stream: turbo_stream.prepend(
+            "flash_messages",
+            partial: "shared/flash_message",
+            locals: { type: "alert", message: flash.now[:alert] }
+          )
+        end
+        format.html { redirect_to @agreement, alert: "Unable to accept agreement." }
+      end
     end
   end
 
   def reject
     if @agreement.reject!
       notify_and_message_other_party(:reject)
-      redirect_to @agreement, notice: "Agreement was successfully rejected."
+
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:notice] = "Agreement was successfully rejected."
+          render turbo_stream: [
+            turbo_stream.replace(dom_id(@agreement), partial: "agreement_show_content", locals: { agreement: @agreement, project: @agreement.project, can_view_full_details: @agreement.can_view_full_project_details?(current_user) }),
+            turbo_stream.prepend("flash_messages", partial: "shared/flash_message", locals: { type: "notice", message: flash.now[:notice] })
+          ]
+        end
+        format.html { redirect_to @agreement, notice: "Agreement was successfully rejected." }
+      end
     else
-      redirect_to @agreement, alert: "Unable to reject agreement."
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:alert] = "Unable to reject agreement."
+          render turbo_stream: turbo_stream.prepend(
+            "flash_messages",
+            partial: "shared/flash_message",
+            locals: { type: "alert", message: flash.now[:alert] }
+          )
+        end
+        format.html { redirect_to @agreement, alert: "Unable to reject agreement." }
+      end
     end
   end
 
@@ -214,18 +295,58 @@ class AgreementsController < ApplicationController
 
     if @agreement.complete!
       notify_and_message_other_party(:complete)
-      redirect_to @agreement, notice: "This agreement has been marked as completed."
+
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:notice] = "This agreement has been marked as completed."
+          render turbo_stream: [
+            turbo_stream.replace(dom_id(@agreement), partial: "agreement_show_content", locals: { agreement: @agreement, project: @agreement.project, can_view_full_details: @agreement.can_view_full_project_details?(current_user) }),
+            turbo_stream.prepend("flash_messages", partial: "shared/flash_message", locals: { type: "notice", message: flash.now[:notice] })
+          ]
+        end
+        format.html { redirect_to @agreement, notice: "This agreement has been marked as completed." }
+      end
     else
-      redirect_to @agreement, alert: "This agreement cannot be marked as completed."
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:alert] = "This agreement cannot be marked as completed."
+          render turbo_stream: turbo_stream.prepend(
+            "flash_messages",
+            partial: "shared/flash_message",
+            locals: { type: "alert", message: flash.now[:alert] }
+          )
+        end
+        format.html { redirect_to @agreement, alert: "This agreement cannot be marked as completed." }
+      end
     end
   end
 
   def cancel
     if @agreement.cancel!
       notify_and_message_other_party(:cancel)
-      redirect_to @agreement, notice: "Agreement was successfully cancelled."
+
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:notice] = "Agreement was successfully cancelled."
+          render turbo_stream: [
+            turbo_stream.replace(dom_id(@agreement), partial: "agreement_show_content", locals: { agreement: @agreement, project: @agreement.project, can_view_full_details: @agreement.can_view_full_project_details?(current_user) }),
+            turbo_stream.prepend("flash_messages", partial: "shared/flash_message", locals: { type: "notice", message: flash.now[:notice] })
+          ]
+        end
+        format.html { redirect_to @agreement, notice: "Agreement was successfully cancelled." }
+      end
     else
-      redirect_to @agreement, alert: "Unable to cancel agreement."
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:alert] = "Unable to cancel agreement."
+          render turbo_stream: turbo_stream.prepend(
+            "flash_messages",
+            partial: "shared/flash_message",
+            locals: { type: "alert", message: flash.now[:alert] }
+          )
+        end
+        format.html { redirect_to @agreement, alert: "Unable to cancel agreement." }
+      end
     end
   end
 
@@ -239,6 +360,89 @@ class AgreementsController < ApplicationController
       counter_to_id: @agreement.id,
       other_party_id: initiator&.id
     )
+  end
+
+  # Lazy loading sections
+  def meetings_section
+    begin
+      @project = @agreement.project
+      # Optimized query with proper includes to avoid N+1
+      @meetings = if @agreement.active? || @agreement.completed?
+        @agreement.meetings
+                  .includes(:agreement, :user) # Include user for meeting creator info
+                  .order(start_time: :asc)
+      else
+        []
+      end
+
+      respond_to do |format|
+        format.turbo_stream { render partial: "meetings_section", locals: { agreement: @agreement, meetings: @meetings, project: @project } }
+        format.html { render partial: "meetings_section", locals: { agreement: @agreement, meetings: @meetings, project: @project } }
+      end
+    rescue => e
+      Rails.logger.error "Error loading meetings section: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render partial: "lazy_loading_error", locals: { title: "Meetings", description: "Scheduled meetings and collaboration sessions" } }
+        format.html { render partial: "lazy_loading_error", locals: { title: "Meetings", description: "Scheduled meetings and collaboration sessions" } }
+      end
+    end
+  end
+
+  def github_section
+    begin
+      @project = @agreement.project.includes(:github_logs) # Preload github_logs
+      @can_view_full_details = @agreement.can_view_full_project_details?(current_user)
+
+      respond_to do |format|
+        format.turbo_stream { render partial: "github_section", locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details } }
+        format.html { render partial: "github_section", locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details } }
+      end
+    rescue => e
+      Rails.logger.error "Error loading github section: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render partial: "lazy_loading_error", locals: { title: "GitHub Integration", description: "Repository access and development activity" } }
+        format.html { render partial: "lazy_loading_error", locals: { title: "GitHub Integration", description: "Repository access and development activity" } }
+      end
+    end
+  end
+
+  def time_logs_section
+    begin
+      @project = @agreement.project
+      @can_view_full_details = @agreement.can_view_full_project_details?(current_user)
+
+      # Preload time logs with users to avoid N+1 queries
+      @project = Project.includes(time_logs: :user).find(@project.id) if @can_view_full_details
+
+      respond_to do |format|
+        format.turbo_stream { render partial: "time_logs_section", locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details } }
+        format.html { render partial: "time_logs_section", locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details } }
+      end
+    rescue => e
+      Rails.logger.error "Error loading time logs section: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render partial: "lazy_loading_error", locals: { title: "Time Tracking", description: "Hours spent and remaining time for this agreement" } }
+        format.html { render partial: "lazy_loading_error", locals: { title: "Time Tracking", description: "Hours spent and remaining time for this agreement" } }
+      end
+    end
+  end
+
+  def counter_offers_section
+    begin
+      # Build agreement chain with optimized loading
+      @agreement_chain = build_agreement_chain_optimized(@agreement)
+
+      respond_to do |format|
+        format.turbo_stream { render partial: "counter_offers_section", locals: { agreement: @agreement, agreement_chain: @agreement_chain } }
+        format.html { render partial: "counter_offers_section", locals: { agreement: @agreement, agreement_chain: @agreement_chain } }
+      end
+    rescue => e
+      Rails.logger.error "Error loading counter offers section: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render partial: "lazy_loading_error", locals: { title: "Negotiation History", description: "Changes and counter-offers made during negotiation" } }
+        format.html { render partial: "lazy_loading_error", locals: { title: "Negotiation History", description: "Changes and counter-offers made during negotiation" } }
+      end
+    end
   end
 
   private
@@ -401,7 +605,11 @@ class AgreementsController < ApplicationController
     end
 
     def set_agreement
-      @agreement = Agreement.find(params[:id])
+      @agreement = Agreement.includes(
+        project: :user,
+        agreement_participants: :user,
+        meetings: []
+      ).find(params[:id])
     end
 
     def authorize_agreement
@@ -467,7 +675,17 @@ class AgreementsController < ApplicationController
     end
 
     def agreement_params
-      params.require(:agreement).permit(:project_id, :agreement_type, :payment_type, :start_date, :end_date, :tasks, :weekly_hours, :hourly_rate, :equity_percentage, :counter_agreement_id, :status, :terms, milestone_ids: [])
+      permitted_params = params.require(:agreement).permit(
+        :project_id, :agreement_type, :payment_type, :start_date, :end_date,
+        :tasks, :weekly_hours, :hourly_rate, :equity_percentage,
+        :counter_agreement_id, :status, :terms, milestone_ids: []
+      )
+
+      # Sanitize HTML content for security
+      permitted_params[:tasks] = ActionController::Base.helpers.sanitize(permitted_params[:tasks]) if permitted_params[:tasks]
+      permitted_params[:terms] = ActionController::Base.helpers.sanitize(permitted_params[:terms]) if permitted_params[:terms]
+
+      permitted_params
     end
 
     def authorize_agreement_action
@@ -479,5 +697,48 @@ class AgreementsController < ApplicationController
       <<~HTML
         <a href="#{agreement_path(@agreement)}" class="p-1 bg-white text-gray-500">View Details</a>
       HTML
+    end
+
+    def filter_params
+      params.permit(:status, :agreement_type, :start_date_from, :start_date_to, :end_date_from, :end_date_to, :search, :clear_filters)
+    end
+
+    def build_agreement_chain(agreement)
+      agreement_chain = []
+      current = agreement
+      while current.counter_to.present?
+        agreement_chain << [ current, current.counter_to ]
+        current = current.counter_to
+      end
+      agreement_chain
+    end
+
+    def build_agreement_chain_optimized(agreement)
+      # Collect all agreement IDs in the chain first
+      chain_ids = []
+      current = agreement
+      chain_ids << current.id
+
+      while current.counter_to_id.present?
+        chain_ids << current.counter_to_id
+        current = current.counter_to
+      end
+
+      # Load all agreements in the chain with includes to avoid N+1
+      agreements_by_id = Agreement.includes(
+        agreement_participants: :user,
+        milestones: []
+      ).where(id: chain_ids).index_by(&:id)
+
+      # Rebuild the chain with preloaded data
+      agreement_chain = []
+      current = agreement
+      while current.counter_to_id.present?
+        previous = agreements_by_id[current.counter_to_id]
+        agreement_chain << [ current, previous ]
+        current = previous
+      end
+
+      agreement_chain
     end
 end

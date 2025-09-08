@@ -182,7 +182,9 @@ class Project < ApplicationRecord
   # @param limit [Integer] Number of logs to return
   # @return [ActiveRecord::Relation] Recent GitHub logs
   def recent_github_logs(limit = 20)
-    github_service.recent_logs(limit)
+    github_logs.includes(:user, github_branch_logs: :github_branch)
+               .order(commit_date: :desc)
+               .limit(limit)
   end
 
   def contributions_summary
@@ -226,10 +228,14 @@ class Project < ApplicationRecord
 
   # Methods
   def progress_percentage
-    return 0 if milestones.empty?
+    return 0 if milestones_count == 0
 
-    completed = milestones.where(status: "completed").count
-    (completed.to_f / milestones.count * 100).round
+    completed_count = milestones.completed.count
+    (completed_count.to_f / milestones_count * 100).round
+  end
+
+  def milestones_count
+    @milestones_count ||= milestones.count
   end
 
   # Methods to check current stage

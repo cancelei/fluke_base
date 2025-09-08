@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,8 +75,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
     t.integer "weekly_hours", null: false
     t.text "tasks", null: false
     t.integer "milestone_ids", default: [], array: true
+    t.index ["agreement_type"], name: "index_agreements_on_agreement_type", comment: "Improves filtering by mentorship/co-founder type"
+    t.index ["created_at"], name: "index_agreements_on_created_at", comment: "Improves ordering by creation date"
     t.index ["payment_type"], name: "index_agreements_on_payment_type"
     t.index ["project_id"], name: "index_agreements_on_project_id"
+    t.index ["status", "agreement_type"], name: "index_agreements_on_status_and_agreement_type", comment: "Composite index for combined filtering"
+    t.index ["status"], name: "index_agreements_on_status", comment: "Improves filtering by agreement status"
+    t.check_constraint "agreement_type::text = ANY (ARRAY['Mentorship'::character varying, 'Co-Founder'::character varying]::text[])", name: "agreements_type_check"
+    t.check_constraint "end_date > start_date", name: "agreements_date_order_check"
+    t.check_constraint "equity_percentage >= 0::numeric AND equity_percentage <= 100::numeric", name: "agreements_equity_percentage_check"
+    t.check_constraint "hourly_rate >= 0::numeric", name: "agreements_hourly_rate_check"
+    t.check_constraint "payment_type::text = ANY (ARRAY['Hourly'::character varying, 'Equity'::character varying, 'Hybrid'::character varying]::text[])", name: "agreements_payment_type_check"
+    t.check_constraint "status::text = ANY (ARRAY['Pending'::character varying, 'Accepted'::character varying, 'Completed'::character varying, 'Rejected'::character varying, 'Cancelled'::character varying, 'Countered'::character varying]::text[])", name: "agreements_status_check"
+    t.check_constraint "weekly_hours > 0 AND weekly_hours <= 40", name: "agreements_weekly_hours_check"
   end
 
   create_table "blockchain_transactions", force: :cascade do |t|
@@ -197,8 +208,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
     t.jsonb "changed_files", default: [], array: true
     t.string "unregistered_user_name"
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
+    t.index ["commit_date"], name: "index_github_logs_on_commit_date", comment: "Improves time-based queries for commit history"
     t.index ["commit_sha"], name: "index_github_logs_on_commit_sha"
+    t.index ["project_id", "commit_date"], name: "index_github_logs_on_project_id_and_commit_date", comment: "Composite index for project commit timeline"
     t.index ["project_id"], name: "index_github_logs_on_project_id"
+    t.index ["user_id", "commit_date"], name: "index_github_logs_on_user_id_and_commit_date", comment: "Composite index for user commit activity"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
   end
 
@@ -211,8 +225,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
     t.string "google_calendar_event_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["agreement_id", "start_time"], name: "index_meetings_on_agreement_id_and_start_time", comment: "Composite index for agreement meetings ordered by time"
     t.index ["agreement_id"], name: "index_meetings_on_agreement_id"
+    t.index ["end_time"], name: "index_meetings_on_end_time", comment: "Improves past/upcoming meeting queries"
     t.index ["google_calendar_event_id"], name: "index_meetings_on_google_calendar_event_id"
+    t.index ["start_time"], name: "index_meetings_on_start_time", comment: "Improves meeting ordering and time-based queries"
+    t.check_constraint "end_time > start_time", name: "meetings_time_order_check"
   end
 
   create_table "messages", force: :cascade do |t|
@@ -223,7 +241,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "voice", default: false
+    t.index ["conversation_id", "created_at"], name: "index_messages_on_conversation_id_and_created_at", comment: "Composite index for conversation message history"
     t.index ["conversation_id"], name: "index_messages_on_conversation_id"
+    t.index ["created_at"], name: "index_messages_on_created_at", comment: "Improves message ordering in conversations"
+    t.index ["read"], name: "index_messages_on_read", comment: "Improves unread message queries"
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
@@ -236,8 +257,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.decimal "usdc_amount", precision: 18, scale: 6, default: "0.0"
+    t.index ["due_date"], name: "index_milestones_on_due_date", comment: "Improves due date queries and sorting"
+    t.index ["project_id", "due_date"], name: "index_milestones_on_project_id_and_due_date", comment: "Composite index for project milestone timeline"
+    t.index ["project_id", "status"], name: "index_milestones_on_project_id_and_status", comment: "Composite index for project milestone progress"
     t.index ["project_id"], name: "index_milestones_on_project_id"
+    t.index ["status"], name: "index_milestones_on_status", comment: "Improves filtering by milestone status"
     t.index ["usdc_amount"], name: "index_milestones_on_usdc_amount"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'in_progress'::character varying, 'completed'::character varying, 'cancelled'::character varying]::text[])", name: "milestones_status_check"
+    t.check_constraint "usdc_amount >= 0::numeric", name: "milestones_usdc_amount_check"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -248,6 +275,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
     t.datetime "read_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_notifications_on_created_at", comment: "Improves ordering notifications by recency"
+    t.index ["read_at"], name: "index_notifications_on_read_at", comment: "Improves unread notifications queries"
+    t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at", comment: "Composite index for user's unread notifications"
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
@@ -267,7 +297,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
     t.string "public_fields", default: [], null: false, array: true
     t.string "repository_url"
     t.string "project_link"
+    t.index ["collaboration_type"], name: "index_projects_on_collaboration_type", comment: "Improves filtering by seeking mentor/co-founder"
+    t.index ["created_at"], name: "index_projects_on_created_at", comment: "Improves ordering by project creation"
+    t.index ["stage"], name: "index_projects_on_stage", comment: "Improves filtering by project stage"
     t.index ["user_id"], name: "index_projects_on_user_id"
+    t.check_constraint "stage::text = ANY (ARRAY['idea'::character varying, 'prototype'::character varying, 'launched'::character varying, 'scaling'::character varying]::text[])", name: "projects_stage_check"
   end
 
   create_table "roles", force: :cascade do |t|
@@ -424,7 +458,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_232223) do
     t.boolean "manual_entry", default: false
     t.index ["milestone_id"], name: "index_time_logs_on_milestone_id"
     t.index ["project_id", "milestone_id"], name: "index_time_logs_on_project_id_and_milestone_id"
+    t.index ["project_id", "user_id"], name: "index_time_logs_on_project_id_and_user_id", comment: "Composite index for user-project time logs"
+    t.index ["started_at"], name: "index_time_logs_on_started_at", comment: "Improves time-based queries and reporting"
+    t.index ["status"], name: "index_time_logs_on_status", comment: "Improves filtering by active/completed time logs"
     t.index ["user_id"], name: "index_time_logs_on_user_id"
+    t.check_constraint "hours_spent >= 0::numeric", name: "time_logs_hours_check"
+    t.check_constraint "status::text = ANY (ARRAY['in_progress'::character varying, 'completed'::character varying, 'paused'::character varying]::text[])", name: "time_logs_status_check"
   end
 
   create_table "user_roles", force: :cascade do |t|

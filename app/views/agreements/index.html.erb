@@ -1,4 +1,7 @@
 <div class="px-4 sm:px-6 lg:px-8">
+  <!-- Flash Messages Container -->
+  <div id="flash_messages"></div>
+
   <div class="sm:flex sm:items-center mb-8">
     <div class="sm:flex-auto">
       <h1 class="text-2xl font-semibold leading-6 text-gray-900">Agreements</h1>
@@ -11,158 +14,9 @@
     </div>
   </div>
 
-  <!-- Entrepreneur Agreements -->
-  <div class="bg-white shadow sm:rounded-lg mb-8">
-    <div class="px-4 py-5 sm:px-6 flex items-center justify-between">
-      <div>
-        <h2 class="text-lg font-medium text-gray-900">Your Projects</h2>
-        <p class="mt-1 text-sm text-gray-500">Agreements for projects you own</p>
-      </div>
-      <% if current_user.projects.any? %>
-        <%= link_to "Find people", explore_people_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
-      <% else %>
-        <%= link_to "Create Project First", new_project_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
-      <% end %>
-    </div>
+  <!-- Filter Controls -->
+  <%= render "filters" %>
 
-    <% if @my_agreements.any? %>
-      <div class="overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mentor</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Time</th>
-              <th scope="col" class="relative px-6 py-3">
-                <span class="sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <% @my_agreements.each do |agreement| %>
-              <% presenter = present(agreement) %>
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">
-                    <%= presenter.project_link %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <%= presenter.agreement_type_badge %>
-                  <%= presenter.payment_type_badge %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
-                    <%= agreement.initiator&.id == current_user.id ? agreement.other_party&.full_name : agreement.initiator&.full_name %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <%= presenter.status_badge %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <%= presenter.created_timeframe %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <%= presenter.time_remaining %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <%= render "agreement_actions", agreement: agreement %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    <% else %>
-      <%= render "empty_state_entrepreneur" %>
-    <% end %>
-  </div>
-
-  <!-- Mentor Agreements -->
-  <div class="bg-white shadow sm:rounded-lg">
-    <div class="px-4 py-5 sm:px-6">
-      <h2 class="text-lg font-medium text-gray-900">Your Mentorships</h2>
-      <p class="mt-1 text-sm text-gray-500">Agreements where you are mentoring other projects</p>
-    </div>
-
-    <% if @other_party_agreements.any? %>
-      <div class="overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrepreneur</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Time</th>
-              <th scope="col" class="relative px-6 py-3">
-                <span class="sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <% @other_party_agreements.each do |agreement| %>
-              <% presenter = present(agreement) %>
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">
-                    <% if agreement.active? || agreement.completed? %>
-                      <%= presenter.project_link %>
-                    <% else %>
-                      <span class="text-gray-500"><%= agreement.project.name %></span>
-                      <span class="text-xs text-gray-400">(limited access)</span>
-                    <% end %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <%= presenter.agreement_type_badge %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= agreement.project.user.full_name %></div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <%= presenter.status_badge %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <%= presenter.payment_type_badge %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <%= presenter.time_remaining %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <%= render "agreement_actions", agreement: agreement %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    <% else %>
-      <%= render "empty_state_mentor" %>
-    <% end %>
-  </div>
+  <!-- Agreement Results -->
+  <%= render "agreement_results" %>
 </div>
-
-<script>
-  document.addEventListener('turbo:load', function() {
-    // Simple dropdown toggle
-    document.querySelector('.dropdown button')?.addEventListener('click', function() {
-      const menu = document.querySelector('.dropdown-menu');
-      menu.classList.toggle('hidden');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-      const dropdown = document.querySelector('.dropdown');
-      const isClickInside = dropdown?.contains(event.target);
-
-      if (!isClickInside) {
-        document.querySelector('.dropdown-menu')?.classList.add('hidden');
-      }
-    });
-  });
-</script>

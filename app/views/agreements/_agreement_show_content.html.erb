@@ -1,17 +1,14 @@
-<!-- Flash Messages Container -->
-<div id="flash_messages"></div>
-
-<% presenter = present(@agreement) %>
-<%= turbo_frame_tag dom_id(@agreement) do %>
+<% presenter = present(agreement) %>
+<%= turbo_frame_tag dom_id(agreement) do %>
   <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <%= render "agreement_show_status" %>
+    <%= render "agreement_show_status", agreement: agreement %>
 
     <div class="border-t border-gray-200">
     <dl>
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Project</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <%= link_to @project.name, @project, class: "text-indigo-600 hover:text-indigo-900" %>
+          <%= link_to project.name, project, class: "text-indigo-600 hover:text-indigo-900" %>
         </dd>
       </div>
 
@@ -54,8 +51,8 @@
       <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Tasks and Responsibilities</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-          <% if @agreement.tasks.present? %>
-            <%= simple_format(@agreement.tasks) %>
+          <% if agreement.tasks.present? %>
+            <%= simple_format(agreement.tasks) %>
           <% else %>
             Not specified
           <% end %>
@@ -83,16 +80,16 @@
         </dd>
       </div>
 
-      <% if @agreement.terms.present? %>
+      <% if agreement.terms.present? %>
         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-gray-500">Additional Terms</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-            <%= simple_format(@agreement.terms) %>
+            <%= simple_format(agreement.terms) %>
           </dd>
         </div>
       <% end %>
 
-      <% if !@can_view_full_details && @agreement.other_party == current_user && @agreement.pending? %>
+      <% if !can_view_full_details && agreement.other_party == current_user && agreement.pending? %>
         <div class="bg-yellow-50 px-4 py-5">
           <div class="flex">
             <div class="flex-shrink-0">
@@ -115,7 +112,7 @@
       <% end %>
 
       <!-- Counter offer history section (if this agreement has counter offers or is a counter offer) -->
-      <% if @agreement.has_counter_offers? || @agreement.is_counter_offer? %>
+      <% if agreement.has_counter_offers? || agreement.is_counter_offer? %>
         <div class="bg-yellow-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-yellow-800">Negotiation History</dt>
           <dd class="mt-1 text-sm text-yellow-700 sm:col-span-2 sm:mt-0">
@@ -125,7 +122,7 @@
       <% end %>
 
       <!-- Add this after the agreement details section, before any action buttons -->
-      <% if @agreement.countered? %>
+      <% if agreement.countered? %>
         <div class="bg-yellow-50 p-4 rounded-md my-6 border border-yellow-200">
           <div class="flex">
             <div class="flex-shrink-0">
@@ -143,9 +140,9 @@
                   You should review the latest counter offer.
                 </p>
 
-                <% if @agreement.counter_offers.any? %>
+                <% if agreement.counter_offers.any? %>
                   <div class="mt-4">
-                    <%= link_to "View Latest Counter Offer", agreement_path(@agreement.counter_offers.order(created_at: :desc).first),
+                    <%= link_to "View Latest Counter Offer", agreement_path(agreement.counter_offers.order(created_at: :desc).first),
                         class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" %>
                   </div>
                 <% end %>
@@ -157,46 +154,4 @@
     </dl>
     </div>
   </div>
-<% end %>
-
-<!-- Time logs section will be loaded lazily below -->
-
-<!-- Meetings section will be loaded lazily below -->
-
-<!-- Lazy-loaded sections with loading placeholders -->
-
-<!-- GitHub Integration Section -->
-<%= turbo_frame_tag "#{dom_id(@agreement)}_github",
-    src: github_section_agreement_path(@agreement),
-    loading: "lazy" do %>
-  <%= render "lazy_loading_placeholder",
-      title: "GitHub Integration",
-      description: "Repository access and development activity" %>
-<% end %>
-
-<!-- Time Logs Section -->
-<%= turbo_frame_tag "#{dom_id(@agreement)}_time_logs",
-    src: time_logs_section_agreement_path(@agreement),
-    loading: "lazy" do %>
-  <%= render "lazy_loading_placeholder",
-      title: "Time Tracking",
-      description: "Hours spent and remaining time for this agreement" %>
-<% end %>
-
-<!-- Meetings Section -->
-<%= turbo_frame_tag "#{dom_id(@agreement)}_meetings",
-    src: meetings_section_agreement_path(@agreement),
-    loading: "lazy" do %>
-  <%= render "lazy_loading_placeholder",
-      title: "Meetings",
-      description: "Scheduled meetings and collaboration sessions" %>
-<% end %>
-
-<!-- Counter Offers Section -->
-<%= turbo_frame_tag "#{dom_id(@agreement)}_counter_offers",
-    src: counter_offers_section_agreement_path(@agreement),
-    loading: "lazy" do %>
-  <%= render "lazy_loading_placeholder",
-      title: "Negotiation History",
-      description: "Changes and counter-offers made during negotiation" %>
 <% end %>

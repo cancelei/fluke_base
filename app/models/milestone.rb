@@ -6,13 +6,18 @@ class Milestone < ApplicationRecord
   # Validations
   validates :title, :due_date, :status, presence: true
 
-  # Milestone statuses
-  NOT_STARTED = "not_started"
+  # Milestone statuses (must match database constraint)
+  PENDING = "pending"
   IN_PROGRESS = "in_progress"
   COMPLETED = "completed"
+  CANCELLED = "cancelled"
+
+  # Legacy alias for backwards compatibility
+  NOT_STARTED = PENDING
 
   # Scopes
-  scope :not_started, -> { where(status: NOT_STARTED) }
+  scope :not_started, -> { where(status: PENDING) }
+  scope :pending, -> { where(status: PENDING) }
   scope :in_progress, -> { where(status: IN_PROGRESS) }
   scope :completed, -> { where(status: COMPLETED) }
   scope :not_completed, -> { where.not(status: COMPLETED) }
@@ -34,7 +39,7 @@ class Milestone < ApplicationRecord
       # Allow explicit "In Progress" status even without time logs
       IN_PROGRESS
     else
-      NOT_STARTED
+      PENDING
     end
   end
 
@@ -42,14 +47,16 @@ class Milestone < ApplicationRecord
   def has_time_logs_from_authorized_users?
     return false if time_logs.empty?
 
-    project_owner_id = project.user_id
-    agreement_participant_ids = project.agreements.active
-                                      .joins(:agreement_participants)
-                                      .pluck("agreement_participants.user_id")
+    # Cache authorized user IDs to prevent repeated queries
+    @authorized_user_ids ||= begin
+      project_owner_id = project.user_id
+      agreement_participant_ids = project.agreements.active
+                                        .joins(:agreement_participants)
+                                        .pluck("agreement_participants.user_id")
+      [ project_owner_id ] + agreement_participant_ids
+    end
 
-    authorized_user_ids = [ project_owner_id ] + agreement_participant_ids
-
-    time_logs.exists?(user_id: authorized_user_ids)
+    time_logs.exists?(user_id: @authorized_user_ids)
   end
 
   # Check if milestone is actually in progress (has time logs or explicit status)
@@ -57,8 +64,13 @@ class Milestone < ApplicationRecord
     actual_status == IN_PROGRESS
   end
 
-  # Check if milestone is not started
+  # Check if milestone is not started (pending)
   def not_started?
-    actual_status == NOT_STARTED
+    actual_status == PENDING
+  end
+
+  # Check if milestone is pending
+  def pending?
+    actual_status == PENDING
   end
 end

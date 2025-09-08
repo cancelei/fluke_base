@@ -1,0 +1,80 @@
+<%= turbo_frame_tag "#{dom_id(agreement)}_time_logs" do %>
+  <% if agreement.active? || agreement.completed? %>
+    <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Time Tracking
+        </h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+          Hours spent and remaining time for this agreement
+        </p>
+      </div>
+
+      <div class="border-t border-gray-200 px-4 py-5">
+        <%= render "time_logs/remaining_time_progress", agreement: agreement, project: project, current_log: nil %>
+
+        <% if can_view_full_details && project.time_logs.any? %>
+          <div class="mt-6">
+            <h4 class="text-sm font-medium text-gray-900 mb-3">Recent Time Entries</h4>
+            <div class="space-y-2">
+              <% project.time_logs.includes(:user).order(created_at: :desc).limit(10).each do |time_log| %>
+                <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-md">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                      <% if time_log.status == 'in_progress' %>
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <% else %>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <% end %>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-gray-900">
+                        <%= time_log.user.full_name %>
+                      </p>
+                      <% if time_log.description.present? %>
+                        <p class="text-xs text-gray-500 truncate max-w-xs">
+                          <%= time_log.description %>
+                        </p>
+                      <% end %>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm text-gray-900">
+                      <% if time_log.status == 'in_progress' %>
+                        <span class="text-green-600">In Progress</span>
+                      <% else %>
+                        <%= pluralize(time_log.hours_spent.to_i, "hour") %>
+                        <% if time_log.hours_spent % 1 != 0 %>
+                          <%= (time_log.hours_spent % 1 * 60).to_i %>m
+                        <% end %>
+                      <% end %>
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      <%= time_log.created_at.strftime("%b %d, %Y") %>
+                    </p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+            <%= link_to "View all time logs", project_time_logs_path(project),
+                class: "inline-flex items-center mt-4 text-indigo-600 hover:text-indigo-900 text-sm" do %>
+              View detailed time logs
+              <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            <% end %>
+          </div>
+        <% elsif project.time_logs.empty? %>
+          <div class="mt-6 text-center py-6">
+            <p class="text-gray-500 text-sm">No time entries recorded yet.</p>
+            <% if agreement.active? %>
+              <p class="text-gray-400 text-xs mt-2">
+                Time tracking will appear here once work begins.
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% end %>

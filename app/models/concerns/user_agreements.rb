@@ -14,6 +14,7 @@ module UserAgreements
   def my_agreements
     Agreement.joins(:project)
             .where("projects.user_id = ?", id)
+            .distinct
   end
 
   # Agreements where user is the mentor/co-founder (not project owner)
@@ -22,6 +23,7 @@ module UserAgreements
             .joins(:agreement_participants)
             .where("agreement_participants.user_id = ? AND projects.user_id != ?",
                   id, id)
+            .distinct
   end
 
   # Alias for clarity when user is a mentor

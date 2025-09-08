@@ -3,7 +3,7 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @projects = current_user.projects.order(created_at: :desc)
+    @projects = current_user.projects.includes(:user, :milestones, :agreements).order(created_at: :desc)
   end
 
   def explore
@@ -12,7 +12,7 @@ class ProjectsController < ApplicationController
 
   def show
     authorize! :read, @project
-    @milestones = @project.milestones.order(created_at: :desc)
+    @milestones = @project.milestones.includes(:time_logs).order(created_at: :desc)
 
     # Check if the current user has an agreement with the project
     @has_agreement = @project.agreements.active.joins(:agreement_participants)
@@ -21,6 +21,7 @@ class ProjectsController < ApplicationController
     # Load suggested mentors only for project owner
     if current_user.id == @project.user_id
       @suggested_mentors = User.with_role(:mentor)
+                             .includes(:roles)
                              .where.not(id: @project.agreements.joins(:agreement_participants)
                                                                       .pluck("agreement_participants.user_id"))
                              .limit(3)
@@ -108,7 +109,7 @@ class ProjectsController < ApplicationController
   private
 
   def set_project
-    @project = Project.find(params[:id])
+    @project = Project.includes(:user, :milestones, agreements: :agreement_participants).find(params[:id])
   end
 
   def project_params

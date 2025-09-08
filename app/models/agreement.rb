@@ -59,6 +59,12 @@ class Agreement < ApplicationRecord
   scope :cancelled, -> { where(status: CANCELLED) }
   scope :countered, -> { where(status: COUNTERED) }
 
+  # Performance-optimized scopes with includes
+  scope :with_project_and_users, -> { includes(:project, agreement_participants: :user) }
+  scope :with_meetings, -> { includes(:meetings) }
+  scope :recent_first, -> { order(created_at: :desc) }
+  scope :for_user, ->(user_id) { joins(:agreement_participants).where(agreement_participants: { user_id: user_id }) }
+
   def init_status
     self.status = PENDING if self.status.blank?
   end

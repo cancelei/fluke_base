@@ -249,3 +249,12 @@ html {
       left: 0;
   }
   }
+
+/* Turbo busy indicator for agreements results */
+#agreement_results [data-loading-indicator] {
+  display: none;
+}
+
+#agreement_results[busy] [data-loading-indicator] {
+  display: block;
+}

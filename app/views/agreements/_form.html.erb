@@ -4,10 +4,11 @@
 %>
 
 <div data-controller="agreement-form">
+  <turbo-frame id="agreement_form">
   <% form_options = if agreement.persisted?
-       { model: agreement, url: agreement_path(agreement), method: :patch, local: true, class: "space-y-6" }
+       { model: agreement, url: agreement_path(agreement), method: :patch, class: "space-y-6" }
      else
-       { model: agreement, local: true, class: "space-y-6" }
+       { model: agreement, class: "space-y-6" }
      end %>
   <%= form_with(**form_options) do |form| %>
       <%= form.hidden_field :project_id, value: @project.id if @project %>
@@ -196,4 +197,5 @@
       <% end %>
     </div>
   <% end %>
+  </turbo-frame>
 </div>

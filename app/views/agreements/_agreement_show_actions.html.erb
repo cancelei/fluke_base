@@ -1,0 +1,65 @@
+<div id="<%= "#{dom_id(@agreement)}_show_actions" %>">
+  <% presenter = present(@agreement) %>
+
+  <div class="mt-6 flex flex-wrap justify-start space-x-3">
+    <% if can?(:edit, @agreement) %>
+      <%= link_to "Edit Agreement", edit_agreement_path(@agreement), class: "btn-primary" %>
+    <% end %>
+
+    <% if can?(:has_counter_offer, @agreement) %>
+      <div class="text-yellow-600">Note: This agreement has a counter offer from another person</div>
+    <% end %>
+
+    <% if presenter.can_be_accepted_by?(current_user) %>
+      <%= button_to "Accept Agreement", accept_agreement_path(@agreement),
+          method: :patch,
+          class: "btn-success",
+          data: {
+            turbo_confirm: "Are you sure you want to accept this agreement?",
+            turbo_frame: dom_id(@agreement)
+          } %>
+    <% end %>
+
+    <% if presenter.can_be_rejected_by?(current_user) %>
+      <%= button_to "Reject Agreement", reject_agreement_path(@agreement),
+          method: :patch,
+          class: "btn-danger",
+          data: {
+            turbo_confirm: "Are you sure you want to reject this agreement?",
+            turbo_frame: dom_id(@agreement)
+          } %>
+    <% end %>
+
+    <% if presenter.can_make_counter_offer?(current_user) %>
+      <%= button_to "Counter Offer", counter_offer_agreement_path(@agreement),
+          method: :post,
+          class: "btn-warning",
+          data: { turbo_confirm: "Are you sure you want to make a counter offer?" } %>
+    <% end %>
+
+    <% if presenter.can_be_cancelled_by?(current_user) %>
+      <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement),
+          method: :patch,
+          class: "btn-danger",
+          data: {
+            turbo_confirm: "Are you sure you want to cancel this agreement?",
+            turbo_frame: dom_id(@agreement)
+          } %>
+    <% end %>
+
+    <% if presenter.can_be_completed_by?(current_user) %>
+      <%= button_to "Mark as Completed", complete_agreement_path(@agreement),
+          method: :patch,
+          class: "btn-success",
+          data: {
+            turbo_confirm: "Are you sure you want to mark this agreement as completed?",
+            turbo_frame: dom_id(@agreement)
+          } %>
+    <% end %>
+
+    <% if @agreement.active? && (current_user == @agreement.initiator || current_user == @agreement.other_party) %>
+      <%= link_to "Time Logs", time_logs_path(@agreement.project),
+          class: "btn-primary" %>
+    <% end %>
+  </div>
+</div>

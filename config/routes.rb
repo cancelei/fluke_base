@@ -2,6 +2,12 @@ Rails.application.routes.draw do
   # System and health check routes
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Test routes for Claude Code (development only)
+  if Rails.env.development?
+    get "test/turbo" => "test#turbo_test", as: :turbo_test
+    get "test/agreements" => "test#agreements", as: :test_agreements
+  end
+
   # Authentication
   devise_for :users, controllers: { registrations: "users/registrations" }
 
@@ -78,6 +84,10 @@ Rails.application.routes.draw do
       patch :complete
       patch :cancel
       post :counter_offer
+      get :meetings_section
+      get :github_section
+      get :time_logs_section
+      get :counter_offers_section
     end
   end
 

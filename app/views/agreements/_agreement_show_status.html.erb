@@ -1,0 +1,15 @@
+<div id="<%= "#{dom_id(@agreement)}_show_status" %>">
+  <% presenter = present(@agreement) %>
+  <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+    <div>
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        <%= presenter.agreement_type_badge %> Agreement for <%= presenter.project_link %>
+      </h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        Status: <%= presenter.status_badge %>
+      </p>
+    </div>
+
+    <%= render "agreement_show_actions" %>
+  </div>
+</div>

@@ -1,0 +1,100 @@
+<%= turbo_frame_tag "agreement_filters", class: "block" do %>
+  <div class="bg-white shadow sm:rounded-lg mb-8">
+    <div class="px-4 py-5 sm:px-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-medium text-gray-900">Filter Agreements</h3>
+          <p class="mt-1 text-sm text-gray-500">Narrow down your agreements using the filters below</p>
+        </div>
+        <% if @query.active_filters? %>
+          <div class="flex items-center space-x-2">
+            <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800">
+              <%= @query.active_filters_count %> filter<%= "s" if @query.active_filters_count > 1 %> active
+            </span>
+            <%= link_to agreements_path,
+                class: "inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50",
+                data: { turbo_frame: "agreement_results" } do %>
+              Clear all filters
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <%= form_with url: agreements_path, method: :get, local: false,
+          data: { turbo_frame: "agreement_results", turbo_action: "replace" },
+          class: "mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6" do |form| %>
+
+        <!-- Status Filter -->
+        <div class="sm:col-span-2">
+          <%= form.label :status, "Status", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :status,
+              options_for_select(AgreementsQuery.status_options, params[:status]),
+              {},
+              { class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                onchange: "this.form.requestSubmit();" } %>
+        </div>
+
+        <!-- Agreement Type Filter -->
+        <div class="sm:col-span-2">
+          <%= form.label :agreement_type, "Type", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :agreement_type,
+              options_for_select(AgreementsQuery.agreement_type_options, params[:agreement_type]),
+              {},
+              { class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                onchange: "this.form.requestSubmit();" } %>
+        </div>
+
+        <!-- Search Filter -->
+        <div class="sm:col-span-2">
+          <%= form.label :search, "Search", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.text_field :search,
+              placeholder: "Project name or participant...",
+              value: params[:search],
+              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+              oninput: "clearTimeout(this.searchTimeout); this.searchTimeout = setTimeout(() => this.form.requestSubmit(), 500);" %>
+        </div>
+
+        <!-- Start Date Range -->
+        <div class="sm:col-span-3">
+          <fieldset>
+            <legend class="block text-sm font-medium text-gray-700">Start Date Range</legend>
+            <div class="mt-1 grid grid-cols-2 gap-2">
+              <%= form.date_field :start_date_from,
+                  placeholder: "From",
+                  value: params[:start_date_from],
+                  class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                  onchange: "this.form.requestSubmit();" %>
+              <%= form.date_field :start_date_to,
+                  placeholder: "To",
+                  value: params[:start_date_to],
+                  class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                  onchange: "this.form.requestSubmit();" %>
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- End Date Range -->
+        <div class="sm:col-span-3">
+          <fieldset>
+            <legend class="block text-sm font-medium text-gray-700">End Date Range</legend>
+            <div class="mt-1 grid grid-cols-2 gap-2">
+              <%= form.date_field :end_date_from,
+                  placeholder: "From",
+                  value: params[:end_date_from],
+                  class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                  onchange: "this.form.requestSubmit();" %>
+              <%= form.date_field :end_date_to,
+                  placeholder: "To",
+                  value: params[:end_date_to],
+                  class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                  onchange: "this.form.requestSubmit();" %>
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- Submit Button (hidden, form auto-submits) -->
+        <%= form.submit "Apply Filters", class: "hidden" %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
