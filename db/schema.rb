@@ -90,42 +90,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.check_constraint "weekly_hours > 0 AND weekly_hours <= 40", name: "agreements_weekly_hours_check"
   end
 
-  create_table "blockchain_transactions", force: :cascade do |t|
-    t.string "transaction_hash", limit: 66, null: false
-    t.string "from_address", limit: 42
-    t.string "to_address", limit: 42
-    t.string "transaction_type"
-    t.string "status", default: "pending"
-    t.bigint "block_number"
-    t.bigint "gas_used"
-    t.decimal "gas_price_gwei", precision: 10, scale: 2
-    t.jsonb "transaction_data", default: {}
-    t.bigint "blockchain_wallet_id"
-    t.bigint "escrow_contract_id"
-    t.bigint "escrow_milestone_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["blockchain_wallet_id"], name: "index_blockchain_transactions_on_blockchain_wallet_id"
-    t.index ["escrow_contract_id"], name: "index_blockchain_transactions_on_escrow_contract_id"
-    t.index ["escrow_milestone_id"], name: "index_blockchain_transactions_on_escrow_milestone_id"
-    t.index ["status"], name: "index_blockchain_transactions_on_status"
-    t.index ["transaction_hash"], name: "index_blockchain_transactions_on_transaction_hash", unique: true
-    t.index ["transaction_type", "status"], name: "index_blockchain_transactions_on_transaction_type_and_status"
-  end
-
-  create_table "blockchain_wallets", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.string "address", limit: 42, null: false
-    t.string "network_type", default: "base_sepolia"
-    t.datetime "connected_at"
-    t.datetime "last_activity_at"
-    t.boolean "is_active", default: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["address"], name: "index_blockchain_wallets_on_address", unique: true
-    t.index ["user_id", "is_active"], name: "index_blockchain_wallets_on_user_id_and_is_active"
-  end
-
   create_table "conversations", force: :cascade do |t|
     t.bigint "sender_id", null: false
     t.bigint "recipient_id", null: false
@@ -133,42 +97,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.datetime "updated_at", null: false
     t.index ["recipient_id", "sender_id"], name: "index_conversations_on_recipient_and_sender", unique: true
     t.index ["sender_id"], name: "index_conversations_on_sender_id"
-  end
-
-  create_table "escrow_contracts", force: :cascade do |t|
-    t.bigint "agreement_id", null: false
-    t.string "contract_address", limit: 42
-    t.string "contract_type", default: "usdc_escrow"
-    t.string "deployment_transaction_hash", limit: 66
-    t.bigint "deployment_block_number"
-    t.string "blockchain_network", default: "base_sepolia"
-    t.string "status", default: "pending"
-    t.jsonb "contract_metadata", default: {}
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["agreement_id", "status"], name: "index_escrow_contracts_on_agreement_id_and_status"
-    t.index ["contract_address"], name: "index_escrow_contracts_on_contract_address", unique: true
-  end
-
-  create_table "escrow_milestones", force: :cascade do |t|
-    t.bigint "milestone_id", null: false
-    t.bigint "escrow_contract_id", null: false
-    t.integer "blockchain_index", null: false
-    t.decimal "usdc_amount", precision: 18, scale: 6
-    t.boolean "client_approved", default: false
-    t.boolean "freelancer_approved", default: false
-    t.boolean "funds_released", default: false
-    t.string "approval_transaction_hash_client", limit: 66
-    t.string "approval_transaction_hash_freelancer", limit: 66
-    t.string "release_transaction_hash", limit: 66
-    t.bigint "release_block_number"
-    t.datetime "approved_at_client"
-    t.datetime "approved_at_freelancer"
-    t.datetime "released_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["escrow_contract_id", "blockchain_index"], name: "idx_on_escrow_contract_id_blockchain_index_f147e7fe50", unique: true
-    t.index ["milestone_id", "escrow_contract_id"], name: "index_escrow_milestones_on_milestone_id_and_escrow_contract_id", unique: true
   end
 
   create_table "github_branch_logs", force: :cascade do |t|
@@ -186,9 +114,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.string "branch_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.datetime "commits_fetched_at"
-    t.string "last_commit_sha"
-    t.boolean "is_fully_fetched"
     t.index ["project_id", "branch_name", "user_id"], name: "idx_on_project_id_branch_name_user_id_fcdce7d2d8", unique: true
     t.index ["user_id"], name: "index_github_branches_on_user_id"
   end
@@ -209,7 +134,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.string "unregistered_user_name"
     t.index ["agreement_id"], name: "index_github_logs_on_agreement_id"
     t.index ["commit_date"], name: "index_github_logs_on_commit_date", comment: "Improves time-based queries for commit history"
-    t.index ["commit_sha"], name: "index_github_logs_on_commit_sha"
+    t.index ["commit_sha"], name: "index_github_logs_on_commit_sha", unique: true
     t.index ["project_id", "commit_date"], name: "index_github_logs_on_project_id_and_commit_date", comment: "Composite index for project commit timeline"
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id", "commit_date"], name: "index_github_logs_on_user_id_and_commit_date", comment: "Composite index for user commit activity"
@@ -256,15 +181,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.bigint "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.decimal "usdc_amount", precision: 18, scale: 6, default: "0.0"
     t.index ["due_date"], name: "index_milestones_on_due_date", comment: "Improves due date queries and sorting"
     t.index ["project_id", "due_date"], name: "index_milestones_on_project_id_and_due_date", comment: "Composite index for project milestone timeline"
     t.index ["project_id", "status"], name: "index_milestones_on_project_id_and_status", comment: "Composite index for project milestone progress"
     t.index ["project_id"], name: "index_milestones_on_project_id"
     t.index ["status"], name: "index_milestones_on_status", comment: "Improves filtering by milestone status"
-    t.index ["usdc_amount"], name: "index_milestones_on_usdc_amount"
     t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'in_progress'::character varying, 'completed'::character varying, 'cancelled'::character varying]::text[])", name: "milestones_status_check"
-    t.check_constraint "usdc_amount >= 0::numeric", name: "milestones_usdc_amount_check"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -359,8 +281,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.string "concurrency_key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.datetime "failed_at"
-    t.text "error"
     t.index ["active_job_id"], name: "index_solid_queue_jobs_on_active_job_id"
     t.index ["class_name"], name: "index_solid_queue_jobs_on_class_name"
     t.index ["finished_at"], name: "index_solid_queue_jobs_on_finished_at"
@@ -520,15 +440,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
   add_foreign_key "agreement_participants", "users"
   add_foreign_key "agreement_participants", "users", column: "accept_or_counter_turn_id"
   add_foreign_key "agreements", "projects"
-  add_foreign_key "blockchain_transactions", "blockchain_wallets"
-  add_foreign_key "blockchain_transactions", "escrow_contracts"
-  add_foreign_key "blockchain_transactions", "escrow_milestones"
-  add_foreign_key "blockchain_wallets", "users"
   add_foreign_key "conversations", "users", column: "recipient_id"
   add_foreign_key "conversations", "users", column: "sender_id"
-  add_foreign_key "escrow_contracts", "agreements"
-  add_foreign_key "escrow_milestones", "escrow_contracts"
-  add_foreign_key "escrow_milestones", "milestones"
   add_foreign_key "github_branch_logs", "github_branches", on_delete: :cascade
   add_foreign_key "github_branch_logs", "github_logs", on_delete: :cascade
   add_foreign_key "github_branches", "projects"

@@ -55,9 +55,5 @@ class AddDatabaseConstraints < ActiveRecord::Migration[8.0]
     add_check_constraint :milestones,
       "status IN ('pending', 'in_progress', 'completed', 'cancelled')",
       name: "milestones_status_check"
-
-    add_check_constraint :milestones,
-      "usdc_amount >= 0",
-      name: "milestones_usdc_amount_check"
   end
 end
