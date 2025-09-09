@@ -1,5 +1,8 @@
 class CreateCoreUsersAndRoles < ActiveRecord::Migration[8.0]
   def change
+    # Only create tables if they don't already exist (for new setups)
+    return if table_exists?(:users)
+
     # Enable PostgreSQL extensions
     enable_extension 'plpgsql'
 

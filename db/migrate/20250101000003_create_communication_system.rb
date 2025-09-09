@@ -1,5 +1,8 @@
 class CreateCommunicationSystem < ActiveRecord::Migration[8.0]
   def change
+    # Only create tables if they don't already exist (for new setups)
+    return if table_exists?(:conversations)
+
     # Conversations table
     create_table :conversations do |t|
       t.references :sender, null: false, foreign_key: { to_table: :users }

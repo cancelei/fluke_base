@@ -1,5 +1,8 @@
 class CreateTimeTrackingAndGithub < ActiveRecord::Migration[8.0]
   def change
+    # Only create tables if they don't already exist (for new setups)
+    return if table_exists?(:time_logs)
+
     # Time logs table
     create_table :time_logs do |t|
       t.references :milestone, foreign_key: true

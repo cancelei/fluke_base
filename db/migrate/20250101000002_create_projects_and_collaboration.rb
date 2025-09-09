@@ -1,5 +1,8 @@
 class CreateProjectsAndCollaboration < ActiveRecord::Migration[8.0]
   def change
+    # Only create tables if they don't already exist (for new setups)
+    return if table_exists?(:projects)
+
     # Projects table
     create_table :projects do |t|
       t.string :name, null: false

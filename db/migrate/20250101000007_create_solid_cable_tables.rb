@@ -1,5 +1,8 @@
 class CreateSolidCableTables < ActiveRecord::Migration[8.0]
   def change
+    # Only create tables if they don't already exist (for new setups)
+    return if table_exists?(:solid_cable_messages)
+
     create_table :solid_cable_messages do |t|
       t.binary :channel, null: false
       t.binary :payload, null: false
