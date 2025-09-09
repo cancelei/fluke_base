@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   get "dashboard" => "dashboard#index", as: :dashboard
   get "home/stats", to: "home#stats", as: :home_stats
 
+
   # User onboarding
   namespace :onboarding do
     get "entrepreneur", as: :entrepreneur
