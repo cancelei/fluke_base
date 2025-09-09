@@ -81,12 +81,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.index ["project_id"], name: "index_agreements_on_project_id"
     t.index ["status", "agreement_type"], name: "index_agreements_on_status_and_agreement_type", comment: "Composite index for combined filtering"
     t.index ["status"], name: "index_agreements_on_status", comment: "Improves filtering by agreement status"
-    t.check_constraint "agreement_type::text = ANY (ARRAY['Mentorship'::character varying, 'Co-Founder'::character varying]::text[])", name: "agreements_type_check"
+    t.check_constraint "agreement_type::text = ANY (ARRAY['Mentorship'::character varying::text, 'Co-Founder'::character varying::text])", name: "agreements_type_check"
     t.check_constraint "end_date > start_date", name: "agreements_date_order_check"
     t.check_constraint "equity_percentage >= 0::numeric AND equity_percentage <= 100::numeric", name: "agreements_equity_percentage_check"
     t.check_constraint "hourly_rate >= 0::numeric", name: "agreements_hourly_rate_check"
-    t.check_constraint "payment_type::text = ANY (ARRAY['Hourly'::character varying, 'Equity'::character varying, 'Hybrid'::character varying]::text[])", name: "agreements_payment_type_check"
-    t.check_constraint "status::text = ANY (ARRAY['Pending'::character varying, 'Accepted'::character varying, 'Completed'::character varying, 'Rejected'::character varying, 'Cancelled'::character varying, 'Countered'::character varying]::text[])", name: "agreements_status_check"
+    t.check_constraint "payment_type::text = ANY (ARRAY['Hourly'::character varying::text, 'Equity'::character varying::text, 'Hybrid'::character varying::text])", name: "agreements_payment_type_check"
+    t.check_constraint "status::text = ANY (ARRAY['Pending'::character varying::text, 'Accepted'::character varying::text, 'Completed'::character varying::text, 'Rejected'::character varying::text, 'Cancelled'::character varying::text, 'Countered'::character varying::text])", name: "agreements_status_check"
     t.check_constraint "weekly_hours > 0 AND weekly_hours <= 40", name: "agreements_weekly_hours_check"
   end
 
@@ -186,7 +186,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.index ["project_id", "status"], name: "index_milestones_on_project_id_and_status", comment: "Composite index for project milestone progress"
     t.index ["project_id"], name: "index_milestones_on_project_id"
     t.index ["status"], name: "index_milestones_on_status", comment: "Improves filtering by milestone status"
-    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'in_progress'::character varying, 'completed'::character varying, 'cancelled'::character varying]::text[])", name: "milestones_status_check"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'in_progress'::character varying::text, 'completed'::character varying::text, 'cancelled'::character varying::text])", name: "milestones_status_check"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -223,7 +223,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.index ["created_at"], name: "index_projects_on_created_at", comment: "Improves ordering by project creation"
     t.index ["stage"], name: "index_projects_on_stage", comment: "Improves filtering by project stage"
     t.index ["user_id"], name: "index_projects_on_user_id"
-    t.check_constraint "stage::text = ANY (ARRAY['idea'::character varying, 'prototype'::character varying, 'launched'::character varying, 'scaling'::character varying]::text[])", name: "projects_stage_check"
+    t.check_constraint "stage::text = ANY (ARRAY['idea'::character varying::text, 'prototype'::character varying::text, 'launched'::character varying::text, 'scaling'::character varying::text])", name: "projects_stage_check"
   end
 
   create_table "roles", force: :cascade do |t|
@@ -383,7 +383,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_222559) do
     t.index ["status"], name: "index_time_logs_on_status", comment: "Improves filtering by active/completed time logs"
     t.index ["user_id"], name: "index_time_logs_on_user_id"
     t.check_constraint "hours_spent >= 0::numeric", name: "time_logs_hours_check"
-    t.check_constraint "status::text = ANY (ARRAY['in_progress'::character varying, 'completed'::character varying, 'paused'::character varying]::text[])", name: "time_logs_status_check"
+    t.check_constraint "status::text = ANY (ARRAY['in_progress'::character varying::text, 'completed'::character varying::text, 'paused'::character varying::text])", name: "time_logs_status_check"
   end
 
   create_table "user_roles", force: :cascade do |t|
