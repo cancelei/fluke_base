@@ -1,0 +1,17 @@
+<%= render "agreements_table",
+      agreements: other_party_agreements,
+      responsive_classes: "overflow-x-auto",
+      table_classes: "table-fixed",
+      columns: [
+        { label: "Project", th_class: "px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-3/12" },
+        { label: "Type", th_class: "px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/12" },
+        { label: "Entrepreneur", th_class: "px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-3/12" },
+        { label: "Status", th_class: "px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/12" },
+        { label: "Payment", th_class: "px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12" },
+        { label: "Remaining", th_class: "px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12" }
+      ],
+      actions_th_class: "px-2 py-2 w-1/12 text-right",
+      tbody_class: "text-sm",
+      tbody_id: "other_party_agreements_tbody",
+      pagination_params: { turbo_frame: "agreements_other" },
+      pagination_data: { turbo_frame: "agreements_other" } %>

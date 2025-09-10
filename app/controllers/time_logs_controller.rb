@@ -67,7 +67,7 @@ class TimeLogsController < ApplicationController
             ),
             turbo_stream.update("remaining_time_progress",
               partial: "remaining_time_progress",
-              locals: { project: @project, current_log: nil, owner: @owner }
+              locals: { project: @project, current_log: nil, owner: @owner, project_wide: true }
             ),
                         turbo_stream.update("flash_messages",
               partial: "shared/flash_messages",
@@ -153,7 +153,7 @@ class TimeLogsController < ApplicationController
           ),
           turbo_stream.update("remaining_time_progress",
             partial: "remaining_time_progress",
-            locals: { project: @project, current_log: current_tracking_log, owner: @owner }
+            locals: { project: @project, current_log: current_tracking_log, owner: @owner, project_wide: true }
           )
         ]
       end
@@ -248,7 +248,7 @@ class TimeLogsController < ApplicationController
             ),
             turbo_stream.update("remaining_time_progress",
               partial: "remaining_time_progress",
-              locals: { project: @project, current_log: nil, owner: @owner }
+              locals: { project: @project, current_log: nil, owner: @owner, project_wide: true }
             ),
                         turbo_stream.update("flash_messages",
               partial: "shared/flash_messages",

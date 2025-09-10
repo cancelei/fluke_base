@@ -1,24 +1,51 @@
-<%= turbo_frame_tag "#{dom_id(agreement)}_time_logs" do %>
-  <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+# Fallback: calculate agreement participant time logs if not provided %>
+<% unless defined?(agreement_participant_time_logs) %>
+  <% if project.user_id == current_user.id %>
+# Project owner: only show the other party's time logs %>
+    <% other_party = agreement.other_party %>
+    <% agreement_participant_time_logs = other_party ? project.time_logs.where(user_id: other_party.id) : project.time_logs.none %>
+  <% else %>
+# Agreement participant: show all agreement participants' time logs %>
+    <% agreement_participant_ids = agreement.agreement_participants.pluck(:user_id) %>
+    <% agreement_participant_time_logs = project.time_logs.where(user_id: agreement_participant_ids) %>
+  <% end %>
+<% end %>
+
+<div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
     <div class="px-4 py-5 sm:px-6">
       <h3 class="text-lg leading-6 font-medium text-gray-900">
         Time Tracking
       </h3>
       <p class="mt-1 max-w-2xl text-sm text-gray-500">
-        Hours spent and remaining time for this agreement
+        <% if project.user_id == current_user.id %>
+          Hours spent by <%= agreement.other_party&.full_name || "the other party" %> for this agreement
+        <% else %>
+          Hours spent and remaining time for this agreement
+        <% end %>
       </p>
     </div>
 
     <div class="border-t border-gray-200">
       <% if agreement.active? || agreement.completed? %>
         <div class="px-4 py-5">
-          <%= render "time_logs/remaining_time_progress", agreement: agreement, project: project, current_log: nil %>
+          <% if project.user_id == current_user.id %>
+# Project owner: show other party's time progress %>
+            <%= render "time_logs/remaining_time_progress", agreement: agreement, project: project, current_log: nil, owner: true %>
 
-          <% if can_view_full_details && project.time_logs.any? %>
+# Enhanced analytics for completed agreements when viewed by project owner %>
+            <% if agreement.completed? %>
+              <%= render "completed_agreement_time_analysis", agreement: agreement, project: project, agreement_participant_time_logs: agreement_participant_time_logs %>
+            <% end %>
+          <% else %>
+# Agreement participant: show agreement-specific progress %>
+            <%= render "time_logs/remaining_time_progress", agreement: agreement, project: project, current_log: nil %>
+          <% end %>
+
+          <% if can_view_full_details && (defined?(agreement_participant_time_logs) && agreement_participant_time_logs.any?) %>
             <div class="mt-6">
               <h4 class="text-sm font-medium text-gray-900 mb-3">Recent Time Entries</h4>
               <div class="space-y-2">
-                <% project.time_logs.includes(:user).order(created_at: :desc).limit(10).each do |time_log| %>
+                <% agreement_participant_time_logs.includes(:user).order(created_at: :desc).limit(10).each do |time_log| %>
                   <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-md">
                     <div class="flex items-center">
                       <div class="flex-shrink-0">
@@ -57,7 +84,7 @@
                   </div>
                 <% end %>
               </div>
-              <%= link_to "View all time logs", project_time_logs_path(project),
+              <%= link_to time_logs_path(project),
                   class: "inline-flex items-center mt-4 text-indigo-600 hover:text-indigo-900 text-sm" do %>
                 View detailed time logs
                 <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +92,7 @@
                 </svg>
               <% end %>
             </div>
-          <% elsif project.time_logs.empty? %>
+          <% elsif !defined?(agreement_participant_time_logs) || agreement_participant_time_logs.empty? %>
             <div class="mt-6 text-center py-6">
               <p class="text-gray-500 text-sm">No time entries recorded yet.</p>
               <% if agreement.active? %>
@@ -90,4 +117,3 @@
       <% end %>
     </div>
   </div>
-<% end %>

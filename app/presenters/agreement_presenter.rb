@@ -80,16 +80,28 @@ class AgreementPresenter < ApplicationPresenter
     "#{weekly_hours} hours/week for #{duration_display} (#{total_hours} total hours)"
   end
 
-  def progress_summary
-    if active?
-      hours_logged = total_hours_logged
-      expected_hours = weekly_hours * weeks_elapsed
+  def progress_summary(current_user = nil)
+    if active? || completed?
+      hours_logged = total_hours_logged(current_user)
 
-      if expected_hours > 0
-        percentage = (hours_logged / expected_hours * 100).round
-        "#{hours_logged} hours logged (#{percentage}% of expected)"
+      if completed?
+        # For completed agreements, show final summary
+        expected_total_hours = weekly_hours * duration_in_weeks
+        if expected_total_hours > 0
+          percentage = (hours_logged / expected_total_hours * 100).round
+          "#{hours_logged} total hours logged (#{percentage}% of contracted #{expected_total_hours}h)"
+        else
+          "#{hours_logged} total hours logged"
+        end
       else
-        "#{hours_logged} hours logged"
+        # For active agreements, show progress to date
+        expected_hours = weekly_hours * weeks_elapsed
+        if expected_hours > 0
+          percentage = (hours_logged / expected_hours * 100).round
+          "#{hours_logged} hours logged (#{percentage}% of expected)"
+        else
+          "#{hours_logged} hours logged"
+        end
       end
     else
       "Agreement not active"
@@ -127,20 +139,40 @@ class AgreementPresenter < ApplicationPresenter
   end
 
   def time_remaining
-    return "Agreement not active" unless active?
     return "No end date set" unless end_date.present?
 
-    days_remaining = (end_date - Date.current).to_i
+    if completed?
+      # For completed agreements, show completion summary
+      actual_duration = (updated_at.to_date - start_date).to_i
+      planned_duration = (end_date - start_date).to_i
 
-    if days_remaining < 0
-      "Overdue by #{days_remaining.abs} days"
-    elsif days_remaining == 0
-      "Due today"
-    elsif days_remaining < 7
-      "#{days_remaining} days remaining"
+      if actual_duration <= planned_duration
+        days_early = planned_duration - actual_duration
+        if days_early > 0
+          "Completed #{days_early} days early"
+        else
+          "Completed on time"
+        end
+      else
+        days_late = actual_duration - planned_duration
+        "Completed #{days_late} days late"
+      end
+    elsif active?
+      # For active agreements, show remaining time
+      days_remaining = (end_date - Date.current).to_i
+
+      if days_remaining < 0
+        "Overdue by #{days_remaining.abs} days"
+      elsif days_remaining == 0
+        "Due today"
+      elsif days_remaining < 7
+        "#{days_remaining} days remaining"
+      else
+        weeks_remaining = (days_remaining / 7.0).round(1)
+        "#{weeks_remaining} weeks remaining"
+      end
     else
-      weeks_remaining = (days_remaining / 7.0).round(1)
-      "#{weeks_remaining} weeks remaining"
+      "Agreement not active"
     end
   end
 
@@ -163,6 +195,10 @@ class AgreementPresenter < ApplicationPresenter
     else
       "Created #{created_at.strftime('%B %d, %Y')}"
     end
+  end
+
+  def created_timeframe_simple
+    time_ago_in_words(created_at)
   end
 
   def counter_offer_info
@@ -201,6 +237,170 @@ class AgreementPresenter < ApplicationPresenter
 
   def can_make_counter_offer?(user)
     pending? && agreement_participants.exists?(user_id: user.id, is_initiator: false)
+  end
+
+  def kpi_metrics_for_owner(current_user = nil)
+    return {} unless active? || completed?
+
+    {
+      hours_performance: hours_performance_kpi(current_user),
+      timeline_performance: timeline_performance_kpi,
+      milestone_performance: milestone_performance_kpi,
+      cost_efficiency: cost_efficiency_kpi(current_user),
+      completion_status: completion_status_kpi
+    }
+  end
+
+  def hours_performance_kpi(current_user = nil)
+    hours_logged = total_hours_logged(current_user)
+    expected_hours = if completed?
+      weekly_hours * duration_in_weeks
+    else
+      weekly_hours * weeks_elapsed
+    end
+
+    return { status: "no_data", message: "No time tracked yet" } if expected_hours == 0
+
+    performance_ratio = (hours_logged / expected_hours.to_f * 100).round
+
+    status = if performance_ratio >= 95
+      "excellent"
+    elsif performance_ratio >= 80
+      "good"
+    elsif performance_ratio >= 60
+      "fair"
+    else
+      "poor"
+    end
+
+    {
+      status: status,
+      hours_logged: hours_logged,
+      expected_hours: expected_hours,
+      performance_ratio: performance_ratio,
+      message: "#{hours_logged}/#{expected_hours}h logged (#{performance_ratio}%)"
+    }
+  end
+
+  def timeline_performance_kpi
+    return { status: "pending", message: "Agreement not started" } unless start_date <= Date.current
+
+    if completed?
+      actual_duration = (updated_at.to_date - start_date).to_i
+      planned_duration = (end_date - start_date).to_i
+
+      if actual_duration <= planned_duration
+        days_early = planned_duration - actual_duration
+        status = days_early > 7 ? "excellent" : "good"
+        message = days_early > 0 ? "Completed #{days_early} days early" : "Completed on time"
+      else
+        days_late = actual_duration - planned_duration
+        status = days_late > 14 ? "poor" : "fair"
+        message = "Completed #{days_late} days late"
+      end
+    else
+      days_remaining = (end_date - Date.current).to_i
+      if days_remaining > 0
+        status = "on_track"
+        message = "#{days_remaining} days remaining"
+      else
+        days_overdue = days_remaining.abs
+        status = days_overdue > 14 ? "poor" : "fair"
+        message = "#{days_overdue} days overdue"
+      end
+    end
+
+    { status: status, message: message }
+  end
+
+  def milestone_performance_kpi
+    return { status: "no_milestones", message: "No milestones defined" } if milestone_ids.blank?
+
+    total = selected_milestones.count
+    completed_count = selected_milestones.where(status: Milestone::COMPLETED).count
+
+    completion_rate = (completed_count.to_f / total * 100).round
+
+    status = if completion_rate == 100
+      "excellent"
+    elsif completion_rate >= 75
+      "good"
+    elsif completion_rate >= 50
+      "fair"
+    else
+      "poor"
+    end
+
+    {
+      status: status,
+      completed: completed_count,
+      total: total,
+      completion_rate: completion_rate,
+      message: "#{completed_count}/#{total} milestones (#{completion_rate}%)"
+    }
+  end
+
+  def cost_efficiency_kpi(current_user = nil)
+    return { status: "no_data", message: "No cost tracking" } unless hourly_rate.present?
+
+    hours_logged = total_hours_logged(current_user)
+    return { status: "no_data", message: "No hours logged yet" } if hours_logged == 0
+
+    actual_cost = hours_logged * hourly_rate
+
+    if completed?
+      planned_cost = calculate_total_cost
+      efficiency = (planned_cost / actual_cost * 100).round
+
+      status = if efficiency >= 100
+        "excellent"
+      elsif efficiency >= 90
+        "good"
+      elsif efficiency >= 80
+        "fair"
+      else
+        "poor"
+      end
+
+      message = "#{number_to_currency(actual_cost)} spent (#{efficiency}% efficient)"
+    else
+      expected_cost_to_date = weekly_hours * weeks_elapsed * hourly_rate
+      if expected_cost_to_date > 0
+        efficiency = (expected_cost_to_date / actual_cost * 100).round
+        status = efficiency >= 95 ? "good" : "fair"
+        message = "#{number_to_currency(actual_cost)} spent vs #{number_to_currency(expected_cost_to_date)} expected"
+      else
+        status = "tracking"
+        message = "#{number_to_currency(actual_cost)} spent"
+      end
+    end
+
+    { status: status, message: message, actual_cost: actual_cost }
+  end
+
+  def completion_status_kpi
+    case status
+    when Agreement::COMPLETED
+      days_to_complete = (updated_at.to_date - start_date).to_i
+      planned_days = (end_date - start_date).to_i
+
+      if days_to_complete <= planned_days
+        { status: "excellent", message: "Successfully completed", icon: "check-circle" }
+      else
+        { status: "good", message: "Completed (delayed)", icon: "check-circle" }
+      end
+    when Agreement::ACCEPTED
+      days_remaining = (end_date - Date.current).to_i
+      if days_remaining > 7
+        { status: "on_track", message: "In progress", icon: "clock" }
+      elsif days_remaining >= 0
+        { status: "fair", message: "Due soon", icon: "exclamation-triangle" }
+      else
+        { status: "poor", message: "Overdue", icon: "exclamation-circle" }
+      end
+    else
+      { status: "pending", message: status.humanize, icon: "clock" }
+    end
   end
 
   private

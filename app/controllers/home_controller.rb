@@ -31,6 +31,15 @@ class HomeController < ApplicationController
     @mentor_count = User.with_role(Role::MENTOR).count
     @cofounder_count = User.with_role(Role::CO_FOUNDER).count
 
-    render turbo_stream: turbo_stream.replace("community_stats", partial: "stats")
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: [
+          turbo_stream.replace("entrepreneur_count", partial: "home/entrepreneur_count", locals: { count: @entrepreneur_count }),
+          turbo_stream.replace("mentor_count", partial: "home/mentor_count", locals: { count: @mentor_count }),
+          turbo_stream.replace("cofounder_count", partial: "home/cofounder_count", locals: { count: @cofounder_count })
+        ]
+      end
+      format.html { render partial: "stats" }
+    end
   end
 end

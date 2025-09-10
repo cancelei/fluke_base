@@ -1,0 +1,9 @@
+<!-- Counter offer history section (if this agreement has counter offers or is a counter offer) -->
+<% if agreement.has_counter_offers? || agreement.is_counter_offer? %>
+  <div class="bg-yellow-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-yellow-800">Negotiation History</dt>
+    <dd class="mt-1 text-sm text-yellow-700 sm:col-span-2 sm:mt-0">
+      <%= presenter.counter_offer_info %>
+    </dd>
+  </div>
+<% end %>

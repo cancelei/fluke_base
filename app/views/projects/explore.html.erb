@@ -36,6 +36,7 @@
     </div>
 
     <% if @projects.any? %>
+      <%= turbo_frame_tag "projects_explore" do %>
       <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <% @projects.each do |project| %>
           <% presenter = present(project) %>
@@ -88,12 +89,10 @@
         <% end %>
       </div>
 
-      <% if @projects.respond_to?(:total_pages) && @projects.total_pages > 1 %>
-        <div class="mt-12 flex justify-center">
-          <div class="bg-white/95 backdrop-blur-md shadow-lg ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl px-6 py-4">
-            <%= paginate @projects %>
-          </div>
-        </div>
+      <!-- Pagination using our shared component with Turbo -->
+      <div class="mt-12">
+        <%= render partial: "shared/pagination", locals: { records: @projects, class_name: "flex justify-center", remote: true } %>
+      </div>
       <% end %>
     <% else %>
       <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl overflow-hidden">

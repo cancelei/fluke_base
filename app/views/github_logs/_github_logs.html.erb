@@ -207,19 +207,21 @@
     </div>
 
     <div class="border-t border-gray-200">
-      <div id="github_logs">
-        <% if @recent_commits&.any? %>
-          <%= render "github_logs/commits_list", recent_commits: @recent_commits, project: @project %>
-        <% else %>
-          <%= render "github_logs/empty_state", project: @project %>
-        <% end %>
-      </div>
+      <%= turbo_frame_tag "github_commits" do %>
+        <div id="github_logs">
+          <% if @recent_commits&.any? %>
+            <%= render "github_logs/commits_list", recent_commits: @recent_commits, project: @project %>
+          <% else %>
+            <%= render "github_logs/empty_state", project: @project %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
 
     <!-- Pagination for commits -->
     <% if @recent_commits&.any? %>
       <div class="px-6 py-4 border-t border-gray-200">
-        <%= render partial: "shared/pagination", locals: { records: @recent_commits } %>
+        <%= render partial: "shared/pagination", locals: { records: @recent_commits, remote: true } %>
       </div>
     <% end %>
   </div>

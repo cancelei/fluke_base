@@ -89,8 +89,8 @@ class Agreement < ApplicationRecord
   end
 
   # Time tracking methods - delegated to calculations service
-  def total_hours_logged
-    calculations_service.total_hours_logged
+  def total_hours_logged(context_user = nil)
+    calculations_service.total_hours_logged(context_user)
   end
 
   def current_time_log

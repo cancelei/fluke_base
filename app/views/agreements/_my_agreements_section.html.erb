@@ -1,0 +1,17 @@
+<%= render "agreements_table",
+      agreements: my_agreements,
+      responsive_classes: "overflow-hidden",
+      table_classes: "",
+      columns: [
+        { label: "Project", th_class: "px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+        { label: "Type", th_class: "px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+        { label: "Mentor", th_class: "px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+        { label: "Status", th_class: "px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+        { label: "Start Date", th_class: "px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" },
+        { label: "Remaining Time", th_class: "px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" }
+      ],
+      actions_th_class: "px-3 py-3",
+      tbody_class: "",
+      tbody_id: "my_agreements_tbody",
+      pagination_params: { turbo_frame: "agreements_my" },
+      pagination_data: { turbo_frame: "agreements_my" } %>

@@ -3,7 +3,11 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @projects = current_user.projects.includes(:user, :milestones, :agreements).order(created_at: :desc)
+    @projects = current_user.projects
+                              .includes(:user, :milestones, :agreements)
+                              .order(created_at: :desc)
+                              .page(params[:page])
+                              .per(12)
   end
 
   def explore

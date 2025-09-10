@@ -1,0 +1,3 @@
+<%= turbo_frame_tag "#{type}_count" do %>
+  <span data-stats-counter-target="number" data-end-value="<%= count || default_count %>">0</span>+
+<% end %>

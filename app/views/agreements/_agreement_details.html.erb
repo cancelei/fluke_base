@@ -1,0 +1,113 @@
+# Main agreement details section %>
+<% presenter = present(agreement) %>
+
+<div class="border-t border-gray-200">
+<dl>
+  <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-gray-500">Project</dt>
+    <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+      <%= link_to project.name, project, class: "text-indigo-600 hover:text-indigo-900", data: { turbo_frame: "_top" } %>
+    </dd>
+  </div>
+
+  <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-gray-500">Parties</dt>
+    <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+      <%= presenter.parties_display %>
+    </dd>
+  </div>
+
+  <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-gray-500">Duration</dt>
+    <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+      <%= presenter.duration_display %>
+    </dd>
+  </div>
+
+  <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-gray-500">Total Commitment</dt>
+    <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+      <%= presenter.total_commitment_display %>
+    </dd>
+  </div>
+
+  <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-gray-500">Payment Details</dt>
+    <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+      <%= presenter.payment_type_badge %>
+      <div class="mt-2 text-sm text-gray-600">
+        <%= presenter.formatted_payment_details %>
+      </div>
+      <div class="mt-2 text-sm text-gray-600">
+        <%= presenter.financial_summary %>
+      </div>
+    </dd>
+  </div>
+
+  <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-gray-500">Tasks and Responsibilities</dt>
+    <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+      <% if agreement.tasks.present? %>
+        <%= simple_format(agreement.tasks) %>
+      <% else %>
+        Not specified
+      <% end %>
+    </dd>
+  </div>
+
+  <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-gray-500">Milestones Progress</dt>
+    <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+      <%= presenter.milestone_progress %>
+    </dd>
+  </div>
+
+  <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-gray-500">Progress Summary</dt>
+    <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+      <%= presenter.progress_summary(current_user) %>
+    </dd>
+  </div>
+
+  <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <dt class="text-sm font-medium text-gray-500">Time Remaining</dt>
+    <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+      <%= presenter.time_remaining %>
+    </dd>
+  </div>
+
+  <% if agreement.terms.present? %>
+    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <dt class="text-sm font-medium text-gray-500">Additional Terms</dt>
+      <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+        <%= simple_format(agreement.terms) %>
+      </dd>
+    </div>
+  <% end %>
+
+  <% if !can_view_full_details && agreement.other_party == current_user && agreement.pending? %>
+    <div class="bg-yellow-50 px-4 py-5">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">
+            Limited Access
+          </h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <p>
+              You'll gain full access to this project's details after accepting the agreement.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <%= render "negotiation_history", agreement: agreement, presenter: presenter %>
+  <%= render "countered_agreement_notice", agreement: agreement %>
+</dl>
+</div>

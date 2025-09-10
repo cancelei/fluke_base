@@ -4,8 +4,10 @@
 <% end %>
 
 <!-- Update index page row if present -->
-<%= turbo_stream.replace dom_id(@agreement) do %>
-  <%= render "agreement_index_row", agreement: @agreement %>
+<% if params[:context] == "index" %>
+  <%= turbo_stream.replace dom_id(@agreement), partial: "agreement_index_row", locals: { agreement: @agreement } %>
+<% else %>
+  <%= turbo_stream.replace dom_id(@agreement), partial: "agreement_show_content", locals: { agreement: @agreement, project: @agreement.project, can_view_full_details: @agreement.can_view_full_project_details?(current_user) } %>
 <% end %>
 
 <!-- Update standalone status badge if present -->

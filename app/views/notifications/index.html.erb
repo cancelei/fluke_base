@@ -10,16 +10,17 @@
       <% end %>
     </div>
 
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-      <ul class="divide-y divide-gray-200" id="notifications_container">
-        <%= render "notifications", notifications: @notifications %>
-      </ul>
-    </div>
-
-    <% if @notifications.respond_to?(:total_pages) && @notifications.total_pages > 1 %>
-      <div class="mt-6">
-        <%= paginate @notifications %>
+    <%= turbo_frame_tag "notifications_list" do %>
+      <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y divide-gray-200" id="notifications_container">
+          <%= render "notifications", notifications: @notifications %>
+        </ul>
       </div>
     <% end %>
+
+    <!-- Pagination using our shared component (Turbo) -->
+    <div class="mt-6">
+      <%= render partial: "shared/pagination", locals: { records: @notifications, remote: true } %>
+    </div>
   </div>
 </div>

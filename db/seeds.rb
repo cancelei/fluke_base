@@ -1,5 +1,5 @@
-# Comprehensive Flukebase Demo Seed File
-# Creates realistic data for 50-60 active users with Web2/Web3 projects
+# Enhanced Flukebase Demo Seed File
+# Creates realistic data with predictable scenarios for easier testing
 
 require 'faker'
 
@@ -9,7 +9,7 @@ Role.ensure_default_roles_exist
 
 # Only create demo data in development
 if Rails.env.development?
-  puts "🚀 Creating comprehensive demo data..."
+  puts "🚀 Creating enhanced demo data with test scenarios..."
 
   # Clear existing data to avoid conflicts
   puts "Clearing existing data..."
@@ -23,6 +23,19 @@ if Rails.env.development?
   Project.destroy_all
   UserRole.destroy_all
   User.destroy_all
+
+  # Helper method to create users with predictable data
+  def create_user(first_name, last_name, roles, index)
+    user = User.create!(
+      email: "#{first_name.downcase}.#{last_name.downcase}@flukebase.com",
+      password: 'password123',
+      password_confirmation: 'password123',
+      first_name: first_name,
+      last_name: last_name
+    )
+    roles.each { |role| user.add_role(role) }
+    user
+  end
 
   # Brazilian and American names
   brazilian_first_names = %w[
@@ -76,17 +89,40 @@ if Rails.env.development?
 
   all_projects = web3_projects + web2_projects
 
-  # Create 55 users with mixed Brazilian and American names
+  # Create predictable test users first
   users = []
-  puts "Creating 55 users..."
+  puts "Creating predictable test users..."
 
-  55.times do |i|
-    is_brazilian = i.even?
+  # Primary test users with known scenarios
+  test_users = [
+    { first: "Alice", last: "Entrepreneur", roles: [ Role::ENTREPRENEUR ], desc: "Project owner with multiple agreements" },
+    { first: "Bob", last: "Mentor", roles: [ Role::MENTOR ], desc: "Active mentor with many projects" },
+    { first: "Carol", last: "Cofounder", roles: [ Role::CO_FOUNDER ], desc: "Serial co-founder" },
+    { first: "Dave", last: "Hybrid", roles: [ Role::ENTREPRENEUR, Role::MENTOR ], desc: "Both entrepreneur and mentor" },
+    { first: "Emma", last: "Expert", roles: [ Role::MENTOR, Role::CO_FOUNDER ], desc: "Experienced mentor and co-founder" },
+    { first: "Frank", last: "Newbie", roles: [ Role::ENTREPRENEUR ], desc: "New entrepreneur, no agreements yet" },
+    { first: "Grace", last: "Superuser", roles: [ Role::ENTREPRENEUR, Role::MENTOR, Role::CO_FOUNDER ], desc: "All roles" },
+    { first: "Henry", last: "Overdue", roles: [ Role::MENTOR ], desc: "Has overdue agreements" },
+    { first: "Ivy", last: "Completed", roles: [ Role::MENTOR ], desc: "Only completed agreements" },
+    { first: "Jack", last: "Pending", roles: [ Role::MENTOR ], desc: "Only pending agreements" }
+  ]
+
+  test_users.each_with_index do |user_data, i|
+    user = create_user(user_data[:first], user_data[:last], user_data[:roles], i)
+    users << user
+    puts "  Created #{user.full_name} (#{user_data[:desc]})"
+  end
+
+  # Add more random users to reach 55 total
+  puts "Creating additional random users..."
+  (55 - test_users.length).times do |i|
+    idx = i + test_users.length
+    is_brazilian = idx.even?
     first_name = is_brazilian ? brazilian_first_names.sample : american_first_names.sample
     last_name = is_brazilian ? brazilian_last_names.sample : american_last_names.sample
 
     user = User.create!(
-      email: "user#{i+1}@flukebase.com",
+      email: "user#{idx+1}@flukebase.com",
       password: 'password123',
       password_confirmation: 'password123',
       first_name: first_name,
@@ -175,12 +211,88 @@ if Rails.env.development?
     end
   end
 
-  puts "Creating agreements between users..."
+  puts "Creating agreements with predictable scenarios..."
   agreements = []
 
-  # Create 4-8 agreements per project
-  projects.each do |project|
-    agreement_count = rand(4..8)
+  # Get our test users for predictable scenarios
+  alice = users.find { |u| u.first_name == "Alice" }  # Entrepreneur
+  bob = users.find { |u| u.first_name == "Bob" }      # Mentor
+  carol = users.find { |u| u.first_name == "Carol" }  # Cofounder
+  henry = users.find { |u| u.first_name == "Henry" }  # Overdue
+  ivy = users.find { |u| u.first_name == "Ivy" }      # Completed
+  jack = users.find { |u| u.first_name == "Jack" }    # Pending
+
+  # Helper to create agreements
+  def create_agreement(project, partner, agreement_type, status, start_offset_days = 0, duration_weeks = 26, hours_per_week = 10)
+    start_date = start_offset_days.days.ago
+    end_date = start_date + duration_weeks.weeks
+
+    agreement = Agreement.create!(
+      project: project,
+      agreement_type: agreement_type,
+      status: status,
+      start_date: start_date,
+      end_date: end_date,
+      terms: agreement_type == Agreement::MENTORSHIP ?
+        "Weekly mentoring sessions, strategic guidance, and industry connections" :
+        "Equal partnership with shared responsibilities and equity split",
+      payment_type: Agreement::HYBRID,
+      tasks: agreement_type == Agreement::MENTORSHIP ?
+        "Product strategy, market analysis, fundraising guidance, team building advice" :
+        "Product development, business operations, fundraising, team management",
+      weekly_hours: hours_per_week,
+      hourly_rate: rand(75..150),
+      equity_percentage: agreement_type == Agreement::CO_FOUNDER ? rand(10..30) : rand(1..5),
+      milestone_ids: project.milestones.sample(rand(1..2)).pluck(:id)
+    )
+
+    # Create agreement participants
+    AgreementParticipant.create!(
+      agreement: agreement,
+      user: project.user,
+      user_role: 'entrepreneur',
+      project: project,
+      is_initiator: true,
+      accept_or_counter_turn_id: partner.id
+    )
+
+    AgreementParticipant.create!(
+      agreement: agreement,
+      user: partner,
+      user_role: agreement_type == Agreement::MENTORSHIP ? 'mentor' : 'co_founder',
+      project: project,
+      is_initiator: false,
+      accept_or_counter_turn_id: partner.id
+    )
+
+    agreement
+  end
+
+  # Create specific test scenarios for Alice's project (first project)
+  alice_project = projects.find { |p| p.user == alice }
+  if alice_project
+    puts "  Creating test agreements for #{alice.full_name}'s project..."
+
+    # 1. Active mentorship with lots of time logged
+    agreements << create_agreement(alice_project, bob, Agreement::MENTORSHIP, Agreement::ACCEPTED, 30, 40, 15)
+
+    # 2. Completed co-founder agreement
+    agreements << create_agreement(alice_project, carol, Agreement::CO_FOUNDER, Agreement::COMPLETED, 90, 20, 25)
+
+    # 3. Overdue mentorship (started but past end date)
+    agreements << create_agreement(alice_project, henry, Agreement::MENTORSHIP, Agreement::ACCEPTED, 60, 8, 12)
+
+    # 4. Pending agreement (not started yet)
+    agreements << create_agreement(alice_project, jack, Agreement::MENTORSHIP, Agreement::PENDING, -7, 26, 8)
+
+    # 5. Recently completed with perfect time tracking
+    agreements << create_agreement(alice_project, ivy, Agreement::MENTORSHIP, Agreement::COMPLETED, 45, 12, 10)
+  end
+
+  # Create random agreements for other projects
+  remaining_projects = projects.reject { |p| p == alice_project }
+  remaining_projects.each do |project|
+    agreement_count = rand(2..5)  # Fewer random agreements
     potential_partners = users.reject { |u| u == project.user }
 
     agreement_count.times do
@@ -188,68 +300,89 @@ if Rails.env.development?
       next if partner.nil?
 
       agreement_type = [ Agreement::MENTORSHIP, Agreement::CO_FOUNDER ].sample
+      status = [ Agreement::PENDING, Agreement::ACCEPTED, Agreement::COMPLETED ].sample
 
-      agreement = Agreement.create!(
-        project: project,
-        agreement_type: agreement_type,
-        status: [ Agreement::PENDING, Agreement::ACCEPTED, Agreement::COMPLETED ].sample,
-        start_date: rand(30.days.ago..30.days.from_now),
-        end_date: rand(3.months.from_now..1.year.from_now),
-        terms: agreement_type == Agreement::MENTORSHIP ?
-          "Weekly mentoring sessions, strategic guidance, and industry connections" :
-          "Equal partnership with shared responsibilities and equity split",
-        payment_type: [ Agreement::HOURLY, Agreement::EQUITY, Agreement::HYBRID ].sample,
-        tasks: agreement_type == Agreement::MENTORSHIP ?
-          "Product strategy, market analysis, fundraising guidance, team building advice" :
-          "Product development, business operations, fundraising, team management",
-        weekly_hours: agreement_type == Agreement::MENTORSHIP ? rand(5..15) : rand(20..40),
-        hourly_rate: rand(75..250),
-        equity_percentage: agreement_type == Agreement::CO_FOUNDER ? rand(10..50) : rand(1..5),
-        milestone_ids: project.milestones.sample(rand(1..3)).pluck(:id)
+      agreements << create_agreement(
+        project,
+        partner,
+        agreement_type,
+        status,
+        rand(-30..30),      # start_offset_days
+        rand(12..52),       # duration_weeks
+        agreement_type == Agreement::MENTORSHIP ? rand(5..15) : rand(20..40)  # hours_per_week
       )
-
-      # Create agreement participants
-      AgreementParticipant.create!(
-        agreement: agreement,
-        user: project.user,
-        user_role: 'entrepreneur',
-        project: project,
-        is_initiator: true,
-        accept_or_counter_turn_id: partner.id
-      )
-
-      AgreementParticipant.create!(
-        agreement: agreement,
-        user: partner,
-        user_role: agreement_type == Agreement::MENTORSHIP ? 'mentor' : 'co_founder',
-        project: project,
-        is_initiator: false,
-        accept_or_counter_turn_id: partner.id
-      )
-
-      agreements << agreement
     end
   end
 
-  puts "Creating time logs..."
+  puts "Creating realistic time logs..."
 
-  # Create time logs for accepted agreements
-  accepted_agreements = agreements.select { |a| a.status == Agreement::ACCEPTED }
+  # Helper to create realistic time logs for an agreement
+  def create_time_logs_for_agreement(agreement, intensity = :normal)
+    return unless agreement.status == Agreement::ACCEPTED || agreement.status == Agreement::COMPLETED
 
-  accepted_agreements.each do |agreement|
-    # Create 5-15 time logs per agreement
-    rand(5..15).times do
-      start_time = rand(30.days.ago..Time.current)
-      duration_hours = rand(1..8)
-      end_time = start_time + duration_hours.hours
+    # Determine who logs time (typically the non-project-owner)
+    working_user = agreement.other_party || agreement.initiator
+    return unless working_user
+
+    # Calculate realistic time logging based on agreement duration
+    weeks_active = if agreement.completed?
+      ((agreement.updated_at.to_date - agreement.start_date) / 7).ceil
+    else
+      [ ((Date.current - agreement.start_date) / 7).ceil, 0 ].max
+    end
+
+    return if weeks_active <= 0
+
+    # Determine hours to log based on intensity
+    target_hours = case intensity
+    when :heavy
+      (agreement.weekly_hours * weeks_active * 1.1).round  # 110% of target
+    when :perfect
+      (agreement.weekly_hours * weeks_active).round        # Exactly as agreed
+    when :light
+      (agreement.weekly_hours * weeks_active * 0.7).round  # 70% of target
+    when :none
+      0
+    else
+      (agreement.weekly_hours * weeks_active * rand(0.8..1.2)).round  # 80-120% variance
+    end
+
+    return if target_hours <= 0
+
+    # Create realistic time entries
+    logged_hours = 0
+    current_date = agreement.start_date
+
+    while logged_hours < target_hours && current_date <= Date.current
+      # Skip weekends for most entries (80% skip rate)
+      if current_date.saturday? || current_date.sunday?
+        if rand < 0.8
+          current_date += 1.day
+          next
+        end
+      end
+
+      # Randomly skip some days
+      if rand < 0.3
+        current_date += 1.day
+        next
+      end
+
+      # Random session length (1-8 hours, weighted toward 2-4 hours)
+      remaining_hours = target_hours - logged_hours
+      session_hours = [ rand(1..8), remaining_hours ].min
+      session_hours = [ session_hours, rand(2..4) ].min if rand < 0.6  # Weight toward shorter sessions
+
+      start_time = current_date.beginning_of_day + rand(9..17).hours + rand(0..59).minutes
+      end_time = start_time + session_hours.hours
 
       TimeLog.create!(
         project: agreement.project,
-        user: [ agreement.initiator, agreement.other_party ].sample,
-        milestone: agreement.selected_milestones.sample,
+        user: working_user,
+        milestone: agreement.selected_milestones.sample || agreement.project.milestones.sample,
         started_at: start_time,
         ended_at: end_time,
-        hours_spent: duration_hours,
+        hours_spent: session_hours,
         description: [
           "Working on user interface improvements",
           "Backend API development",
@@ -260,12 +393,51 @@ if Rails.env.development?
           "Testing and bug fixes",
           "Documentation updates",
           "Team coordination meeting",
-          "Investor pitch preparation"
+          "Investor pitch preparation",
+          "Code review and refactoring",
+          "Performance optimization",
+          "Feature development",
+          "Bug investigation and fixes"
         ].sample,
         status: "completed",
-        manual_entry: [ true, false ].sample
+        manual_entry: rand < 0.3  # 30% manual entries
       )
+
+      logged_hours += session_hours
+      current_date += rand(1..3).days  # Variable gaps between sessions
     end
+
+    puts "    Created #{TimeLog.where(project: agreement.project, user: working_user).count} time logs for #{working_user.full_name} (#{logged_hours}h total)"
+  end
+
+  # Create predictable time logs for test scenarios
+  if alice_project
+    alice_agreements = agreements.select { |a| a.project == alice_project }
+
+    alice_agreements.each do |agreement|
+      intensity = case agreement.other_party&.first_name
+      when "Bob"    # Active mentor - lots of time
+        :heavy
+      when "Carol"  # Completed co-founder - perfect tracking
+        :perfect
+      when "Henry"  # Overdue mentor - light work
+        :light
+      when "Jack"   # Pending - no time yet
+        :none
+      when "Ivy"    # Completed mentor - perfect tracking
+        :perfect
+      else
+        :normal
+      end
+
+      create_time_logs_for_agreement(agreement, intensity)
+    end
+  end
+
+  # Create time logs for other agreements
+  remaining_agreements = agreements.reject { |a| a.project == alice_project }
+  remaining_agreements.each do |agreement|
+    create_time_logs_for_agreement(agreement, :normal)
   end
 
   puts "Creating conversations and messages..."
@@ -331,7 +503,7 @@ if Rails.env.development?
     end
   end
 
-  puts "\n✅ Demo seed data created successfully!"
+  puts "\n✅ Enhanced demo seed data created successfully!"
   puts "📊 Summary:"
   puts "   👥 Users: #{User.count}"
   puts "   🚀 Projects: #{Project.count}"
@@ -340,5 +512,25 @@ if Rails.env.development?
   puts "   ⏰ Time Logs: #{TimeLog.count}"
   puts "   💬 Messages: #{Message.count}"
   puts "   📅 Meetings: #{Meeting.count}"
-  puts "\n🎉 Ready to explore Flukebase with realistic demo data!"
+
+  puts "\n🧪 Test User Scenarios Created:"
+  puts "   • alice.entrepreneur@flukebase.com - Project owner with multiple agreement types"
+  puts "   • bob.mentor@flukebase.com - Active mentor with heavy time logging"
+  puts "   • carol.cofounder@flukebase.com - Completed co-founder with perfect tracking"
+  puts "   • henry.overdue@flukebase.com - Mentor with overdue agreement"
+  puts "   • ivy.completed@flukebase.com - Mentor with completed agreement"
+  puts "   • jack.pending@flukebase.com - Mentor with pending agreement"
+  puts "   • frank.newbie@flukebase.com - New entrepreneur with no agreements"
+  puts "   • grace.superuser@flukebase.com - User with all roles"
+
+  puts "\n🎯 Key Test Cases:"
+  puts "   📈 Time tracking: Realistic patterns with weekday bias"
+  puts "   📅 Agreement lifecycle: Pending → Accepted → Completed"
+  puts "   ⏰ Overdue scenarios: Past end dates with varying completion"
+  puts "   💯 Perfect tracking: Agreements with exactly committed hours"
+  puts "   🚀 Heavy usage: Over-committed mentors and active projects"
+  puts "   📊 Mixed intensities: Light, normal, and heavy time logging"
+
+  puts "\n🔑 Login with any test user using password: 'password123'"
+  puts "\n🎉 Ready to test Flukebase with predictable scenarios!"
 end

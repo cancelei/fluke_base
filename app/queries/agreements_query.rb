@@ -9,7 +9,7 @@ class AgreementsQuery
                               .with_project_and_users
                               .with_meetings
                               .recent_first
-    apply_filters(agreements)
+    apply_filters(agreements).page(@params[:page]).per(12)
   end
 
   def other_party_agreements
@@ -17,7 +17,7 @@ class AgreementsQuery
                               .with_project_and_users
                               .with_meetings
                               .recent_first
-    apply_filters(agreements)
+    apply_filters(agreements).page(@params[:page]).per(12)
   end
 
   def filter_by_status(my_agreements, other_party_agreements)

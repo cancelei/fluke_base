@@ -1,0 +1,26 @@
+<div class="<%= responsive_classes %>">
+  <table class="min-w-full divide-y divide-gray-200 <%= table_classes %>">
+    <thead class="bg-gray-50">
+      <tr>
+        <% columns.each do |column| %>
+          <th scope="col" class="<%= column[:th_class] %>">
+            <%= column[:label] %>
+          </th>
+        <% end %>
+        <th scope="col" class="relative <%= actions_th_class %>">
+          <span class="sr-only">Actions</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200 <%= tbody_class %>" id="<%= tbody_id %>">
+      <% agreements.each do |agreement| %>
+        <%= render "agreement_index_row", agreement: agreement %>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination using our shared component (Turbo frame navigation) -->
+<div class="px-6 py-3">
+  <%= paginate agreements, params: pagination_params, data: pagination_data %>
+</div>

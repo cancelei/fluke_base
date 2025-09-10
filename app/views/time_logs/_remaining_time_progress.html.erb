@@ -1,10 +1,36 @@
-<% if local_assigns[:owner] %>
+<% if local_assigns[:agreement] %>
+# For agreement-specific time tracking %>
+  <% agreement_participant_ids = agreement.agreement_participants.pluck(:user_id) %>
+  <% total_allowed_hours = agreement.weekly_hours.to_f * agreement.duration_in_weeks.to_f %>
+  <% used_hours = project.time_logs.where(user_id: agreement_participant_ids).where.not(status: "in_progress").sum(:hours_spent) +
+      (project.time_logs.where(user_id: agreement_participant_ids).in_progress.any? ? ((Time.zone.now - project.time_logs.where(user_id: agreement_participant_ids).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
+  <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+<% elsif local_assigns[:project_wide] %>
+# For project-wide time tracking (time logs page) %>
+  <% agreements = project.agreements.includes(:agreement_participants) %>
+  <% if local_assigns[:owner] %>
+# Project owner: show ALL project time %>
+    <% total_allowed_hours = agreements.sum { |a| a.weekly_hours * a.duration_in_weeks } %>
+    <% used_hours = project.time_logs.where.not(status: "in_progress").sum(:hours_spent) +
+        (project.time_logs.in_progress.any? ? ((Time.zone.now - project.time_logs.in_progress.last.started_at) / 1.hour).round(2) : 0) %>
+    <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+  <% else %>
+# Agreement participant: show only their own time within the project context %>
+    <% user_agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }, project: project).first %>
+    <% total_allowed_hours = user_agreement&.weekly_hours.to_f * user_agreement&.duration_in_weeks.to_f %>
+    <% used_hours = project.time_logs.where(user: current_user).where.not(status: "in_progress").sum(:hours_spent) +
+        ((project.time_logs.where(user: current_user).in_progress.any?) ? ((Time.zone.now - project.time_logs.where(user: current_user).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
+    <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+  <% end %>
+<% elsif local_assigns[:owner] %>
+# For project owner view in agreement context - show other parties' work %>
   <% agreements = project.agreements.includes(:agreement_participants) %>
   <% total_allowed_hours = agreements.sum { |a| a.weekly_hours * a.duration_in_weeks } %>
   <% used_hours = project.time_logs.where.not(user_id: current_user.id).where.not(status: "in_progress").sum(:hours_spent) +
       (project.time_logs.where.not(user_id: current_user.id).in_progress.any? ? ((Time.zone.now - project.time_logs.where.not(user_id: current_user.id).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
   <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
 <% else %>
+# For individual user view %>
   <% agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).find_by(project: project) %>
   <% total_allowed_hours = agreement&.weekly_hours.to_f * agreement&.duration_in_weeks.to_f %>
   <% used_hours = project.time_logs.where(user: current_user).where.not(status: "in_progress").sum(:hours_spent) + ((current_log && current_log.started_at) ? ((Time.zone.now - current_log.started_at) / 1.hour).round(2) : 0) %>
@@ -17,7 +43,76 @@
       <%= used_hours %> / <%= total_allowed_hours %> hours
     </span>
   </div>
-  <% if local_assigns[:owner] %>
+  <% if local_assigns[:agreement] %>
+# Agreement-specific progress bar with participant breakdown %>
+    <div class="relative group">
+      <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-300 cursor-pointer">
+        <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+      </div>
+      <div class="absolute z-10 left-0 mt-2 w-full bg-white border border-gray-200 rounded shadow-lg p-4 text-xs text-gray-700 min-w-[250px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200">
+        <div class="font-semibold mb-2">Agreement Participants</div>
+        <ul>
+          <% agreement.agreement_participants.includes(:user).each do |participant| %>
+            <% participant_used = project.time_logs.where(user_id: participant.user_id).where.not(status: "in_progress").sum(:hours_spent) + (project.time_logs.where(user_id: participant.user_id).in_progress.any? ? ((Time.zone.now - project.time_logs.where(user_id: participant.user_id).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
+            <% participant_total = agreement.weekly_hours * agreement.duration_in_weeks %>
+            <% participant_percent = participant_total > 0 ? [ (participant_used.to_f / participant_total * 100).round, 100 ].min : 0 %>
+            <li class="mb-1 flex justify-between items-center">
+              <span>
+                <%= participant.user&.full_name || participant.user&.email || "User" %>
+              </span>
+              <span class="ml-2">
+                <%= participant_used %> / <%= participant_total %>h (<%= participant_percent %>%)
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% elsif local_assigns[:project_wide] %>
+    <div class="relative group">
+      <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-300 cursor-pointer">
+        <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+      </div>
+      <% if local_assigns[:owner] %>
+        <div class="absolute z-10 left-0 mt-2 w-full bg-white border border-gray-200 rounded shadow-lg p-4 text-xs text-gray-700 min-w-[250px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200">
+          <div class="font-semibold mb-2">All Project Contributors</div>
+          <ul>
+# Get all users who have logged time for this project %>
+            <% project.time_logs.joins(:user).group("users.id").sum(:hours_spent).each do |user_id, user_hours| %>
+              <% user = User.find(user_id) %>
+              <li class="mb-1 flex justify-between items-center">
+                <span>
+                  <%= user.full_name || user.email || "User" %>
+                  <% if user_id == project.user_id %>
+                    <span class="text-gray-500">(Owner)</span>
+                  <% end %>
+                </span>
+                <span class="ml-2">
+                  <%= user_hours %>h
+                </span>
+              </li>
+            <% end %>
+          </ul>
+          <div class="border-t border-gray-200 mt-2 pt-2 font-semibold">
+            Total: <%= used_hours %>h of <%= total_allowed_hours %>h allocated
+          </div>
+        </div>
+      <% else %>
+        <div class="absolute z-10 left-0 mt-2 w-full bg-white border border-gray-200 rounded shadow-lg p-4 text-xs text-gray-700 min-w-[200px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200">
+          <div class="font-semibold mb-2">Your Time Contribution</div>
+          <div>
+            <% if user_agreement %>
+              Agreement: <%= user_agreement.agreement_type %><br>
+              Weekly commitment: <%= user_agreement.weekly_hours %>h<br>
+              Duration: <%= user_agreement.duration_in_weeks %> weeks
+            <% else %>
+              No active agreement found
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% elsif local_assigns[:owner] %>
     <div class="relative group">
       <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-300 cursor-pointer">
         <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>

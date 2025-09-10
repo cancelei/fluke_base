@@ -1,11 +1,5 @@
-<%= turbo_frame_tag "agreement_results", class: "block" do %>
-  <!-- Loading indicator -->
-  <div data-loading-indicator>
-    <div class="flex justify-center py-4">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-    </div>
-  </div>
 
+<%= turbo_frame_tag "agreement_results" do %>
   <!-- Entrepreneur Agreements -->
   <div class="bg-white shadow sm:rounded-lg mb-8">
     <div class="px-4 py-5 sm:px-6 flex items-center justify-between">
@@ -26,37 +20,9 @@
     </div>
 
     <% if @my_agreements.any? %>
-      <div class="overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mentor</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Time</th>
-              <th scope="col" class="relative px-6 py-3">
-                <span class="sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200" id="my_agreements_tbody">
-            <% @my_agreements.each do |agreement| %>
-              <%= turbo_frame_tag dom_id(agreement) do %>
-                <%= render "agreement_index_row", agreement: agreement %>
-              <% end %>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Results count -->
-      <div class="bg-gray-50 px-6 py-3">
-        <p class="text-sm text-gray-700">
-          Showing <%= @my_agreements.count %> agreement<%= "s" unless @my_agreements.count == 1 %>
-        </p>
-      </div>
+      <%= turbo_frame_tag "agreements_my" do %>
+        <%= render "my_agreements_section", my_agreements: @my_agreements, query: @query %>
+      <% end %>
     <% else %>
       <%= render "empty_state_entrepreneur" %>
     <% end %>
@@ -75,37 +41,9 @@
     </div>
 
     <% if @other_party_agreements.any? %>
-      <div class="overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrepreneur</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remaining Time</th>
-              <th scope="col" class="relative px-6 py-3">
-                <span class="sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200" id="other_party_agreements_tbody">
-            <% @other_party_agreements.each do |agreement| %>
-              <%= turbo_frame_tag dom_id(agreement) do %>
-                <%= render "agreement_index_row", agreement: agreement %>
-              <% end %>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Results count -->
-      <div class="bg-gray-50 px-6 py-3">
-        <p class="text-sm text-gray-700">
-          Showing <%= @other_party_agreements.count %> agreement<%= "s" unless @other_party_agreements.count == 1 %>
-        </p>
-      </div>
+      <%= turbo_frame_tag "agreements_other" do %>
+        <%= render "other_agreements_section", other_party_agreements: @other_party_agreements, query: @query %>
+      <% end %>
     <% else %>
       <%= render "empty_state_mentor" %>
     <% end %>
