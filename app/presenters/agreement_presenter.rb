@@ -153,7 +153,8 @@ class AgreementPresenter < ApplicationPresenter
 
   def project_link
     h.link_to project.name, h.project_path(project),
-            class: "text-blue-600 hover:text-blue-800 font-medium"
+            class: "text-blue-600 hover:text-blue-800 font-medium",
+            data: { turbo_frame: "_top" }
   end
 
   def created_timeframe

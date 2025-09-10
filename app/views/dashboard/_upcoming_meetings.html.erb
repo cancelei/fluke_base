@@ -1,0 +1,33 @@
+<% cache([ current_user, "upcoming_meetings", @upcoming_meetings.maximum(:updated_at) ]) do %>
+  <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+    <div class="px-6 py-6 sm:px-8 bg-gradient-to-r from-blue-50/50 to-purple-50/50">
+      <h3 class="text-lg font-semibold text-gray-900">Upcoming Meetings</h3>
+    </div>
+    <div class="border-t border-gray-200">
+      <ul role="list" class="divide-y divide-gray-200">
+        <% if @upcoming_meetings.present? %>
+          <% @upcoming_meetings.each do |meeting| %>
+            <% cache([ meeting, current_user ]) do %>
+              <li class="px-6 py-5 sm:px-8 hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-purple-50/30 transition-all duration-200">
+                <div class="flex items-center justify-between">
+                  <p class="truncate text-sm font-semibold text-blue-600"><%= meeting.title %></p>
+                </div>
+                <div class="mt-3">
+                  <p class="text-sm text-gray-600"><%= meeting.description %></p>
+                </div>
+                <div class="mt-3 flex justify-between text-sm text-gray-500">
+                  <p><%= meeting.start_time.strftime("%b %d, %Y at %l:%M %p") %></p>
+                  <p><%= meeting.duration_in_minutes %> minutes</p>
+                </div>
+              </li>
+            <% end %>
+          <% end %>
+        <% else %>
+          <li class="px-6 py-8 sm:px-8 text-center">
+            <p class="text-sm text-gray-500">No upcoming meetings.</p>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>

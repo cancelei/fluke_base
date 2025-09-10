@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_09_000001) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_10_020519) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -470,4 +470,97 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_000001) do
   add_foreign_key "user_roles", "users"
   add_foreign_key "users", "projects", column: "selected_project_id", on_delete: :nullify
   add_foreign_key "users", "roles", column: "current_role_id"
+
+  create_view "dashboard_stats", materialized: true, sql_definition: <<-SQL
+      SELECT u.id AS user_id,
+      u.email,
+      COALESCE(p_stats.total_projects, (0)::bigint) AS total_projects,
+      COALESCE(p_stats.projects_seeking_mentor, (0)::bigint) AS projects_seeking_mentor,
+      COALESCE(p_stats.projects_seeking_cofounder, (0)::bigint) AS projects_seeking_cofounder,
+      COALESCE(a_stats.total_agreements, (0)::bigint) AS total_agreements,
+      COALESCE(a_stats.active_agreements, (0)::bigint) AS active_agreements,
+      COALESCE(a_stats.completed_agreements, (0)::bigint) AS completed_agreements,
+      COALESCE(a_stats.pending_agreements, (0)::bigint) AS pending_agreements,
+      COALESCE(a_stats.agreements_as_initiator, (0)::bigint) AS agreements_as_initiator,
+      COALESCE(a_stats.agreements_as_participant, (0)::bigint) AS agreements_as_participant,
+      COALESCE(m_stats.total_meetings, (0)::bigint) AS total_meetings,
+      COALESCE(m_stats.upcoming_meetings, (0)::bigint) AS upcoming_meetings,
+      COALESCE(mil_stats.total_milestones, (0)::bigint) AS total_milestones,
+      COALESCE(mil_stats.completed_milestones, (0)::bigint) AS completed_milestones,
+      COALESCE(mil_stats.in_progress_milestones, (0)::bigint) AS in_progress_milestones,
+      now() AS calculated_at
+     FROM ((((users u
+       LEFT JOIN ( SELECT projects.user_id,
+              count(*) AS total_projects,
+              count(
+                  CASE
+                      WHEN ((projects.collaboration_type)::text = ANY ((ARRAY['mentor'::character varying, 'both'::character varying])::text[])) THEN 1
+                      ELSE NULL::integer
+                  END) AS projects_seeking_mentor,
+              count(
+                  CASE
+                      WHEN ((projects.collaboration_type)::text = ANY ((ARRAY['co-founder'::character varying, 'both'::character varying])::text[])) THEN 1
+                      ELSE NULL::integer
+                  END) AS projects_seeking_cofounder
+             FROM projects
+            GROUP BY projects.user_id) p_stats ON ((p_stats.user_id = u.id)))
+       LEFT JOIN ( SELECT ap.user_id,
+              count(*) AS total_agreements,
+              count(
+                  CASE
+                      WHEN ((a.status)::text = 'Accepted'::text) THEN 1
+                      ELSE NULL::integer
+                  END) AS active_agreements,
+              count(
+                  CASE
+                      WHEN ((a.status)::text = 'Completed'::text) THEN 1
+                      ELSE NULL::integer
+                  END) AS completed_agreements,
+              count(
+                  CASE
+                      WHEN ((a.status)::text = 'Pending'::text) THEN 1
+                      ELSE NULL::integer
+                  END) AS pending_agreements,
+              count(
+                  CASE
+                      WHEN (ap.is_initiator = true) THEN 1
+                      ELSE NULL::integer
+                  END) AS agreements_as_initiator,
+              count(
+                  CASE
+                      WHEN (ap.is_initiator = false) THEN 1
+                      ELSE NULL::integer
+                  END) AS agreements_as_participant
+             FROM (agreement_participants ap
+               JOIN agreements a ON ((a.id = ap.agreement_id)))
+            GROUP BY ap.user_id) a_stats ON ((a_stats.user_id = u.id)))
+       LEFT JOIN ( SELECT ap.user_id,
+              count(m.*) AS total_meetings,
+              count(
+                  CASE
+                      WHEN (m.start_time > now()) THEN 1
+                      ELSE NULL::integer
+                  END) AS upcoming_meetings
+             FROM ((agreement_participants ap
+               JOIN agreements a ON ((a.id = ap.agreement_id)))
+               LEFT JOIN meetings m ON ((m.agreement_id = a.id)))
+            GROUP BY ap.user_id) m_stats ON ((m_stats.user_id = u.id)))
+       LEFT JOIN ( SELECT p.user_id,
+              count(mil.*) AS total_milestones,
+              count(
+                  CASE
+                      WHEN ((mil.status)::text = 'completed'::text) THEN 1
+                      ELSE NULL::integer
+                  END) AS completed_milestones,
+              count(
+                  CASE
+                      WHEN ((mil.status)::text = 'in_progress'::text) THEN 1
+                      ELSE NULL::integer
+                  END) AS in_progress_milestones
+             FROM (projects p
+               LEFT JOIN milestones mil ON ((mil.project_id = p.id)))
+            GROUP BY p.user_id) mil_stats ON ((mil_stats.user_id = u.id)));
+  SQL
+  add_index "dashboard_stats", ["user_id"], name: "index_dashboard_stats_on_user_id", unique: true
+
 end

@@ -8,131 +8,13 @@
 <div class="mt-8">
   <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
     <!-- Projects section -->
-    <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-      <div class="px-6 py-6 sm:px-8 flex justify-between items-center bg-gradient-to-r from-blue-50/50 to-purple-50/50">
-        <h3 class="text-lg font-semibold text-gray-900">Recent Projects</h3>
-        <%= link_to "View all", projects_path, class: "text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline" %>
-      </div>
-      <div class="border-t border-gray-200">
-        <ul role="list" class="divide-y divide-gray-200">
-          <% if @projects.present? %>
-            <% @projects.each do |project| %>
-              <% project_presenter = present(project) %>
-              <li class="px-6 py-5 sm:px-8 hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-purple-50/30 transition-all duration-200">
-                <div class="flex items-center justify-between">
-                  <p class="truncate text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"><%= link_to project_presenter.display_name(current_user), project_path(project) %></p>
-                  <div class="ml-3 flex flex-shrink-0">
-                    <%= project_presenter.stage_badge %>
-                  </div>
-                </div>
-                <div class="mt-3 sm:flex sm:justify-between">
-                  <div class="sm:flex">
-                    <p class="flex items-center text-sm text-gray-600">
-                      <span><%= project_presenter.display_description(current_user, truncate: true, length: 100) %></span>
-                    </p>
-                  </div>
-                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <p><%= project_presenter.milestones_summary %></p>
-                  </div>
-                </div>
-              </li>
-            <% end %>
-          <% else %>
-            <li class="px-6 py-8 sm:px-8 text-center">
-              <p class="text-sm text-gray-500 mb-4">No projects yet.</p>
-              <%= link_to "Create a project", new_project_path, class: "inline-flex items-center rounded-xl border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105" %>
-            </li>
-          <% end %>
-        </ul>
-
-        <% if current_user.has_role?(:mentor) %>
-          <div class="px-6 py-6 sm:px-8 bg-gradient-to-r from-blue-50/80 to-purple-50/80 border-t border-blue-100/50">
-            <div class="flex flex-col items-center justify-center space-y-3">
-              <h4 class="text-sm font-semibold text-blue-700">Looking to mentor new projects?</h4>
-              <%= link_to explore_projects_path, class: "w-full inline-flex justify-center items-center rounded-xl border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105" do %>
-                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                Explore Available Projects
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    </div>
+    <%= render "recent_projects" %>
 
     <!-- Agreements section -->
-    <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-      <div class="px-6 py-6 sm:px-8 flex justify-between items-center bg-gradient-to-r from-blue-50/50 to-purple-50/50">
-        <h3 class="text-lg font-semibold text-gray-900">Recent Agreements</h3>
-        <%= link_to "View all", agreements_path, class: "text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline" %>
-      </div>
-      <div class="border-t border-gray-200">
-        <ul role="list" class="divide-y divide-gray-200">
-          <% if @agreements.present? %>
-            <% @agreements.each do |agreement| %>
-              <% agreement_presenter = present(agreement) %>
-              <li class="px-6 py-5 sm:px-8 hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-purple-50/30 transition-all duration-200">
-                <div class="flex items-center justify-between">
-                  <p class="truncate text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
-                    <%= agreement_presenter.project_link %>
-                  </p>
-                  <div class="ml-3 flex flex-shrink-0">
-                    <%= agreement_presenter.status_badge %>
-                  </div>
-                </div>
-                <div class="mt-3 sm:flex sm:justify-between">
-                  <div class="sm:flex">
-                    <p class="flex items-center text-sm text-gray-600">
-                      <span><%= agreement_presenter.parties_display %></span>
-                    </p>
-                  </div>
-                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <p><%= agreement_presenter.time_remaining %></p>
-                  </div>
-                </div>
-              </li>
-            <% end %>
-          <% else %>
-            <li class="px-6 py-8 sm:px-8 text-center">
-              <p class="text-sm text-gray-500 mb-4">No agreements yet.</p>
-              <%= link_to "Create an agreement", new_agreement_path, class: "inline-flex items-center rounded-xl border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105" %>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-    </div>
+    <%= render "recent_agreements" %>
 
     <!-- Upcoming Meetings section -->
-    <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-      <div class="px-6 py-6 sm:px-8 bg-gradient-to-r from-blue-50/50 to-purple-50/50">
-        <h3 class="text-lg font-semibold text-gray-900">Upcoming Meetings</h3>
-      </div>
-      <div class="border-t border-gray-200">
-        <ul role="list" class="divide-y divide-gray-200">
-          <% if @upcoming_meetings.present? %>
-            <% @upcoming_meetings.each do |meeting| %>
-              <li class="px-6 py-5 sm:px-8 hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-purple-50/30 transition-all duration-200">
-                <div class="flex items-center justify-between">
-                  <p class="truncate text-sm font-semibold text-blue-600"><%= meeting.title %></p>
-                </div>
-                <div class="mt-3">
-                  <p class="text-sm text-gray-600"><%= meeting.description %></p>
-                </div>
-                <div class="mt-3 flex justify-between text-sm text-gray-500">
-                  <p><%= meeting.start_time.strftime("%b %d, %Y at %l:%M %p") %></p>
-                  <p><%= meeting.duration_in_minutes %> minutes</p>
-                </div>
-              </li>
-            <% end %>
-          <% else %>
-            <li class="px-6 py-8 sm:px-8 text-center">
-              <p class="text-sm text-gray-500">No upcoming meetings.</p>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-    </div>
+    <%= render "upcoming_meetings" %>
   </div>
 </div>
 
@@ -144,13 +26,6 @@
         <div>
           <h3 class="text-xl font-bold text-gray-900">Projects Looking for Mentors</h3>
           <p class="mt-2 max-w-2xl text-sm text-gray-600">
-            <% if @explorable_projects.nil? %>
-              [Debug: @explorable_projects is nil]
-            <% elsif @explorable_projects.empty? %>
-              [Debug: Found 0 explorable projects]
-            <% else %>
-              [Debug: Found <%= @explorable_projects.size %> explorable projects]
-            <% end %>
             These projects are seeking mentorship or co-founders.
           </p>
         </div>

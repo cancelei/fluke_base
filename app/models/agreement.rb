@@ -268,9 +268,14 @@ class Agreement < ApplicationRecord
     agreement_participants.any?(&:counter_agreement_id)
   end
 
+  def counter_to_id
+    # Get the ID of the original agreement this is a counter offer to
+    agreement_participants.first&.counter_agreement_id
+  end
+
   def counter_to
     # Get the original agreement this is a counter offer to
-    counter_agreement_id = agreement_participants.first&.counter_agreement_id
+    counter_agreement_id = counter_to_id
     Agreement.find_by(id: counter_agreement_id) if counter_agreement_id
   end
 

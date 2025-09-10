@@ -102,3 +102,6 @@ gem "cancancan", "~> 3.6"
 gem "letter_avatar"
 
 gem "faraday-retry", "~> 2.3"
+
+# Materialized views for performance
+gem "scenic", "~> 1.8"

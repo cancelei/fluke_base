@@ -163,8 +163,8 @@ class AgreementsController < ApplicationController
 
       respond_to do |format|
         format.turbo_stream do
-          flash.now[:notice] = notice_message
-          render :create
+          flash[:notice] = notice_message
+          redirect_to @agreement, status: :see_other
         end
         format.html { redirect_to @agreement, notice: notice_message }
       end
@@ -390,8 +390,10 @@ class AgreementsController < ApplicationController
 
   def github_section
     begin
-      @project = @agreement.project.includes(:github_logs) # Preload github_logs
       @can_view_full_details = @agreement.can_view_full_project_details?(current_user)
+
+      # Preload github logs to avoid N+1 queries
+      @project = Project.includes(:github_logs).find(@agreement.project.id)
 
       respond_to do |format|
         format.turbo_stream { render partial: "github_section", locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details } }

@@ -1,5 +1,0 @@
-<%= turbo_stream.prepend "flash_messages", partial: "shared/flash_message", locals: { type: "notice", message: flash.now[:notice] } %>
-
-<%= turbo_stream.replace "agreement_form", partial: "agreements/agreement_show_content", locals: { agreement: @agreement, project: @agreement.project, can_view_full_details: @agreement.can_view_full_project_details?(current_user) } %>
-
-<%= turbo_stream.prepend "my_agreements_tbody", partial: "agreements/agreement_index_row", locals: { agreement: @agreement } %>
