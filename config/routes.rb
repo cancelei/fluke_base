@@ -2,6 +2,11 @@ Rails.application.routes.draw do
   # System and health check routes
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Error handling routes
+  get "/404", to: "errors#not_found", via: :all
+  get "/500", to: "errors#internal_server_error", via: :all
+  get "/406", to: "errors#unsupported_browser", via: :all
+
   # Test routes for Claude Code (development only)
   if Rails.env.development?
     get "test/turbo" => "test#turbo_test", as: :turbo_test

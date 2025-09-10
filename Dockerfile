@@ -60,11 +60,12 @@ RUN SECRET_KEY_BASE_DUMMY=1 \
     SKIP_DB_INITIALIZER=true \
     ./bin/rails assets:precompile
 
-# Install SolidQueue (generates migration files)
+# Install SolidQueue and SolidCache (generates migration files)
 RUN SECRET_KEY_BASE_DUMMY=1 \
     DATABASE_URL="postgresql://postgres:postgres@localhost/fluke_base_production" \
     SKIP_DB_INITIALIZER=true \
-    bundle exec rails solid_queue:install
+    bundle exec rails solid_queue:install && \
+    bundle exec rails solid_cache:install
 
 # Final stage for app image
 FROM base
@@ -91,6 +92,9 @@ done\n\
 \n\
 # Run database migrations\n\
 ./bin/rails db:prepare\n\
+\n\
+# Create cache database and solid_cache_entries table\n\
+./bin/rails runner \"ActiveRecord::Base.connection.execute('CREATE TABLE IF NOT EXISTS solid_cache_entries (key bytea NOT NULL, value bytea NOT NULL, created_at timestamp NOT NULL, key_hash bigint NOT NULL, byte_size integer NOT NULL); CREATE UNIQUE INDEX IF NOT EXISTS index_solid_cache_entries_on_key_hash ON solid_cache_entries (key_hash); CREATE INDEX IF NOT EXISTS index_solid_cache_entries_on_byte_size ON solid_cache_entries (byte_size); CREATE INDEX IF NOT EXISTS index_solid_cache_entries_on_key_hash_and_byte_size ON solid_cache_entries (key_hash, byte_size);')\" || true\n\
 \n\
 # Start the application\n\
 exec "$@"' > /rails/bin/start.sh && \
