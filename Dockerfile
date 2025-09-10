@@ -60,12 +60,11 @@ RUN SECRET_KEY_BASE_DUMMY=1 \
     SKIP_DB_INITIALIZER=true \
     ./bin/rails assets:precompile
 
-# Install SolidQueue and SolidCache (generates migration files)
+# Install SolidQueue (generates migration files)
 RUN SECRET_KEY_BASE_DUMMY=1 \
     DATABASE_URL="postgresql://postgres:postgres@localhost/fluke_base_production" \
     SKIP_DB_INITIALIZER=true \
-    bundle exec rails solid_queue:install && \
-    bundle exec rails solid_cache:install
+    bundle exec rails solid_queue:install
 
 # Final stage for app image
 FROM base
@@ -74,31 +73,9 @@ FROM base
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
-# Create start script before switching users
-RUN echo '#!/bin/bash\n\
-set -e\n\
-\n\
-# Extract connection details from DATABASE_URL\n\
-DB_USER=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/([^:]+):.*/\\1/")\n\
-DB_PASS=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/[^:]+:([^@]+)@.*/\\1/")\n\
-DB_HOST=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/[^@]+@([^\\/]+)\\/.*/\\1/")\n\
-DB_NAME=$(echo $DATABASE_URL | sed -E "s/^postgresql:\\/\\/[^@]+@[^\\/]+\\/(.*)/\\1/")\n\
-\n\
-# Wait for PostgreSQL to be ready\n\
-until PGPASSWORD=$DB_PASS psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1" > /dev/null 2>&1; do\n\
-  echo "Waiting for PostgreSQL to be ready..."\n\
-  sleep 2\n\
-done\n\
-\n\
-# Run database migrations\n\
-./bin/rails db:prepare\n\
-\n\
-# Create cache database and solid_cache_entries table\n\
-./bin/rails runner \"ActiveRecord::Base.connection.execute('CREATE TABLE IF NOT EXISTS solid_cache_entries (key bytea NOT NULL, value bytea NOT NULL, created_at timestamp NOT NULL, key_hash bigint NOT NULL, byte_size integer NOT NULL); CREATE UNIQUE INDEX IF NOT EXISTS index_solid_cache_entries_on_key_hash ON solid_cache_entries (key_hash); CREATE INDEX IF NOT EXISTS index_solid_cache_entries_on_byte_size ON solid_cache_entries (byte_size); CREATE INDEX IF NOT EXISTS index_solid_cache_entries_on_key_hash_and_byte_size ON solid_cache_entries (key_hash, byte_size);')\" || true\n\
-\n\
-# Start the application\n\
-exec "$@"' > /rails/bin/start.sh && \
-chmod +x /rails/bin/start.sh
+# Copy start script
+COPY bin/start.sh /rails/bin/start.sh
+RUN chmod +x /rails/bin/start.sh
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
