@@ -122,10 +122,12 @@ module ApplicationHelper
   end
 
   def smooth_scroll_link(text, anchor)
-    link_to text, anchor, class: "inline-flex items-center rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 transition-all duration-200", data: { behavior: "smooth" }
+    destination = (controller_name == "home" && action_name == "index") ? anchor : "#{root_path}#{anchor}"
+    link_to text, destination, class: "inline-flex items-center rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 transition-all duration-200", data: { behavior: "smooth" }
   end
 
   def mobile_smooth_scroll_link(text, anchor)
-    link_to text, anchor, class: "block rounded-xl px-3 py-3 text-base font-medium text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 transition-all duration-200", data: { behavior: "smooth" }
+    destination = (controller_name == "home" && action_name == "index") ? anchor : "#{root_path}#{anchor}"
+    link_to text, destination, class: "block rounded-xl px-3 py-3 text-base font-medium text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-gray-900 transition-all duration-200", data: { behavior: "smooth" }
   end
 end
