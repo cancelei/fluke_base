@@ -169,7 +169,12 @@ class TimeLogsController < ApplicationController
     )
 
     if @time_log.save
-      session[:progress_milestone_id] = @time_log.milestone_id
+      if current_user.respond_to?(:multi_project_tracking) && current_user.multi_project_tracking
+        session[:progress_milestone_ids] ||= {}
+        session[:progress_milestone_ids][@project.id] = @time_log.milestone_id
+      else
+        session[:progress_milestone_id] = @time_log.milestone_id
+      end
       @milestone.update(status: "in_progress")
 
       # Reload data for updated views
@@ -219,7 +224,13 @@ class TimeLogsController < ApplicationController
 
   def stop_tracking
     if @time_log.complete!
-      session[:progress_milestone_id] = nil
+      if current_user.respond_to?(:multi_project_tracking) && current_user.multi_project_tracking
+        if session[:progress_milestone_ids].is_a?(Hash)
+          session[:progress_milestone_ids].delete(@project.id)
+        end
+      else
+        session[:progress_milestone_id] = nil
+      end
 
       # Reload data for updated views
       reload_data_for_views
@@ -382,7 +393,11 @@ class TimeLogsController < ApplicationController
   end
 
   def time_log_in_progress
-    @project.time_logs.in_progress.where(user_id: current_user.id).exists?
+    scope = TimeLog.in_progress.where(user_id: current_user.id)
+    if current_user.respond_to?(:multi_project_tracking) && current_user.multi_project_tracking
+      scope = scope.where(project_id: @project.id)
+    end
+    scope.exists?
   end
 
   def current_tracking_log
