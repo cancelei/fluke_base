@@ -1,0 +1,34 @@
+<%# Reusable toast notification partial
+     Usage: <%= render "shared/toast_notification", type: :success, message: "Success!", title: "Great!" %>
+     Types: :success, :error, :info, :warning, :notice, :alert
+     Options:
+     - type: notification type (required)
+     - message: notification message (required)
+     - title: optional title
+     - timeout: dismiss timeout in ms (default: 5000)
+     - close_button: show close button (default: true)
+     - progress_bar: show progress bar (default: true)
+     - position: toast position (default: "toast-top-right")
+%>
+
+<%
+  type = local_assigns[:type] || :info
+  message = local_assigns[:message]
+  title = local_assigns[:title] || ""
+  timeout = local_assigns[:timeout] || 5000
+  close_button = local_assigns.fetch(:close_button, true)
+  progress_bar = local_assigns.fetch(:progress_bar, true)
+  position = local_assigns[:position] || "toast-top-right"
+%>
+
+<% if message.present? %>
+  <div data-controller="toast"
+       data-toast-type-value="<%= type %>"
+       data-toast-message-value="<%= html_escape(message) %>"
+       data-toast-title-value="<%= html_escape(title) %>"
+       data-toast-timeout-value="<%= timeout %>"
+       data-toast-close-button-value="<%= close_button %>"
+       data-toast-progress-bar-value="<%= progress_bar %>"
+       data-toast-position-class-value="<%= position %>">
+  </div>
+<% end %>

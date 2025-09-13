@@ -48,3 +48,5 @@ linters:
     enabled: true
   SpaceInHtmlTag:
     enabled: true
+  CommentSyntax:
+    enabled: true

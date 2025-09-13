@@ -1,11 +1,11 @@
-# Fallback: calculate agreement participant time logs if not provided %>
+<%# Fallback: calculate agreement participant time logs if not provided %>
 <% unless defined?(agreement_participant_time_logs) %>
   <% if project.user_id == current_user.id %>
-# Project owner: only show the other party's time logs %>
+<%# Project owner: only show the other party's time logs %>
     <% other_party = agreement.other_party %>
     <% agreement_participant_time_logs = other_party ? project.time_logs.where(user_id: other_party.id) : project.time_logs.none %>
   <% else %>
-# Agreement participant: show all agreement participants' time logs %>
+<%# Agreement participant: show all agreement participants' time logs %>
     <% agreement_participant_ids = agreement.agreement_participants.pluck(:user_id) %>
     <% agreement_participant_time_logs = project.time_logs.where(user_id: agreement_participant_ids) %>
   <% end %>
@@ -29,15 +29,15 @@
       <% if agreement.active? || agreement.completed? %>
         <div class="px-4 py-5">
           <% if project.user_id == current_user.id %>
-# Project owner: show other party's time progress %>
+<%# Project owner: show other party's time progress %>
             <%= render "time_logs/remaining_time_progress", agreement: agreement, project: project, current_log: nil, owner: true %>
 
-# Enhanced analytics for completed agreements when viewed by project owner %>
+<%# Enhanced analytics for completed agreements when viewed by project owner %>
             <% if agreement.completed? %>
               <%= render "completed_agreement_time_analysis", agreement: agreement, project: project, agreement_participant_time_logs: agreement_participant_time_logs %>
             <% end %>
           <% else %>
-# Agreement participant: show agreement-specific progress %>
+<%# Agreement participant: show agreement-specific progress %>
             <%= render "time_logs/remaining_time_progress", agreement: agreement, project: project, current_log: nil %>
           <% end %>
 
