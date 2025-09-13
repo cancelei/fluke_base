@@ -2,10 +2,11 @@ class HomeController < ApplicationController
   skip_before_action :authenticate_user!, only: [ :index, :stats ]
 
   def index
-    # Get role counts for the landing page
-    @entrepreneur_count = User.with_role(Role::ENTREPRENEUR).count
-    @mentor_count = User.with_role(Role::MENTOR).count
-    @cofounder_count = User.with_role(Role::CO_FOUNDER).count
+    # Get role counts for the landing page with optimized single query
+    role_counts = get_role_counts
+    @entrepreneur_count = role_counts[:entrepreneur]
+    @mentor_count = role_counts[:mentor]
+    @cofounder_count = role_counts[:cofounder]
 
     # Get real statistics for the landing page
     @total_agreements = Agreement.count
@@ -26,20 +27,49 @@ class HomeController < ApplicationController
   end
 
   def stats
-    # Get updated role counts
-    @entrepreneur_count = User.with_role(Role::ENTREPRENEUR).count
-    @mentor_count = User.with_role(Role::MENTOR).count
-    @cofounder_count = User.with_role(Role::CO_FOUNDER).count
+    # Get fresh counts for all role types with optimized single query
+    role_counts = get_role_counts
+    @entrepreneur_count = role_counts[:entrepreneur]
+    @mentor_count = role_counts[:mentor]
+    @cofounder_count = role_counts[:cofounder]
 
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: [
-          turbo_stream.replace("entrepreneur_count", partial: "home/entrepreneur_count", locals: { count: @entrepreneur_count }),
-          turbo_stream.replace("mentor_count", partial: "home/mentor_count", locals: { count: @mentor_count }),
-          turbo_stream.replace("cofounder_count", partial: "home/cofounder_count", locals: { count: @cofounder_count })
+          turbo_stream.update("entrepreneur_count", partial: "shared/count_display", locals: {
+            type: "entrepreneur",
+            count: @entrepreneur_count,
+            default_count: 247
+          }),
+          turbo_stream.update("mentor_count", partial: "shared/count_display", locals: {
+            type: "mentor",
+            count: @mentor_count,
+            default_count: 189
+          }),
+          turbo_stream.update("cofounder_count", partial: "shared/count_display", locals: {
+            type: "cofounder",
+            count: @cofounder_count,
+            default_count: 73
+          })
         ]
       end
-      format.html { render partial: "stats" }
+      format.html { render partial: "stats", layout: false }
     end
+  end
+
+  private
+
+  def get_role_counts
+    # Single query to get all role counts efficiently
+    counts = User.joins(:roles)
+                 .where(roles: { name: [ Role::ENTREPRENEUR, Role::MENTOR, Role::CO_FOUNDER ] })
+                 .group("roles.name")
+                 .count
+
+    {
+      entrepreneur: counts[Role::ENTREPRENEUR] || 0,
+      mentor: counts[Role::MENTOR] || 0,
+      cofounder: counts[Role::CO_FOUNDER] || 0
+    }
   end
 end

@@ -373,7 +373,9 @@ if Rails.env.development?
       session_hours = [ rand(1..8), remaining_hours ].min
       session_hours = [ session_hours, rand(2..4) ].min if rand < 0.6  # Weight toward shorter sessions
 
-      start_time = current_date.beginning_of_day + rand(9..17).hours + rand(0..59).minutes
+      # Ensure start_time is in the past (at least 1 hour ago)
+      max_start_time = [ Time.current - 1.hour, current_date.end_of_day ].min
+      start_time = [ current_date.beginning_of_day + rand(9..17).hours + rand(0..59).minutes, max_start_time ].min
       end_time = start_time + session_hours.hours
 
       TimeLog.create!(
@@ -478,7 +480,7 @@ if Rails.env.development?
   puts "Creating meetings..."
 
   # Create meetings for accepted agreements
-  accepted_agreements.each do |agreement|
+  agreements.select { |a| a.status == Agreement::ACCEPTED }.each do |agreement|
     rand(2..5).times do
       start_time = rand(7.days.ago..30.days.from_now).change(hour: rand(9..17))
 
