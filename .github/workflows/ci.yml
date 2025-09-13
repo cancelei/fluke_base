@@ -50,11 +50,11 @@ jobs:
 
       - name: Run Brakeman
         if: matrix.linter == 'brakeman'
-        run: bundle exec brakeman --quiet --format=github
+        run: bundle exec brakeman --quiet --format=text
 
       - name: Run ERB Lint
         if: matrix.linter == 'erb_lint'
-        run: bundle exec erb_lint --lint-all --format=github
+        run: bundle exec erb_lint --lint-all --format=compact
 
       - name: Run ESLint
         if: matrix.linter == 'eslint'
