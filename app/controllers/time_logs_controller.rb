@@ -98,16 +98,11 @@ class TimeLogsController < ApplicationController
 
   def index
     @owner = current_user.id == @project.user_id
-    # Set the selected date or default to today
-    @selected_date = params[:date].present? ? Date.parse(params[:date]) : Date.current
-
-    # Get the date range for the carousel (3 days before and after selected date)
-    @date_range = (@selected_date - 3.days)..(@selected_date + 3.days)
 
     # Get milestones for the current project's project
     @milestones = (@owner ? @project.milestones : Milestone.where(id: @project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).pluck(:milestone_ids).flatten))
 
-    # Get time logs for the selected date
+    # Get all time logs for the project
     @time_logs = @project.time_logs
                            .includes(:milestone)
                            .order(started_at: :desc)
@@ -123,17 +118,9 @@ class TimeLogsController < ApplicationController
       format.html
       format.turbo_stream do
         render turbo_stream: [
-          turbo_stream.update("date_header",
-            partial: "time_logs/date_header",
-            locals: { selected_date: @selected_date }
-          ),
-          turbo_stream.update("date_carousel",
-            partial: "time_logs/date_carousel",
-            locals: { selected_date: @selected_date, date_range: @date_range, project: @project }
-          ),
           turbo_stream.update("milestones_section",
             partial: "time_logs/milestones_section",
-            locals: { milestones: @milestones, project: @project, selected_date: @selected_date }
+            locals: { milestones: @milestones, project: @project }
           ),
           turbo_stream.update("pending_confirmation_section",
             partial: "time_logs/pending_confirmation_section",

@@ -1,0 +1,245 @@
+#!/usr/bin/env ruby
+require 'open3'
+
+class LintRunner
+  def initialize
+    @results = {}
+    @total_errors = 0
+    @total_warnings = 0
+    @start_time = Time.now
+    @mutex = Mutex.new
+  end
+
+  def run_all
+    puts "🔍 Running all linters in parallel...\n"
+    puts "=" * 60
+
+    # Run all linters in parallel using threads
+    threads = []
+    
+    threads << Thread.new { run_rubocop }
+    threads << Thread.new { run_brakeman }
+    threads << Thread.new { run_erb_lint }
+    threads << Thread.new { run_js_lint }
+    
+    # Wait for all threads to complete
+    threads.each(&:join)
+
+    print_summary
+  end
+
+  def fix_all
+    puts "🔧 Auto-fixing all linters in parallel...\n"
+    puts "=" * 60
+
+    # Run auto-fix commands in parallel
+    threads = []
+    
+    threads << Thread.new { fix_rubocop }
+    threads << Thread.new { fix_erb_lint }
+    threads << Thread.new { fix_js_lint }
+    
+    # Wait for all threads to complete
+    threads.each(&:join)
+
+    puts "\n✅ Auto-fix completed! Running linters to verify...\n"
+    run_all
+  end
+
+  private
+
+  def run_rubocop
+    @mutex.synchronize { puts "\n📝 Running RuboCop (Ruby linting)..." }
+    result = run_command('bundle exec rubocop --format=progress')
+    @mutex.synchronize do
+      @results[:rubocop] = result
+      print_result('RuboCop', result)
+    end
+  end
+
+  def run_brakeman
+    @mutex.synchronize { puts "\n🔒 Running Brakeman (Security analysis)..." }
+    result = run_command('bundle exec brakeman --quiet --format=json')
+    @mutex.synchronize do
+      @results[:brakeman] = result
+      print_result('Brakeman', result)
+    end
+  end
+
+  def run_erb_lint
+    @mutex.synchronize { puts "\n📄 Running ERB Lint (Template linting)..." }
+    result = run_command('bundle exec erb_lint --lint-all --format=compact')
+    @mutex.synchronize do
+      @results[:erb_lint] = result
+      print_result('ERB Lint', result)
+    end
+  end
+
+  def run_js_lint
+    @mutex.synchronize { puts "\n⚡ Running ESLint (JavaScript linting)..." }
+    result = run_command('npm run lint:js')
+    @mutex.synchronize do
+      @results[:js_lint] = result
+      print_result('ESLint', result)
+    end
+  end
+
+  def fix_rubocop
+    @mutex.synchronize { puts "\n🔧 Auto-fixing RuboCop (Ruby linting)..." }
+    result = run_command('bundle exec rubocop -A')
+    @mutex.synchronize do
+      if result[:success]
+        puts "✅ RuboCop: Auto-fix completed"
+      else
+        puts "❌ RuboCop: Auto-fix failed"
+        puts "   #{result[:stderr]}" if result[:stderr] && !result[:stderr].empty?
+      end
+    end
+  end
+
+  def fix_erb_lint
+    @mutex.synchronize { puts "\n🔧 Auto-fixing ERB Lint (Template linting)..." }
+    result = run_command('bundle exec erb_lint --lint-all -a')
+    @mutex.synchronize do
+      if result[:success]
+        puts "✅ ERB Lint: Auto-fix completed"
+      else
+        puts "❌ ERB Lint: Auto-fix failed"
+        puts "   #{result[:stderr]}" if result[:stderr] && !result[:stderr].empty?
+      end
+    end
+  end
+
+  def fix_js_lint
+    @mutex.synchronize { puts "\n🔧 Auto-fixing ESLint (JavaScript linting)..." }
+    result = run_command('npm run lint:js:fix')
+    @mutex.synchronize do
+      if result[:success]
+        puts "✅ ESLint: Auto-fix completed"
+      else
+        puts "❌ ESLint: Auto-fix failed"
+        puts "   #{result[:stderr]}" if result[:stderr] && !result[:stderr].empty?
+      end
+    end
+  end
+
+  def run_command(command)
+    stdout, stderr, status = Open3.capture3(command)
+    {
+      command: command,
+      stdout: stdout,
+      stderr: stderr,
+      status: status,
+      success: status.success?
+    }
+  end
+
+  def print_result(name, result)
+    if result[:success]
+      puts "✅ #{name}: No issues found"
+    else
+      puts "❌ #{name}: Issues found"
+      
+      # Parse and count issues
+      output = result[:stdout] + result[:stderr]
+      errors, warnings = count_issues(output, name)
+      @total_errors += errors
+      @total_warnings += warnings
+      
+      # Show first few lines of output for context
+      lines = output.split("\n").first(5)
+      if lines.any? { |line| line.strip != '' }
+        puts "   First few issues:"
+        lines.each do |line|
+          next if line.strip.empty?
+          puts "   #{line}"
+        end
+        if output.split("\n").length > 5
+          puts "   ... (truncated, run individual linter for full output)"
+        end
+      end
+    end
+  end
+
+  def count_issues(output, linter_name)
+    errors = 0
+    warnings = 0
+
+    case linter_name
+    when 'RuboCop'
+      # RuboCop format: "1 file inspected, 2 offenses detected, 1 offense corrected"
+      if match = output.match(/(\d+) offenses detected/)
+        errors = match[1].to_i
+      end
+    when 'Brakeman'
+      # Brakeman JSON output - count security warnings
+      if output.include?('"warnings"')
+        begin
+          require 'json'
+          data = JSON.parse(output)
+          errors = data['warnings']&.length || 0
+        rescue JSON::ParserError
+          # Fallback to line counting
+          errors = output.scan(/warning/).length
+        end
+      end
+    when 'ERB Lint'
+      # ERB Lint format: "1 offense detected"
+      if match = output.match(/(\d+) offense/)
+        errors = match[1].to_i
+      end
+    when 'ESLint'
+      # ESLint format: "✖ 23 problems (0 errors, 23 warnings)"
+      if match = output.match(/✖ (\d+) problems \((\d+) errors, (\d+) warnings\)/)
+        errors = match[2].to_i
+        warnings = match[3].to_i
+      end
+    end
+
+    [errors, warnings]
+  end
+
+  def print_summary
+    duration = Time.now - @start_time
+    
+    puts "\n" + "=" * 60
+    puts "📊 LINTING SUMMARY"
+    puts "=" * 60
+    
+    @results.each do |name, result|
+      status = result[:success] ? "✅ PASS" : "❌ FAIL"
+      puts "#{name.to_s.ljust(15)} #{status}"
+    end
+    
+    puts "\n📈 TOTALS:"
+    puts "   Errors:   #{@total_errors}"
+    puts "   Warnings: #{@total_warnings}"
+    puts "   Duration: #{duration.round(2)}s"
+    
+    if @total_errors > 0
+      puts "\n💡 TIP: Run individual linters for detailed output:"
+      puts "   bundle exec rubocop          # Ruby linting"
+      puts "   bundle exec brakeman         # Security analysis"
+      puts "   bundle exec erb_lint         # ERB template linting"
+      puts "   npm run lint:js              # JavaScript linting"
+      puts "   npm run lint:js:fix          # Auto-fix JS issues"
+    end
+    
+    puts "\n🎯 QUICK FIXES:"
+    puts "   ./bin/lint --fix               # Auto-fix ALL issues"
+    puts "   npm run lint:fix               # Auto-fix ALL issues (npm)"
+    puts "   bundle exec rubocop -A         # Auto-fix Ruby issues"
+    puts "   bundle exec erb_lint -a        # Auto-fix ERB issues"
+    puts "   npm run lint:js:fix            # Auto-fix JS issues"
+    
+    # Exit with error code if any linter failed
+    exit 1 if @total_errors > 0
+  end
+end
+
+# Parse command line arguments
+if ARGV.include?('--fix') || ARGV.include?('-f')
+  LintRunner.new.fix_all
+else
+  LintRunner.new.run_all
+end

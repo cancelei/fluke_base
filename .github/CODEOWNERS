@@ -1,0 +1,32 @@
+# Global owners - these users will be requested for review on all PRs
+* @cancelei
+
+# Ruby files
+*.rb @cancelei
+
+# JavaScript files
+*.js @cancelei
+*.jsx @cancelei
+*.ts @cancelei
+*.tsx @cancelei
+
+# ERB templates
+*.erb @cancelei
+
+# Configuration files
+Gemfile @cancelei
+package.json @cancelei
+yarn.lock @cancelei
+package-lock.json @cancelei
+
+# Linting configuration
+.rubocop.yml @cancelei
+eslint.config.js @cancelei
+.erb_lint.yml @cancelei
+
+# GitHub Actions
+.github/ @cancelei
+
+# Documentation
+README.md @cancelei
+*.md @cancelei

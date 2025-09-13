@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+# Test script for GitHub Actions workflows
+# This simulates the GitHub Actions environment locally
+
+echo "🧪 Testing GitHub Actions Workflow Locally"
+echo "=========================================="
+
+# Check if we're in a git repository
+if [ ! -d ".git" ]; then
+    echo "❌ Not in a git repository. Please run from the project root."
+    exit 1
+fi
+
+# Check if required tools are installed
+echo "🔍 Checking dependencies..."
+
+if ! command -v ruby &> /dev/null; then
+    echo "❌ Ruby is not installed"
+    exit 1
+fi
+
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js is not installed"
+    exit 1
+fi
+
+if ! command -v bundle &> /dev/null; then
+    echo "❌ Bundler is not installed"
+    exit 1
+fi
+
+if ! command -v npm &> /dev/null; then
+    echo "❌ npm is not installed"
+    exit 1
+fi
+
+echo "✅ All dependencies found"
+
+# Install dependencies
+echo "📦 Installing dependencies..."
+bundle install --jobs 4 --retry 3
+npm ci
+
+# Run the unified linter
+echo "🔍 Running unified linter..."
+./bin/lint
+
+# Check exit code
+if [ $? -eq 0 ]; then
+    echo "✅ All tests passed! Ready for GitHub Actions."
+else
+    echo "❌ Some tests failed. Please fix issues before pushing."
+    exit 1
+fi
+
+echo "🚀 Ready to push to GitHub!"

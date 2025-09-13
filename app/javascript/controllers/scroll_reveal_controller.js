@@ -1,15 +1,15 @@
-import { Controller } from "@hotwired/stimulus"
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-  static targets = ["element"]
+  static targets = ['element'];
 
   connect() {
-    this.setupIntersectionObserver()
+    this.setupIntersectionObserver();
   }
 
   disconnect() {
     if (this.observer) {
-      this.observer.disconnect()
+      this.observer.disconnect();
     }
   }
 
@@ -18,52 +18,52 @@ export default class extends Controller {
       root: null,
       rootMargin: '-100px',
       threshold: 0.1
-    }
+    };
 
     this.observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry, index) => {
+      entries.forEach((entry, _index) => {
         if (entry.isIntersecting) {
           // Add staggered delay for multiple elements
-          const delay = Array.from(this.elementTargets).indexOf(entry.target) * 100
-          
+          const delay = Array.from(this.elementTargets).indexOf(entry.target) * 100;
+
           setTimeout(() => {
-            this.revealElement(entry.target)
-          }, delay)
-          
-          this.observer.unobserve(entry.target)
+            this.revealElement(entry.target);
+          }, delay);
+
+          this.observer.unobserve(entry.target);
         }
-      })
-    }, options)
+      });
+    }, options);
 
     // Initially hide all elements and observe them
     this.elementTargets.forEach(element => {
-      element.style.opacity = '0'
-      element.style.transform = 'translateY(50px)'
-      element.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-      
-      this.observer.observe(element)
-    })
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(50px)';
+      element.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+      this.observer.observe(element);
+    });
   }
 
   revealElement(element) {
-    element.style.opacity = '1'
-    element.style.transform = 'translateY(0)'
-    
+    element.style.opacity = '1';
+    element.style.transform = 'translateY(0)';
+
     // Add a subtle bounce effect
     setTimeout(() => {
-      element.style.transform = 'translateY(-5px)'
+      element.style.transform = 'translateY(-5px)';
       setTimeout(() => {
-        element.style.transform = 'translateY(0)'
-      }, 150)
-    }, 400)
+        element.style.transform = 'translateY(0)';
+      }, 150);
+    }, 400);
   }
 
   showDemo(event) {
-    event.preventDefault()
-    
+    event.preventDefault();
+
     // Create demo modal
-    const modal = document.createElement('div')
-    modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4'
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4';
     modal.innerHTML = `
       <div class="bg-white rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-8">
@@ -123,29 +123,29 @@ export default class extends Controller {
           </div>
         </div>
       </div>
-    `
-    
-    document.body.appendChild(modal)
-    document.body.style.overflow = 'hidden'
-    
+    `;
+
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+
     // Animate modal entrance
-    modal.style.opacity = '0'
+    modal.style.opacity = '0';
     requestAnimationFrame(() => {
-      modal.style.transition = 'opacity 0.3s ease-out'
-      modal.style.opacity = '1'
-    })
+      modal.style.transition = 'opacity 0.3s ease-out';
+      modal.style.opacity = '1';
+    });
   }
 
   closeDemo(event) {
-    const modal = event.target.closest('.fixed')
+    const modal = event.target.closest('.fixed');
     if (modal) {
-      modal.style.opacity = '0'
+      modal.style.opacity = '0';
       setTimeout(() => {
         if (modal.parentNode) {
-          document.body.removeChild(modal)
+          document.body.removeChild(modal);
         }
-        document.body.style.overflow = 'auto'
-      }, 300)
+        document.body.style.overflow = 'auto';
+      }, 300);
     }
   }
-} 
+}

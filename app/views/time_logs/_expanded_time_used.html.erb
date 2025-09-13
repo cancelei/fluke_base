@@ -1,0 +1,256 @@
+<% if local_assigns[:agreement] %>
+<%# # For agreement-specific time tracking %>
+  <% agreement_participant_ids = agreement.agreement_participants.pluck(:user_id) %>
+  <% total_allowed_hours = agreement.weekly_hours.to_f * agreement.duration_in_weeks.to_f %>
+  <% used_hours = project.time_logs.where(user_id: agreement_participant_ids).where.not(status: "in_progress").sum(:hours_spent) +
+      (project.time_logs.where(user_id: agreement_participant_ids).in_progress.any? ? ((Time.zone.now - project.time_logs.where(user_id: agreement_participant_ids).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
+  <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+<% elsif local_assigns[:project_wide] %>
+<%# For project-wide time tracking (time logs page) %>
+  <% agreements = project.agreements.includes(:agreement_participants) %>
+  <% if local_assigns[:owner] %>
+<%# Project owner: show ALL project time %>
+    <% total_allowed_hours = agreements.sum { |a| a.weekly_hours * a.duration_in_weeks } %>
+    <% used_hours = project.time_logs.where.not(status: "in_progress").sum(:hours_spent) +
+        (project.time_logs.in_progress.any? ? ((Time.zone.now - project.time_logs.in_progress.last.started_at) / 1.hour).round(2) : 0) %>
+    <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+  <% else %>
+# Agreement participant: show only their own time within the project context %>
+    <% user_agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }, project: project).first %>
+    <% total_allowed_hours = user_agreement&.weekly_hours.to_f * user_agreement&.duration_in_weeks.to_f %>
+    <% used_hours = project.time_logs.where(user: current_user).where.not(status: "in_progress").sum(:hours_spent) +
+        ((project.time_logs.where(user: current_user).in_progress.any?) ? ((Time.zone.now - project.time_logs.where(user: current_user).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
+    <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+  <% end %>
+<% elsif local_assigns[:owner] %>
+<%# For project owner view in agreement context - show other parties' work  %>
+  <% agreements = project.agreements.includes(:agreement_participants) %>
+  <% total_allowed_hours = agreements.sum { |a| a.weekly_hours * a.duration_in_weeks } %>
+  <% used_hours = project.time_logs.where.not(user_id: current_user.id).where.not(status: "in_progress").sum(:hours_spent) +
+      (project.time_logs.where.not(user_id: current_user.id).in_progress.any? ? ((Time.zone.now - project.time_logs.where.not(user_id: current_user.id).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
+  <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+<% else %>
+<%# # For individual user view %>
+  <% agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).find_by(project: project) %>
+  <% total_allowed_hours = agreement&.weekly_hours.to_f * agreement&.duration_in_weeks.to_f %>
+  <% used_hours = project.time_logs.where(user: current_user).where.not(status: "in_progress").sum(:hours_spent) + ((current_log && current_log.started_at) ? ((Time.zone.now - current_log.started_at) / 1.hour).round(2) : 0) %>
+  <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+<% end %>
+
+<div class="space-y-6">
+  <!-- Header Section -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50">
+        <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+          Time Usage Overview
+        </h2>
+        <p class="text-sm text-gray-600">Track your project time allocation and progress</p>
+      </div>
+    </div>
+
+    <!-- Status Badge -->
+    <div class="flex items-center space-x-2">
+      <% if percent_used >= 90 %>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          Near Limit
+        </span>
+      <% elsif percent_used >= 75 %>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          High Usage
+        </span>
+      <% else %>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          On Track
+        </span>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Main Time Display -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Hours Used -->
+    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-indigo-600 mb-1">Hours Used</p>
+          <p class="text-3xl font-bold text-indigo-900"><%= used_hours %></p>
+        </div>
+        <div class="h-12 w-12 flex items-center justify-center rounded-lg bg-indigo-100">
+          <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Allocated -->
+    <div class="bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl p-6 border border-gray-200">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600 mb-1">Total Allocated</p>
+          <p class="text-3xl font-bold text-gray-900"><%= total_allowed_hours %></p>
+        </div>
+        <div class="h-12 w-12 flex items-center justify-center rounded-lg bg-gray-100">
+          <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remaining Hours -->
+    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-green-600 mb-1">Remaining</p>
+          <p class="text-3xl font-bold text-green-900"><%= [ total_allowed_hours - used_hours, 0 ].max.round(1) %></p>
+        </div>
+        <div class="h-12 w-12 flex items-center justify-center rounded-lg bg-green-100">
+          <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Bar with Hover Details -->
+  <div class="space-y-3">
+    <div class="flex justify-between items-center">
+      <span class="text-sm font-medium text-gray-700">Progress</span>
+      <span class="text-sm font-medium text-gray-700">
+        <%= percent_used %>% complete
+      </span>
+    </div>
+
+    <% if local_assigns[:agreement] %>
+    <%# # Agreement-specific progress bar with participant breakdown %>
+      <div class="relative group">
+        <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-300 cursor-pointer transition-all duration-200 hover:shadow-md">
+          <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-4 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+        </div>
+        <div class="absolute z-50 left-0 mt-3 w-full bg-white border border-gray-200 rounded-xl shadow-2xl p-6 text-sm text-gray-700 min-w-[300px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200" style="z-index: 9999;">
+          <div class="font-semibold mb-3 text-gray-900">Agreement Participants</div>
+          <ul class="space-y-2">
+            <% agreement.agreement_participants.includes(:user).each do |participant| %>
+              <% participant_used = project.time_logs.where(user_id: participant.user_id).where.not(status: "in_progress").sum(:hours_spent) + (project.time_logs.where(user_id: participant.user_id).in_progress.any? ? ((Time.zone.now - project.time_logs.where(user_id: participant.user_id).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
+              <% participant_total = agreement.weekly_hours * agreement.duration_in_weeks %>
+              <% participant_percent = participant_total > 0 ? [ (participant_used.to_f / participant_total * 100).round, 100 ].min : 0 %>
+              <li class="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">
+                  <%= participant.user&.full_name || participant.user&.email || "User" %>
+                </span>
+                <span class="text-indigo-600 font-semibold">
+                  <%= participant_used %> / <%= participant_total %>h (<%= participant_percent %>%)
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% elsif local_assigns[:project_wide] %>
+      <div class="relative group">
+        <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-300 cursor-pointer transition-all duration-200 hover:shadow-md">
+          <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-4 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+        </div>
+        <% if local_assigns[:owner] %>
+          <div class="absolute z-50 left-0 mt-3 w-full bg-white border border-gray-200 rounded-xl shadow-2xl p-6 text-sm text-gray-700 min-w-[300px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200" style="z-index: 9999;">
+            <div class="font-semibold mb-3 text-gray-900">All Project Contributors</div>
+            <ul class="space-y-2">
+<%# Get all users who have logged time for this project %>
+              <% project.time_logs.joins(:user).group("users.id").sum(:hours_spent).each do |user_id, user_hours| %>
+                <% user = User.find(user_id) %>
+                <li class="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+                  <span class="font-medium">
+                    <%= user.full_name || user.email || "User" %>
+                    <% if user_id == project.user_id %>
+                      <span class="text-gray-500 text-xs">(Owner)</span>
+                    <% end %>
+                  </span>
+                  <span class="text-indigo-600 font-semibold">
+                    <%= user_hours %>h
+                  </span>
+                </li>
+              <% end %>
+            </ul>
+            <div class="border-t border-gray-200 mt-4 pt-4 font-semibold text-center">
+              <span class="text-gray-900">Total: <%= used_hours %>h of <%= total_allowed_hours %>h allocated</span>
+            </div>
+          </div>
+        <% else %>
+          <div class="absolute z-50 left-0 mt-3 w-full bg-white border border-gray-200 rounded-xl shadow-2xl p-6 text-sm text-gray-700 min-w-[250px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200" style="z-index: 9999;">
+            <div class="font-semibold mb-3 text-gray-900">Your Time Contribution</div>
+            <div class="space-y-2">
+              <% if user_agreement %>
+                <div class="py-2 px-3 bg-gray-50 rounded-lg">
+                  <div class="font-medium text-gray-700">Agreement Type</div>
+                  <div class="text-indigo-600"><%= user_agreement.agreement_type %></div>
+                </div>
+                <div class="py-2 px-3 bg-gray-50 rounded-lg">
+                  <div class="font-medium text-gray-700">Weekly Commitment</div>
+                  <div class="text-indigo-600"><%= user_agreement.weekly_hours %>h per week</div>
+                </div>
+                <div class="py-2 px-3 bg-gray-50 rounded-lg">
+                  <div class="font-medium text-gray-700">Duration</div>
+                  <div class="text-indigo-600"><%= user_agreement.duration_in_weeks %> weeks</div>
+                </div>
+              <% else %>
+                <div class="py-2 px-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div class="text-yellow-800">No active agreement found</div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% elsif local_assigns[:owner] %>
+      <div class="relative group">
+        <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-300 cursor-pointer transition-all duration-200 hover:shadow-md">
+          <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-4 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+        </div>
+        <div class="absolute z-50 left-0 mt-3 w-full bg-white border border-gray-200 rounded-xl shadow-2xl p-6 text-sm text-gray-700 min-w-[300px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200" style="z-index: 9999;">
+          <div class="font-semibold mb-3 text-gray-900">Agreements Breakdown</div>
+          <ul class="space-y-2">
+            <% agreements.each do |a| %>
+              <% other_user = (a.initiator&.id == current_user.id ? a.other_party : a.initiator) %>
+              <% a_used = project.time_logs.where.not(status: "in_progress").where(user_id: other_user.id).sum(:hours_spent) + (project.time_logs.where(user_id: other_user.id).in_progress.any? ? ((Time.zone.now - project.time_logs.in_progress.where(user_id: other_user.id).last.started_at) / 1.hour).round(2) : 0) %>
+              <% a_total = a.weekly_hours * a.duration_in_weeks %>
+              <% a_percent = a_total > 0 ? [ (a_used.to_f / a_total * 100).round, 100 ].min : 0 %>
+              <li class="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">
+                  <%= other_user&.full_name || other_user&.email || "User" %>
+                </span>
+                <span class="text-indigo-600 font-semibold">
+                  <%= a_used %> / <%= a_total %>h (<%= a_percent %>%)
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% else %>
+      <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-300">
+        <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-4 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+      </div>
+    <% end %>
+
+    <div class="text-xs text-gray-500 text-center">
+      <%= percent_used %>% of allowed hours used
+    </div>
+  </div>
+</div>

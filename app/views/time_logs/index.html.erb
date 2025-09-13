@@ -33,14 +33,9 @@
             </div>
           </div>
 
-          <!-- Date Display -->
-          <%= render "time_logs/date_header", selected_date: @selected_date %>
         </div>
       </div>
     </div>
-
-    <!-- Date Carousel -->
-    <%= render "time_logs/date_carousel", selected_date: @selected_date, date_range: @date_range, project: @project %>
 
     <!-- Current Time Log (if any) -->
     <div id="current_tracking_container">
@@ -50,12 +45,15 @@
       <% end %>
     </div>
 
-  <div id="remaining_time_progress">
-    <%= render "remaining_time_progress", project: @project, current_log: current_log, owner: @owner %>
+  <!-- Expanded Time Used Section -->
+  <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl mb-6">
+    <div class="px-6 py-6 sm:px-8">
+      <%= render "time_logs/expanded_time_used", project: @project, current_log: current_log, owner: @owner %>
+    </div>
   </div>
 
     <!-- All Milestones Section -->
-    <%= render "time_logs/milestones_section", milestones: @milestones, project: @project, selected_date: @selected_date %>
+    <%= render "time_logs/milestones_section", milestones: @milestones, project: @project %>
 
     <!-- Manual Time Log Entry -->
     <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 mb-6"

@@ -1,4 +1,4 @@
-name: CI
+name: Parallel Lint
 
 on:
   push:
@@ -6,17 +6,11 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-env:
-  RUBY_VERSION: '3.2.1'
-  NODE_VERSION: '20'
-
 jobs:
-  # Test job (if you have tests)
-  test:
-    name: Run Tests
+  # Ruby linting with RuboCop
+  rubocop:
+    name: RuboCop (Ruby)
     runs-on: ubuntu-latest
-    if: false  # Disable if no tests exist yet
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,38 +18,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ env.RUBY_VERSION }}
-          bundler-cache: true
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: |
-          bundle install --jobs 4 --retry 3
-          npm ci
-
-      - name: Run tests
-        run: |
-          bundle exec rspec
-          npm test
-
-  # Linting jobs - run in parallel
-  lint-ruby:
-    name: Lint Ruby
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ env.RUBY_VERSION }}
+          ruby-version: '3.2.1'
           bundler-cache: true
 
       - name: Cache RuboCop
@@ -69,10 +32,10 @@ jobs:
       - name: Run RuboCop
         run: bundle exec rubocop --format=progress
 
-  lint-security:
-    name: Lint Security
+  # Security analysis with Brakeman
+  brakeman:
+    name: Brakeman (Security)
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -80,16 +43,16 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ env.RUBY_VERSION }}
+          ruby-version: '3.2.1'
           bundler-cache: true
 
       - name: Run Brakeman
         run: bundle exec brakeman --quiet --format=json
 
-  lint-templates:
-    name: Lint Templates
+  # ERB template linting
+  erb-lint:
+    name: ERB Lint (Templates)
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -97,7 +60,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ env.RUBY_VERSION }}
+          ruby-version: '3.2.1'
           bundler-cache: true
 
       - name: Cache ERB Lint
@@ -111,10 +74,10 @@ jobs:
       - name: Run ERB Lint
         run: bundle exec erb_lint --lint-all --format=compact
 
-  lint-javascript:
-    name: Lint JavaScript
+  # JavaScript linting with ESLint
+  eslint:
+    name: ESLint (JavaScript)
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -122,7 +85,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -131,11 +94,11 @@ jobs:
       - name: Run ESLint
         run: npm run lint:js
 
-  # Summary job
+  # Summary job that runs after all linters complete
   lint-summary:
     name: Lint Summary
     runs-on: ubuntu-latest
-    needs: [lint-ruby, lint-security, lint-templates, lint-javascript]
+    needs: [rubocop, brakeman, erb-lint, eslint]
     if: always()
     
     steps:
@@ -145,13 +108,13 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ env.RUBY_VERSION }}
+          ruby-version: '3.2.1'
           bundler-cache: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -159,20 +122,20 @@ jobs:
           bundle install --jobs 4 --retry 3
           npm ci
 
-      - name: Run unified linter for summary
+      - name: Run unified linter
         run: ./bin/lint
         continue-on-error: true
 
-      - name: Generate summary
+      - name: Check results
         run: |
-          echo "## 🔍 Lint Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Lint Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Linter | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔍 RuboCop (Ruby) | ${{ needs.lint-ruby.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Brakeman (Security) | ${{ needs.lint-security.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📄 ERB Lint (Templates) | ${{ needs.lint-templates.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| ⚡ ESLint (JavaScript) | ${{ needs.lint-javascript.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| RuboCop | ${{ needs.rubocop.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Brakeman | ${{ needs.brakeman.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ERB Lint | ${{ needs.erb-lint.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ESLint | ${{ needs.eslint.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Run locally:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
@@ -185,10 +148,10 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const rubocopStatus = '${{ needs.lint-ruby.result }}' === 'success' ? '✅' : '❌';
-            const brakemanStatus = '${{ needs.lint-security.result }}' === 'success' ? '✅' : '❌';
-            const erbLintStatus = '${{ needs.lint-templates.result }}' === 'success' ? '✅' : '❌';
-            const eslintStatus = '${{ needs.lint-javascript.result }}' === 'success' ? '✅' : '❌';
+            const rubocopStatus = '${{ needs.rubocop.result }}' === 'success' ? '✅' : '❌';
+            const brakemanStatus = '${{ needs.brakeman.result }}' === 'success' ? '✅' : '❌';
+            const erbLintStatus = '${{ needs.erb-lint.result }}' === 'success' ? '✅' : '❌';
+            const eslintStatus = '${{ needs.eslint.result }}' === 'success' ? '✅' : '❌';
             
             const allPassed = rubocopStatus === '✅' && brakemanStatus === '✅' && erbLintStatus === '✅' && eslintStatus === '✅';
             const statusEmoji = allPassed ? '✅' : '❌';
@@ -220,23 +183,22 @@ jobs:
               body: comment
             });
 
-  # Final check - fail if any linter failed
+  # Fail the workflow if any linter fails
   lint-check:
     name: Lint Check
     runs-on: ubuntu-latest
-    needs: [lint-ruby, lint-security, lint-templates, lint-javascript]
+    needs: [rubocop, brakeman, erb-lint, eslint]
     if: always()
     
     steps:
       - name: Check lint results
         run: |
-          if [ "${{ needs.lint-ruby.result }}" != "success" ] || 
-             [ "${{ needs.lint-security.result }}" != "success" ] || 
-             [ "${{ needs.lint-templates.result }}" != "success" ] || 
-             [ "${{ needs.lint-javascript.result }}" != "success" ]; then
-            echo "❌ One or more linters failed. Please fix the issues and try again."
-            echo "Run './bin/lint --fix' locally to auto-fix many issues."
+          if [ "${{ needs.rubocop.result }}" != "success" ] || 
+             [ "${{ needs.brakeman.result }}" != "success" ] || 
+             [ "${{ needs.erb-lint.result }}" != "success" ] || 
+             [ "${{ needs.eslint.result }}" != "success" ]; then
+            echo "One or more linters failed. Please fix the issues and try again."
             exit 1
           else
-            echo "✅ All linters passed successfully!"
+            echo "All linters passed successfully!"
           fi

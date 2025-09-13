@@ -1,21 +1,21 @@
-import { Controller } from "@hotwired/stimulus"
-import toastr from "toastr"
+import { Controller } from '@hotwired/stimulus';
+import toastr from 'toastr';
 
 export default class extends Controller {
-  static values = { 
-    message: String, 
+  static values = {
+    message: String,
     type: String,
     title: String,
     timeout: { type: Number, default: 5000 },
     closeButton: { type: Boolean, default: true },
     progressBar: { type: Boolean, default: true },
-    positionClass: { type: String, default: "toast-top-right" },
+    positionClass: { type: String, default: 'toast-top-right' },
     preventDuplicates: { type: Boolean, default: true }
-  }
+  };
 
   connect() {
-    this.configureToastr()
-    this.showToast()
+    this.configureToastr();
+    this.showToast();
   }
 
   configureToastr() {
@@ -27,42 +27,42 @@ export default class extends Controller {
       positionClass: this.positionClassValue,
       preventDuplicates: this.preventDuplicatesValue,
       onclick: null,
-      showDuration: "300",
-      hideDuration: "1000",
+      showDuration: '300',
+      hideDuration: '1000',
       timeOut: this.timeoutValue,
-      extendedTimeOut: "1000",
-      showEasing: "swing",
-      hideEasing: "linear",
-      showMethod: "fadeIn",
-      hideMethod: "fadeOut"
-    }
+      extendedTimeOut: '1000',
+      showEasing: 'swing',
+      hideEasing: 'linear',
+      showMethod: 'fadeIn',
+      hideMethod: 'fadeOut'
+    };
   }
 
   showToast() {
-    if (!this.messageValue) return
+    if (!this.messageValue) return;
 
-    const type = this.normalizeType(this.typeValue)
-    const title = this.titleValue || ""
-    
+    const type = this.normalizeType(this.typeValue);
+    const title = this.titleValue || '';
+
     switch (type) {
-      case 'success':
-        toastr.success(this.messageValue, title)
-        break
-      case 'info':
-        toastr.info(this.messageValue, title)
-        break
-      case 'warning':
-        toastr.warning(this.messageValue, title)
-        break
-      case 'error':
-        toastr.error(this.messageValue, title)
-        break
-      default:
-        toastr.info(this.messageValue, title)
+    case 'success':
+      toastr.success(this.messageValue, title);
+      break;
+    case 'info':
+      toastr.info(this.messageValue, title);
+      break;
+    case 'warning':
+      toastr.warning(this.messageValue, title);
+      break;
+    case 'error':
+      toastr.error(this.messageValue, title);
+      break;
+    default:
+      toastr.info(this.messageValue, title);
     }
 
     // Remove the element after showing the toast to prevent re-triggering
-    this.element.remove()
+    this.element.remove();
   }
 
   normalizeType(type) {
@@ -73,8 +73,8 @@ export default class extends Controller {
       'error': 'error',
       'warning': 'warning',
       'info': 'info'
-    }
-    
-    return typeMap[type] || 'info'
+    };
+
+    return typeMap[type] || 'info';
   }
 }
