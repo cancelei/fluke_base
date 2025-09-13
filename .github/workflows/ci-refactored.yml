@@ -69,14 +69,6 @@ jobs:
           ruby-version: ${{ env.RUBY_VERSION }}
           bundler-cache: true
 
-      - name: Cache RuboCop
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/rubocop
-          key: ${{ runner.os }}-rubocop-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-rubocop-
-
       - name: Run RuboCop
         run: bundle exec rubocop --format=github
 
@@ -110,14 +102,6 @@ jobs:
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
           bundler-cache: true
-
-      - name: Cache ERB Lint
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/erb_lint
-          key: ${{ runner.os }}-erb-lint-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-erb-lint-
 
       - name: Run ERB Lint
         run: bundle exec erb_lint --lint-all --format=github
@@ -202,7 +186,7 @@ jobs:
         run: bundle exec rspec --format progress --format RspecJunitFormatter --out tmp/rspec.xml
 
       - name: Upload coverage reports
-        if: always()
+        if: always() && hashFiles('coverage/**') != ''
         uses: actions/upload-artifact@v4
         with:
           name: coverage-reports
@@ -210,7 +194,7 @@ jobs:
           retention-days: 7
 
       - name: Upload test results
-        if: always()
+        if: always() && hashFiles('tmp/rspec.xml') != ''
         uses: actions/upload-artifact@v4
         with:
           name: test-results
@@ -281,7 +265,7 @@ jobs:
         run: bundle exec rspec spec/system --format progress
 
       - name: Upload system test screenshots
-        if: failure()
+        if: failure() && hashFiles('tmp/screenshots/**') != ''
         uses: actions/upload-artifact@v4
         with:
           name: system-test-screenshots
@@ -305,6 +289,7 @@ jobs:
           name: coverage-reports
           path: coverage/
         continue-on-error: true
+        if: always()
 
       - name: Generate CI summary
         run: |
