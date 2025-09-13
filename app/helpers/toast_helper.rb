@@ -19,8 +19,15 @@ module ToastHelper
   #   <%= toast(:error, "Something went wrong", title: "Error", timeout: 10000) %>
   #
   def toast(type, message, **options)
+    # Validate toast type
+    valid_types = %w[success error info warning notice alert]
+    normalized_type = normalize_toast_type(type)
+
+    # Validate message
+    raise ArgumentError, "Message cannot be blank" if message.blank?
+
     render "shared/toast_notification",
-           type: type,
+           type: normalized_type,
            message: message,
            **options
   end
@@ -80,22 +87,62 @@ module ToastHelper
     toast_notifications.join.html_safe
   end
 
+  # Create a toast with action buttons
+  #
+  # @param type [Symbol, String] The type of notification
+  # @param message [String] The message to display
+  # @param actions [Array] Array of action hashes with :label, :url, and :method
+  # @param options [Hash] Additional toast options
+  #
+  # @example With action buttons
+  #   <%= toast_with_actions(:success, "User created!",
+  #     actions: [
+  #       { label: "View", url: user_path(@user) },
+  #       { label: "Edit", url: edit_user_path(@user) }
+  #     ]
+  #   ) %>
+  #
+  def toast_with_actions(type, message, actions: [], **options)
+    options[:actions] = actions
+    toast(type, message, **options)
+  end
+
+  # Create a persistent toast that doesn't auto-dismiss
+  #
+  # @param type [Symbol, String] The type of notification
+  # @param message [String] The message to display
+  # @param options [Hash] Additional toast options
+  #
+  def persistent_toast(type, message, **options)
+    options[:timeout] = 0 # Never auto-dismiss
+    options[:close_button] = true # Always show close button
+    toast(type, message, **options)
+  end
+
+  # Create a toast with custom styling
+  #
+  # @param type [Symbol, String] The type of notification
+  # @param message [String] The message to display
+  # @param custom_class [String] Custom CSS class
+  # @param options [Hash] Additional toast options
+  #
+  def custom_toast(type, message, custom_class: nil, **options)
+    options[:custom_class] = custom_class
+    toast(type, message, **options)
+  end
+
   private
 
-  # Normalize Rails flash types to toast types
+  # Normalize toast types to ensure consistency
   #
-  # @param flash_type [String, Symbol] Rails flash type
+  # @param type [String, Symbol] Toast type
   # @return [Symbol] Normalized toast type
   #
-  def normalize_flash_type(flash_type)
-    case flash_type.to_s
-    when "notice"
+  def normalize_toast_type(type)
+    case type.to_s.downcase
+    when "notice", "success"
       :success
-    when "alert"
-      :error
-    when "success"
-      :success
-    when "error"
+    when "alert", "error"
       :error
     when "warning"
       :warning
@@ -104,5 +151,14 @@ module ToastHelper
     else
       :info
     end
+  end
+
+  # Normalize Rails flash types to toast types
+  #
+  # @param flash_type [String, Symbol] Rails flash type
+  # @return [Symbol] Normalized toast type
+  #
+  def normalize_flash_type(flash_type)
+    normalize_toast_type(flash_type)
   end
 end

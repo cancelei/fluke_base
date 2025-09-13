@@ -1,5 +1,5 @@
 <%# Reusable toast notification partial
-     Usage: <%= render "shared/toast_notification", type: :success, message: "Success!", title: "Great!" %>
+     Usage: render "shared/toast_notification", type: :success, message: "Success!", title: "Great!"
      Types: :success, :error, :info, :warning, :notice, :alert
      Options:
      - type: notification type (required)
@@ -19,6 +19,11 @@
   close_button = local_assigns.fetch(:close_button, true)
   progress_bar = local_assigns.fetch(:progress_bar, true)
   position = local_assigns[:position] || "toast-top-right"
+  actions = local_assigns[:actions] || []
+  custom_class = local_assigns[:custom_class]
+  max_toasts = local_assigns.fetch(:max_toasts, 5)
+  queue = local_assigns.fetch(:queue, true)
+  announce_to_screen_reader = local_assigns.fetch(:announce_to_screen_reader, true)
 %>
 
 <% if message.present? %>
@@ -29,6 +34,17 @@
        data-toast-timeout-value="<%= timeout %>"
        data-toast-close-button-value="<%= close_button %>"
        data-toast-progress-bar-value="<%= progress_bar %>"
-       data-toast-position-class-value="<%= position %>">
+       data-toast-position-class-value="<%= position %>"
+       data-toast-max-toasts-value="<%= max_toasts %>"
+       data-toast-queue-value="<%= queue %>"
+       data-toast-announce-to-screen-reader-value="<%= announce_to_screen_reader %>"
+       data-toast-actions-value="<%= actions.to_json if actions.any? %>"
+       data-toast-custom-class-value="<%= custom_class if custom_class.present? %>"
+       role="alert"
+       aria-live="polite"
+       aria-atomic="true"
+       tabindex="-1"
+       class="toast-notification <%= custom_class if custom_class.present? %>"
+       data-toast-id="<%= SecureRandom.hex(8) %>">
   </div>
 <% end %>

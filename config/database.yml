@@ -31,6 +31,14 @@ development:
     <<: *primary_development
     database: fluke_base_development_cable
     migrations_paths: db/cable_migrate
+  cache:
+    <<: *primary_development
+    database: fluke_base_development_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *primary_development
+    database: fluke_base_development_queue
+    migrations_paths: db/queue_migrate
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.

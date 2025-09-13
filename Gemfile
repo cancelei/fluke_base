@@ -72,6 +72,11 @@ group :development, :test do
   # Testing framework
   gem "rspec-rails"
   gem "factory_bot_rails"
+
+  # Code coverage
+  gem "simplecov", require: false
+  gem "simplecov-html", require: false
+  gem "simplecov-lcov", require: false
 end
 gem "faker"
 
@@ -91,6 +96,9 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   gem "shoulda-matchers"
+
+  # Test reporting
+  gem "rspec_junit_formatter"
 end
 
 gem "cssbundling-rails", "~> 1.4"

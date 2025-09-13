@@ -1,0 +1,216 @@
+#!/usr/bin/env ruby
+
+require 'open3'
+require 'optparse'
+
+class TestRunner
+  def initialize
+    @results = {}
+    @total_failures = 0
+    @start_time = Time.now
+    @options = {}
+    parse_options
+  end
+
+  def run
+    if @options[:coverage]
+      ENV['COVERAGE'] = 'true'
+      puts "📊 Coverage reporting enabled"
+    end
+
+    puts "🧪 Running comprehensive test suite...\n"
+    puts "=" * 60
+
+    case @options[:type]
+    when 'unit'
+      run_unit_tests
+    when 'system'
+      run_system_tests
+    when 'integration'
+      run_integration_tests
+    when 'all'
+      run_all_tests
+    else
+      run_all_tests
+    end
+
+    print_summary
+    exit 1 if @total_failures > 0
+  end
+
+  private
+
+  def parse_options
+    OptionParser.new do |opts|
+      opts.banner = "Usage: ./bin/test [options]"
+
+      opts.on("-t", "--type TYPE", ["unit", "system", "integration", "all"],
+              "Select test type (unit, system, integration, all)") do |type|
+        @options[:type] = type
+      end
+
+      opts.on("-c", "--coverage", "Enable coverage reporting") do
+        @options[:coverage] = true
+      end
+
+      opts.on("-v", "--verbose", "Verbose output") do
+        @options[:verbose] = true
+      end
+
+      opts.on("-h", "--help", "Prints this help") do
+        puts opts
+        exit
+      end
+    end.parse!
+
+    @options[:type] ||= 'all'
+  end
+
+  def run_all_tests
+    run_unit_tests
+    run_integration_tests
+    run_system_tests
+  end
+
+  def run_unit_tests
+    puts "\n🔬 Running unit tests (models, helpers, services)..."
+    
+    spec_dirs = %w[models helpers services jobs mailers].select do |dir|
+      Dir.exist?("spec/#{dir}")
+    end
+
+    if spec_dirs.any?
+      spec_paths = spec_dirs.map { |dir| "spec/#{dir}" }.join(' ')
+      result = run_rspec(spec_paths, "Unit Tests")
+      @results[:unit] = result
+    else
+      puts "⚠️  No unit test directories found"
+      @results[:unit] = { success: true, output: "No unit tests found" }
+    end
+  end
+
+  def run_integration_tests
+    puts "\n🔗 Running integration tests (requests, features)..."
+    
+    spec_dirs = %w[requests features controllers].select do |dir|
+      Dir.exist?("spec/#{dir}")
+    end
+
+    if spec_dirs.any?
+      spec_paths = spec_dirs.map { |dir| "spec/#{dir}" }.join(' ')
+      result = run_rspec(spec_paths, "Integration Tests")
+      @results[:integration] = result
+    else
+      puts "⚠️  No integration test directories found"
+      @results[:integration] = { success: true, output: "No integration tests found" }
+    end
+  end
+
+  def run_system_tests
+    puts "\n🌐 Running system tests (end-to-end)..."
+    
+    if Dir.exist?("spec/system")
+      result = run_rspec("spec/system", "System Tests")
+      @results[:system] = result
+    else
+      puts "⚠️  No system test directory found"
+      @results[:system] = { success: true, output: "No system tests found" }
+    end
+  end
+
+  def run_rspec(spec_path, test_type)
+    format_options = @options[:verbose] ? "--format=documentation" : "--format=progress"
+    
+    coverage_env = @options[:coverage] ? { 'COVERAGE' => 'true' } : {}
+    
+    command = "bundle exec rspec #{spec_path} #{format_options}"
+    
+    puts "   Running: #{command}"
+    
+    stdout, stderr, status = Open3.capture3(coverage_env, command)
+    
+    result = {
+      command: command,
+      stdout: stdout,
+      stderr: stderr,
+      status: status,
+      success: status.success?
+    }
+
+    print_test_result(test_type, result)
+    result
+  end
+
+  def print_test_result(name, result)
+    if result[:success]
+      puts "✅ #{name}: All tests passed"
+      
+      # Extract test statistics
+      output = result[:stdout]
+      if match = output.match(/(\d+) examples?, (\d+) failures?/)
+        examples = match[1].to_i
+        failures = match[2].to_i
+        puts "   #{examples} examples, #{failures} failures"
+      end
+    else
+      puts "❌ #{name}: Tests failed"
+      
+      # Extract and count failures
+      output = result[:stdout] + result[:stderr]
+      if match = output.match(/(\d+) examples?, (\d+) failures?/)
+        failures = match[2].to_i
+        @total_failures += failures
+        puts "   #{match[1]} examples, #{failures} failures"
+      else
+        @total_failures += 1
+      end
+
+      # Show first few lines of failure output
+      failure_lines = output.split("\n").select do |line|
+        line.include?('FAIL') || line.include?('Error') || line.match(/\d+\)\s/)
+      end.first(3)
+      
+      if failure_lines.any?
+        puts "   First few failures:"
+        failure_lines.each { |line| puts "   #{line}" }
+        puts "   ... (run with --verbose for full output)"
+      end
+    end
+  end
+
+  def print_summary
+    duration = Time.now - @start_time
+    
+    puts "\n" + "=" * 60
+    puts "📊 TEST SUMMARY"
+    puts "=" * 60
+    
+    @results.each do |name, result|
+      status = result[:success] ? "✅ PASS" : "❌ FAIL"
+      puts "#{name.to_s.capitalize.ljust(15)} #{status}"
+    end
+    
+    puts "\n📈 TOTALS:"
+    puts "   Total Failures: #{@total_failures}"
+    puts "   Duration: #{duration.round(2)}s"
+    
+    if @options[:coverage] && Dir.exist?('coverage')
+      puts "\n📊 COVERAGE:"
+      puts "   HTML Report: coverage/index.html"
+      puts "   LCOV Report: coverage/lcov.info"
+    end
+
+    if @total_failures > 0
+      puts "\n💡 DEBUGGING TIPS:"
+      puts "   ./bin/test --verbose           # Show detailed output"
+      puts "   ./bin/test --type unit         # Run only unit tests"
+      puts "   ./bin/test --type integration  # Run only integration tests"
+      puts "   ./bin/test --type system       # Run only system tests"
+      puts "   bundle exec rspec spec/path    # Run specific test file"
+    else
+      puts "\n🎉 All tests passed successfully!"
+    end
+  end
+end
+
+TestRunner.new.run

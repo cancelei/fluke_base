@@ -1,15 +1,13 @@
 <%# Turbo Stream template for adding toast notifications
      Usage in controllers:
-     
+
      respond_to do |format|
-       format.turbo_stream { 
-         render turbo_stream: turbo_stream.after("toast-container", 
+       format.turbo_stream {
+         render turbo_stream: turbo_stream.after("toast-container",
            render("shared/toast_turbo_stream", type: :success, message: "Success!")
          )
        }
-     end
-%>
-
+     end %>
 <%
   type = local_assigns[:type] || :info
   message = local_assigns[:message]
@@ -19,11 +17,10 @@
   progress_bar = local_assigns.fetch(:progress_bar, true)
   position = local_assigns[:position] || "toast-top-right"
 %>
-
 <% if message.present? %>
-  <%= render "shared/toast_notification", 
-             type: type, 
-             message: message, 
+  <%= render "shared/toast_notification",
+             type: type,
+             message: message,
              title: title,
              timeout: timeout,
              close_button: close_button,

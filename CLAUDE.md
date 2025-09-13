@@ -3,8 +3,14 @@
 ## Testing Commands
 - `rails server` - Start development server
 - `rails console` - Start Rails console
-- `rails test` - Run test suite
-- `bundle exec rspec` - Run RSpec tests (if available)
+- `./bin/test` - Run comprehensive test suite with options
+- `./bin/test --coverage` - Run tests with coverage reporting
+- `./bin/test --type unit` - Run only unit tests (models, services, helpers)
+- `./bin/test --type integration` - Run integration tests (controllers, requests)
+- `./bin/test --type system` - Run system/end-to-end tests
+- `bundle exec rspec` - Run RSpec tests directly
+- `npm run test` - Run tests via npm
+- `npm run test:coverage` - Run tests with coverage via npm
 
 ## Testing Endpoints (No Authentication Required)
 
@@ -20,6 +26,15 @@ These endpoints work without authentication and confirm all Turbo implementation
 - `rails db:migrate` - Run migrations
 - `rails db:seed` - Seed initial data
 - `rails db:reset` - Reset database completely
+
+## Coverage and CI/CD
+- `npm run ci` - Run full CI pipeline locally (lint + test with coverage)
+- Coverage reports generated in `coverage/` directory
+- HTML coverage report: `coverage/index.html`
+- LCOV format for CI: `coverage/lcov.info`
+- GitHub Actions workflows:
+  - `.github/workflows/ci-refactored.yml` - Modern parallel CI/CD pipeline
+  - `.github/workflows/ci.yml` - Current parallel linting setup
 
 ## Turbo Testing Notes
 - All Turbo implementations have been reviewed and fixed
