@@ -1,5 +1,15 @@
 ---
 EnableDefaultLinters: true
+exclude:
+  - 'vendor/**/*'
+  - 'node_modules/**/*'
+  - 'public/**/*'
+  - 'storage/**/*'
+  - 'tmp/**/*'
+  - 'log/**/*'
+  - 'coverage/**/*'
+  - 'spec/**/*'
+  - 'test/**/*'
 linters:
   ErbSafety:
     enabled: true
