@@ -43,21 +43,57 @@ class ApplicationController < ActionController::Base
   def set_selected_project
     return unless user_signed_in? && current_user
 
-    if params[:project_id].present?
-      project = Project.find_by(id: params[:project_id])
-      if project && current_user.projects.include?(project)
-        ProjectSelectionService.new(current_user, session, project.id).call
-        @selected_project = project
+    # Determine project id from nested routes (project_id) or direct project routes (id)
+    incoming_project_id = if params[:project_id].present?
+                            params[:project_id]
+    elsif controller_name == "projects" && params[:id].present?
+                            params[:id]
+    else
+                            nil
+    end
+
+    if incoming_project_id.present?
+      project = Project.find_by(id: incoming_project_id)
+      if project
+        involved_as_owner = current_user.projects.include?(project)
+        involved_via_initiated = current_user.initiated_agreements.where(project_id: project.id, status: "Accepted").exists?
+        involved_via_received = current_user.received_agreements.where(project_id: project.id, status: "Accepted").exists?
+
+        if involved_as_owner || involved_via_initiated || involved_via_received
+          ProjectSelectionService.new(current_user, session, project.id).call
+          @selected_project = project
+        end
       end
     else
       # Set @selected_project from session if not set by params
       selected_project_id = current_user.selected_project_id || session[:selected_project_id]
-      @selected_project = current_user.projects.find_by(id: selected_project_id) if selected_project_id.present? && !current_user.has_role?(:mentor)
-      @selected_project = current_user.initiated_agreements.where(project_id: selected_project_id, status: "Accepted")&.first&.project if selected_project_id.present? && current_user.has_role?(:mentor)
 
+      # Enhanced project resolution for mentors and entrepreneurs
+      if selected_project_id.present?
+        if current_user.has_role?(:mentor)
+          # For mentors, find project through agreements
+          @selected_project = current_user.initiated_agreements
+                                        .where(project_id: selected_project_id, status: "Accepted")
+                                        .first&.project ||
+                             current_user.received_agreements
+                                        .where(project_id: selected_project_id, status: "Accepted")
+                                        .first&.project
+        else
+          # For entrepreneurs, find project through ownership or agreements
+          @selected_project = current_user.projects.find_by(id: selected_project_id) ||
+                             current_user.initiated_agreements
+                                        .where(project_id: selected_project_id, status: "Accepted")
+                                        .first&.project ||
+                             current_user.received_agreements
+                                        .where(project_id: selected_project_id, status: "Accepted")
+                                        .first&.project
+        end
+      end
+
+      # Fallback: set first available project if none selected
       if @selected_project.nil? && current_user.projects.any? && !acting_as_mentor?
         @selected_project = current_user.projects.first
-        session[:selected_project_id] = @selected_project.id if @selected_project
+        ProjectSelectionService.new(current_user, session, @selected_project.id).call if @selected_project
       end
     end
   end

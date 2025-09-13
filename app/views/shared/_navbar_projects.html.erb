@@ -14,17 +14,21 @@
           <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Projects</p>
         </div>
         <div class="py-1" role="menu" aria-orientation="vertical">
-          <% (current_user.projects + current_user.initiated_agreements.active.includes(:project).map(&:project) + current_user.received_agreements.active.includes(:project).map(&:project)).uniq.each do |project| %>
+          <% available_projects = (current_user.projects + current_user.initiated_agreements.active.includes(:project).map(&:project) + current_user.received_agreements.active.includes(:project).map(&:project)).uniq %>
+          <% if selected_project.present? && !available_projects.include?(selected_project) %>
+            <% available_projects.unshift(selected_project) %>
+          <% end %>
+          <% available_projects.each do |project| %>
             <% if request.path.match?(/projects\/\d+/) %>
               <%= link_to project.name,
                 request.path.gsub(/projects\/\d+/, "projects/#{project.id}"),
                 data: { turbo: false },
-                class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'bg-indigo-100 font-bold' if params[:project_id].to_i == project.id}",
+                class: "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'bg-indigo-100 font-bold' if selected_project&.id == project.id}",
                 role: "menuitem" %>
             <% else %>
               <%= form_with(url: update_selected_project_path(project_id: project.id),
                           method: :patch,
-                          data: { turbo: true }) do |f| %>
+                          data: { turbo: true, turbo_frame: "_top" }) do |f| %>
                 <button type="submit"
                         class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 <%= "bg-indigo-100 font-bold" if selected_project&.id == project.id %>"
                         role="menuitem">
