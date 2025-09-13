@@ -506,12 +506,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_120000) do
               count(*) AS total_projects,
               count(
                   CASE
-                      WHEN ((projects.collaboration_type)::text = ANY ((ARRAY['mentor'::character varying, 'both'::character varying])::text[])) THEN 1
+                      WHEN ((projects.collaboration_type)::text = ANY (ARRAY[('mentor'::character varying)::text, ('both'::character varying)::text])) THEN 1
                       ELSE NULL::integer
                   END) AS projects_seeking_mentor,
               count(
                   CASE
-                      WHEN ((projects.collaboration_type)::text = ANY ((ARRAY['co-founder'::character varying, 'both'::character varying])::text[])) THEN 1
+                      WHEN ((projects.collaboration_type)::text = ANY (ARRAY[('co-founder'::character varying)::text, ('both'::character varying)::text])) THEN 1
                       ELSE NULL::integer
                   END) AS projects_seeking_cofounder
              FROM projects

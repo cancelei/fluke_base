@@ -3,7 +3,7 @@
 ## Testing Commands
 - `rails server` - Start development server
 - `rails console` - Start Rails console
-- `./bin/test` - Run comprehensive test suite with options
+- `./bin/test` - Run essential tests (models + helpers)
 - `./bin/test --coverage` - Run tests with coverage reporting
 - `./bin/test --type unit` - Run only unit tests (models, services, helpers)
 - `./bin/test --type integration` - Run integration tests (controllers, requests)

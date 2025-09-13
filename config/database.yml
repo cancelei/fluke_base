@@ -74,6 +74,8 @@ test:
   primary: &primary_test
     <<: *default
     url: <%= ENV["DATABASE_URL"] || "postgres://postgres:postgres@localhost/fluke_base_test" %>
+  # Simplified for CI - only enable additional databases in full test environment
+  <% if ENV["CI"] != "true" %>
   cable:
     <<: *primary_test
     database: fluke_base_test_cable
@@ -86,6 +88,7 @@ test:
     <<: *primary_test
     database: fluke_base_test_queue
     migrations_paths: db/queue_migrate
+  <% end %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is

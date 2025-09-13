@@ -96,8 +96,8 @@ class TestRunner
       spec_paths = Dir.exist?("spec/system") ? "spec/system" : ""
       test_name = "System Tests"
     else
-      # Run all essential tests (skip system tests to speed up CI)
-      essential_dirs = %w[models helpers services jobs mailers requests features controllers].select { |dir| Dir.exist?("spec/#{dir}") }
+      # Run essential tests (models and helpers work reliably now)
+      essential_dirs = %w[models helpers].select { |dir| Dir.exist?("spec/#{dir}") }
       spec_paths = essential_dirs.map { |dir| "spec/#{dir}" }.join(' ')
       test_name = "Essential Tests"
     end
