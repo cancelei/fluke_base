@@ -9,134 +9,75 @@ on:
 env:
   RUBY_VERSION: '3.2.1'
   NODE_VERSION: '20'
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_DB: fluke_base_test
 
 jobs:
-  # Test job (if you have tests)
-  test:
-    name: Run Tests
+  # Essential linting - run in parallel
+  lint:
+    name: 🔍 Lint
     runs-on: ubuntu-latest
-    if: false  # Disable if no tests exist yet
+    strategy:
+      matrix:
+        linter: [rubocop, brakeman, erb_lint, eslint]
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Ruby
+        if: matrix.linter != 'eslint'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ env.RUBY_VERSION }}
           bundler-cache: true
 
       - name: Set up Node.js
+        if: matrix.linter == 'eslint'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Install dependencies
-        run: |
-          bundle install --jobs 4 --retry 3
-          npm ci
-
-      - name: Run tests
-        run: |
-          bundle exec rspec
-          npm test
-
-  # Linting jobs - run in parallel
-  lint-ruby:
-    name: Lint Ruby
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ env.RUBY_VERSION }}
-          bundler-cache: true
-
-      - name: Cache RuboCop
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/rubocop
-          key: ${{ runner.os }}-rubocop-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-rubocop-
-
-      - name: Run RuboCop
-        run: bundle exec rubocop --format=progress
-
-  lint-security:
-    name: Lint Security
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ env.RUBY_VERSION }}
-          bundler-cache: true
-
-      - name: Run Brakeman
-        run: bundle exec brakeman --quiet --format=json
-
-  lint-templates:
-    name: Lint Templates
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ env.RUBY_VERSION }}
-          bundler-cache: true
-
-      - name: Cache ERB Lint
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/erb_lint
-          key: ${{ runner.os }}-erb-lint-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-erb-lint-
-
-      - name: Run ERB Lint
-        run: bundle exec erb_lint --lint-all --format=compact
-
-  lint-javascript:
-    name: Lint JavaScript
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
+      - name: Install Node dependencies
+        if: matrix.linter == 'eslint'
         run: npm ci
 
+      - name: Run RuboCop
+        if: matrix.linter == 'rubocop'
+        run: bundle exec rubocop --format=github
+
+      - name: Run Brakeman
+        if: matrix.linter == 'brakeman'
+        run: bundle exec brakeman --quiet --format=github
+
+      - name: Run ERB Lint
+        if: matrix.linter == 'erb_lint'
+        run: bundle exec erb_lint --lint-all --format=github
+
       - name: Run ESLint
+        if: matrix.linter == 'eslint'
         run: npm run lint:js
 
-  # Summary job
-  lint-summary:
-    name: Lint Summary
+  # Essential tests only
+  test:
+    name: 🧪 Tests
     runs-on: ubuntu-latest
-    needs: [lint-ruby, lint-security, lint-templates, lint-javascript]
-    if: always()
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     
     steps:
       - name: Checkout code
@@ -159,84 +100,71 @@ jobs:
           bundle install --jobs 4 --retry 3
           npm ci
 
-      - name: Run unified linter for summary
-        run: ./bin/lint
-        continue-on-error: true
-
-      - name: Generate summary
+      - name: Setup test database
+        env:
+          DATABASE_URL: postgres://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@localhost:5432/${{ env.POSTGRES_DB }}
+          RAILS_ENV: test
         run: |
-          echo "## 🔍 Lint Results Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Linter | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔍 RuboCop (Ruby) | ${{ needs.lint-ruby.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Brakeman (Security) | ${{ needs.lint-security.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📄 ERB Lint (Templates) | ${{ needs.lint-templates.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| ⚡ ESLint (JavaScript) | ${{ needs.lint-javascript.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Run locally:**" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "./bin/lint          # Run all linters" >> $GITHUB_STEP_SUMMARY
-          echo "./bin/lint --fix    # Auto-fix issues" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          bundle exec rails db:create
+          bundle exec rails db:migrate
+          # Only run additional migrations if they exist
+          if [ -d "db/cache_migrate" ] && [ "$(ls -A db/cache_migrate)" ]; then
+            bundle exec rails db:migrate:cache || echo "Cache migration skipped"
+          fi
+          if [ -d "db/queue_migrate" ] && [ "$(ls -A db/queue_migrate)" ]; then
+            bundle exec rails db:migrate:queue || echo "Queue migration skipped"  
+          fi
+          if [ -d "db/cable_migrate" ] && [ "$(ls -A db/cable_migrate)" ]; then
+            bundle exec rails db:migrate:cable || echo "Cable migration skipped"
+          fi
 
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: postgres://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@localhost:5432/${{ env.POSTGRES_DB }}
+          RAILS_ENV: test
+          COVERAGE: true
+        run: bundle exec rspec --format progress
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const rubocopStatus = '${{ needs.lint-ruby.result }}' === 'success' ? '✅' : '❌';
-            const brakemanStatus = '${{ needs.lint-security.result }}' === 'success' ? '✅' : '❌';
-            const erbLintStatus = '${{ needs.lint-templates.result }}' === 'success' ? '✅' : '❌';
-            const eslintStatus = '${{ needs.lint-javascript.result }}' === 'success' ? '✅' : '❌';
-            
-            const allPassed = rubocopStatus === '✅' && brakemanStatus === '✅' && erbLintStatus === '✅' && eslintStatus === '✅';
-            const statusEmoji = allPassed ? '✅' : '❌';
-            const statusText = allPassed ? 'All linters passed!' : 'Some linters found issues';
-            
-            const comment = `## ${statusEmoji} Lint Results
-            
-            ${statusText}
-            
-            | Linter | Status |
-            |--------|--------|
-            | 🔍 RuboCop (Ruby) | ${rubocopStatus} |
-            | 🔒 Brakeman (Security) | ${brakemanStatus} |
-            | 📄 ERB Lint (Templates) | ${erbLintStatus} |
-            | ⚡ ESLint (JavaScript) | ${eslintStatus} |
-            
-            **Run locally:**
-            \`\`\`bash
-            ./bin/lint          # Run all linters
-            ./bin/lint --fix    # Auto-fix issues
-            \`\`\`
-            
-            Check the [Actions tab](https://github.com/${context.repo.owner}/${context.repo.repo}/actions) for detailed results.`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+          name: coverage-reports
+          path: coverage/
+          retention-days: 7
 
-  # Final check - fail if any linter failed
-  lint-check:
-    name: Lint Check
+  # Summary
+  summary:
+    name: 📊 Summary
     runs-on: ubuntu-latest
-    needs: [lint-ruby, lint-security, lint-templates, lint-javascript]
+    needs: [lint, test]
     if: always()
     
     steps:
-      - name: Check lint results
+      - name: Generate summary
         run: |
-          if [ "${{ needs.lint-ruby.result }}" != "success" ] || 
-             [ "${{ needs.lint-security.result }}" != "success" ] || 
-             [ "${{ needs.lint-templates.result }}" != "success" ] || 
-             [ "${{ needs.lint-javascript.result }}" != "success" ]; then
-            echo "❌ One or more linters failed. Please fix the issues and try again."
-            echo "Run './bin/lint --fix' locally to auto-fix many issues."
+          echo "## 🏗️ CI Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Linting | ${{ needs.lint.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Tests | ${{ needs.test.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test.result }}" != "success" ]]; then
+            echo "**🔧 Quick Fixes:**" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "./bin/lint --fix    # Auto-fix linting issues" >> $GITHUB_STEP_SUMMARY
+            echo "./bin/test          # Run tests locally" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🎉 **All checks passed!**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check overall status
+        run: |
+          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test.result }}" != "success" ]]; then
+            echo "❌ CI failed - please fix issues and try again"
             exit 1
           else
-            echo "✅ All linters passed successfully!"
+            echo "✅ All CI checks passed!"
           fi

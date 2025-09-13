@@ -67,54 +67,47 @@ class TestRunner
   end
 
   def run_all_tests
-    run_unit_tests
-    run_integration_tests
-    run_system_tests
+    run_essential_tests
   end
 
   def run_unit_tests
-    puts "\n🔬 Running unit tests (models, helpers, services)..."
-    
-    spec_dirs = %w[models helpers services jobs mailers].select do |dir|
-      Dir.exist?("spec/#{dir}")
-    end
-
-    if spec_dirs.any?
-      spec_paths = spec_dirs.map { |dir| "spec/#{dir}" }.join(' ')
-      result = run_rspec(spec_paths, "Unit Tests")
-      @results[:unit] = result
-    else
-      puts "⚠️  No unit test directories found"
-      @results[:unit] = { success: true, output: "No unit tests found" }
-    end
+    run_essential_tests("unit")
   end
 
   def run_integration_tests
-    puts "\n🔗 Running integration tests (requests, features)..."
-    
-    spec_dirs = %w[requests features controllers].select do |dir|
-      Dir.exist?("spec/#{dir}")
-    end
-
-    if spec_dirs.any?
-      spec_paths = spec_dirs.map { |dir| "spec/#{dir}" }.join(' ')
-      result = run_rspec(spec_paths, "Integration Tests")
-      @results[:integration] = result
-    else
-      puts "⚠️  No integration test directories found"
-      @results[:integration] = { success: true, output: "No integration tests found" }
-    end
+    run_essential_tests("integration")
   end
 
   def run_system_tests
-    puts "\n🌐 Running system tests (end-to-end)..."
+    run_essential_tests("system")
+  end
+
+  def run_essential_tests(filter = nil)
+    puts "\n🧪 Running essential tests..."
     
-    if Dir.exist?("spec/system")
-      result = run_rspec("spec/system", "System Tests")
-      @results[:system] = result
+    case filter
+    when "unit"
+      spec_paths = %w[models helpers services jobs mailers].select { |dir| Dir.exist?("spec/#{dir}") }.map { |dir| "spec/#{dir}" }.join(' ')
+      test_name = "Unit Tests"
+    when "integration"
+      spec_paths = %w[requests features controllers].select { |dir| Dir.exist?("spec/#{dir}") }.map { |dir| "spec/#{dir}" }.join(' ')
+      test_name = "Integration Tests"
+    when "system"
+      spec_paths = Dir.exist?("spec/system") ? "spec/system" : ""
+      test_name = "System Tests"
     else
-      puts "⚠️  No system test directory found"
-      @results[:system] = { success: true, output: "No system tests found" }
+      # Run all essential tests (skip system tests to speed up CI)
+      essential_dirs = %w[models helpers services jobs mailers requests features controllers].select { |dir| Dir.exist?("spec/#{dir}") }
+      spec_paths = essential_dirs.map { |dir| "spec/#{dir}" }.join(' ')
+      test_name = "Essential Tests"
+    end
+
+    if spec_paths.empty?
+      puts "⚠️  No test directories found for #{filter || 'essential tests'}"
+      @results[:essential] = { success: true, output: "No tests found" }
+    else
+      result = run_rspec(spec_paths, test_name)
+      @results[:essential] = result
     end
   end
 

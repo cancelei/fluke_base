@@ -32,9 +32,8 @@ These endpoints work without authentication and confirm all Turbo implementation
 - Coverage reports generated in `coverage/` directory
 - HTML coverage report: `coverage/index.html`
 - LCOV format for CI: `coverage/lcov.info`
-- GitHub Actions workflows:
-  - `.github/workflows/ci-refactored.yml` - Modern parallel CI/CD pipeline
-  - `.github/workflows/ci.yml` - Current parallel linting setup
+- GitHub Actions workflow:
+  - `.github/workflows/ci.yml` - Streamlined CI with essential linting and tests only
 
 ## Turbo Testing Notes
 - All Turbo implementations have been reviewed and fixed
