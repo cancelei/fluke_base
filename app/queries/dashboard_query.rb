@@ -23,8 +23,6 @@ class DashboardQuery
   end
 
   def mentor_opportunities
-    return Project.none unless @current_user.has_role?(:mentor)
-
     # Find projects seeking mentors where user doesn't have an agreement
     Project.includes(:user)
            .where("collaboration_type = ? OR collaboration_type = ?",

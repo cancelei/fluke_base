@@ -168,14 +168,19 @@ class AgreementForm < ApplicationForm
   end
 
   def determine_user_role(user_id)
-    user = User.find(user_id)
-    # Get the user's primary role
+    # With simplified user system, determine role based on project ownership and agreement type
     if project.user_id == user_id
-      user_role = "Entrepreneur"
+      "entrepreneur"
     else
-      user_role = user.user_roles.joins(:role).first&.role&.name
+      case agreement_type
+      when Agreement::MENTORSHIP
+        "mentor"
+      when Agreement::CO_FOUNDER
+        "co_founder"
+      else
+        "collaborator"
+      end
     end
-    user_role || "Unknown"
   end
 
   def setup_counter_offer(agreement)

@@ -1,35 +1,38 @@
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-  <div class="px-4 py-6 sm:px-0">
-    <nav class="flex mb-4 text-sm text-gray-500" aria-label="Breadcrumb">
-      <ol class="inline-flex items-center space-x-1">
-        <li>
-          <%= link_to "All People", explore_people_path, class: "hover:underline #{@role.blank? && @project_id.blank? ? 'font-bold text-indigo-700' : ''}" %>
-        </li>
-        <li>
-          <span>/</span>
-        </li>
-        <li>
-          <%= link_to "Entrepreneurs", explore_people_path(role: Role::ENTREPRENEUR), class: "hover:underline #{(@role == Role::ENTREPRENEUR) ? 'font-bold text-indigo-700' : ''}" %>
-        </li>
-        <li>
-          <span>/</span>
-        </li>
-        <li>
-          <%= link_to "Mentors", explore_people_path(role: Role::MENTOR), class: "hover:underline #{(@role == Role::MENTOR) ? 'font-bold text-indigo-700' : ''}" %>
-        </li>
-        <% if @project_id.present? %>
-          <li><span>/</span></li>
-          <li>
-            <%= link_to "By Project", explore_people_path(project_id: @project_id), class: "hover:underline font-bold text-indigo-700" %>
-          </li>
-        <% end %>
-      </ol>
-    </nav>
-    <%= form_with url: explore_people_path, method: :get, class: "flex flex-wrap gap-2 mb-6" do |f| %>
-      <%= f.text_field :search, value: params[:search], placeholder: "Search people...", class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-      <%= f.select :role, [ [ "All Roles", "" ], [ "Entrepreneur", Role::ENTREPRENEUR ], [ "Mentor", Role::MENTOR ] ], { selected: params[:role] }, { class: "rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
-      <%= f.submit "Search", class: "inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" %>
-    <% end %>
-    <%= render partial: "shared/explore_users", locals: { users: @users, user_role: @role&.to_sym || :all, title: "Explore People", description: "Browse all entrepreneurs and mentors on the platform." } %>
+<div class="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30">
+  <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+      <div class="relative">
+        <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+          Discover Amazing People
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          Connect with talented individuals from around the world. Find collaborators, mentors, and friends in our vibrant community.
+        </p>
+
+        <!-- Decorative elements -->
+        <div class="absolute -top-4 left-1/4 w-8 h-8 bg-indigo-200 rounded-full opacity-20 animate-pulse"></div>
+        <div class="absolute -bottom-2 right-1/3 w-6 h-6 bg-purple-200 rounded-full opacity-20 animate-pulse delay-1000"></div>
+      </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 mb-8">
+      <%= form_with url: explore_people_path, method: :get, class: "flex flex-col sm:flex-row gap-4" do |f| %>
+        <div class="flex-1">
+          <%= f.text_field :search, value: params[:search],
+              placeholder: "Search by name, skills, or interests...",
+              class: "w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-4 py-3" %>
+        </div>
+        <%= f.submit "Explore", class: "px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105" %>
+      <% end %>
+    </div>
+
+    <!-- Results Section -->
+    <%= render partial: "shared/explore_users", locals: {
+        users: @users,
+        title: "Community People",
+        description: "Connect with #{@users.respond_to?(:total_count) ? @users.total_count : User.count} talented people in our community"
+      } %>
   </div>
 </div>

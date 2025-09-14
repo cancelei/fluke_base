@@ -19,7 +19,7 @@
 </div>
 
 <!-- Explorable Projects section for mentors -->
-<% if current_user.has_role?(:mentor) %>
+<%# Show explorable projects to all users %>
   <div class="mt-12">
     <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-2xl">
       <div class="px-6 py-8 sm:px-8 flex justify-between items-center bg-gradient-to-r from-blue-50/50 to-purple-50/50">
@@ -78,4 +78,3 @@
       <% end %>
     </div>
   </div>
-<% end %>

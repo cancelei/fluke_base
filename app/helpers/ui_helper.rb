@@ -205,107 +205,45 @@ module UiHelper
     end
   end
 
-  # User Card Helper Methods
-  def user_card_color_scheme(role)
-    case role
-    when Role::MENTOR
-      {
-        container: "border-blue-200",
-        avatar_bg: "bg-blue-50",
-        avatar_icon: "text-blue-300",
-        role_badge: "bg-blue-100 text-blue-700",
-        footer_border: "border-blue-100",
-        footer_text: "text-blue-600 group-hover:text-blue-800",
-        message_btn: "text-blue-700 ring-blue-200 hover:bg-blue-50"
-      }
-    when Role::ENTREPRENEUR
-      {
-        container: "border-green-200",
-        avatar_bg: "bg-green-50",
-        avatar_icon: "text-green-300",
-        role_badge: "bg-green-100 text-green-700",
-        footer_border: "border-green-100",
-        footer_text: "text-green-600 group-hover:text-green-800",
-        message_btn: "text-green-700 ring-green-200 hover:bg-green-50"
-      }
-    else
-      {
-        container: "border-gray-200",
-        avatar_bg: "bg-indigo-100",
-        avatar_icon: "text-indigo-300",
-        role_badge: "bg-indigo-100 text-indigo-700",
-        footer_border: "border-gray-200",
-        footer_text: "text-indigo-600 group-hover:text-indigo-800",
-        message_btn: "text-gray-700 ring-gray-200 hover:bg-gray-50"
-      }
-    end
+  # User Card Helper Methods - Simplified for unified user system
+  def user_card_color_scheme
+    {
+      container: "border-indigo-200",
+      avatar_bg: "bg-indigo-50",
+      avatar_icon: "text-indigo-300",
+      badge: "bg-blue-100 text-blue-700",
+      footer_border: "border-indigo-100",
+      footer_text: "text-indigo-600 group-hover:text-indigo-800",
+      message_btn: "text-indigo-700 ring-indigo-200 hover:bg-indigo-50"
+    }
   end
 
-  def default_bio_for_role(role)
-    case role
-    when Role::MENTOR
-      "Experienced professional ready to mentor"
-    when Role::ENTREPRENEUR
-      "Aspiring entrepreneur building the future"
-    else
-      "Member of the FlukeBase community"
-    end
+  def default_bio
+    "Active person in the FlukeBase community"
   end
 
-  def render_role_specific_content(user, role)
-    case role
-    when Role::MENTOR
-      render_mentor_card_content(user)
-    when Role::ENTREPRENEUR
-      render_entrepreneur_card_content(user)
-    else
-      render_general_card_content(user)
-    end
-  end
-
-  def render_mentor_card_content(user)
+  def render_user_card_content(user)
     content = []
 
-    # Skills
-    skills = user.skills || [ "Business", "Tech", "Marketing", "UI/UX", "Growth" ]
-    content << content_tag(:div, class: "flex flex-wrap gap-1") do
-      skills.first(3).map do |skill|
-        content_tag(:span, skill, class: "inline-flex items-center rounded bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700")
-      end.join.html_safe
+    # Skills (if available)
+    if user.skills&.any?
+      content << content_tag(:div, class: "flex flex-wrap gap-1") do
+        user.skills.first(3).map do |skill|
+          content_tag(:span, skill, class: "inline-flex items-center rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700")
+        end.join.html_safe
+      end
     end
 
     # Stats
-    content << content_tag(:div, class: "mt-2 flex justify-between items-center text-xs text-gray-600") do
-      "Mentees: #{user.other_party_agreements.completed.count}"
-    end
-
-    safe_join(content)
-  end
-
-  def render_entrepreneur_card_content(user)
-    content = []
-
     content << content_tag(:div, class: "flex flex-col gap-1 text-xs text-gray-600") do
       stats = []
       stats << "Projects: <strong>#{user.projects.count}</strong>"
-      if user.projects.any? && user.projects.first.stage.present?
-        stats << "Stage: #{user.projects.first.stage.capitalize}"
-      end
+      stats << "Active Agreements: <strong>#{user.all_agreements.where(status: Agreement::ACCEPTED).count}</strong>"
       safe_join(stats.map { |stat| content_tag(:span, stat.html_safe) })
     end
 
-    safe_join(content)
-  end
-
-  def render_general_card_content(user)
-    content = []
-
-    content << content_tag(:div, class: "text-xs text-gray-600") do
-      "Active Projects: #{user.my_agreements.where(status: Agreement::ACCEPTED).count}"
-    end
-
     content << content_tag(:div, class: "mt-2") do
-      render partial: "shared/achievements", locals: { user: user, user_role: :entrepreneur }
+      render partial: "shared/achievements", locals: { user: user }
     end
 
     safe_join(content)

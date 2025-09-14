@@ -27,18 +27,20 @@
               <%= presenter.display_name %>
             </h1>
             <div class="flex flex-wrap justify-center lg:justify-start gap-2 mb-4">
-              <%= presenter.role_badges %>
+              <%= presenter.badges %>
             </div>
           </div>
 
           <!-- Action Buttons -->
           <div class="flex flex-col sm:flex-row gap-3">
-            <%= link_to new_agreement_path(project_id: current_user.selected_project_id, other_party_id: @person.id), class: "inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200" do %>
-              <svg class="-ml-0.5 mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-              </svg>
-              Initiate Agreement
-            <% end if current_user != @person && current_user.has_role?(Role::ENTREPRENEUR) && current_user.selected_project_id.present? && current_user.current_role&.name == Role::ENTREPRENEUR %>
+            <% if current_user != @person && current_user.selected_project_id.present? %>
+              <%= link_to new_agreement_path(project_id: current_user.selected_project_id, other_party_id: @person.id), class: "inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200" do %>
+                <svg class="-ml-0.5 mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                </svg>
+                Initiate Agreement
+              <% end %>
+            <% end %>
 
             <% if current_user != @person %>
               <%= button_to "Message", conversations_path(recipient_id: @person.id), method: :post, data: { turbo: false }, class: "inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200" %>
@@ -249,7 +251,7 @@
         </svg>
         Achievements
       </h2>
-      <%= render partial: "shared/achievements", locals: { user: @person, user_role: @person.roles.first&.name&.to_sym || :all } %>
+      <%= render partial: "shared/achievements", locals: { user: @person } %>
     </section>
 
     <!-- Track Record -->
@@ -260,7 +262,7 @@
         </svg>
         Track Record
       </h2>
-      <%= render partial: "shared/track_record", locals: { user: @person, user_role: @person.roles.first&.name&.to_sym || :all, agreements: @person.received_agreements } %>
+      <%= render partial: "shared/track_record", locals: { user: @person, agreements: @person.received_agreements } %>
     </section>
 
     <!-- Projects -->

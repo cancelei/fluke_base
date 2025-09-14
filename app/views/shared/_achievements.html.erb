@@ -1,10 +1,5 @@
-<%# Displays achievements for a user, role-aware. %>
+<%# Displays achievements for a user %>
 <ul class="list-disc pl-5 text-sm text-gray-700">
-  <% if user_role == :mentor %>
-    <li>Mentored <%= user.other_party_agreements.completed.count %> entrepreneurs</li>
-
-  <% else %>
-    <li>Completed <%= user.my_agreements.completed.count %> mentorship(s)</li>
-    <li>Launched <%= user.projects.count %> project(s)</li>
-  <% end %>
+  <li>Completed <%= user.my_agreements.completed.count %> collaboration(s)</li>
+  <li>Launched <%= user.projects.count %> project(s)</li>
 </ul>

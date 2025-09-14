@@ -90,7 +90,7 @@
                   Propose Agreement
                 <% end %>
               <% end %>
-            <% elsif current_user.has_role?(:mentor) && !@has_agreement && current_user.id != @project.user_id %>
+            <% elsif !@has_agreement && current_user.id != @project.user_id %>
               <%= link_to new_agreement_path(project_id: @project.id, other_party_id: @project.user.id), class: "inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 hover:shadow-xl transition-all duration-200" do %>
                 <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

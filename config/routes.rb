@@ -18,26 +18,13 @@ Rails.application.routes.draw do
   get "home/stats", to: "home#stats", as: :home_stats
 
 
-  # User onboarding
-  namespace :onboarding do
-    get "entrepreneur", as: :entrepreneur
-    get "mentor", as: :mentor
-    get "co_founder", to: "entrepreneur#index"
-  end
-  post "complete_onboarding", to: "onboarding#complete_onboarding"
-
   # User profile and settings
   get "profile", to: "profile#show", as: :profile_show
   get "profile/edit", to: "profile#edit", as: :profile_edit
   patch "profile", to: "profile#update", as: :profile_update
 
-  # User role management
-  get "roles", to: "roles#index", as: :roles
-  post "roles/request", to: "roles#request_role", as: :request_role
+  # User project selection
   patch "/users/selected_project", to: "users#update_selected_project", as: :update_selected_project
-  get "users/update_role", to: "users#update_role", as: :update_role_users
-  post "users/change_role", to: "users#change_role", as: :change_role_users
-  post "users/switch_current_role", to: "users#switch_current_role", as: :switch_current_role_users
 
   # People directory
   get "people/explore", to: "people#explore", as: :explore_people

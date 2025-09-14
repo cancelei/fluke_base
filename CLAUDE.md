@@ -66,3 +66,42 @@ These endpoints work without authentication and confirm all Turbo implementation
 - Flash messaging properly configured for Turbo Streams
 - Controller responses include proper frame awareness
 - JavaScript moved to Stimulus controllers
+
+## User System Architecture
+
+### Philosophy
+FlukeBase operates with a **unified user experience** without role-based restrictions or categorizations. All authenticated users have equal access to all platform features.
+
+### Key Principles
+- **Universal Access**: All authenticated users have access to all core features
+- **Simplified Experience**: No role-based onboarding, restrictions, or complex user flows
+- **Feature Equality**: All users can create projects, initiate agreements, track time, and access all functionality
+- **Clean Architecture**: Simplified codebase without role-related complexity
+
+### User Features Available to All
+- **Project Management**: Create, manage, and collaborate on projects
+- **Agreement System**: Initiate mentorship or co-founder agreements with any user
+- **Time Tracking**: Track time on project milestones
+- **Messaging**: Direct communication with other users
+- **Profile Management**: Complete user profiles with skills, experience, and social links
+
+### Removed Components (Completely Eliminated)
+- `Role` model: Role definitions and categorization system removed
+- `UserRole` join table: User-role associations removed
+- `Roleable` concern: Role management helpers removed
+- `RoleManager` service: Role assignment logic removed
+- `RolesController`: Role management interface removed
+- `OnboardingController`: Role-specific onboarding flows removed
+- `UserOnboardingService`: Complex onboarding logic removed
+- Onboarding routes: `/onboarding/*` and `/roles/*` paths removed
+- Role-specific views: All role categorization templates removed
+- Role initializers and rake tasks removed
+- Role-related test files and factories removed
+
+### Unified Experience
+- **Navbar**: All users see project selector and milestones dropdown
+- **Project Access**: Users can access any project they own or have agreements with
+- **Time Tracking**: All users can track time on project milestones
+- **Dashboard**: Direct access to dashboard with unified experience for all users
+- **User Discovery**: All users can explore and connect with other users
+- **Agreement Creation**: Any user can initiate agreements with any other user

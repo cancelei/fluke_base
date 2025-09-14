@@ -1,8 +1,10 @@
 <% if current_user.selected_project_id.present? %>
   <% selected_project = Project.find(current_user.selected_project_id) %>
-  <% milestones = current_user.id == selected_project.user_id ? selected_project.milestones : Milestone.where(id: selected_project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).active.pluck(:milestone_ids).flatten) %>
+  <% milestones = selected_project.milestones %>
+  <% active_milestones = milestones.filter { |m| !m.completed? } %>
 
-  <% milestones.filter { |m| !m.completed? }.each do |milestone| %>
+  <% if active_milestones.any? %>
+    <% active_milestones.each do |milestone| %>
     <% active_log = selected_project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id) %>
     <div class="flex items-center justify-between px-4 py-3 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-200">
       <div class="flex items-center space-x-3">
@@ -21,6 +23,16 @@
             <polygon points="5,3 19,12 5,21" />
           </svg>
         <% end %>
+      <% end %>
+    </div>
+    <% end %>
+  <% else %>
+    <!-- No active milestones -->
+    <div class="px-4 py-3 text-sm text-gray-500 text-center">
+      <p>No active milestones</p>
+      <% if selected_project.present? %>
+        <%= link_to "Create milestone", new_project_milestone_path(selected_project),
+            class: "mt-2 inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200" %>
       <% end %>
     </div>
   <% end %>

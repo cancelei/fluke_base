@@ -543,7 +543,7 @@ class AgreementsController < ApplicationController
       if params[:project_id].present?
         @project = Project.find(params[:project_id])
         session[:selected_project_id] = @project.id if @project
-      elsif !acting_as_mentor? && current_user.selected_project.present?
+      elsif current_user.selected_project.present?
         @project = current_user.selected_project
       end
     end
@@ -668,8 +668,7 @@ class AgreementsController < ApplicationController
     def authorize_agreement
       authorized = (
         current_user.id == @agreement.initiator&.id ||
-        current_user.id == @agreement.other_party&.id ||
-        current_user.has_role?(:admin)
+        current_user.id == @agreement.other_party&.id
       )
 
       # If not directly involved, check if user is involved in the original agreement (for counter offers)

@@ -17,21 +17,17 @@ class ApplicationController < ActionController::Base
   end
 
   # DRY helper: Require role or redirect
-  def require_role!(role_name, redirect_path, alert_message)
-    unless current_user.has_role?(role_name)
-      redirect_to redirect_path, alert: alert_message and return
-    end
-  end
+  # Role requirement methods removed - all users have access to all features
 
   rescue_from CanCan::AccessDenied, with: :user_not_authorized
 
-  helper_method :selected_project, :acting_as_mentor?, :present
+  helper_method :selected_project, :present
 
   protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [ :first_name, :last_name, :role_id, :github_username, :github_token ])
-    devise_parameter_sanitizer.permit(:account_update, keys: [ :first_name, :last_name, :role_id, :github_username, :github_token ])
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :first_name, :last_name, :github_username, :github_token ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :first_name, :last_name, :github_username, :github_token ])
   end
 
   def after_sign_in_path_for(resource)
@@ -70,28 +66,18 @@ class ApplicationController < ActionController::Base
 
       # Enhanced project resolution for mentors and entrepreneurs
       if selected_project_id.present?
-        if current_user.has_role?(:mentor)
-          # For mentors, find project through agreements
-          @selected_project = current_user.initiated_agreements
-                                        .where(project_id: selected_project_id, status: "Accepted")
-                                        .first&.project ||
-                             current_user.received_agreements
-                                        .where(project_id: selected_project_id, status: "Accepted")
-                                        .first&.project
-        else
-          # For entrepreneurs, find project through ownership or agreements
-          @selected_project = current_user.projects.find_by(id: selected_project_id) ||
-                             current_user.initiated_agreements
-                                        .where(project_id: selected_project_id, status: "Accepted")
-                                        .first&.project ||
-                             current_user.received_agreements
-                                        .where(project_id: selected_project_id, status: "Accepted")
-                                        .first&.project
-        end
+        # Find project through ownership or agreements (unified logic for all users)
+        @selected_project = current_user.projects.find_by(id: selected_project_id) ||
+                           current_user.initiated_agreements
+                                      .where(project_id: selected_project_id, status: "Accepted")
+                                      .first&.project ||
+                           current_user.received_agreements
+                                      .where(project_id: selected_project_id, status: "Accepted")
+                                      .first&.project
       end
 
       # Fallback: set first available project if none selected
-      if @selected_project.nil? && current_user.projects.any? && !acting_as_mentor?
+      if @selected_project.nil? && current_user.projects.any?
         @selected_project = current_user.projects.first
         ProjectSelectionService.new(current_user, session, @selected_project.id).call if @selected_project
       end
@@ -102,9 +88,7 @@ class ApplicationController < ActionController::Base
     @selected_project
   end
 
-  def acting_as_mentor?
-    session[:acting_as_mentor].present? && current_user.has_role?(:mentor)
-  end
+  # Acting as mentor concept removed - all users have equal access
 
   def user_not_authorized
     flash[:alert] = "You are not authorized to perform this action."

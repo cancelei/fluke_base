@@ -7,8 +7,7 @@ class Ability
     # Define abilities for the user here
     return unless user.present?
 
-    # Admin can do everything
-    can :manage, :all if user.has_role?(:admin)
+    # Note: Admin functionality removed with role system
 
     define_project_abilities(user)
     define_agreement_abilities(user)

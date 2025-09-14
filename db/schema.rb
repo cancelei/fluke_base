@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_11_120000) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_13_192237) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -226,13 +226,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_120000) do
     t.check_constraint "stage::text = ANY (ARRAY['idea'::character varying::text, 'prototype'::character varying::text, 'launched'::character varying::text, 'scaling'::character varying::text])", name: "projects_stage_check"
   end
 
-  create_table "roles", force: :cascade do |t|
-    t.string "name", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index "lower((name)::text)", name: "index_roles_on_lower_name", unique: true
-  end
-
   create_table "solid_cable_messages", force: :cascade do |t|
     t.binary "channel", null: false
     t.binary "payload", null: false
@@ -246,7 +239,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_120000) do
   create_table "solid_cache_entries", id: false, force: :cascade do |t|
     t.binary "key", null: false
     t.binary "value", null: false
-    t.datetime "created_at", precision: nil, null: false
+    t.datetime "created_at", null: false
     t.bigint "key_hash", null: false
     t.integer "byte_size", null: false
     t.index ["byte_size"], name: "index_solid_cache_entries_on_byte_size"
@@ -397,16 +390,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_120000) do
     t.check_constraint "status::text = ANY (ARRAY['in_progress'::character varying::text, 'completed'::character varying::text, 'paused'::character varying::text])", name: "time_logs_status_check"
   end
 
-  create_table "user_roles", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.bigint "role_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "onboarded", default: false
-    t.index ["role_id"], name: "index_user_roles_on_role_id"
-    t.index ["user_id"], name: "index_user_roles_on_user_id"
-  end
-
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -428,7 +411,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_120000) do
     t.string "business_stage"
     t.string "help_seekings", default: [], array: true
     t.text "business_info"
-    t.bigint "current_role_id"
     t.string "github_username"
     t.string "github_token", limit: 255
     t.boolean "show_project_context_nav", default: false, null: false
@@ -438,7 +420,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_120000) do
     t.string "facebook"
     t.string "tiktok"
     t.boolean "multi_project_tracking", default: false, null: false
-    t.index ["current_role_id"], name: "index_users_on_current_role_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["selected_project_id"], name: "index_users_on_selected_project_id"
@@ -478,10 +459,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_120000) do
   add_foreign_key "time_logs", "milestones"
   add_foreign_key "time_logs", "projects"
   add_foreign_key "time_logs", "users"
-  add_foreign_key "user_roles", "roles"
-  add_foreign_key "user_roles", "users"
   add_foreign_key "users", "projects", column: "selected_project_id", on_delete: :nullify
-  add_foreign_key "users", "roles", column: "current_role_id"
 
   create_view "dashboard_stats", materialized: true, sql_definition: <<-SQL
       SELECT u.id AS user_id,

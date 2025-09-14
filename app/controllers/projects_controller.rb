@@ -24,9 +24,7 @@ class ProjectsController < ApplicationController
 
     # Load suggested mentors only for project owner
     if current_user.id == @project.user_id
-      @suggested_mentors = User.with_role(:mentor)
-                             .includes(:roles)
-                             .where.not(id: @project.agreements.joins(:agreement_participants)
+      @suggested_mentors = User.where.not(id: @project.agreements.joins(:agreement_participants)
                                                                       .pluck("agreement_participants.user_id"))
                              .limit(3)
     else
@@ -46,15 +44,6 @@ class ProjectsController < ApplicationController
   end
 
   def new
-    unless current_user.has_role?(Role::ENTREPRENEUR) && current_user.onboarded_for?(Role::ENTREPRENEUR)
-      # Add Entrepreneur role if not present
-      session[:comes_from_project_new] = true
-      current_user.add_role("Entrepreneur") unless current_user.has_role?("Entrepreneur")
-      # Redirect to entrepreneur onboarding
-      redirect_to onboarding_entrepreneur_path, notice: "Please complete your entrepreneur profile before creating a project."
-      return
-    end
-
     @project_form = ProjectForm.new(user_id: current_user.id)
   end
 

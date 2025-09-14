@@ -25,7 +25,7 @@ if Rails.env.development?
   User.destroy_all
 
   # Helper method to create users with predictable data
-  def create_user(first_name, last_name, roles, index)
+  def create_user(first_name, last_name, index)
     user = User.create!(
       email: "#{first_name.downcase}.#{last_name.downcase}@flukebase.com",
       password: 'password123',
@@ -33,7 +33,6 @@ if Rails.env.development?
       first_name: first_name,
       last_name: last_name
     )
-    roles.each { |role| user.add_role(role) }
     user
   end
 
@@ -95,20 +94,20 @@ if Rails.env.development?
 
   # Primary test users with known scenarios
   test_users = [
-    { first: "Alice", last: "Entrepreneur", roles: [ Role::ENTREPRENEUR ], desc: "Project owner with multiple agreements" },
-    { first: "Bob", last: "Mentor", roles: [ Role::MENTOR ], desc: "Active mentor with many projects" },
-    { first: "Carol", last: "Cofounder", roles: [ Role::CO_FOUNDER ], desc: "Serial co-founder" },
-    { first: "Dave", last: "Hybrid", roles: [ Role::ENTREPRENEUR, Role::MENTOR ], desc: "Both entrepreneur and mentor" },
-    { first: "Emma", last: "Expert", roles: [ Role::MENTOR, Role::CO_FOUNDER ], desc: "Experienced mentor and co-founder" },
-    { first: "Frank", last: "Newbie", roles: [ Role::ENTREPRENEUR ], desc: "New entrepreneur, no agreements yet" },
-    { first: "Grace", last: "Superuser", roles: [ Role::ENTREPRENEUR, Role::MENTOR, Role::CO_FOUNDER ], desc: "All roles" },
-    { first: "Henry", last: "Overdue", roles: [ Role::MENTOR ], desc: "Has overdue agreements" },
-    { first: "Ivy", last: "Completed", roles: [ Role::MENTOR ], desc: "Only completed agreements" },
-    { first: "Jack", last: "Pending", roles: [ Role::MENTOR ], desc: "Only pending agreements" }
+    { first: "Alice", last: "Entrepreneur", desc: "Project owner with multiple agreements" },
+    { first: "Bob", last: "Mentor", desc: "Active mentor with many projects" },
+    { first: "Carol", last: "Cofounder", desc: "Serial co-founder" },
+    { first: "Dave", last: "Hybrid", desc: "Experienced user with projects and collaborations" },
+    { first: "Emma", last: "Expert", desc: "Experienced collaborator and project creator" },
+    { first: "Frank", last: "Newbie", desc: "New user, no agreements yet" },
+    { first: "Grace", last: "Superuser", desc: "Active community member" },
+    { first: "Henry", last: "Overdue", desc: "Has overdue agreements" },
+    { first: "Ivy", last: "Completed", desc: "Only completed agreements" },
+    { first: "Jack", last: "Pending", desc: "Only pending agreements" }
   ]
 
   test_users.each_with_index do |user_data, i|
-    user = create_user(user_data[:first], user_data[:last], user_data[:roles], i)
+    user = create_user(user_data[:first], user_data[:last], i)
     users << user
     puts "  Created #{user.full_name} (#{user_data[:desc]})"
   end
@@ -129,9 +128,7 @@ if Rails.env.development?
       last_name: last_name
     )
 
-    # Assign roles - most users have multiple roles
-    roles = [ Role::ENTREPRENEUR, Role::MENTOR, Role::CO_FOUNDER ].sample(rand(1..3))
-    roles.each { |role| user.add_role(role) }
+    # Note: Role system removed - all users are community members
 
     users << user
   end

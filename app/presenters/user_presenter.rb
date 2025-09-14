@@ -17,21 +17,8 @@ class UserPresenter < ApplicationPresenter
     end
   end
 
-  def role_badges
-    roles.map do |role|
-      role_class = case role.name
-      when Role::ENTREPRENEUR
-        "bg-blue-100 text-blue-800"
-      when Role::MENTOR
-        "bg-green-100 text-green-800"
-      when Role::CO_FOUNDER
-        "bg-purple-100 text-purple-800"
-      else
-        "bg-gray-100 text-gray-800"
-      end
-
-      "<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{role_class}\">#{role.name}</span>"
-    end.join(" ").html_safe
+  def badges
+    "<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800\">Community Person</span>".html_safe
   end
 
   def formatted_bio

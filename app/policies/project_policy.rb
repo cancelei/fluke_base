@@ -8,8 +8,8 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def create?
-    # Only entrepreneurs and co-founders can create projects
-    user.has_role?(Role::ENTREPRENEUR)
+    # All authenticated users can create projects
+    true
   end
 
   def update?

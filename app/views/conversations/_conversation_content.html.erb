@@ -15,21 +15,9 @@
       </div>
       <div class="ml-3">
         <h2 class="text-lg font-medium text-gray-900"><%= other_user.full_name %></h2>
-        <% if other_user.has_role?(Role::MENTOR) %>
-          <span class="inline-flex items-center rounded-md bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-700">
-            Mentor
-          </span>
-        <% end %>
-        <% if other_user.has_role?(Role::ENTREPRENEUR) %>
-          <span class="inline-flex items-center rounded-md bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700">
-            Entrepreneur
-          </span>
-        <% end %>
-        <% if other_user.has_role?(Role::CO_FOUNDER) %>
-          <span class="inline-flex items-center rounded-md bg-purple-50 px-1.5 py-0.5 text-xs font-medium text-purple-700">
-            Co-Founder
-          </span>
-        <% end %>
+        <span class="inline-flex items-center rounded-md bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700">
+          Community Person
+        </span>
       </div>
     </div>
   </div>

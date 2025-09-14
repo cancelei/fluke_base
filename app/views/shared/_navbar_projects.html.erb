@@ -14,11 +14,13 @@
           <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Projects</p>
         </div>
         <div class="py-1" role="menu" aria-orientation="vertical">
-          <% available_projects = (current_user.projects + current_user.initiated_agreements.active.includes(:project).map(&:project) + current_user.received_agreements.active.includes(:project).map(&:project)).uniq %>
+          <% available_projects = current_user.accessible_projects %>
           <% if selected_project.present? && !available_projects.include?(selected_project) %>
             <% available_projects.unshift(selected_project) %>
           <% end %>
-          <% available_projects.each do |project| %>
+
+          <% if available_projects.any? %>
+            <% available_projects.each do |project| %>
             <% if request.path.match?(/projects\/\d+/) %>
               <%= link_to project.name,
                 request.path.gsub(/projects\/\d+/, "projects/#{project.id}"),
@@ -36,23 +38,22 @@
                 </button>
               <% end %>
             <% end %>
+            <% end %>
+          <% else %>
+            <!-- No projects available -->
+            <div class="px-4 py-3 text-sm text-gray-500 text-center">
+              <p>No projects available</p>
+              <%= link_to "Create your first project", new_project_path,
+                  class: "mt-2 inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200" %>
+            </div>
           <% end %>
 
-          <% current_user.user_roles.each do |user_role| %>
-            <div class="border-t border-gray-100 my-1"></div>
-            <%= button_to "Change role to #{user_role.role.name}",
-              switch_current_role_users_path(role_id: user_role.role_id),
-              method: :post,
-              disabled: current_user.current_role_id == user_role.role_id,
-              class: "block w-full text-left px-4 py-2 text-sm text-indigo-700 hover:bg-gray-100 #{'bg-indigo-100 font-bold' if current_user.current_role_id == user_role.role_id}",
-              role: "menuitem" %>
-          <% end %>
         </div>
       </div>
     </div>
 
     <!-- Milestones Dropdown -->
-    <% if current_user.selected_project_id.present? && (current_user.received_agreements.any? || current_user.initiated_agreements.any?) %>
+    <% if current_user.selected_project_id.present? %>
       <div class="relative" data-controller="dropdown">
         <button type="button" class="group inline-flex items-center space-x-2 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50 hover:text-gray-900 transition-all duration-200" data-action="click->dropdown#toggle">
           <svg class="w-4 h-4 text-gray-400 group-hover:text-green-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

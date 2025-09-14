@@ -1,7 +1,6 @@
 class ProfileController < ApplicationController
   def show
     @user = current_user
-    @roles = @user.roles
   end
 
   def edit

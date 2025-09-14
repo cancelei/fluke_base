@@ -17,7 +17,7 @@ class PeopleSearchQuery
   private
 
   def base_scope
-    User.joins(:roles).where(roles: { name: [ Role::MENTOR, Role::ENTREPRENEUR ] })
+    User.all
   end
 
   def filter_by_search_term(scope)
@@ -27,9 +27,8 @@ class PeopleSearchQuery
   end
 
   def filter_by_role(scope)
-    return scope unless @params[:role].present?
-
-    scope.joins(:roles).where(roles: { name: @params[:role] })
+    # Role filtering removed with role system elimination
+    scope
   end
 
   def filter_by_project(scope)
@@ -43,6 +42,6 @@ class PeopleSearchQuery
   end
 
   def add_includes(scope)
-    scope.distinct.includes(:roles, :projects, :initiated_agreements, :received_agreements)
+    scope.distinct.includes(:projects, :initiated_agreements, :received_agreements)
   end
 end

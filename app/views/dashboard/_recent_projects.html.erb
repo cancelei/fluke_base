@@ -20,10 +20,10 @@
         <% end %>
       </ul>
 
-      <% if current_user.has_role?(:mentor) %>
+      <%# Show mentor opportunities to all users %>
         <div class="px-6 py-6 sm:px-8 bg-gradient-to-r from-blue-50/80 to-purple-50/80 border-t border-blue-100/50">
           <div class="flex flex-col items-center justify-center space-y-3">
-            <h4 class="text-sm font-semibold text-blue-700">Looking to mentor new projects?</h4>
+            <h4 class="text-sm font-semibold text-blue-700">Looking to mentor or collaborate on projects?</h4>
             <%= link_to explore_projects_path, class: "w-full inline-flex justify-center items-center rounded-xl border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105" do %>
               <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -32,7 +32,6 @@
             <% end %>
           </div>
         </div>
-      <% end %>
     </div>
   </div>
 <% end %>
