@@ -36,7 +36,7 @@ jobs:
 
       - name: Set up Node.js
         if: matrix.linter == 'eslint'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -91,7 +91,7 @@ jobs:
           bundler-cache: true
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
