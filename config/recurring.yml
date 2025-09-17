@@ -1,9 +1,9 @@
 production:
-  clear_solid_queue_finished_jobs:
-    class: SolidQueue::Jobs::ClearFinishedJobsJob
-    queue: default
-    priority: 10
-    schedule: every day at midnight
+  # clear_solid_queue_finished_jobs:
+  #   class: SolidQueue::Jobs::ClearFinishedJobsJob
+  #   queue: default
+  #   priority: 10
+  #   schedule: every day at midnight
   # Example tasks (commented out)
   # periodic_cleanup:
   #   class: CleanSoftDeletedRecordsJob
