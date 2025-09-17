@@ -1,4 +1,4 @@
-# Configure database connection
+# Configure database connection - use primary database for single database setup
 Rails.application.config.solid_queue.connects_to = { database: { writing: :primary } }
 
 # Configure mailers queue

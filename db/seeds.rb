@@ -3,9 +3,7 @@
 
 require 'faker'
 
-# Ensure roles exist
-puts "Creating roles..."
-Role.ensure_default_roles_exist
+# Note: Role system has been removed - all users are community members
 
 # Only create demo data in development
 if Rails.env.development?
@@ -21,7 +19,6 @@ if Rails.env.development?
   Agreement.destroy_all
   Milestone.destroy_all
   Project.destroy_all
-  UserRole.destroy_all
   User.destroy_all
 
   # Helper method to create users with predictable data

@@ -2,6 +2,7 @@ class Milestone < ApplicationRecord
   # Relationships
   belongs_to :project
   has_many :time_logs, dependent: :destroy
+  has_many :milestone_enhancements, dependent: :destroy
 
   # Validations
   validates :title, :due_date, :status, presence: true
@@ -72,5 +73,22 @@ class Milestone < ApplicationRecord
   # Check if milestone is pending
   def pending?
     actual_status == PENDING
+  end
+
+  # Enhancement methods
+  def latest_enhancement
+    milestone_enhancements.recent.first
+  end
+
+  def enhancement_history
+    milestone_enhancements.recent.limit(10)
+  end
+
+  def has_successful_enhancement?
+    milestone_enhancements.successful.exists?
+  end
+
+  def can_be_enhanced?
+    description.present?
   end
 end

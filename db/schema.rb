@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_13_192237) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -173,6 +173,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_192237) do
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
+  create_table "milestone_enhancements", force: :cascade do |t|
+    t.bigint "milestone_id", null: false
+    t.bigint "user_id", null: false
+    t.text "original_description"
+    t.text "enhanced_description"
+    t.json "context_data"
+    t.integer "processing_time_ms"
+    t.string "enhancement_style"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["milestone_id"], name: "index_milestone_enhancements_on_milestone_id"
+    t.index ["user_id"], name: "index_milestone_enhancements_on_user_id"
+  end
+
   create_table "milestones", force: :cascade do |t|
     t.string "title", null: false
     t.text "description"
@@ -201,6 +216,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_192237) do
     t.index ["read_at"], name: "index_notifications_on_read_at", comment: "Improves unread notifications queries"
     t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at", comment: "Composite index for user's unread notifications"
     t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
+  create_table "project_agents", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "provider"
+    t.string "model"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_project_agents_on_project_id"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -445,8 +469,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_13_192237) do
   add_foreign_key "meetings", "agreements"
   add_foreign_key "messages", "conversations"
   add_foreign_key "messages", "users"
+  add_foreign_key "milestone_enhancements", "milestones"
+  add_foreign_key "milestone_enhancements", "users"
   add_foreign_key "milestones", "projects"
   add_foreign_key "notifications", "users"
+  add_foreign_key "project_agents", "projects"
   add_foreign_key "projects", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

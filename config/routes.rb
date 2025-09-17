@@ -40,6 +40,12 @@ Rails.application.routes.draw do
   resources :projects do
     resources :milestones do
       post :confirm, on: :member
+      post :ai_enhance, on: :collection
+      post :apply_ai_enhancement, on: :collection
+      post :revert_ai_enhancement, on: :collection
+      post :discard_ai_enhancement, on: :collection
+      get :enhancement_status, on: :member
+      get :enhancement_display, on: :member
     end
 
     resources :github_logs, only: [ :index ] do

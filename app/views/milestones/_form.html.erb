@@ -1,4 +1,10 @@
-<%= form_with(model: [ @project, milestone ], class: "mx-auto mt-4") do |form| %>
+<% if milestone.persisted? %>
+  <%= turbo_stream_from "milestone_#{milestone.id}_enhancements" %>
+<% else %>
+  <%= turbo_stream_from "project_#{@project.id}_milestone_enhancement" %>
+<% end %>
+
+<%= form_with(model: [ @project, milestone ], class: "mx-auto mt-4", data: { controller: "milestone-ai", "milestone-ai-project-id-value": @project.id, "milestone-ai-milestone-id-value": milestone.persisted? ? milestone.id : nil }) do |form| %>
   <% if milestone.errors.any? %>
     <div class="bg-red-50 p-4 rounded-md mb-6">
       <div class="flex">
@@ -25,14 +31,35 @@
     <div>
       <%= form.label :title, class: "block text-sm font-medium leading-6 text-gray-900" %>
       <div class="mt-2">
-        <%= form.text_field :title, class: "block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
+        <%= form.text_field :title, class: "block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", data: { "milestone-ai-target": "title" } %>
       </div>
     </div>
 
     <div>
       <%= form.label :description, class: "block text-sm font-medium leading-6 text-gray-900" %>
       <div class="mt-2">
-        <%= form.text_area :description, rows: 3, class: "block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
+        <%= form.text_area :description, rows: 3, class: "block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6", data: { "milestone-ai-target": "description" } %>
+        <div class="mt-2 flex flex-wrap items-center gap-3">
+          <select data-milestone-ai-target="styleSelect" class="rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
+            <option value="professional">Professional</option>
+            <option value="technical">Technical</option>
+            <option value="creative">Creative</option>
+            <option value="detailed">Detailed</option>
+            <option value="concise">Concise</option>
+          </select>
+          <button type="button" data-action="click->milestone-ai#enhance" data-milestone-ai-target="enhanceButton" class="inline-flex items-center px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            Enhance with AI
+          </button>
+        </div>
+        <!-- AI Suggestion Container -->
+        <div id="ai-suggestion-container">
+          <% if defined?(@enhancement) && @enhancement %>
+            <%= render "ai_suggestion", enhancement: @enhancement, milestone: milestone %>
+          <% end %>
+        </div>
       </div>
     </div>
 
