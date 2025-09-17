@@ -163,10 +163,7 @@ class AgreementsController < ApplicationController
       milestone_ids: params[:agreement][:milestone_ids]
     )
 
-    Rails.logger.debug "Form params: #{form_params.inspect}"
     @agreement_form = AgreementForm.new(form_params)
-    Rails.logger.debug "Form valid? #{@agreement_form.valid?}"
-    Rails.logger.debug "Form errors: #{@agreement_form.errors.full_messages.inspect}" unless @agreement_form.valid?
 
     if @agreement_form.save
       @agreement = @agreement_form.agreement
@@ -180,15 +177,8 @@ class AgreementsController < ApplicationController
         notify_and_message_other_party(:create)
       end
 
-      respond_to do |format|
-        format.turbo_stream do
-          flash[:notice] = notice_message
-          redirect_to @agreement, status: :see_other
-        end
-        format.html { redirect_to @agreement, notice: notice_message }
-      end
+      redirect_to agreements_path, notice: notice_message
     else
-      Rails.logger.debug @agreement_form.errors.full_messages.inspect
       @agreement_form.errors.full_messages.each { |error| flash[:alert] = error }
       @project = @agreement_form.project
       @agreement = Agreement.new  # For authorization checks in the form

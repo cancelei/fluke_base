@@ -1,11 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-  static targets = ['paymentType', 'hourlyField', 'equityField', 'milestoneField', 'milestoneIds'];
+  static targets = ['paymentType', 'hourlyField', 'equityField'];
 
   connect() {
     this.togglePaymentFields();
-    // this.updateMilestoneField();
   }
 
   togglePaymentFields() {
@@ -26,28 +25,6 @@ export default class extends Controller {
       hourlyFields.forEach(field => { field.style.display = 'none'; });
       equityFields.forEach(field => { field.style.display = 'none'; });
     }
-  }
-
-  updateMilestoneField() {
-    // Convert NodeList of inputs to array of their values
-    const selectedMilestoneIds = this.milestoneFieldTargets.map(el => el.value);
-
-    // Get the checked value (assuming a single checkbox/input)
-    const checkedValue = this.milestoneIdsTargets[0].value;
-
-    // Toggle logic
-    const index = selectedMilestoneIds.indexOf(checkedValue);
-    if (index > -1) {
-      selectedMilestoneIds.splice(index, 1); // Remove if exists
-    } else {
-      selectedMilestoneIds.push(checkedValue); // Add if not present
-    }
-
-    // Assuming you're updating a hidden field that stores this array
-    // Example: <input type="hidden" data-something-target="milestoneField" />
-    this.milestoneFieldTarget.value = selectedMilestoneIds.join(',');
-
-    console.log('Updated Milestone IDs:', this.milestoneFieldTarget.value);
   }
 
 }

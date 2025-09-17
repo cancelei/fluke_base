@@ -41,7 +41,7 @@ class Agreement < ApplicationRecord
   validates :start_date, presence: true
   validates :end_date, presence: true
   validates :tasks, presence: true
-  validates :weekly_hours, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 40 }
+  validates :weekly_hours, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 40 }, if: -> { agreement_type == MENTORSHIP }
   validates :hourly_rate, presence: true, numericality: { greater_than_or_equal_to: 0 }, if: -> { payment_type == HOURLY || payment_type == HYBRID }
   validates :equity_percentage, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }, if: -> { payment_type == EQUITY || payment_type == HYBRID }
   validate :end_date_after_start_date
@@ -70,6 +70,7 @@ class Agreement < ApplicationRecord
   end
 
   def init_agreement_type
+    return if self.agreement_type.present?
     self.agreement_type = self.weekly_hours.present? ? MENTORSHIP : CO_FOUNDER
   end
 

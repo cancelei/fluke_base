@@ -3,10 +3,10 @@
 require 'rails_helper'
 
 describe AgreementsController, type: :controller do
-  let(:user) { create(:user) }
+  let(:user) { create(:user, :alice) }
   let(:project) { create(:project, user: user) }
-  let(:mentor) { create(:user, :mentor) }
-  let(:agreement) { create(:agreement, entrepreneur: user, mentor: mentor, project: project) }
+  let(:other_user) { create(:user, :bob) }
+  let(:agreement) { create(:agreement, :with_participants, project: project, initiator: user, other_party: other_user) }
 
   before { sign_in user }
 
@@ -25,7 +25,7 @@ describe AgreementsController, type: :controller do
   end
 
   describe 'POST #create' do
-    let(:agreement_params) { attributes_for(:agreement, project_id: project.id, other_party_user_id: mentor.id, initiator_user_id: user.id) }
+    let(:agreement_params) { attributes_for(:agreement, project_id: project.id, other_party_user_id: other_user.id, initiator_user_id: user.id) }
 
     it 'creates a new agreement' do
       expect {

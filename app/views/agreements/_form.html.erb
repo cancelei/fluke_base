@@ -4,11 +4,10 @@
 %>
 
 <div data-controller="agreement-form">
-  <turbo-frame id="agreement_form">
   <% form_options = if agreement.persisted?
        { model: agreement, url: agreement_path(agreement), method: :patch, class: "space-y-6" }
      else
-       { model: agreement, class: "space-y-6" }
+       { model: agreement, class: "space-y-6", data: { turbo: false } }
      end %>
   <%= form_with(**form_options) do |form| %>
       <%= form.hidden_field :project_id, value: @project.id if @project %>
@@ -126,15 +125,10 @@
 
         <%= form.label :milestones, "Milestones", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-1">
-          <input type="hidden" data-agreement-form-target="milestoneField">
           <% @milestones.each_with_index do |milestone, index| %>
             <%= check_box_tag "agreement[milestone_ids][]", milestone.id, @milestone_ids.include?(milestone.id),
                 id: "milestone_#{index}",
-                class: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500",
-                data: {
-                  action: "change->agreement-form#updateMilestoneField",
-                  agreement_form_target: "milestoneIds"
-                } %>
+                class: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" %>
             <%= label_tag "milestone_#{index}", milestone.title, class: "inline-block text-sm font-medium text-gray-700 ml-2 mr-4" %>
           <% end %>
           <% if agreement.errors[:milestone_ids] %>
@@ -197,5 +191,4 @@
       <% end %>
     </div>
   <% end %>
-  </turbo-frame>
 </div>

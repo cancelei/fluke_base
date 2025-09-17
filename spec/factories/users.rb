@@ -7,16 +7,16 @@ FactoryBot.define do
     last_name { "Doe" }
     onboarded { true }
 
-    trait :entrepreneur do
+    trait :alice do
       first_name { "Alice" }
-      last_name { "Entrepreneur" }
-      email { "alice.entrepreneur@example.com" }
+      last_name { "Smith" }
+      email { "alice.smith@example.com" }
     end
 
-    trait :mentor do
+    trait :bob do
       first_name { "Bob" }
-      last_name { "Mentor" }
-      email { "bob.mentor@example.com" }
+      last_name { "Johnson" }
+      email { "bob.johnson@example.com" }
       years_of_experience { 10.0 }
     end
   end
