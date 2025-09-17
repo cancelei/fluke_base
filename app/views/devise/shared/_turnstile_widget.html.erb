@@ -1,34 +1,21 @@
-<% if Rails.env.development? %>
-  <div class="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
-    🔧 Development Mode: Turnstile verification is disabled for easier testing.
-  </div>
-  <!-- Add hidden field for development mode -->
-  <input type="hidden" name="turnstile_token" value="development_mode_token">
-<% elsif Rails.application.config.turnstile[:site_key].present? %>
-  <!-- Invisible Turnstile widget - automatically adds token to form -->
-  <div class="cf-turnstile" data-sitekey="<%= Rails.application.config.turnstile[:site_key] %>" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" data-error-callback="onTurnstileError"></div>
+<div data-controller="turnstile"
+     data-turnstile-site-key-value="<%= Rails.application.config.turnstile[:site_key] %>"
+     data-turnstile-mode-value="<%= Rails.env.development? ? "development" : "production" %>">
 
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <% if Rails.env.development? %>
+    <div class="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+      🔧 Development Mode: Turnstile verification is disabled for easier testing.
+    </div>
+  <% elsif Rails.application.config.turnstile[:site_key].present? %>
+    <div class="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+      🛡️ Security verification enabled
+    </div>
+  <% else %>
+    <div class="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md">
+      ⚠️ Turnstile is not configured. Please set TURNSTILE_SITE_KEY environment variable.
+    </div>
+  <% end %>
 
-  <script>
-    function onTurnstileSuccess(token) {
-      // For invisible mode, Turnstile automatically adds the token to the form
-      // But we can add additional handling if needed
-      console.log('Turnstile token received:', token ? 'Yes' : 'No');
-    }
-
-    function onTurnstileExpired() {
-      // Handle expired token
-      console.log('Turnstile token expired');
-    }
-
-    function onTurnstileError(error) {
-      // Handle error
-      console.error('Turnstile error:', error);
-    }
-  </script>
-<% else %>
-  <div class="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md">
-    ⚠️ Turnstile is not configured. Please set TURNSTILE_SITE_KEY environment variable.
-  </div>
-<% end %>
+  <!-- Turnstile widget container -->
+  <div data-turnstile-target="widget" class="turnstile-widget"></div>
+</div>
