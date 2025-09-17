@@ -1,26 +1,20 @@
-<% if Rails.application.config.turnstile[:site_key].present? %>
-  <div class="turnstile-widget" data-sitekey="<%= Rails.application.config.turnstile[:site_key] %>" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" data-error-callback="onTurnstileError" data-size="invisible"></div>
+<% if Rails.env.development? %>
+  <div class="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+    🔧 Development Mode: Turnstile verification is disabled for easier testing.
+  </div>
+  <!-- Add hidden field for development mode -->
+  <input type="hidden" name="turnstile_token" value="development_mode_token">
+<% elsif Rails.application.config.turnstile[:site_key].present? %>
+  <!-- Invisible Turnstile widget - automatically adds token to form -->
+  <div class="cf-turnstile" data-sitekey="<%= Rails.application.config.turnstile[:site_key] %>" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" data-error-callback="onTurnstileError"></div>
 
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <script>
     function onTurnstileSuccess(token) {
-      // Add the token to the form as a hidden field
-      const form = document.querySelector('form');
-      if (form) {
-        // Remove any existing turnstile token field
-        const existingTokenField = form.querySelector('input[name="turnstile_token"]');
-        if (existingTokenField) {
-          existingTokenField.remove();
-        }
-
-        // Add the new token field
-        const tokenField = document.createElement('input');
-        tokenField.type = 'hidden';
-        tokenField.name = 'turnstile_token';
-        tokenField.value = token;
-        form.appendChild(tokenField);
-      }
+      // For invisible mode, Turnstile automatically adds the token to the form
+      // But we can add additional handling if needed
+      console.log('Turnstile token received:', token ? 'Yes' : 'No');
     }
 
     function onTurnstileExpired() {

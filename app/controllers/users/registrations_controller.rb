@@ -11,9 +11,12 @@ class Users::RegistrationsController < Devise::RegistrationsController
   private
 
   def verify_turnstile_token
+    return if Rails.env.development?
     return if Rails.application.config.turnstile[:secret_key].blank?
 
-    token = params[:turnstile_token]
+    # In production, Turnstile sends the token as 'cf-turnstile-response'
+    # In development, we send it as 'turnstile_token'
+    token = params["cf-turnstile-response"] || params[:turnstile_token]
     unless TurnstileVerificationService.verify(token, request.remote_ip)
       self.resource = build_resource(sign_up_params)
       resource.errors.add(:base, "Please complete the security verification.")

@@ -12,6 +12,9 @@ class TurnstileVerificationService
   def verify
     return false if @token.blank?
 
+    # Allow development mode token to pass
+    return true if Rails.env.development? && @token == "development_mode_token"
+
     response = self.class.post("/turnstile/v0/siteverify", {
       body: {
         secret: Rails.application.config.turnstile[:secret_key],

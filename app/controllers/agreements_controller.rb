@@ -3,7 +3,7 @@ class AgreementsController < ApplicationController
 
   before_action :authenticate_user!
   before_action :set_agreement, only: %i[show edit update destroy accept reject complete cancel counter_offer meetings_section github_section time_logs_section counter_offers_section]
-  before_action :authorize_agreement, only: %i[show edit update destroy meetings_section github_section time_logs_section counter_offers_section]
+  before_action :authorize_agreement, only: %i[show edit update destroy accept reject complete cancel meetings_section github_section time_logs_section counter_offers_section]
   before_action :check_project_ownership, only: %i[new create]
   before_action :ensure_can_modify, only: %i[edit update destroy]
   before_action :authorize_agreement_action, only: %i[accept reject counter_offer cancel]
