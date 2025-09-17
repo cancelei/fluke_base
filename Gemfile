@@ -31,7 +31,7 @@ gem "stripe", "~> 9.0"
 gem "google-api-client", require: "google/apis/calendar_v3"
 
 # GitHub API integration
-gem "octokit", "~> 6.1"
+gem "octokit", "~> 10.0"
 
 # AI Agent integration for milestone AI augmentation
 gem "ruby_llm"
