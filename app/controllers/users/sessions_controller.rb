@@ -10,7 +10,7 @@ class Users::SessionsController < Devise::SessionsController
 
     token = params[:turnstile_token]
     unless TurnstileVerificationService.verify(token, request.remote_ip)
-      resource = resource_class.new(sign_in_params)
+      self.resource = resource_class.new(sign_in_params)
       resource.errors.add(:base, "Please complete the security verification.")
       render :new, status: :unprocessable_entity
     end

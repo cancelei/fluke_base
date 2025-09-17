@@ -15,7 +15,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
     token = params[:turnstile_token]
     unless TurnstileVerificationService.verify(token, request.remote_ip)
-      resource = build_resource(sign_up_params)
+      self.resource = build_resource(sign_up_params)
       resource.errors.add(:base, "Please complete the security verification.")
       render :new, status: :unprocessable_entity
     end
