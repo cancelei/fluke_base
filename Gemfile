@@ -21,7 +21,6 @@ gem "tailwindcss-rails"
 
 # Authentication
 gem "devise"
-gem "cloudflare-turnstile-rails"
 gem "httparty"
 
 # Payments

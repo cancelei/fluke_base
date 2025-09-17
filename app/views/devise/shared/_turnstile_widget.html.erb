@@ -1,21 +1,59 @@
-<div data-controller="turnstile"
-     data-turnstile-site-key-value="<%= Rails.application.config.turnstile[:site_key] %>"
-     data-turnstile-mode-value="<%= Rails.env.development? ? "development" : "production" %>">
+<% if Rails.env.development? %>
+  <div class="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+    🔧 Development Mode: Turnstile verification is disabled for easier testing.
+  </div>
+  <!-- Add hidden field for development mode -->
+  <input type="hidden" name="turnstile_token" value="development_mode_token">
+<% elsif Rails.application.config.turnstile[:site_key].present? %>
+  <div class="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+    🛡️ Security verification enabled
+  </div>
 
-  <% if Rails.env.development? %>
-    <div class="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
-      🔧 Development Mode: Turnstile verification is disabled for easier testing.
-    </div>
-  <% elsif Rails.application.config.turnstile[:site_key].present? %>
-    <div class="text-sm text-green-600 bg-green-50 p-3 rounded-md">
-      🛡️ Security verification enabled
-    </div>
-  <% else %>
-    <div class="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md">
-      ⚠️ Turnstile is not configured. Please set TURNSTILE_SITE_KEY environment variable.
-    </div>
-  <% end %>
+  <!-- Load Turnstile script with CSP compatibility -->
+  <%= javascript_include_tag "https://challenges.cloudflare.com/turnstile/v0/api.js",
+      async: true,
+      defer: true,
+      nonce: content_security_policy_nonce %>
 
-  <!-- Turnstile widget container -->
-  <div data-turnstile-target="widget" class="turnstile-widget"></div>
-</div>
+  <!-- Turnstile widget with proper CSP attributes -->
+  <div class="cf-turnstile"
+       data-sitekey="<%= Rails.application.config.turnstile[:site_key] %>"
+       data-callback="onTurnstileSuccess"
+       data-expired-callback="onTurnstileExpired"
+       data-error-callback="onTurnstileError"
+       data-size="invisible">
+  </div>
+
+  <!-- CSP-compatible inline script -->
+  <script nonce="<%= content_security_policy_nonce %>">
+    window.onTurnstileSuccess = function(token) {
+      const form = document.querySelector('form');
+      if (form) {
+        // Remove existing token field
+        const existingField = form.querySelector('input[name="cf-turnstile-response"]');
+        if (existingField) {
+          existingField.remove();
+        }
+
+        // Add new token field
+        const tokenField = document.createElement('input');
+        tokenField.type = 'hidden';
+        tokenField.name = 'cf-turnstile-response';
+        tokenField.value = token;
+        form.appendChild(tokenField);
+      }
+    };
+
+    window.onTurnstileExpired = function() {
+      console.log('Turnstile token expired');
+    };
+
+    window.onTurnstileError = function(error) {
+      console.error('Turnstile error:', error);
+    };
+  </script>
+<% else %>
+  <div class="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md">
+    ⚠️ Turnstile is not configured. Please set TURNSTILE_SITE_KEY environment variable.
+  </div>
+<% end %>
