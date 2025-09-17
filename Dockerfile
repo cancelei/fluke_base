@@ -60,11 +60,7 @@ RUN SECRET_KEY_BASE_DUMMY=1 \
     SKIP_DB_INITIALIZER=true \
     ./bin/rails assets:precompile
 
-# Install SolidQueue (generates migration files)
-RUN SECRET_KEY_BASE_DUMMY=1 \
-    DATABASE_URL="postgresql://postgres:postgres@localhost/fluke_base_production" \
-    SKIP_DB_INITIALIZER=true \
-    bundle exec rails solid_queue:install
+# SolidQueue is already configured and tables are in schema - no need to install
 
 # Final stage for app image
 FROM base

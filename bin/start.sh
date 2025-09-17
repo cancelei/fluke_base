@@ -16,8 +16,7 @@ done
 # Run database migrations
 ./bin/rails db:prepare
 
-# Create solid_cache_entries table if it doesn't exist
-./bin/rails runner "begin; ActiveRecord::Base.connection.execute('CREATE TABLE IF NOT EXISTS solid_cache_entries (key bytea NOT NULL, value bytea NOT NULL, created_at timestamp NOT NULL, key_hash bigint NOT NULL, byte_size integer NOT NULL); CREATE UNIQUE INDEX IF NOT EXISTS index_solid_cache_entries_on_key_hash ON solid_cache_entries (key_hash); CREATE INDEX IF NOT EXISTS index_solid_cache_entries_on_byte_size ON solid_cache_entries (byte_size); CREATE INDEX IF NOT EXISTS index_solid_cache_entries_on_key_hash_and_byte_size ON solid_cache_entries (key_hash, byte_size);'); puts 'Solid cache table created successfully'; rescue => e; puts 'Solid cache table already exists or error: ' + e.message; end" || true
+# SolidCache, SolidQueue, and SolidCable tables are in schema - no manual creation needed
 
 # Start the application
 exec "$@"
