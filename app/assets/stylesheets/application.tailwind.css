@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* Fix -webkit-text-size-adjust parsing error */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
 @layer components {
   /* Button Base Styles */
   .btn {
@@ -272,10 +279,42 @@ html {
   display: block;
 }
 
-/* Toastr Notification Styles */
+/* Toastr Notification Styles - Override old IE filter syntax */
 #toast-container {
   position: fixed;
   z-index: 999999;
+}
+
+/* Override toastr's old IE filter syntax with modern opacity */
+#toast-container > div {
+  opacity: 0.8 !important;
+  filter: none !important;
+  -ms-filter: none !important;
+}
+
+#toast-container > div:hover {
+  opacity: 1 !important;
+  filter: none !important;
+  -ms-filter: none !important;
+}
+
+.toast-progress {
+  opacity: 0.4 !important;
+  filter: none !important;
+  -ms-filter: none !important;
+}
+
+.toast-close-button {
+  opacity: 0.8 !important;
+  filter: none !important;
+  -ms-filter: none !important;
+}
+
+.toast-close-button:hover,
+.toast-close-button:focus {
+  opacity: 0.4 !important;
+  filter: none !important;
+  -ms-filter: none !important;
 }
 
 #toast-container * {
