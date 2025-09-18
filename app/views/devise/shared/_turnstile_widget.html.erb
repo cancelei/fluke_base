@@ -10,10 +10,7 @@
   </div>
 
   <!-- Load Turnstile script with CSP compatibility -->
-  <%= javascript_include_tag "https://challenges.cloudflare.com/turnstile/v0/api.js",
-      async: true,
-      defer: true,
-      nonce: content_security_policy_nonce %>
+  <script nonce="<%= content_security_policy_nonce %>" src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <!-- Turnstile widget with Stimulus controller (CSP-compliant) -->
   <div data-controller="turnstile"
