@@ -156,12 +156,22 @@ class ApplicationController < ActionController::Base
 
   # CSP violation report endpoint
   def csp_violation_report
-    return head :ok if Rails.env.development?
+    begin
+      report_data = JSON.parse(request.raw_post)
 
-    report_data = JSON.parse(request.raw_post) rescue nil
-
-    if report_data
-      Rails.logger.warn "CSP Violation: #{report_data.inspect}"
+      if report_data && report_data["csp-report"]
+        violation = report_data["csp-report"]
+        Rails.logger.warn "CSP Violation Report:"
+        Rails.logger.warn "  Blocked URI: #{violation['blocked-uri']}"
+        Rails.logger.warn "  Violated Directive: #{violation['violated-directive']}"
+        Rails.logger.warn "  Document URI: #{violation['document-uri']}"
+        Rails.logger.warn "  Source File: #{violation['source-file']}"
+        Rails.logger.warn "  Line Number: #{violation['line-number']}"
+      end
+    rescue JSON::ParserError => e
+      Rails.logger.error "Failed to parse CSP violation report: #{e.message}"
+    rescue => e
+      Rails.logger.error "CSP violation report error: #{e.message}"
     end
 
     head :ok
