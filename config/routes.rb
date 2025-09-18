@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   # System and health check routes
   get "up" => "rails/health#show", as: :rails_health_check
+  post "csp-violation-report-endpoint" => "application#csp_violation_report"
 
 
   # Test routes for Claude Code (development only)

@@ -2,8 +2,8 @@ class ApplicationController < ActionController::Base
   include CanCan::ControllerAdditions
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
-  protect_from_forgery with: :exception
-  before_action :authenticate_user!
+  protect_from_forgery with: :exception, except: :csp_violation_report
+  before_action :authenticate_user!, except: :csp_violation_report
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :set_selected_project
 
@@ -152,5 +152,18 @@ class ApplicationController < ActionController::Base
 
   def stream_toast_warning(message, **options)
     render_toast_stream(:warning, message, **options)
+  end
+
+  # CSP violation report endpoint
+  def csp_violation_report
+    return head :ok if Rails.env.development?
+
+    report_data = JSON.parse(request.raw_post) rescue nil
+
+    if report_data
+      Rails.logger.warn "CSP Violation: #{report_data.inspect}"
+    end
+
+    head :ok
   end
 end
