@@ -23,6 +23,9 @@ gem "tailwindcss-rails"
 gem "devise"
 gem "httparty"
 
+# Cloudflare Turnstile integration
+gem "rails_cloudflare_turnstile"
+
 # Payments
 gem "pay", "~> 6.8"
 gem "stripe", "~> 9.0"

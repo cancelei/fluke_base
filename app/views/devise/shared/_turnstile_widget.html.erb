@@ -2,22 +2,37 @@
   <div class="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
     🔧 Development Mode: Turnstile verification is disabled for easier testing.
   </div>
-  <!-- Add hidden field for development mode -->
-  <input type="hidden" name="turnstile_token" value="development_mode_token">
 <% elsif Rails.application.config.turnstile[:site_key].present? %>
   <div class="text-sm text-green-600 bg-green-50 p-3 rounded-md">
-    🛡️ Security verification enabled
+    🛡️ Security verification enabled (invisible)
   </div>
 
-  <!-- Load Turnstile script with CSP compatibility -->
-  <script nonce="<%= content_security_policy_nonce %>" src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <!-- Cloudflare Turnstile widget in invisible mode -->
+  <%= cloudflare_turnstile(
+    size: "invisible",
+    theme: "auto",
+    tabindex: 0,
+    response_field_name: "cf-turnstile-response",
+    data: {
+      callback: "onTurnstileSuccess",
+      "error-callback": "onTurnstileError",
+      "expired-callback": "onTurnstileExpired"
+    }
+  ) %>
 
-  <!-- Turnstile widget with Stimulus controller (CSP-compliant) -->
-  <div data-controller="turnstile"
-       data-turnstile-sitekey-value="<%= Rails.application.config.turnstile[:site_key] %>"
-       data-turnstile-size-value="invisible">
-    <div data-turnstile-target="widget"></div>
-  </div>
+  <script nonce="<%= content_security_policy_nonce %>">
+    window.onTurnstileSuccess = function(token) {
+      console.log('Turnstile challenge passed:', token);
+    };
+
+    window.onTurnstileError = function(error) {
+      console.error('Turnstile error:', error);
+    };
+
+    window.onTurnstileExpired = function() {
+      console.warn('Turnstile token expired');
+    };
+  </script>
 <% else %>
   <div class="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md">
     ⚠️ Turnstile is not configured. Please set TURNSTILE_SITE_KEY environment variable.
