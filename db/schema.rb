@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_18_234000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -224,6 +224,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
     t.string "model"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "openai_assistant_id"
+    t.index ["openai_assistant_id"], name: "index_project_agents_on_openai_assistant_id", unique: true, where: "(openai_assistant_id IS NOT NULL)"
     t.index ["project_id"], name: "index_project_agents_on_project_id"
   end
 
