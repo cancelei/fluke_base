@@ -11,13 +11,26 @@ Rails.application.configure do
     policy.img_src     :self, :https, :data  # Allow data: URIs for SVG images
     policy.object_src  :none
 
-    # Allow inline scripts and styles with nonces, plus unsafe-hashes for Turbo compatibility
-    policy.script_src  :self, :https, "https://challenges.cloudflare.com", "'unsafe-hashes'",
-                      "'sha256-rC8O/z7r/5hFyyAKirUgp0VYdiNfFcPXbRRyUMwtXbE='",
-                      "'sha256-ALaDkBo93Qax4JosMrWAFtKE7+rUENfP37WzspJnRXU='"
+    # Script policy with comprehensive inline support
+    if Rails.env.development?
+      # More permissive for development
+      policy.script_src :self, :https, "https://challenges.cloudflare.com", "'unsafe-inline'", "'unsafe-eval'"
+    else
+      # Production policy with specific hashes and unsafe-hashes for Turbo
+      policy.script_src :self, :https, "https://challenges.cloudflare.com",
+                        "'unsafe-hashes'", "'unsafe-inline'",
+                        "'sha256-rC8O/z7r/5hFyyAKirUgp0VYdiNfFcPXbRRyUMwtXbE='",
+                        "'sha256-ALaDkBo93Qax4JosMrWAFtKE7+rUENfP37WzspJnRXU='"
+    end
 
-    policy.style_src   :self, :https, "https://challenges.cloudflare.com", "'unsafe-hashes'",
-                      "'sha256-IuYlf9OtyuVBrT3e+V0GJ9PQfQF97T7UBUwlHE5brNQ='"
+    # Style policy with unsafe-hashes for Turbo compatibility
+    if Rails.env.development?
+      policy.style_src :self, :https, "https://challenges.cloudflare.com", "'unsafe-inline'"
+    else
+      policy.style_src :self, :https, "https://challenges.cloudflare.com",
+                       "'unsafe-hashes'", "'unsafe-inline'",
+                       "'sha256-IuYlf9OtyuVBrT3e+V0GJ9PQfQF97T7UBUwlHE5brNQ='"
+    end
 
     policy.frame_src   :self, "https://challenges.cloudflare.com"
     policy.connect_src :self, :https, "https://challenges.cloudflare.com"
