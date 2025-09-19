@@ -3,10 +3,6 @@
     🔧 Development Mode: Turnstile verification is disabled for easier testing.
   </div>
 <% elsif Rails.application.config.turnstile[:site_key].present? %>
-  <div class="text-sm text-green-600 bg-green-50 p-3 rounded-md">
-    🛡️ Security verification enabled (invisible)
-  </div>
-
   <!-- Cloudflare Turnstile widget in invisible mode -->
   <%= cloudflare_turnstile(
     size: "invisible",
