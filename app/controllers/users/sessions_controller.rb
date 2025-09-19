@@ -1,14 +1,7 @@
 # frozen_string_literal: true
 
 class Users::SessionsController < Devise::SessionsController
-  skip_before_action :verify_authenticity_token, only: [ :csp_violation_report ]
-  before_action :validate_cloudflare_turnstile, only: [ :create ]
-
-  def csp_violation_report
-    # Handle CSP violation reports
-    Rails.logger.warn "CSP Violation: #{request.body.read}" if Rails.env.development?
-    head :ok
-  end
+  before_action :validate_cloudflare_turnstile, only: [ :create ], if: -> { RailsCloudflareTurnstile.configuration.enabled }
 
   private
 

@@ -2,10 +2,14 @@ class ApplicationController < ActionController::Base
   include CanCan::ControllerAdditions
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
-  protect_from_forgery with: :exception, except: :csp_violation_report
-  before_action :authenticate_user!, except: :csp_violation_report
+  protect_from_forgery with: :exception
+  before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :set_selected_project
+
+  # CSP violation report exceptions
+  skip_before_action :authenticate_user!, only: [ :csp_violation_report ]
+  skip_before_action :verify_authenticity_token, only: [ :csp_violation_report ]
 
   # DRY helper: Find resource by klass and param, or redirect with alert
   def find_resource_or_redirect(klass, param_key, redirect_path, alert_message)
