@@ -23,15 +23,55 @@
   <script nonce="<%= content_security_policy_nonce %>">
     window.onTurnstileSuccess = function(token) {
       console.log('Turnstile challenge passed:', token);
+      // Find the form containing the turnstile widget and enable submission
+      const form = document.querySelector('form[action*="sign_in"]');
+      if (form) {
+        const submitButton = form.querySelector('input[type="submit"]');
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      }
     };
 
     window.onTurnstileError = function(error) {
       console.error('Turnstile error:', error);
+      // Show user-friendly error message
+      const form = document.querySelector('form[action*="sign_in"]');
+      if (form) {
+        const submitButton = form.querySelector('input[type="submit"]');
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+      }
     };
 
     window.onTurnstileExpired = function() {
       console.warn('Turnstile token expired');
+      // Reset form state when token expires
+      const form = document.querySelector('form[action*="sign_in"]');
+      if (form) {
+        const submitButton = form.querySelector('input[type="submit"]');
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+      }
     };
+
+    // Initialize form state on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form[action*="sign_in"]');
+      if (form) {
+        const submitButton = form.querySelector('input[type="submit"]');
+        if (submitButton) {
+          // Disable submit button until Turnstile verification completes
+          submitButton.disabled = true;
+          submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+      }
+    });
   </script>
 <% else %>
   <div class="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md">

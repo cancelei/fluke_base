@@ -1,7 +1,14 @@
 # frozen_string_literal: true
 
 class Users::SessionsController < Devise::SessionsController
+  skip_before_action :verify_authenticity_token, only: [ :csp_violation_report ]
   before_action :validate_cloudflare_turnstile, only: [ :create ]
+
+  def csp_violation_report
+    # Handle CSP violation reports
+    Rails.logger.warn "CSP Violation: #{request.body.read}" if Rails.env.development?
+    head :ok
+  end
 
   private
 
@@ -9,7 +16,13 @@ class Users::SessionsController < Devise::SessionsController
   def handle_turnstile_failure
     self.resource = resource_class.new(sign_in_params)
     resource.errors.add(:base, "Security verification failed. Please try again.")
-    render :new, status: :unprocessable_entity
+
+    respond_to do |format|
+      format.html { render :new, status: :unprocessable_entity }
+      format.turbo_stream {
+        render turbo_stream: turbo_stream.replace("new_user", partial: "devise/sessions/form", locals: { resource: resource })
+      }
+    end
   end
 
   # Rescue from the gem's exception
