@@ -1,11 +1,18 @@
+<% icon_partial = (type.to_s == "notice" ? "notice" : (type.to_s == "alert" ? "alert" : "alert")) %>
+<% safe_message = if message.to_s.include?("<a ")
+  sanitize(message.to_s, tags: %w[a], attributes: %w[href title target rel class])
+   else
+  h(message.to_s)
+   end %>
+
 <div class="rounded-md <%= type == :notice ? "bg-green-50" : "bg-red-50" %> p-4 mb-6">
   <div class="flex">
     <div class="flex-shrink-0">
-      <%= render "shared/icons/#{type}" %>
+      <%= render "shared/icons/#{icon_partial}" %>
     </div>
     <div class="ml-3">
       <p class="text-sm font-medium <%= type == :notice ? "text-green-800" : "text-red-800" %>">
-        <%= message %>
+        <%= safe_message %>
       </p>
     </div>
   </div>

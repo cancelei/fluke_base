@@ -1,10 +1,10 @@
 FactoryBot.define do
   factory :meeting do
-    title { "MyString" }
-    description { "MyText" }
-    start_time { "2025-04-09 10:37:40" }
-    end_time { "2025-04-09 10:37:40" }
-    agreement { nil }
-    google_calendar_event_id { "MyString" }
+    title { "Team Meeting" }
+    description { "Weekly team sync" }
+    start_time { 1.hour.from_now }
+    end_time { 2.hours.from_now }
+    association :agreement
+    google_calendar_event_id { SecureRandom.uuid }
   end
 end

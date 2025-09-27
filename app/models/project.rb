@@ -34,12 +34,13 @@ class Project < ApplicationRecord
   SEEKING_COFOUNDER = "co_founder"
   SEEKING_BOTH = "both"
 
-  # Public field options
+  # Field privacy controls
+  DEFAULT_PUBLIC_FIELDS = %w[name description stage collaboration_type category funding_status team_size].freeze
   PUBLIC_FIELD_OPTIONS = %w[
     name description stage category current_stage
     target_market funding_status team_size collaboration_type
     project_link
-  ]
+  ].freeze
 
   # Associations
   has_many :github_logs, dependent: :destroy
@@ -276,6 +277,7 @@ class Project < ApplicationRecord
     self.stage ||= IDEA
     self.current_stage ||= stage.humanize if stage.present?
     self.collaboration_type ||= SEEKING_MENTOR
-    self.public_fields ||= []
+    # Make essential fields public by default for better project discovery
+    self.public_fields = DEFAULT_PUBLIC_FIELDS if public_fields.blank?
   end
 end

@@ -16,14 +16,18 @@ export default class extends Controller {
       return false;
     }
 
-    // Check for Turnstile validation in production/staging
-    if (this.element.querySelector('[data-cf-turnstile-response]')) {
-      const turnstileResponse = this.element.querySelector('input[name="cf-turnstile-response"]');
-      if (!turnstileResponse || !turnstileResponse.value) {
-        event.preventDefault();
-        console.warn('Turnstile verification required before form submission');
-        return false;
-      }
+    // Check for Turnstile validation only if Turnstile is enabled
+    const turnstileResponse = this.element.querySelector('input[name="cf-turnstile-response"]');
+    const turnstileWidget = this.element.querySelector('.cf-turnstile');
+    
+    // Only check Turnstile if the widget is present and enabled
+    if (turnstileWidget && turnstileResponse && !turnstileResponse.value) {
+      event.preventDefault();
+      window.FlukeLogger?.warning('FormSubmission', 'Turnstile verification required before form submission', {
+        formAction: this.element.action,
+        hasTurnstile: !!turnstileResponse
+      });
+      return false;
     }
 
     this.submitting = true;

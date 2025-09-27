@@ -220,6 +220,7 @@ RSpec.describe AgreementStatusService do
 
   describe "integration with agreement model" do
     it "delegates status changes to service" do
+      allow(agreement).to receive(:status_service).and_return(service)
       expect(service).to receive(:accept!).and_return(true)
       agreement.accept!
     end

@@ -4,7 +4,8 @@ RSpec.describe AgreementParticipant, type: :model do
   let(:alice) { create(:user, :alice) }
   let(:bob) { create(:user, :bob) }
   let(:project) { create(:project, user: alice) }
-  let(:agreement) { create(:agreement, :with_participants, project: project, initiator: alice, other_party: bob) }
+  let(:agreement) { create(:agreement, project: project) }
+  let(:agreement_with_participants) { create(:agreement, :with_participants, project: project, initiator: alice, other_party: bob) }
 
   describe "associations" do
     it { should belong_to(:agreement) }
@@ -26,8 +27,8 @@ RSpec.describe AgreementParticipant, type: :model do
   end
 
   describe "scopes" do
-    let!(:initiator_participant) { agreement.agreement_participants.find_by(is_initiator: true) }
-    let!(:other_participant) { agreement.agreement_participants.find_by(is_initiator: false) }
+    let!(:initiator_participant) { agreement_with_participants.agreement_participants.find_by(is_initiator: true) }
+    let!(:other_participant) { agreement_with_participants.agreement_participants.find_by(is_initiator: false) }
 
     it "filters initiators" do
       expect(AgreementParticipant.initiators).to include(initiator_participant)
@@ -46,18 +47,18 @@ RSpec.describe AgreementParticipant, type: :model do
     end
 
     it "filters by agreement" do
-      agreement_participants = AgreementParticipant.for_agreement(agreement)
+      agreement_participants = AgreementParticipant.for_agreement(agreement_with_participants)
       expect(agreement_participants).to include(initiator_participant, other_participant)
     end
   end
 
   describe "class methods" do
-    let!(:initiator_participant) { agreement.agreement_participants.find_by(is_initiator: true) }
-    let!(:other_participant) { agreement.agreement_participants.find_by(is_initiator: false) }
+    let!(:initiator_participant) { agreement_with_participants.agreement_participants.find_by(is_initiator: true) }
+    let!(:other_participant) { agreement_with_participants.agreement_participants.find_by(is_initiator: false) }
 
     describe ".find_initiator" do
       it "finds the initiator participant" do
-        found = AgreementParticipant.find_initiator(agreement)
+        found = AgreementParticipant.find_initiator(agreement_with_participants)
         expect(found).to eq(initiator_participant)
         expect(found.user).to eq(alice)
       end
@@ -65,13 +66,13 @@ RSpec.describe AgreementParticipant, type: :model do
 
     describe ".find_other_party" do
       it "finds the other party participant for alice" do
-        found = AgreementParticipant.find_other_party(agreement, alice)
+        found = AgreementParticipant.find_other_party(agreement_with_participants, alice)
         expect(found).to eq(other_participant)
         expect(found.user).to eq(bob)
       end
 
       it "finds the other party participant for bob" do
-        found = AgreementParticipant.find_other_party(agreement, bob)
+        found = AgreementParticipant.find_other_party(agreement_with_participants, bob)
         expect(found).to eq(initiator_participant)
         expect(found.user).to eq(alice)
       end
@@ -79,7 +80,7 @@ RSpec.describe AgreementParticipant, type: :model do
 
     describe ".find_participants" do
       it "finds all participants for an agreement" do
-        found = AgreementParticipant.find_participants(agreement)
+        found = AgreementParticipant.find_participants(agreement_with_participants)
         expect(found.count).to eq(2)
         expect(found).to include(initiator_participant, other_participant)
       end
@@ -87,8 +88,8 @@ RSpec.describe AgreementParticipant, type: :model do
   end
 
   describe "instance methods" do
-    let(:initiator_participant) { agreement.agreement_participants.find_by(is_initiator: true) }
-    let(:other_participant) { agreement.agreement_participants.find_by(is_initiator: false) }
+    let(:initiator_participant) { agreement_with_participants.agreement_participants.find_by(is_initiator: true) }
+    let(:other_participant) { agreement_with_participants.agreement_participants.find_by(is_initiator: false) }
 
     describe "#initiator?" do
       it "correctly identifies initiator" do
@@ -121,7 +122,7 @@ RSpec.describe AgreementParticipant, type: :model do
         end
 
         it "prevents action when agreement is not pending" do
-          agreement.update!(status: Agreement::ACCEPTED)
+          agreement_with_participants.update!(status: Agreement::ACCEPTED)
           expect(other_participant.can_accept_or_counter?).to be false
         end
       end
@@ -165,11 +166,11 @@ RSpec.describe AgreementParticipant, type: :model do
 
   describe "user role assignment" do
     it "assigns correct roles based on context" do
-      initiator_participant = agreement.agreement_participants.find_by(is_initiator: true)
-      other_participant = agreement.agreement_participants.find_by(is_initiator: false)
+      initiator_participant = agreement_with_participants.agreement_participants.find_by(is_initiator: true)
+      other_participant = agreement_with_participants.agreement_participants.find_by(is_initiator: false)
 
       expect(initiator_participant.user_role).to eq("entrepreneur")
-      expect(other_participant.user_role).to eq("mentor")
+      expect(other_participant.user_role).to eq("co_founder")
     end
 
     context "for co-founder agreements" do

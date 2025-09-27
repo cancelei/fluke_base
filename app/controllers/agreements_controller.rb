@@ -183,7 +183,7 @@ class AgreementsController < ApplicationController
       @project = @agreement_form.project
       @agreement = Agreement.new  # For authorization checks in the form
       @milestone_ids = @agreement_form.milestone_ids_array
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -192,6 +192,7 @@ class AgreementsController < ApplicationController
 
     # Use AgreementForm to handle the update properly
     form_params = agreement_params.merge(
+      project_id: @agreement.project_id,
       initiator_user_id: @agreement.agreement_participants.find_by(is_initiator: true)&.user_id,
       other_party_user_id: @agreement.agreement_participants.find_by(is_initiator: false)&.user_id,
       milestone_ids: params[:agreement][:milestone_ids]
@@ -231,7 +232,7 @@ class AgreementsController < ApplicationController
 
       @milestone_ids = @agreement_form.milestone_ids_array
 
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -242,6 +243,8 @@ class AgreementsController < ApplicationController
   end
 
   def accept
+    return unless authorize_agreement_action
+
     if @agreement.accept!
       notify_and_message_other_party(:accept)
 
@@ -280,6 +283,8 @@ class AgreementsController < ApplicationController
   end
 
   def reject
+    return unless authorize_agreement_action
+
     if @agreement.reject!
       notify_and_message_other_party(:reject)
 
@@ -342,6 +347,8 @@ class AgreementsController < ApplicationController
   end
 
   def cancel
+    return unless authorize_agreement_action
+
     if @agreement.cancel!
       notify_and_message_other_party(:cancel)
 
@@ -386,7 +393,7 @@ class AgreementsController < ApplicationController
       # Optimized query with proper includes to avoid N+1
       @meetings = if @agreement.active? || @agreement.completed?
         @agreement.meetings
-                  .includes(:agreement, :user) # Include user for meeting creator info
+                  .includes(:agreement)
                   .order(start_time: :asc)
       else
         []
@@ -398,6 +405,7 @@ class AgreementsController < ApplicationController
       end
     rescue => e
       Rails.logger.error "Error loading meetings section: #{e.message}"
+      Rails.logger.error "Backtrace: #{e.backtrace.first(5).join('\n')}"
       respond_to do |format|
         format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_meetings", partial: "lazy_loading_error", locals: { title: "Meetings", description: "Scheduled meetings and collaboration sessions" }) }
         format.html do
@@ -730,10 +738,26 @@ class AgreementsController < ApplicationController
       permitted_params
     end
 
-    def authorize_agreement_action
-      action = params[:action].to_sym
-      authorize! action, @agreement
+  def authorize_agreement_action
+    action = params[:action].to_sym
+    unless can?(action, @agreement)
+      respond_to do |format|
+        format.turbo_stream do
+          flash.now[:alert] = "You are not authorized to perform this action."
+          render turbo_stream: turbo_stream.prepend(
+            "flash_messages",
+            partial: "shared/flash_message",
+            locals: { type: "alert", message: flash.now[:alert] }
+          )
+        end
+        format.html do
+          redirect_to @agreement, alert: "You are not authorized to perform this action."
+        end
+      end
+      return false
     end
+    true
+  end
 
     def details_link
       <<~HTML
@@ -768,8 +792,7 @@ class AgreementsController < ApplicationController
 
       # Load all agreements in the chain with includes to avoid N+1
       agreements_by_id = Agreement.includes(
-        agreement_participants: :user,
-        milestones: []
+        agreement_participants: :user
       ).where(id: chain_ids).index_by(&:id)
 
       # Rebuild the chain with preloaded data

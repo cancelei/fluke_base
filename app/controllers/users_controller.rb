@@ -40,7 +40,7 @@ class UsersController < ApplicationController
       end
     else
       respond_to do |format|
-        format.turbo_stream { head :unprocessable_entity }
+        format.turbo_stream { head :unprocessable_content }
         format.html { redirect_back fallback_location: root_path, alert: "Project not found." }
       end
     end

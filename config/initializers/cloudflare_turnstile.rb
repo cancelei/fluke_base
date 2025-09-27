@@ -5,6 +5,16 @@ RailsCloudflareTurnstile.configure do |c|
 
   c.site_key = site_key
   c.secret_key = secret_key
-  c.fail_open = Rails.env.development? # Allow requests to pass in development if Turnstile fails
-  c.enabled = !Rails.env.development? && site_key.present? && secret_key.present? # Only enable if keys are configured
+
+  # Environment-specific configuration
+  case Rails.env
+  when "test", "development"
+    # In test and development environments, disable Turnstile and allow requests to pass
+    c.enabled = false
+    c.fail_open = true
+  else
+    # Production and other environments: strict validation
+    c.fail_open = false # Don't allow requests to pass if Turnstile fails
+    c.enabled = site_key.present? && secret_key.present? # Enable if keys are configured
+  end
 end

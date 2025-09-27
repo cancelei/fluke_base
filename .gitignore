@@ -61,6 +61,10 @@ yarn-debug.log*
 # Ignore test coverage
 /coverage/
 
+# Playwright artifacts
+playwright-report/
+test-results/
+
 # Ignore Spring files
 /spring/*.pid
 

@@ -1,6 +1,11 @@
 module ApplicationHelper
   include UiHelper
 
+  # Presenter helper exposed to views/specs
+  def present(object, with: nil)
+    controller.present(object, with: with)
+  end
+
   def page_entries_info(collection = nil)
     collection ||= @projects
 

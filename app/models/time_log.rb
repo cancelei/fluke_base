@@ -40,6 +40,7 @@ class TimeLog < ApplicationRecord
   # Calculate total hours spent on this time log
   def calculate_hours_spent
     return unless ended_at.present? && started_at.present?
+    return if hours_spent.present?
 
     self.hours_spent = ((ended_at - started_at) / 1.hour).round(2)
   end

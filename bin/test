@@ -1,209 +1,23 @@
 #!/usr/bin/env ruby
 
-require 'open3'
-require 'optparse'
+# Forwarder to unified Rails test task
+# Keeps backward compatibility with previous ./bin/test usage
 
-class TestRunner
-  def initialize
-    @results = {}
-    @total_failures = 0
-    @start_time = Time.now
-    @options = {}
-    parse_options
-  end
+args = ARGV.join(' ')
+coverage = args.include?('--coverage')
 
-  def run
-    if @options[:coverage]
-      ENV['COVERAGE'] = 'true'
-      puts "📊 Coverage reporting enabled"
-    end
+env = {}
+env['COVERAGE'] = 'true' if coverage
 
-    puts "🧪 Running comprehensive test suite...\n"
-    puts "=" * 60
+puts 'ℹ️  ./bin/test is deprecated. Forwarding to `bundle exec rake test`...'
+cmd = ['bundle', 'exec', 'rake', 'test']
 
-    case @options[:type]
-    when 'unit'
-      run_unit_tests
-    when 'system'
-      run_system_tests
-    when 'integration'
-      run_integration_tests
-    when 'all'
-      run_all_tests
-    else
-      run_all_tests
-    end
-
-    print_summary
-    exit 1 if @total_failures > 0
-  end
-
-  private
-
-  def parse_options
-    OptionParser.new do |opts|
-      opts.banner = "Usage: ./bin/test [options]"
-
-      opts.on("-t", "--type TYPE", ["unit", "system", "integration", "all"],
-              "Select test type (unit, system, integration, all)") do |type|
-        @options[:type] = type
-      end
-
-      opts.on("-c", "--coverage", "Enable coverage reporting") do
-        @options[:coverage] = true
-      end
-
-      opts.on("-v", "--verbose", "Verbose output") do
-        @options[:verbose] = true
-      end
-
-      opts.on("-h", "--help", "Prints this help") do
-        puts opts
-        exit
-      end
-    end.parse!
-
-    @options[:type] ||= 'all'
-  end
-
-  def run_all_tests
-    run_essential_tests
-  end
-
-  def run_unit_tests
-    run_essential_tests("unit")
-  end
-
-  def run_integration_tests
-    run_essential_tests("integration")
-  end
-
-  def run_system_tests
-    run_essential_tests("system")
-  end
-
-  def run_essential_tests(filter = nil)
-    puts "\n🧪 Running essential tests..."
-    
-    case filter
-    when "unit"
-      spec_paths = %w[models helpers services jobs mailers].select { |dir| Dir.exist?("spec/#{dir}") }.map { |dir| "spec/#{dir}" }.join(' ')
-      test_name = "Unit Tests"
-    when "integration"
-      spec_paths = %w[requests features controllers].select { |dir| Dir.exist?("spec/#{dir}") }.map { |dir| "spec/#{dir}" }.join(' ')
-      test_name = "Integration Tests"
-    when "system"
-      spec_paths = Dir.exist?("spec/system") ? "spec/system" : ""
-      test_name = "System Tests"
-    else
-      # Run essential tests (models and helpers work reliably now)
-      essential_dirs = %w[models helpers].select { |dir| Dir.exist?("spec/#{dir}") }
-      spec_paths = essential_dirs.map { |dir| "spec/#{dir}" }.join(' ')
-      test_name = "Essential Tests"
-    end
-
-    if spec_paths.empty?
-      puts "⚠️  No test directories found for #{filter || 'essential tests'}"
-      @results[:essential] = { success: true, output: "No tests found" }
-    else
-      result = run_rspec(spec_paths, test_name)
-      @results[:essential] = result
-    end
-  end
-
-  def run_rspec(spec_path, test_type)
-    format_options = @options[:verbose] ? "--format=documentation" : "--format=progress"
-    
-    coverage_env = @options[:coverage] ? { 'COVERAGE' => 'true' } : {}
-    
-    command = "bundle exec rspec #{spec_path} #{format_options}"
-    
-    puts "   Running: #{command}"
-    
-    stdout, stderr, status = Open3.capture3(coverage_env, command)
-    
-    result = {
-      command: command,
-      stdout: stdout,
-      stderr: stderr,
-      status: status,
-      success: status.success?
-    }
-
-    print_test_result(test_type, result)
-    result
-  end
-
-  def print_test_result(name, result)
-    if result[:success]
-      puts "✅ #{name}: All tests passed"
-      
-      # Extract test statistics
-      output = result[:stdout]
-      if match = output.match(/(\d+) examples?, (\d+) failures?/)
-        examples = match[1].to_i
-        failures = match[2].to_i
-        puts "   #{examples} examples, #{failures} failures"
-      end
-    else
-      puts "❌ #{name}: Tests failed"
-      
-      # Extract and count failures
-      output = result[:stdout] + result[:stderr]
-      if match = output.match(/(\d+) examples?, (\d+) failures?/)
-        failures = match[2].to_i
-        @total_failures += failures
-        puts "   #{match[1]} examples, #{failures} failures"
-      else
-        @total_failures += 1
-      end
-
-      # Show first few lines of failure output
-      failure_lines = output.split("\n").select do |line|
-        line.include?('FAIL') || line.include?('Error') || line.match(/\d+\)\s/)
-      end.first(3)
-      
-      if failure_lines.any?
-        puts "   First few failures:"
-        failure_lines.each { |line| puts "   #{line}" }
-        puts "   ... (run with --verbose for full output)"
-      end
-    end
-  end
-
-  def print_summary
-    duration = Time.now - @start_time
-    
-    puts "\n" + "=" * 60
-    puts "📊 TEST SUMMARY"
-    puts "=" * 60
-    
-    @results.each do |name, result|
-      status = result[:success] ? "✅ PASS" : "❌ FAIL"
-      puts "#{name.to_s.capitalize.ljust(15)} #{status}"
-    end
-    
-    puts "\n📈 TOTALS:"
-    puts "   Total Failures: #{@total_failures}"
-    puts "   Duration: #{duration.round(2)}s"
-    
-    if @options[:coverage] && Dir.exist?('coverage')
-      puts "\n📊 COVERAGE:"
-      puts "   HTML Report: coverage/index.html"
-      puts "   LCOV Report: coverage/lcov.info"
-    end
-
-    if @total_failures > 0
-      puts "\n💡 DEBUGGING TIPS:"
-      puts "   ./bin/test --verbose           # Show detailed output"
-      puts "   ./bin/test --type unit         # Run only unit tests"
-      puts "   ./bin/test --type integration  # Run only integration tests"
-      puts "   ./bin/test --type system       # Run only system tests"
-      puts "   bundle exec rspec spec/path    # Run specific test file"
-    else
-      puts "\n🎉 All tests passed successfully!"
-    end
-  end
+if coverage
+  # Strip the legacy flag so rake task receives a clean arg list
+  filtered = ARGV.reject { |a| a == '--coverage' }
+  cmd += filtered
+else
+  cmd += ARGV
 end
 
-TestRunner.new.run
+exec env, *cmd

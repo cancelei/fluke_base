@@ -5,26 +5,45 @@ require 'faker'
 
 # Note: Role system has been removed - all users are community members
 
-# Only create demo data in development
-if Rails.env.development?
-  puts "🚀 Creating enhanced demo data with test scenarios..."
+# Create demo data in development and staging environments
+if Rails.env.development? || Rails.env.staging?
+  puts "🚀 Creating enhanced demo data with test scenarios for #{Rails.env} environment..."
 
-  # Clear existing data to avoid conflicts
-  puts "Clearing existing data..."
-  TimeLog.destroy_all
-  Message.destroy_all
-  Conversation.destroy_all
-  Meeting.destroy_all
-  AgreementParticipant.destroy_all
-  Agreement.destroy_all
-  Milestone.destroy_all
-  Project.destroy_all
-  User.destroy_all
+  # Clear existing data to avoid conflicts (only in development)
+  if Rails.env.development?
+    puts "Clearing existing data..."
+    TimeLog.destroy_all
+    Message.destroy_all
+    Conversation.destroy_all
+    Meeting.destroy_all
+    AgreementParticipant.destroy_all
+    Agreement.destroy_all
+    Milestone.destroy_all
+    Project.destroy_all
+    User.destroy_all
+  else
+    # In staging, only clear if database is empty or if explicitly requested
+    if User.count == 0 || ENV['FORCE_SEED'] == 'true'
+      puts "Database appears empty or FORCE_SEED=true, clearing existing data..."
+      TimeLog.destroy_all
+      Message.destroy_all
+      Conversation.destroy_all
+      Meeting.destroy_all
+      AgreementParticipant.destroy_all
+      Agreement.destroy_all
+      Milestone.destroy_all
+      Project.destroy_all
+      User.destroy_all
+    else
+      puts "Database has existing data. Skipping seeding. Set FORCE_SEED=true to override."
+      exit 0
+    end
+  end
 
   # Helper method to create users with predictable data
   def create_user(first_name, last_name, index)
     user = User.create!(
-      email: "#{first_name.downcase}.#{last_name.downcase}@flukebase.com",
+      email: "#{first_name.downcase}.#{last_name.downcase}@flukebase.me",
       password: 'password123',
       password_confirmation: 'password123',
       first_name: first_name,
@@ -118,7 +137,7 @@ if Rails.env.development?
     last_name = is_brazilian ? brazilian_last_names.sample : american_last_names.sample
 
     user = User.create!(
-      email: "user#{idx+1}@flukebase.com",
+      email: "user#{idx+1}@flukebase.me",
       password: 'password123',
       password_confirmation: 'password123',
       first_name: first_name,
@@ -139,6 +158,8 @@ if Rails.env.development?
     project_count.times do
       project_data = all_projects.sample
 
+      # Note: public_fields will be set to default essential fields automatically
+      # (name, description, stage, collaboration_type, category, funding_status, team_size)
       project = Project.create!(
         name: project_data[:name],
         description: project_data[:desc],
@@ -510,14 +531,14 @@ if Rails.env.development?
   puts "   📅 Meetings: #{Meeting.count}"
 
   puts "\n🧪 Test User Scenarios Created:"
-  puts "   • alice.entrepreneur@flukebase.com - Project owner with multiple agreement types"
-  puts "   • bob.mentor@flukebase.com - Active mentor with heavy time logging"
-  puts "   • carol.cofounder@flukebase.com - Completed co-founder with perfect tracking"
-  puts "   • henry.overdue@flukebase.com - Mentor with overdue agreement"
-  puts "   • ivy.completed@flukebase.com - Mentor with completed agreement"
-  puts "   • jack.pending@flukebase.com - Mentor with pending agreement"
-  puts "   • frank.newbie@flukebase.com - New entrepreneur with no agreements"
-  puts "   • grace.superuser@flukebase.com - User with all roles"
+  puts "   • alice.entrepreneur@flukebase.me - Project owner with multiple agreement types"
+  puts "   • bob.mentor@flukebase.me - Active mentor with heavy time logging"
+  puts "   • carol.cofounder@flukebase.me - Completed co-founder with perfect tracking"
+  puts "   • henry.overdue@flukebase.me - Mentor with overdue agreement"
+  puts "   • ivy.completed@flukebase.me - Mentor with completed agreement"
+  puts "   • jack.pending@flukebase.me - Mentor with pending agreement"
+  puts "   • frank.newbie@flukebase.me - New entrepreneur with no agreements"
+  puts "   • grace.superuser@flukebase.me - User with all roles"
 
   puts "\n🎯 Key Test Cases:"
   puts "   📈 Time tracking: Realistic patterns with weekday bias"

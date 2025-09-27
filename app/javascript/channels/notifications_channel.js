@@ -2,11 +2,11 @@ import consumer from './consumer';
 
 consumer.subscriptions.create('NotificationsChannel', {
   connected() {
-    console.log('Connected to notifications channel');
+    window.FlukeLogger?.websocketEvent('NotificationsChannel', 'connected');
   },
 
   disconnected() {
-    console.log('Disconnected from notifications channel');
+    window.FlukeLogger?.websocketEvent('NotificationsChannel', 'disconnected');
   },
 
   received(data) {

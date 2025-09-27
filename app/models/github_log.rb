@@ -1,7 +1,7 @@
 class GithubLog < ApplicationRecord
   belongs_to :project
   belongs_to :agreement, optional: true
-  belongs_to :user
+  belongs_to :user, optional: true
   has_many :github_branch_logs
   has_many :github_branches, through: :github_branch_logs
 

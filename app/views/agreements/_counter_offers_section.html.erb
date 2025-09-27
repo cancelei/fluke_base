@@ -15,7 +15,7 @@
           <% agreement_chain.each_with_index do |(current_agreement, previous_agreement), idx| %>
             <div class="mb-6 <%= "pb-6 border-b border-gray-200" unless idx == agreement_chain.length - 1 %>">
               <h4 class="font-bold text-indigo-700 mb-3 flex items-center">
-                <% if agreement_chain.last == [current_agreement, previous_agreement] %>
+                <% if idx == 0 %>
                   <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
@@ -24,7 +24,7 @@
                   <svg class="h-5 w-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m0-4l4-4"></path>
                   </svg>
-                  Counter Offer <%= agreement_chain.length - idx - 1 %>
+                  Counter Offer <%= idx %>
                 <% end %>
 
                 <span class="ml-2 text-sm font-normal text-gray-600">

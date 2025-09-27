@@ -10,8 +10,18 @@ RSpec.describe ProjectAgent, type: :model do
   describe 'validations' do
     subject { build(:project_agent, project: project) }
 
-    it { should validate_presence_of(:provider) }
-    it { should validate_presence_of(:model) }
+    it 'validates presence of provider' do
+      # Test by setting provider to empty string (bypasses default callback)
+      subject.provider = ""
+      expect(subject).not_to be_valid
+      expect(subject.errors[:provider]).to include("can't be blank")
+    end
+    it 'validates presence of model' do
+      # Test by setting model to empty string (bypasses default callback)
+      subject.model = ""
+      expect(subject).not_to be_valid
+      expect(subject.errors[:model]).to include("can't be blank")
+    end
     it { should validate_inclusion_of(:provider).in_array(%w[openai anthropic]) }
 
     context 'when provider is openai' do

@@ -14,7 +14,7 @@ RSpec.describe "TimeLogs multi-project tracking", type: :request do
   end
 
   def start_tracking(project, milestone)
-    post create_time_logs_path(project.id), params: { milestone_id: milestone.id }
+    post time_logs_path(project.id), params: { milestone_id: milestone.id }
     expect(response).to have_http_status(:redirect).or have_http_status(:ok)
   end
 

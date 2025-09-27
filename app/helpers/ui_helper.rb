@@ -248,11 +248,11 @@ module UiHelper
 
     safe_join(content)
   end
-end
 
-def stage_badge(stage)
-  return "" unless stage.present?
+  def stage_badge(stage)
+    return "" unless stage.present?
 
-  content_tag(:span, stage.capitalize,
-    class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800")
+    content_tag(:span, stage.capitalize,
+      class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800")
+  end
 end

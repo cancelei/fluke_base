@@ -127,7 +127,7 @@ RSpec.describe AgreementCalculationsService do
       )
 
       details = service.payment_details
-      expect(details).to include("$75.0")
+      expect(details).to include("75.0$")
       expect(details).to include("hour")
       expect(details).to include("10")
     end
@@ -152,7 +152,7 @@ RSpec.describe AgreementCalculationsService do
       )
 
       details = service.payment_details
-      expect(details).to include("$40.0")
+      expect(details).to include("40.0$")
       expect(details).to include("12.0%")
       expect(details).to include("15")
     end
@@ -169,19 +169,19 @@ RSpec.describe AgreementCalculationsService do
     context "without context user" do
       it "returns total hours from all participants" do
         # Create time logs for both users
-        create(:time_log, project: project, milestone: milestone1, user: alice, hours: 5)
-        create(:time_log, project: project, milestone: milestone1, user: bob, hours: 3)
-        create(:time_log, project: project, milestone: milestone2, user: alice, hours: 2)
+        create(:time_log, project: project, milestone: milestone1, user: alice, hours_spent: 5)
+        create(:time_log, project: project, milestone: milestone1, user: bob, hours_spent: 3)
+        create(:time_log, project: project, milestone: milestone2, user: alice, hours_spent: 2)
 
         total_hours = service.total_hours_logged
-        expect(total_hours).to eq(10)  # 5 + 3 + 2
+        expect(total_hours.to_f).to eq(10.0)  # 5 + 3 + 2
       end
 
       it "only counts hours for agreement milestones" do
         other_milestone = create(:milestone, project: project)
 
-        create(:time_log, project: project, milestone: milestone1, user: alice, hours: 5)
-        create(:time_log, project: project, milestone: other_milestone, user: alice, hours: 10)
+        create(:time_log, project: project, milestone: milestone1, user: alice, hours_spent: 5)
+        create(:time_log, project: project, milestone: other_milestone, user: alice, hours_spent: 10)
 
         total_hours = service.total_hours_logged
         expect(total_hours).to eq(5)  # Only milestone1 is in the agreement
@@ -190,9 +190,9 @@ RSpec.describe AgreementCalculationsService do
 
     context "with context user" do
       it "returns hours logged by specific user" do
-        create(:time_log, project: project, milestone: milestone1, user: alice, hours: 5)
-        create(:time_log, project: project, milestone: milestone1, user: bob, hours: 3)
-        create(:time_log, project: project, milestone: milestone2, user: alice, hours: 2)
+        create(:time_log, project: project, milestone: milestone1, user: alice, hours_spent: 5)
+        create(:time_log, project: project, milestone: milestone1, user: bob, hours_spent: 3)
+        create(:time_log, project: project, milestone: milestone2, user: alice, hours_spent: 2)
 
         alice_hours = service.total_hours_logged(alice)
         expect(alice_hours).to eq(7)  # 5 + 2
@@ -203,7 +203,7 @@ RSpec.describe AgreementCalculationsService do
 
       it "returns zero for user with no logged hours" do
         charlie = create(:user)
-        create(:time_log, project: project, milestone: milestone1, user: alice, hours: 5)
+        create(:time_log, project: project, milestone: milestone1, user: alice, hours_spent: 5)
 
         charlie_hours = service.total_hours_logged(charlie)
         expect(charlie_hours).to eq(0)
@@ -229,13 +229,14 @@ RSpec.describe AgreementCalculationsService do
     end
 
     it "finds currently active time log for agreement participants" do
-      # Create an active time log (end_time is nil)
+      # Create an active time log (ended_at is nil)
       active_log = create(:time_log,
         project: project,
         milestone: milestone,
         user: alice,
-        start_time: 1.hour.ago,
-        end_time: nil
+        started_at: 1.hour.ago,
+        ended_at: nil,
+        status: "in_progress"
       )
 
       expect(service.current_time_log).to eq(active_log)
@@ -246,8 +247,9 @@ RSpec.describe AgreementCalculationsService do
         project: project,
         milestone: milestone,
         user: alice,
-        start_time: 2.hours.ago,
-        end_time: 1.hour.ago
+        started_at: 2.hours.ago,
+        ended_at: 1.hour.ago,
+        status: "completed"
       )
 
       expect(service.current_time_log).to be_nil
@@ -258,16 +260,18 @@ RSpec.describe AgreementCalculationsService do
         project: project,
         milestone: milestone,
         user: alice,
-        start_time: 2.hours.ago,
-        end_time: nil
+        started_at: 2.hours.ago,
+        ended_at: nil,
+        status: "in_progress"
       )
 
       newer_log = create(:time_log,
         project: project,
         milestone: milestone,
         user: bob,
-        start_time: 1.hour.ago,
-        end_time: nil
+        started_at: 1.hour.ago,
+        ended_at: nil,
+        status: "in_progress"
       )
 
       expect(service.current_time_log).to eq(newer_log)
@@ -276,25 +280,38 @@ RSpec.describe AgreementCalculationsService do
 
   describe "edge cases and error handling" do
     it "handles nil dates gracefully" do
-      agreement.update!(start_date: nil, end_date: nil)
+      # Use a non-persisted copy to avoid DB constraints and focus on service behavior
+      temp = agreement.dup
+      temp.start_date = nil
+      temp.end_date = nil
+      temp_service = AgreementCalculationsService.new(temp)
 
-      expect(service.duration_in_weeks).to eq(0)
-      expect(service.total_cost).to eq(0)
+      expect(temp_service.duration_in_weeks).to eq(0)
+      expect(temp_service.total_cost).to eq(0)
     end
 
-    it "handles agreements with zero weekly hours" do
+    it "handles agreements with minimum weekly hours" do
       agreement.update!(
-        weekly_hours: 0,
+        payment_type: Agreement::HOURLY,
+        weekly_hours: 1, # Minimum allowed by constraint
         hourly_rate: 50.0,
         start_date: Date.current,
         end_date: 4.weeks.from_now.to_date
       )
 
-      expect(service.total_cost).to eq(0)
+      service = AgreementCalculationsService.new(agreement)
+      expect(service.total_cost).to eq(200.0) # 4 weeks * 1 hour * $50
+    end
+
+    it "validates weekly hours constraint" do
+      expect {
+        agreement.update!(weekly_hours: 0)
+      }.to raise_error(ActiveRecord::StatementInvalid, /weekly_hours_check/)
     end
 
     it "handles very large numbers" do
       agreement.update!(
+        payment_type: Agreement::HOURLY,
         weekly_hours: 40,
         hourly_rate: 999.99,
         start_date: Date.current,
@@ -309,6 +326,7 @@ RSpec.describe AgreementCalculationsService do
 
   describe "integration with agreement model" do
     it "delegates calculations from agreement model" do
+      allow(agreement).to receive(:calculations_service).and_return(service)
       expect(service).to receive(:total_cost).and_return(1000.0)
       agreement.calculate_total_cost
     end
@@ -339,7 +357,7 @@ RSpec.describe AgreementCalculationsService do
           project: project,
           milestone: milestone,
           user: [ alice, bob ].sample,
-          hours: rand(1..8)
+          hours_spent: rand(1..8)
         )
       end
 

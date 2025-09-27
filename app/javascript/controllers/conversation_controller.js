@@ -8,25 +8,34 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log('Conversation controller connected');
+    window.FlukeLogger?.controllerLifecycle('ConversationController', 'connected', {
+      element: this.element.tagName,
+      hasSidebar: !!this.sidebarTarget
+    });
     // Close sidebar when clicking outside on mobile
     document.addEventListener('click', this.handleClickOutside);
   }
 
   disconnect() {
-    console.log('Conversation controller disconnected');
+    window.FlukeLogger?.controllerLifecycle('ConversationController', 'disconnected');
     document.removeEventListener('click', this.handleClickOutside);
   }
 
   toggleSidebar(event) {
-    console.log('Toggle sidebar clicked');
+    window.FlukeLogger?.userInteraction('toggled sidebar', event.target, {
+      isOpen: this.sidebarTarget?.classList.contains('open')
+    });
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
 
     if (!this.hasSidebarTarget || !this.hasOverlayTarget) {
-      console.error('Missing required targets');
+      window.FlukeLogger?.error('ConversationController', new Error('Missing required targets'), {
+        action: 'toggleSidebar',
+        hasSidebarTarget: !!this.hasSidebarTarget,
+        hasOverlayTarget: !!this.hasOverlayTarget
+      });
       return;
     }
 
@@ -107,11 +116,14 @@ export default class extends Controller {
         if (response.ok) {
           this.updateConversationIdInPath(conversationId);
         } else {
-          console.error('Failed to mark as read');
+          window.FlukeLogger?.error('ConversationController', new Error('Failed to mark as read'), {
+            action: 'markAsRead',
+            status: response.status
+          });
         }
       })
       .catch(error => {
-        console.error('Network error:', error);
+        window.FlukeLogger?.error('ConversationController', error, { action: 'markAsRead' });
       });
   }
 

@@ -34,8 +34,6 @@ Rails.application.configure do
 
     policy.frame_src   :self, "https://challenges.cloudflare.com"
     policy.connect_src :self, :https, "https://challenges.cloudflare.com"
-
-    policy.report_uri "/csp-violation-report-endpoint"
   end
 
   # Improved nonce generator for Turbo compatibility

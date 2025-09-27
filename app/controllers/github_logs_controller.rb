@@ -128,7 +128,7 @@ class GithubLogsController < ApplicationController
         if count.positive?
           render json: { message: "Fetched #{count} new #{"commit".pluralize(count)}", count: count }
         else
-          render json: { message: "No new commits found or there was an error", count: 0 }, status: :unprocessable_entity
+          render json: { message: "No new commits found or there was an error", count: 0 }, status: :unprocessable_content
         end
       }
     end
@@ -151,7 +151,7 @@ class GithubLogsController < ApplicationController
       }
       format.json {
         render json: { error: "GitHub API error: #{e.message}" },
-               status: :unprocessable_entity
+               status: :unprocessable_content
       }
     end
   end

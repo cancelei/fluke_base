@@ -1,7 +1,7 @@
-<% if notice %>
-  <%= render "shared/flash_message", type: :notice, message: notice %>
+<% if notice.present? %>
+  <%= render "shared/flash_message", type: :notice, message: h(notice) %>
 <% end %>
 
-<% if alert %>
-  <%= render "shared/flash_message", type: :alert, message: alert %>
+<% if alert.present? %>
+  <%= render "shared/flash_message", type: :alert, message: h(alert) %>
 <% end %>

@@ -30,7 +30,10 @@ class AgreementStatusService
     @agreement.update(status: Agreement::COUNTERED)
 
     # Link the new agreement to this one
-    counter_agreement.counter_to_id = @agreement.id
+    # Set the counter agreement relationship through participants
+    counter_agreement.agreement_participants.each do |participant|
+      participant.update!(counter_agreement_id: @agreement.id)
+    end
     counter_agreement.status = Agreement::PENDING
 
     counter_agreement.save

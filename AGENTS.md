@@ -1,63 +1,36 @@
-# FlukeBase Agent Guidelines
+# Repository Guidelines
 
-## Commands
-- **Single test**: `bundle exec rspec spec/path/to/file_spec.rb`
-- **All tests**: `./bin/test` | **Unit**: `./bin/test --type unit` | **Integration**: `./bin/test --type integration` | **System**: `./bin/test --type system`
-- **Coverage**: `./bin/test --coverage` | **Verbose**: `./bin/test --verbose`
-- **Lint**: `./bin/lint` | **Auto-fix**: `./bin/lint --fix` | **CI**: `./bin/lint && ./bin/test --coverage`
-- **Server**: `rails server` | **Console**: `rails console` | **Workers**: `./bin/jobs`
+## Project Structure & Module Organization
+- Rails app in `app/` (controllers, models, views).
+- Client code in `app/javascript/` (Stimulus controllers, utils).
+- Business logic in `app/services/`, `app/presenters/`, `app/policies/`, `app/queries/`.
+- Tests in `spec/` (RSpec: `models/`, `controllers/`, `requests/`, `system/`; Playwright: `e2e/`).
+- Configuration in `config/`; database in `db/`; shared libs in `lib/`; assets in `app/assets/`; docs in `docs/` and `technical_spec/`.
 
-## Code Style
-### Ruby/Rails
-- Style: `rubocop-rails-omakase` | Naming: snake_case methods, CamelCase classes
-- Architecture: Service objects for business logic | Error handling: Rails rescue blocks
-- Imports: Rails autoloading | Delegation: `@service ||= Service.new(self)`
-- Models: Concerns for shared logic | Policies: Pundit-based authorization
+## Build, Test, and Development Commands
+- Install deps: `bundle install && npm ci`.
+- Run server: `rails server` (console: `rails console`; workers: `./bin/jobs`).
+- Unified tests: `bundle exec rake test` (ESLint → RSpec → Playwright).
+- Coverage: `COVERAGE=true bundle exec rake test`.
+- RSpec only: `bundle exec rspec [spec/path_spec.rb]`.
+- Playwright: `npm run test:e2e` (headed: `npm run test:e2e:headed`).
+- Lint: `./bin/lint` (auto-fix: `./bin/lint --fix`); JS-only: `npm run lint:js` (fix: `npm run lint:js:fix`).
 
-### JavaScript
-- ES modules | Single quotes | Semicolons required | 2-space indentation
-- camelCase variables/functions, PascalCase classes | Stimulus in `app/javascript/controllers/`
-- Globals: Rails, Turbo, Stimulus | No console in production | Prefer const/let over var
+## Coding Style & Naming Conventions
+- Ruby: `rubocop-rails-omakase`; snake_case methods; CamelCase classes; service objects; concerns for shared logic; Pundit policies.
+- JavaScript: ES modules, single quotes, semicolons, 2-space indent; camelCase functions/vars; PascalCase classes; place Stimulus controllers in `app/javascript/controllers/`.
+- Hotwire/Turbo: server-rendered HTML; no client-side routing; prefer Turbo Frames/Streams for scoped updates.
 
-### Architecture
-- Multi-database: Primary, cache, queue, cable | Privacy: `ProjectVisibilityService`
-- Real-time: Turbo streams | Unified user system with dynamic roles
-- Forms: Custom form objects | Presenters: View logic separation | Queries: Complex DB logic
+## Testing Guidelines
+- Use RSpec for unit/integration/system; mirror paths (e.g., `spec/models/user_spec.rb`).
+- Keep coverage for new/changed code; run `COVERAGE=true bundle exec rake test` locally.
+- Place E2E tests in `spec/e2e/`; keep fast tests in RSpec, flows in Playwright.
 
-## Hotwire/Turbo Best Practices
-### Server-Side Rendering Priority
-- **HTML-over-the-wire**: Always prefer server-rendered HTML over JSON APIs
-- **Turbo Drive**: Leverage automatic page navigation without full reloads
-- **No client-side routing**: Keep all routing logic on the server
+## Commit & Pull Request Guidelines
+- Commits: short, imperative. Prefer `feat:`, `fix:`, `chore:`, `refactor:`. Existing history also uses `feat/update ...`; be consistent and clear.
+- PRs: include summary, linked issues, screenshots for UI, and test plan. All linters/tests must pass (`bundle exec rake test`).
 
-### Turbo Frames Usage
-- **Scoped navigation**: Use `<%= turbo_frame_tag %>` for independent page segments
-- **Lazy loading**: Add `src` attribute for deferred content loading
-- **Parallel execution**: Break complex pages into frames for concurrent loading
-- **Efficient caching**: Each frame caches independently
-
-### Turbo Streams Patterns
-- **Real-time updates**: Use `turbo_stream_from` for WebSocket connections
-- **Model broadcasts**: Implement `after_create_commit { broadcast_*_to }` in models
-- **Inline responses**: Use `format.turbo_stream { render turbo_stream: ... }`
-- **Actions**: append, prepend, replace, update, remove, before, after
-
-### Stimulus Integration
-- **Progressive enhancement**: Add behavior to server-rendered HTML
-- **Controller naming**: Use `data-controller="component-name"`
-- **Targets**: Define `static targets = ["element"]` for DOM access
-- **Values**: Use `static values = { key: String }` for configuration
-- **Lifecycle**: Use `connect()` and `disconnect()` methods
-
-### Form Handling
-- **Turbo confirmations**: Use `data: { turbo_confirm: "Are you sure?" }`
-- **Method overrides**: Use `data: { turbo_method: "delete" }` for non-GET actions
-- **Error handling**: Render forms with `status: :unprocessable_entity` on validation errors
-- **Progressive enhancement**: Forms work without JavaScript enabled
-
-## Cursor Rules
-- **Product**: Collaboration platform for entrepreneurs and collaborators
-- **Core**: Unified user system, structured agreements, project management, time tracking
-- **Tech**: Ruby on Rails + Hotwire/Turbo, PostgreSQL, Tailwind CSS, GitHub integration
-- **AI**: OpenAI integration for milestone generation, progress prediction, smart matching</content>
-</xai:function_call
+## Security & Configuration Tips
+- Use `.env` and Rails credentials; never commit secrets.
+- Update CSP/Turnstile configs in `config/` with care; verify via E2E before merge.
+- Run `bin/rails db:prepare` after pulling schema changes.

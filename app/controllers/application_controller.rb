@@ -1,15 +1,13 @@
 class ApplicationController < ActionController::Base
   include CanCan::ControllerAdditions
-  # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
-  allow_browser versions: :modern
+  include RailsCloudflareTurnstile::ControllerHelpers
+  # Allow browsers with reasonable modern feature support while not being overly restrictive
+  allow_browser versions: { chrome: 100, safari: 15, firefox: 100, opera: 85, ie: false }
   protect_from_forgery with: :exception
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :set_selected_project
 
-  # CSP violation report exceptions
-  skip_before_action :authenticate_user!, only: [ :csp_violation_report ]
-  skip_before_action :verify_authenticity_token, only: [ :csp_violation_report ]
 
   # DRY helper: Find resource by klass and param, or redirect with alert
   def find_resource_or_redirect(klass, param_key, redirect_path, alert_message)
@@ -60,7 +58,10 @@ class ApplicationController < ActionController::Base
         involved_via_received = current_user.received_agreements.where(project_id: project.id, status: "Accepted").exists?
 
         if involved_as_owner || involved_via_initiated || involved_via_received
-          ProjectSelectionService.new(current_user, session, project.id).call
+          # Only call ProjectSelectionService for project owners
+          if involved_as_owner
+            ProjectSelectionService.new(current_user, session, project.id).call
+          end
           @selected_project = project
         end
       end
@@ -95,8 +96,20 @@ class ApplicationController < ActionController::Base
   # Acting as mentor concept removed - all users have equal access
 
   def user_not_authorized
-    flash[:alert] = "You are not authorized to perform this action."
-    redirect_back(fallback_location: root_path)
+    respond_to do |format|
+      format.turbo_stream do
+        flash.now[:alert] = "You are not authorized to perform this action."
+        render turbo_stream: turbo_stream.prepend(
+          "flash_messages",
+          partial: "shared/flash_message",
+          locals: { type: "alert", message: flash.now[:alert] }
+        )
+      end
+      format.html do
+        flash[:alert] = "You are not authorized to perform this action."
+        redirect_back(fallback_location: root_path)
+      end
+    end
   end
 
   def present(object, with: nil)
@@ -107,6 +120,7 @@ class ApplicationController < ActionController::Base
       presenter_class.new(object, view_context)
     end
   end
+  helper_method :present
 
   # Toast notification helpers for controllers
 
@@ -141,6 +155,7 @@ class ApplicationController < ActionController::Base
     toast_flash(:warning, message, **options)
   end
 
+
   # Turbo Stream toast methods
   def stream_toast_success(message, **options)
     render_toast_stream(:success, message, **options)
@@ -156,28 +171,5 @@ class ApplicationController < ActionController::Base
 
   def stream_toast_warning(message, **options)
     render_toast_stream(:warning, message, **options)
-  end
-
-  # CSP violation report endpoint
-  def csp_violation_report
-    begin
-      report_data = JSON.parse(request.raw_post)
-
-      if report_data && report_data["csp-report"]
-        violation = report_data["csp-report"]
-        Rails.logger.warn "CSP Violation Report:"
-        Rails.logger.warn "  Blocked URI: #{violation['blocked-uri']}"
-        Rails.logger.warn "  Violated Directive: #{violation['violated-directive']}"
-        Rails.logger.warn "  Document URI: #{violation['document-uri']}"
-        Rails.logger.warn "  Source File: #{violation['source-file']}"
-        Rails.logger.warn "  Line Number: #{violation['line-number']}"
-      end
-    rescue JSON::ParserError => e
-      Rails.logger.error "Failed to parse CSP violation report: #{e.message}"
-    rescue => e
-      Rails.logger.error "CSP violation report error: #{e.message}"
-    end
-
-    head :ok
   end
 end

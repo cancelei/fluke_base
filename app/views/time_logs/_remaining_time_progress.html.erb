@@ -15,7 +15,6 @@
         (project.time_logs.in_progress.any? ? ((Time.zone.now - project.time_logs.in_progress.last.started_at) / 1.hour).round(2) : 0) %>
     <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
   <% else %>
-# Agreement participant: show only their own time within the project context %>
     <% user_agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }, project: project).first %>
     <% total_allowed_hours = user_agreement&.weekly_hours.to_f * user_agreement&.duration_in_weeks.to_f %>
     <% used_hours = project.time_logs.where(user: current_user).where.not(status: "in_progress").sum(:hours_spent) +

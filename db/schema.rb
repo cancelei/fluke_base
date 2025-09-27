@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_26_225915) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "admin_users", force: :cascade do |t|
+    t.string "username"
+    t.string "email"
+    t.string "password_digest"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "agreement_participants", force: :cascade do |t|
@@ -72,7 +80,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
     t.string "payment_type", null: false
     t.decimal "hourly_rate", precision: 10, scale: 2
     t.decimal "equity_percentage", precision: 5, scale: 2
-    t.integer "weekly_hours", null: false
+    t.integer "weekly_hours"
     t.text "tasks", null: false
     t.integer "milestone_ids", default: [], array: true
     t.index ["agreement_type"], name: "index_agreements_on_agreement_type", comment: "Improves filtering by mentorship/co-founder type"
@@ -82,12 +90,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
     t.index ["status", "agreement_type"], name: "index_agreements_on_status_and_agreement_type", comment: "Composite index for combined filtering"
     t.index ["status"], name: "index_agreements_on_status", comment: "Improves filtering by agreement status"
     t.check_constraint "agreement_type::text = ANY (ARRAY['Mentorship'::character varying::text, 'Co-Founder'::character varying::text])", name: "agreements_type_check"
-    t.check_constraint "end_date > start_date", name: "agreements_date_order_check"
+    t.check_constraint "end_date >= start_date", name: "agreements_date_order_check"
     t.check_constraint "equity_percentage >= 0::numeric AND equity_percentage <= 100::numeric", name: "agreements_equity_percentage_check"
     t.check_constraint "hourly_rate >= 0::numeric", name: "agreements_hourly_rate_check"
     t.check_constraint "payment_type::text = ANY (ARRAY['Hourly'::character varying::text, 'Equity'::character varying::text, 'Hybrid'::character varying::text])", name: "agreements_payment_type_check"
     t.check_constraint "status::text = ANY (ARRAY['Pending'::character varying::text, 'Accepted'::character varying::text, 'Completed'::character varying::text, 'Rejected'::character varying::text, 'Cancelled'::character varying::text, 'Countered'::character varying::text])", name: "agreements_status_check"
-    t.check_constraint "weekly_hours > 0 AND weekly_hours <= 40", name: "agreements_weekly_hours_check"
+    t.check_constraint "weekly_hours IS NULL OR weekly_hours > 0 AND weekly_hours <= 40", name: "agreements_weekly_hours_check"
+  end
+
+  create_table "contact_requests", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.string "company"
+    t.text "message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "subject"
+    t.boolean "newsletter"
   end
 
   create_table "conversations", force: :cascade do |t|
@@ -121,7 +140,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
   create_table "github_logs", force: :cascade do |t|
     t.bigint "project_id", null: false
     t.bigint "agreement_id"
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.string "commit_sha", null: false
     t.text "commit_message"
     t.integer "lines_added"
@@ -204,6 +223,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
     t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'in_progress'::character varying::text, 'completed'::character varying::text, 'cancelled'::character varying::text])", name: "milestones_status_check"
   end
 
+  create_table "newsletter_subscribers", force: :cascade do |t|
+    t.string "email"
+    t.string "name"
+    t.datetime "subscribed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_newsletter_subscribers_on_email", unique: true
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "title", null: false
@@ -216,6 +244,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
     t.index ["read_at"], name: "index_notifications_on_read_at", comment: "Improves unread notifications queries"
     t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at", comment: "Composite index for user's unread notifications"
     t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
+  create_table "pitch_versions", force: :cascade do |t|
+    t.string "title"
+    t.text "content"
+    t.boolean "active"
+    t.integer "version_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "project_agents", force: :cascade do |t|
@@ -447,6 +484,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_205553) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["selected_project_id"], name: "index_users_on_selected_project_id"
+  end
+
+  create_table "waiting_lists", force: :cascade do |t|
+    t.string "email"
+    t.string "name"
+    t.string "company"
+    t.string "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "pitch_version_id"
+    t.string "role"
+    t.text "message"
+    t.boolean "newsletter"
+    t.index ["email"], name: "index_waiting_lists_on_email", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

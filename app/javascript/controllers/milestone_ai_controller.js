@@ -1,6 +1,5 @@
-/* global FormData */
-
 import { Controller } from '@hotwired/stimulus';
+import { Turbo } from '@hotwired/turbo-rails';
 
 export default class MilestoneAiController extends Controller {
   static targets = ['title', 'description', 'enhanceButton', 'styleSelect'];
@@ -71,12 +70,13 @@ export default class MilestoneAiController extends Controller {
         // For new milestones, the DirectMilestoneEnhancementJob will broadcast directly
       } else {
         this.showError('AI enhancement failed. Please try again.');
-        // eslint-disable-next-line no-console
-        console.error('AI enhancement failed with status:', response.status);
+        window.FlukeLogger?.error('MilestoneAI', new Error('AI enhancement failed'), {
+          action: 'enhanceMilestone',
+          status: response.status
+        });
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('AI enhancement failed', error);
+      window.FlukeLogger?.error('MilestoneAI', error, { action: 'enhanceMilestone' });
       this.showError('AI enhancement failed. Please check your connection and try again.');
     } finally {
       this.enhanceButtonTarget.disabled = false;
@@ -238,12 +238,13 @@ export default class MilestoneAiController extends Controller {
         Turbo.renderStreamMessage(turboStream);
       } else {
         this.showError('Action failed. Please try again.');
-        // eslint-disable-next-line no-console
-        console.error(`${action} failed with status:`, response.status);
+        window.FlukeLogger?.error('MilestoneAI', new Error(`${action} failed`), {
+          action: action,
+          status: response.status
+        });
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(`${action} failed:`, error);
+      window.FlukeLogger?.error('MilestoneAI', error, { action: action });
       this.showError('Action failed. Please check your connection and try again.');
     }
   }
@@ -351,8 +352,7 @@ export default class MilestoneAiController extends Controller {
         }
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error checking enhancement status:', error);
+      window.FlukeLogger?.error('MilestoneAI', error, { action: 'checkEnhancementStatus' });
     }
   }
 
@@ -373,8 +373,7 @@ export default class MilestoneAiController extends Controller {
         Turbo.renderStreamMessage(turboStream);
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error refreshing enhancement display:', error);
+      window.FlukeLogger?.error('MilestoneAI', error, { action: 'refreshEnhancementDisplay' });
     }
   }
 

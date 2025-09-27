@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :message do
     body { "MyText" }
-    conversation { nil }
-    user { nil }
+    association :conversation
+    association :user
     read { false }
   end
 end

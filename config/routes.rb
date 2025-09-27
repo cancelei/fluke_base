@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
   # System and health check routes
   get "up" => "rails/health#show", as: :rails_health_check
-  post "csp-violation-report-endpoint" => "application#csp_violation_report"
 
 
   # Test routes for Claude Code (development only)
@@ -105,6 +104,20 @@ Rails.application.routes.draw do
       member do
         post :retry
       end
+    end
+  end
+
+  # Test-only helpers for Playwright E2E (only mounted in test env)
+  if Rails.env.test?
+    namespace :test_only do
+      # Programmatic login endpoint for E2E to establish a session quickly
+      # Accepts query or form params: email, password
+      # GET supported for convenience in headless flows
+      match "login", to: "sessions#create", via: [ :get, :post ]
+      # Minimal data seeding helpers
+      match "create_project", to: "data#create_project", via: [ :get, :post ]
+      match "create_agreement", to: "data#create_agreement", via: [ :get, :post ]
+      match "create_conversation", to: "data#create_conversation", via: [ :get, :post ]
     end
   end
 end

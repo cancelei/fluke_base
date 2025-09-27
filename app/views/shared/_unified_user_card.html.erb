@@ -7,9 +7,7 @@
   custom_stats = options[:custom_stats]
 %>
 
-<div class="bg-white/80 backdrop-blur-sm border border-white/30 rounded-2xl shadow-lg cursor-pointer group relative hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-     data-url="<%= person_path(user) %>"
-     onclick="if(event.target.closest('.cta-btn')){return;} window.location=this.dataset.url;">
+<%= link_to (user&.id ? person_path(user) : "#"), class: "block bg-white/80 backdrop-blur-sm border border-white/30 rounded-2xl shadow-lg cursor-pointer group relative hover:shadow-xl hover:-translate-y-1 transition-all duration-300 no-underline", data: { turbo_frame: "_top" } do %>
 
   <!-- Avatar Section with Gradient Overlay -->
   <div class="<%= avatar_height %> bg-gradient-to-br from-indigo-100 to-purple-100 rounded-t-2xl flex items-center justify-center relative overflow-hidden">
@@ -91,10 +89,12 @@
       View Profile
     </span>
     <% if show_message_button %>
-      <%= button_to "Connect", conversations_path(recipient_id: user.id),
+      <%= button_to "Connect", conversations_path,
+          params: { recipient_id: user.id },
           method: :post,
           data: { turbo: false },
+          onclick: "event.stopPropagation(); event.preventDefault(); this.form.submit();",
           class: "cta-btn inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-semibold rounded-lg shadow-sm hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 relative z-10" %>
     <% end %>
   </div>
-</div>
+<% end %>

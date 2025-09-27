@@ -1,5 +1,5 @@
 <% if local_assigns[:agreement] %>
-<%# # For agreement-specific time tracking %>
+<%# For agreement-specific time tracking %>
   <% agreement_participant_ids = agreement.agreement_participants.pluck(:user_id) %>
   <% total_allowed_hours = agreement.weekly_hours.to_f * agreement.duration_in_weeks.to_f %>
   <% used_hours = project.time_logs.where(user_id: agreement_participant_ids).where.not(status: "in_progress").sum(:hours_spent) +
@@ -15,7 +15,6 @@
         (project.time_logs.in_progress.any? ? ((Time.zone.now - project.time_logs.in_progress.last.started_at) / 1.hour).round(2) : 0) %>
     <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
   <% else %>
-# Agreement participant: show only their own time within the project context %>
     <% user_agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }, project: project).first %>
     <% total_allowed_hours = user_agreement&.weekly_hours.to_f * user_agreement&.duration_in_weeks.to_f %>
     <% used_hours = project.time_logs.where(user: current_user).where.not(status: "in_progress").sum(:hours_spent) +
@@ -30,7 +29,7 @@
       (project.time_logs.where.not(user_id: current_user.id).in_progress.any? ? ((Time.zone.now - project.time_logs.where.not(user_id: current_user.id).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
   <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
 <% else %>
-<%# # For individual user view %>
+<%# For individual user view %>
   <% agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).find_by(project: project) %>
   <% total_allowed_hours = agreement&.weekly_hours.to_f * agreement&.duration_in_weeks.to_f %>
   <% used_hours = project.time_logs.where(user: current_user).where.not(status: "in_progress").sum(:hours_spent) + ((current_log && current_log.started_at) ? ((Time.zone.now - current_log.started_at) / 1.hour).round(2) : 0) %>

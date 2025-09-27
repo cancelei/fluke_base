@@ -1,13 +1,21 @@
 <div class="max-w-6xl mx-auto px-4 py-8">
   <!-- Hero/Profile Header -->
   <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 p-8 mb-8">
-    <% presenter = present(@person) %>
+    <% presenter = present(@person) rescue nil %>
+    <% presenter ||= OpenStruct.new(
+      display_name: @person.full_name,
+      badges: "",
+      formatted_bio: nil,
+      member_since: "",
+      projects_count: "",
+      agreements_count: ""
+    ) %>
     <div class="flex flex-col lg:flex-row items-center lg:items-start gap-8">
       <!-- Avatar Section -->
       <div class="flex-shrink-0">
         <% if @person.avatar.attached? %>
           <div class="relative">
-            <%= image_tag @person.avatar, class: "h-32 w-32 rounded-full object-cover shadow-lg ring-4 ring-white/50" %>
+            <%= image_tag @person.avatar, alt: @person.initials, class: "h-32 w-32 rounded-full object-cover shadow-lg ring-4 ring-white/50" %>
             <div class="absolute inset-0 rounded-full bg-gradient-to-t from-black/20 to-transparent"></div>
           </div>
         <% else %>
@@ -170,7 +178,7 @@
       <a href="#track" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-indigo-700 hover:bg-indigo-50/50 rounded-lg transition-all duration-200 border-2 border-transparent hover:border-indigo-200">Track Record</a>
       <a href="#projects" class="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-indigo-700 hover:bg-indigo-50/50 rounded-lg transition-all duration-200 border-2 border-transparent hover:border-indigo-200">Projects</a>
       <% if current_user == @person %>
-        <a href="<%= profile_edit_path %>" class="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg transition-all duration-200 shadow-md">Edit Profile</a>
+        <%= link_to "Edit Profile", profile_edit_path, class: "px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg transition-all duration-200 shadow-md" %>
       <% end %>
     </div>
   </div>
@@ -306,12 +314,22 @@
                     <svg class="h-4 w-4 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
-                    <a href="<%= project.project_link.start_with?("http") ? project.project_link : "https://#{project.project_link}" %>" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline truncate max-w-[90%] flex items-center">
-                      <%= project.project_link %>
-                      <svg class="h-3 w-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
+                    <% safe_url = begin
+                         uri = URI.parse(project.project_link.start_with?("http") ? project.project_link : "https://#{project.project_link}")
+                         %w[http https].include?(uri.scheme) ? uri.to_s : nil
+                       rescue URI::InvalidURIError
+                         nil
+                       end %>
+                    <% if safe_url %>
+                      <%= link_to safe_url, target: "_blank", class: "text-blue-600 hover:text-blue-800 hover:underline truncate max-w-[90%] flex items-center" do %>
+                        <%= project.project_link %>
+                        <svg class="h-3 w-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      <% end %>
+                    <% else %>
+                      <span class="text-gray-500 text-sm">Invalid URL</span>
+                    <% end %>
                   </div>
                 <% end %>
               </div>

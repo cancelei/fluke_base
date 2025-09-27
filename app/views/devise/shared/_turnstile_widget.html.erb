@@ -1,26 +1,33 @@
-<% if Rails.env.development? %>
-  <div class="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
-    🔧 Development Mode: Turnstile verification is disabled for easier testing.
-  </div>
-<% elsif Rails.application.config.turnstile[:site_key].present? %>
+<% if Rails.env.production? && RailsCloudflareTurnstile.configuration.enabled && Rails.application.config.turnstile[:site_key].present? %>
   <!-- Cloudflare Turnstile widget in invisible mode -->
-  <%= cloudflare_turnstile(
-    size: "invisible",
-    theme: "auto",
-    tabindex: 0,
-    response_field_name: "cf-turnstile-response",
-    data: {
-      callback: "onTurnstileSuccess",
-      "error-callback": "onTurnstileError",
-      "expired-callback": "onTurnstileExpired"
-    }
-  ) %>
+  <div class="cf-turnstile"
+       data-sitekey="<%= Rails.application.config.turnstile[:site_key] %>"
+       data-callback="onTurnstileSuccess"
+       data-error-callback="onTurnstileError"
+       data-expired-callback="onTurnstileExpired"
+       data-size="normal"
+       data-theme="auto"
+       data-tabindex="0">
+  </div>
+
+  <!-- Hidden input for the response -->
+  <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response">
 
   <script nonce="<%= content_security_policy_nonce %>">
     window.onTurnstileSuccess = function(token) {
-      console.log('Turnstile challenge passed:', token);
+      window.FlukeLogger?.formEvent('Turnstile verification successful', {
+        tokenLength: token?.length,
+        formAction: document.querySelector('form[data-controller*="form-submission"]')?.action
+      });
+
+      // Set the token in the hidden input
+      const responseInput = document.getElementById('cf-turnstile-response');
+      if (responseInput) {
+        responseInput.value = token;
+      }
+
       // Find the form containing the turnstile widget and enable submission
-      const form = document.querySelector('form[action*="sign_in"]');
+      const form = document.querySelector('form[data-controller*="form-submission"]');
       if (form) {
         const submitButton = form.querySelector('input[type="submit"]');
         if (submitButton) {
@@ -31,22 +38,56 @@
     };
 
     window.onTurnstileError = function(error) {
-      console.error('Turnstile error:', error);
-      // Show user-friendly error message
-      const form = document.querySelector('form[action*="sign_in"]');
-      if (form) {
-        const submitButton = form.querySelector('input[type="submit"]');
-        if (submitButton) {
-          submitButton.disabled = true;
-          submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+      window.FlukeLogger?.error('Turnstile', error, {
+        action: 'verification',
+        formAction: document.querySelector('form[data-controller*="form-submission"]')?.action
+      });
+
+      // Clear the token on error
+      const responseInput = document.getElementById('cf-turnstile-response');
+      if (responseInput) {
+        responseInput.value = '';
+      }
+
+      // Handle form state based on environment
+      const isDevelopment = <%= Rails.env.development?.to_json %>;
+      if (isDevelopment) {
+        // In development, show a helpful message but don't block form submission
+        console.warn('Turnstile error in development:', error);
+        const form = document.querySelector('form[data-controller*="form-submission"]');
+        if (form) {
+          const submitButton = form.querySelector('input[type="submit"]');
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+          }
+        }
+      } else {
+        // In production, disable form submission on error
+        const form = document.querySelector('form[data-controller*="form-submission"]');
+        if (form) {
+          const submitButton = form.querySelector('input[type="submit"]');
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+          }
         }
       }
     };
 
     window.onTurnstileExpired = function() {
-      console.warn('Turnstile token expired');
+      window.FlukeLogger?.warning('Turnstile', 'Token expired, form submission disabled', {
+        formAction: document.querySelector('form[data-controller*="form-submission"]')?.action
+      });
+
+      // Clear the token on expiration
+      const responseInput = document.getElementById('cf-turnstile-response');
+      if (responseInput) {
+        responseInput.value = '';
+      }
+
       // Reset form state when token expires
-      const form = document.querySelector('form[action*="sign_in"]');
+      const form = document.querySelector('form[data-controller*="form-submission"]');
       if (form) {
         const submitButton = form.querySelector('input[type="submit"]');
         if (submitButton) {
@@ -58,7 +99,7 @@
 
     // Initialize form state on page load
     document.addEventListener('DOMContentLoaded', function() {
-      const form = document.querySelector('form[action*="sign_in"]');
+      const form = document.querySelector('form[data-controller*="form-submission"]');
       if (form) {
         const submitButton = form.querySelector('input[type="submit"]');
         if (submitButton) {
@@ -69,6 +110,10 @@
       }
     });
   </script>
+<% elsif Rails.env.development? %>
+  <div class="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+    ℹ️ Turnstile is disabled in development for easier local testing.
+  </div>
 <% else %>
   <div class="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md">
     ⚠️ Turnstile is not configured. Please set TURNSTILE_SITE_KEY environment variable.

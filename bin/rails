@@ -1,4 +1,22 @@
 #!/usr/bin/env ruby
 APP_PATH = File.expand_path("../config/application", __dir__)
 require_relative "../config/boot"
+
+# Forward unified test task when invoked via `rails test`
+if ARGV.first == "test"
+  env = {}
+
+  # Normalize legacy coverage flag from bin/test
+  filtered_args = []
+  ARGV[1..].to_a.each do |arg|
+    if arg == "--coverage"
+      env["COVERAGE"] = "true"
+    else
+      filtered_args << arg
+    end
+  end
+
+  exec env, "bundle", "exec", "rake", "test", *filtered_args
+end
+
 require "rails/commands"

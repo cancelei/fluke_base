@@ -16,6 +16,19 @@ done
 # Run database migrations
 ./bin/rails db:prepare
 
+# Run database seeding for staging environment
+if [ "$RAILS_ENV" = "staging" ] && [ "$SKIP_SEED" != "true" ]; then
+  echo "🌱 Running database seeding for staging environment..."
+  ./bin/rails db:seed
+  if [ $? -eq 0 ]; then
+    echo "✅ Database seeding completed successfully"
+  else
+    echo "⚠️ Database seeding failed, but continuing with application startup"
+  fi
+elif [ "$SKIP_SEED" = "true" ]; then
+  echo "⏭️ Skipping database seeding (SKIP_SEED=true)"
+fi
+
 # SolidCache, SolidQueue, and SolidCable tables are in schema - no manual creation needed
 
 # Start the application

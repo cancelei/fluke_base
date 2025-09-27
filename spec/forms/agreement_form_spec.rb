@@ -24,7 +24,12 @@ RSpec.describe AgreementForm, type: :model do
   end
 
   describe "validations" do
-    subject { AgreementForm.new(valid_attributes) }
+    subject {
+      # Ensure milestones exist before creating form
+      milestone1
+      milestone2
+      AgreementForm.new(valid_attributes)
+    }
 
     it { should validate_presence_of(:project_id) }
     it { should validate_presence_of(:initiator_user_id) }
@@ -63,11 +68,23 @@ RSpec.describe AgreementForm, type: :model do
 
     describe "end_date_after_start_date" do
       it "is valid when end date is after start date" do
-        form = AgreementForm.new(valid_attributes)
+        # Ensure milestones exist and are persisted before creating form
+        m1 = milestone1
+        m2 = milestone2
+        # Force persistence
+        m1.save!
+        m2.save!
+
+        # Create attributes with actual milestone IDs
+        attributes = valid_attributes.merge(milestone_ids: "#{m1.id},#{m2.id}")
+        form = AgreementForm.new(attributes)
         expect(form).to be_valid
       end
 
       it "is invalid when end date is before start date" do
+        # Ensure milestones exist before creating form
+        milestone1
+        milestone2
         form = AgreementForm.new(valid_attributes.merge(
           start_date: 4.weeks.from_now.to_date,
           end_date: 1.week.from_now.to_date

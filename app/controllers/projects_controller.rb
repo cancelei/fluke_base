@@ -31,7 +31,7 @@ class ProjectsController < ApplicationController
       @suggested_mentors = []
     end
 
-    # Update the selected project in the session
+    # Update the selected project in the session (only for project owners)
     if current_user && current_user.projects.include?(@project)
       ProjectSelectionService.new(current_user, session, @project.id).call
       @selected_project = @project
@@ -55,40 +55,28 @@ class ProjectsController < ApplicationController
       GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
       redirect_to @project, notice: "Project was successfully created."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
   def edit
     authorize! :update, @project
 
-    @project_form = ProjectForm.new(
-      name: @project.name,
-      description: @project.description,
-      stage: @project.stage,
-      category: @project.category,
-      current_stage: @project.current_stage,
-      target_market: @project.target_market,
-      funding_status: @project.funding_status,
-      team_size: @project.team_size,
-      collaboration_type: @project.collaboration_type,
-      repository_url: @project.repository_url,
-      project_link: @project.project_link,
-      public_fields: @project.public_fields,
-      user_id: @project.user_id
-    )
+    @project_form = ProjectForm.new(project_to_form_attributes(@project))
   end
 
   def update
     authorize! :update, @project
 
-    @project_form = ProjectForm.new(project_params.merge(user_id: @project.user_id))
+    # Pre-fill form with existing attributes to allow partial updates
+    base_attrs = project_to_form_attributes(@project)
+    @project_form = ProjectForm.new(base_attrs.merge(project_params).merge(user_id: @project.user_id))
 
     if @project_form.valid?
       @project_form.update_project(@project)
       redirect_to @project, notice: "Project was successfully updated."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -107,5 +95,23 @@ class ProjectsController < ApplicationController
 
   def project_params
     params.require(:project).permit(:name, :description, :stage, :category, :current_stage, :target_market, :funding_status, :team_size, :collaboration_type, :repository_url, :project_link, public_fields: [])
+  end
+
+  def project_to_form_attributes(project)
+    {
+      name: project.name,
+      description: project.description,
+      stage: project.stage,
+      category: project.category,
+      current_stage: project.current_stage,
+      target_market: project.target_market,
+      funding_status: project.funding_status,
+      team_size: project.team_size,
+      collaboration_type: project.collaboration_type,
+      repository_url: project.repository_url,
+      project_link: project.project_link,
+      public_fields: project.public_fields,
+      user_id: project.user_id
+    }
   end
 end

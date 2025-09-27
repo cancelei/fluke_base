@@ -7,22 +7,22 @@ class AgreementForm < ApplicationForm
   attribute :start_date, :date
   attribute :end_date, :date
   attribute :tasks, :string
-  attribute :weekly_hours, :integer
-  attribute :hourly_rate, :decimal
-  attribute :equity_percentage, :decimal
+  attribute :weekly_hours, :string
+  attribute :hourly_rate, :string
+  attribute :equity_percentage, :string
   attribute :milestone_ids, :string
   attribute :counter_agreement_id, :integer
   attribute :status, :string, default: Agreement::PENDING
   attribute :terms, :string
 
   validates :project_id, :initiator_user_id, :other_party_user_id, :agreement_type, :payment_type, presence: true
-  validates :start_date, :end_date, :tasks, :weekly_hours, presence: true
-  validates :weekly_hours, numericality: { greater_than: 0, less_than_or_equal_to: 40 }
+  validates :start_date, :end_date, :tasks, presence: true
+  validates :weekly_hours, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 40, only_integer: true }, if: -> { agreement_type == Agreement::MENTORSHIP }
   validates :hourly_rate, presence: true, numericality: { greater_than_or_equal_to: 0 },
             if: -> { payment_type == Agreement::HOURLY || payment_type == Agreement::HYBRID }
   validates :equity_percentage, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 },
             if: -> { payment_type == Agreement::EQUITY || payment_type == Agreement::HYBRID }
-  validates :milestone_ids, presence: true, if: -> { agreement_type == Agreement::MENTORSHIP }
+  validate :milestone_ids_presence, if: -> { agreement_type == Agreement::MENTORSHIP }
 
   validate :end_date_after_start_date
   validate :different_parties
@@ -32,11 +32,11 @@ class AgreementForm < ApplicationForm
   def initialize(attributes = {})
     super
     self.agreement_type = determine_agreement_type if agreement_type.blank?
-    self.milestone_ids = parse_milestone_ids(attributes["milestone_ids"])
+    self.milestone_ids = parse_milestone_ids(attributes[:milestone_ids] || attributes["milestone_ids"])
   end
 
   def milestone_ids_array
-    @milestone_ids_array ||= parse_milestone_ids(attributes["milestone_ids"])
+    @milestone_ids_array ||= parse_milestone_ids(milestone_ids)
   end
 
   def milestone_ids=(value)
@@ -112,17 +112,17 @@ class AgreementForm < ApplicationForm
 
   def assign_attributes_to_agreement
     @agreement.assign_attributes(
-      project_id: project_id,
-      agreement_type: agreement_type,
-      payment_type: payment_type,
-      start_date: start_date,
-      end_date: end_date,
-      tasks: tasks,
-      weekly_hours: weekly_hours,
-      hourly_rate: hourly_rate,
-      equity_percentage: equity_percentage,
-      milestone_ids: milestone_ids_array,
-      status: status
+      project_id: project_id || @agreement.project_id,
+      agreement_type: agreement_type || @agreement.agreement_type,
+      payment_type: payment_type || @agreement.payment_type,
+      start_date: start_date || @agreement.start_date,
+      end_date: end_date || @agreement.end_date,
+      tasks: tasks || @agreement.tasks,
+      weekly_hours: weekly_hours.nil? ? @agreement.weekly_hours : weekly_hours.to_i,
+      hourly_rate: hourly_rate.nil? ? @agreement.hourly_rate : hourly_rate.to_f,
+      equity_percentage: equity_percentage.nil? ? @agreement.equity_percentage : equity_percentage.to_f,
+      milestone_ids: milestone_ids_array.presence || @agreement.milestone_ids,
+      status: status || @agreement.status
     )
 
     # Create or update agreement participants
@@ -222,6 +222,12 @@ class AgreementForm < ApplicationForm
       value.split(",").map(&:strip).map(&:to_i).reject(&:zero?)
     else
       []
+    end
+  end
+
+  def milestone_ids_presence
+    if milestone_ids_array.blank?
+      errors.add(:milestone_ids, "can't be blank")
     end
   end
 

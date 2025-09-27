@@ -39,7 +39,7 @@ class AgreementParticipant < ApplicationRecord
   end
 
   def can_accept_or_counter?
-    accept_or_counter_turn_id == user_id
+    accept_or_counter_turn_id == user_id && agreement.status == Agreement::PENDING
   end
 
   def other_participants

@@ -128,7 +128,7 @@
       <% if @project.user==current_user ||
         @project.agreements.active.joins(:agreement_participants).exists?(agreement_participants: { user_id: current_user.id }) %>
         <span class="hidden sm:block">
-          <%= button_to refresh_project_github_logs_path(branch: @selected_branch, user_name: @user_name,
+          <%= button_to refresh_project_github_logs_path(@project, branch: @selected_branch, user_name: @user_name,
             agreement_only: @agreement_only), method: :post,
             class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
                         data: { confirm: "Are you sure you want to refresh the commits? This may take a few minutes." } do %>

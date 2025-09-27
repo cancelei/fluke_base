@@ -1,3 +1,5 @@
+require "json"
+
 class ProjectForm < ApplicationForm
   # Make this form object use 'project' as the param key for Rails forms
   def self.model_name
@@ -14,7 +16,7 @@ class ProjectForm < ApplicationForm
   attribute :collaboration_type, :string
   attribute :repository_url, :string
   attribute :project_link, :string
-  attribute :public_fields, :string
+  attribute :public_fields, default: -> { [] }
   attribute :user_id, :integer
 
   validates :name, :description, :stage, presence: true
@@ -31,12 +33,13 @@ class ProjectForm < ApplicationForm
   end
 
   def public_fields_array
-    @public_fields_array ||= Array(public_fields)
+    @public_fields_array ||= parse_public_fields(public_fields)
   end
 
   def public_fields=(value)
-    @public_fields_array = nil
-    super(parse_public_fields(value))
+    parsed = parse_public_fields(value)
+    @public_fields_array = parsed
+    super(parsed)
   end
 
   def stage_options
@@ -103,20 +106,41 @@ class ProjectForm < ApplicationForm
   end
 
   def parse_public_fields(value)
-    case value
+    array = case value
     when String
-      value.split(",").map(&:strip).reject(&:blank?)
+              parse_string_public_fields(value)
     when Array
-      value.reject(&:blank?)
+              value
+    when nil
+              []
     else
-      []
+              Array.wrap(value)
     end
+
+    Array.wrap(array).map { |item| item.to_s.strip }.reject(&:blank?)
+  end
+
+  def parse_string_public_fields(value)
+    return [] if value.blank?
+
+    parsed = parse_json_array(value)
+    return parsed if parsed
+
+    value.split(",")
+  end
+
+  def parse_json_array(value)
+    parsed = JSON.parse(value)
+    parsed.is_a?(Array) ? parsed : nil
+  rescue JSON::ParserError
+    nil
   end
 
   def set_defaults
     self.stage ||= Project::IDEA
     self.current_stage ||= stage.humanize if stage.present?
     self.collaboration_type ||= Project::SEEKING_MENTOR
-    self.public_fields ||= []
+    # Make essential fields public by default for better project discovery
+    self.public_fields = Project::DEFAULT_PUBLIC_FIELDS if public_fields_array.blank?
   end
 end

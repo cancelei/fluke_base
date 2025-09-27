@@ -13,7 +13,7 @@ export default class extends Controller {
   }
 
   setupMutationObserver() {
-    this.observer = new MutationObserver(_mutations => {
+    this.observer = new MutationObserver(() => {
       this.scrollToBottom();
     });
 

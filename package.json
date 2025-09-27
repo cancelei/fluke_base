@@ -6,25 +6,32 @@
     "build:css": "tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --minify -c ./config/tailwind.config.js",
     "lint": "./bin/lint",
     "lint:fix": "./bin/lint --fix",
-    "lint:js": "eslint app/javascript/**/*.js --format=stylish",
-    "lint:js:fix": "eslint app/javascript/**/*.js --fix",
-    "test": "./bin/test",
-    "test:unit": "./bin/test --type unit",
-    "test:integration": "./bin/test --type integration",
-    "test:system": "./bin/test --type system",
-    "test:coverage": "./bin/test --coverage",
-    "ci": "./bin/lint && ./bin/test --coverage"
+    "lint:js": "npx eslint app/javascript/**/*.js --format=stylish",
+    "lint:js:fix": "npx eslint app/javascript/**/*.js --fix",
+    "lint:dockerfile": "bin/linters/hadolint --config .hadolint.yaml Dockerfile",
+    "lint:yaml": "npx yaml-lint config/*.yml .github/workflows/*.yml",
+    "test": "bundle exec rails test",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ff": "playwright test --max-failures=1",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:cov": "E2E_COVERAGE=1 playwright test",
+    "test:coverage": "COVERAGE=true bundle exec rails test",
+    "ci": "./bin/lint && COVERAGE=true bundle exec rails test",
+    "postinstall": "node -e \"if(!process.env.PLAYWRIGHT_INSTALL){process.exit(0)}\" && playwright install --with-deps"
   },
   "devDependencies": {
-    "@eslint/js": "^9.35.0",
+    "@eslint/js": "^9.36.0",
+    "@playwright/test": "^1.48.2",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "autoprefixer": "^10.4.21",
-    "eslint": "^9.35.0",
+    "eslint": "^9.36.0",
+    "globals": "^16.4.0",
     "postcss": "^8.5.3",
     "tailwind-scrollbar-hide": "^1.1.7",
-    "tailwindcss": "^3.4.16"
-  },
-  "dependencies": {}
+    "tailwindcss": "^3.4.16",
+    "yaml-lint": "^1.7.0"
+  }
 }

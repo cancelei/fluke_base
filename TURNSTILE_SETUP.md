@@ -101,10 +101,19 @@ Example with custom options:
 
 ### Development Environment
 
-For local development, make sure to:
-1. Add `localhost` to your Turnstile site domains
-2. Use `127.0.0.1` if that's what you're using locally
-3. Test with both HTTP and HTTPS if applicable
+Turnstile is **disabled by default** in development for easier local testing:
+- No Turnstile validation is performed
+- Forms work normally without any security checks
+- A helpful message is shown instead of the widget
+- This allows you to develop without configuring Turnstile domains
+
+#### Enabling Turnstile in Development (Optional)
+If you want to test Turnstile functionality in development:
+1. Add `localhost` to your Turnstile site domains in the Cloudflare dashboard
+2. Add `127.0.0.1` if you're using that instead of localhost
+3. Add your development port (e.g., `localhost:3000`) if needed
+4. Set the `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` environment variables
+5. Restart your Rails server
 
 ## Security Notes
 

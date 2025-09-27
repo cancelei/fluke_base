@@ -21,7 +21,7 @@ export default class extends Controller {
     };
 
     this.observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry, _index) => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
           // Add staggered delay for multiple elements
           const delay = Array.from(this.elementTargets).indexOf(entry.target) * 100;

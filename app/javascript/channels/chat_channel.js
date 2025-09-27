@@ -2,11 +2,11 @@ import consumer from './consumer';
 
 consumer.subscriptions.create({ channel: 'ChatChannel', room: 'general' }, {
   connected() {
-    console.log('Connected to chat channel');
+    window.FlukeLogger?.websocketEvent('ChatChannel', 'connected', { room: 'general' });
   },
 
   disconnected() {
-    console.log('Disconnected from chat channel');
+    window.FlukeLogger?.websocketEvent('ChatChannel', 'disconnected', { room: 'general' });
   },
 
   received(data) {

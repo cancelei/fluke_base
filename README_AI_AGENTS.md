@@ -1,5 +1,8 @@
 # AI Agent Codebase Analysis Guide: FlukeBase
 
+> Canonical run/debug instructions for AI agents have been consolidated here: `docs/AI_OPERATIONS.md`.
+> Use that as the single source for how to run, test, and debug.
+
 ## Project Overview
 
 **FlukeBase** is a Rails 8.0.2 application designed as a collaborative platform connecting entrepreneurs, mentors, and co-founders. The system facilitates project management, time tracking, agreement workflows, and GitHub integration for software development collaborations.
@@ -127,17 +130,14 @@ The application heavily uses service objects for business logic encapsulation:
 **Coverage**: SimpleCov with HTML and LCOV output formats
 **CI Integration**: GitHub Actions with parallelized linting
 
-### Custom Test Runner (`bin/test`)
-**AI Agent Usage**: Execute via `./bin/test` with options:
-- `--type unit`: Models, services, helpers
-- `--type integration`: Controllers, requests
-- `--type system`: End-to-end browser tests
-- `--coverage`: Generate coverage reports
+### Unified Test Runner (`rake test`)
+**AI Agent Usage**: Execute via `bundle exec rake test`.
+- Runs in order: ESLint → RSpec → Playwright (Rails server auto-starts in test env on port 5010).
+- Coverage: set `COVERAGE=true` (e.g., `COVERAGE=true bundle exec rake test`).
 
-**Coverage Configuration** (`spec/support/coverage.rb`):
-- Minimum thresholds currently disabled for development
-- Excludes: `app/controllers/application_controller.rb`, base classes
-- Groups by component: Controllers, Models, Helpers, Views, Services
+**RSpec Coverage** (`spec/support/coverage.rb`):
+- Controlled by `COVERAGE=true`.
+- HTML: `coverage/index.html`, LCOV: `coverage/lcov.info`.
 
 ## GitHub Actions CI/CD
 
@@ -166,12 +166,22 @@ The application heavily uses service objects for business logic encapsulation:
 rails server                    # Start development server (default port 3000)
 ./bin/dev                       # Start with live reloading
 rails console                   # Interactive Rails console  
-./bin/test                      # Run essential test suite
-./bin/test --coverage           # Run tests with coverage reporting
+bundle exec rake test          # Unified tests (ESLint, RSpec, Playwright)
+COVERAGE=true bundle exec rake test  # With coverage
 ./bin/lint                      # Run all linters in parallel
 npm run ci                      # Full CI pipeline locally
 kamal deploy                    # Deploy to production
 ```
+
+### Playwright (E2E)
+- Config: `playwright.config.js` (JS-only). Web server: `bin/rails server -e test -p 5010`.
+- Run: `npm run test:e2e` | Headed: `npm run test:e2e:headed`.
+- Base URL: `http://127.0.0.1:5010`.
+
+### Debugging Tips
+- RSpec: `bundle exec rspec spec/path/to/file_spec.rb --format documentation`.
+- ESLint: `npm run lint:js:fix` for auto-fix.
+- Playwright: use `--headed --debug` flags; inspect reports under `playwright-report/` and traces on retry.
 
 ### Test Endpoints (Development Only)
 - `http://localhost:3000/test/turbo` - Turbo implementation verification

@@ -63,10 +63,8 @@ class User < ApplicationRecord
   end
 
   def selected_project
-    # This method is used by the navbar and other views to get the currently selected project
-    # The actual project selection is managed by ApplicationController#set_selected_project
-    # which stores the project_id in the session
-    nil # The actual project is set by the controller
+    # Delegate to ActiveRecord association; controller may still set session for convenience
+    super
   end
 
   def show_project_context_nav?

@@ -4,6 +4,8 @@ class AgreementCalculationsService
   end
 
   def total_cost
+    # For equity-only agreements, there is no direct hourly cost component
+    return 0 if @agreement.payment_type == Agreement::EQUITY
     return nil unless @agreement.hourly_rate.present? && @agreement.weekly_hours.present?
     return 0 if @agreement.hourly_rate == 0
 
@@ -19,31 +21,37 @@ class AgreementCalculationsService
   def payment_details
     case @agreement.payment_type
     when Agreement::HOURLY
-      "#{@agreement.hourly_rate}$/hour"
+      base = "#{@agreement.hourly_rate}$/hour"
+      if @agreement.weekly_hours.present?
+        "#{base} for #{@agreement.weekly_hours}h/week"
+      else
+        base
+      end
     when Agreement::EQUITY
       "#{@agreement.equity_percentage}% equity"
     when Agreement::HYBRID
-      "#{@agreement.hourly_rate}$/hour + #{@agreement.equity_percentage}% equity"
+      hourly = "#{@agreement.hourly_rate}$/hour ($#{@agreement.hourly_rate}/hour)"
+      if @agreement.weekly_hours.present?
+        "#{hourly}, #{@agreement.weekly_hours}h/week + #{@agreement.equity_percentage}% equity"
+      else
+        "#{hourly} + #{@agreement.equity_percentage}% equity"
+      end
     end
   end
 
   def total_hours_logged(context_user = nil)
-    # Context-aware time tracking:
-    # - For project owners: show only the other party's hours (the work done for them)
-    # - For agreement participants: show all agreement participants' hours
-    # - Default (no context): show other party's hours (most common use case)
+    # Aggregate time tracking across agreement milestones. When a context user
+    # is provided, return only that user's completed hours. Otherwise, return
+    # the total for all agreement participants.
+    milestone_ids = Array(@agreement.milestone_ids).presence
+    scope = @agreement.project.time_logs.completed
+    scope = scope.where(milestone_id: milestone_ids) if milestone_ids
 
-    if context_user&.id == @agreement.project.user_id
-      # Project owner viewing - show only other party's time logs
-      other_party = @agreement.other_party
-      return 0 unless other_party
-      @agreement.project.time_logs.where(user_id: other_party.id).completed.sum(:hours_spent).round(2)
+    if context_user
+      scope.where(user_id: context_user.id).sum(:hours_spent).round(2)
     else
-      # Agreement participant or default - show work done by non-project-owner participants
-      # This is typically the mentor/co-founder's work
-      other_party = @agreement.other_party
-      return 0 unless other_party
-      @agreement.project.time_logs.where(user_id: other_party.id).completed.sum(:hours_spent).round(2)
+      participant_ids = @agreement.agreement_participants.pluck(:user_id)
+      scope.where(user_id: participant_ids).sum(:hours_spent).round(2)
     end
   end
 

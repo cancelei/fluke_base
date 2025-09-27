@@ -57,7 +57,7 @@
         <div class="mt-1">
           <%= form.number_field :weekly_hours, min: 1, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
         </div>
-        <p class="mt-1 text-sm text-gray-500">Estimated hours of work per week</p>
+        <p class="mt-1 text-sm text-gray-500">Estimated hours of work per week (leave blank for co-founder agreement)</p>
       </div>
 
       <div class="sm:col-span-6">
@@ -122,7 +122,6 @@
       </div>
 
       <div class="sm:col-span-6">
-
         <%= form.label :milestones, "Milestones", class: "block text-sm font-medium text-gray-700" %>
         <div class="mt-1">
           <% @milestones.each_with_index do |milestone, index| %>

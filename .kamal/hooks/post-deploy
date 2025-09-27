@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Post-deploy hook for Kamal deployments
+# This script runs after successful deployment
+#
+# Available environment variables:
+# KAMAL_RECORDED_AT
+# KAMAL_PERFORMER
+# KAMAL_VERSION
+# KAMAL_HOSTS
+# KAMAL_ROLE (if set)
+# KAMAL_DESTINATION (if set)
+# KAMAL_RUNTIME
+
+echo "Post-deploy hook started for $KAMAL_DESTINATION"
+echo "Deployed by: $KAMAL_PERFORMER"
+echo "Version: $KAMAL_VERSION"
+echo "Runtime: $KAMAL_RUNTIME seconds"
+
+# Only run seeding for staging deployments
+if [ "$KAMAL_DESTINATION" = "staging" ]; then
+  echo "🌱 Running database seeding for staging environment..."
+  
+  # Run the seeding command on the deployed container
+  # Using kamal app exec to run the command in the deployed container
+  kamal app exec "bin/rails db:seed RAILS_ENV=staging" --destination staging
+  
+  if [ $? -eq 0 ]; then
+    echo "✅ Database seeding completed successfully for staging"
+  else
+    echo "❌ Database seeding failed for staging"
+    exit 1
+  fi
+else
+  echo "Skipping database seeding for $KAMAL_DESTINATION environment"
+fi
+
+echo "Post-deploy hook completed for $KAMAL_DESTINATION"

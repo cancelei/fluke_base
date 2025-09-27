@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="environment" content="<%= Rails.env %>">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -22,8 +23,10 @@
     <%= stylesheet_link_tag "application.tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
-    <%# Cloudflare Turnstile script %>
-    <%= cloudflare_turnstile_script_tag %>
+    <%# Cloudflare Turnstile script - only load in production if enabled %>
+    <% if Rails.env.production? && RailsCloudflareTurnstile.configuration.enabled %>
+      <%= cloudflare_turnstile_script_tag %>
+    <% end %>
   </head>
 
   <body class="min-h-screen bg-gray-50">

@@ -11,18 +11,30 @@ export default class extends Controller {
   connect() {
     this.interval = null;
     this.tick = 0;
+    window.FlukeLogger?.controllerLifecycle('TimerController', 'connected', {
+      hasStartedAt: !!this.startedAtValue,
+      usedHours: this.usedHoursValue
+    });
     if (this.startedAtValue) {
       this.startTimer();
     }
   }
 
   startTimer() {
+    window.FlukeLogger?.userInteraction('started timer', this.playButtonTarget, {
+      startedAt: this.startedAtValue,
+      usedHours: this.usedHoursValue
+    });
     this.playButtonTarget.classList.add('hidden');
     this.stopButtonTarget.classList.remove('hidden');
     this.interval = setInterval(() => this.updateTimer(), 1000);
   }
 
   stopTimer() {
+    window.FlukeLogger?.userInteraction('stopped timer', this.stopButtonTarget, {
+      duration: this.tick,
+      usedHours: this.usedHoursValue
+    });
     this.playButtonTarget.classList.remove('hidden');
     this.stopButtonTarget.classList.add('hidden');
     clearInterval(this.interval);

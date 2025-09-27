@@ -214,7 +214,7 @@ kamal app logs                  # View application logs
 1. Create feature branch from `main`
 2. Implement changes with tests
 3. Ensure all linting passes: `npm run lint:fix`
-4. Run test suite: `./bin/test --coverage`
+4. Run test suite: `COVERAGE=true bundle exec rake test`
 5. Create pull request
 
 ### Code Standards

@@ -76,7 +76,11 @@ export default class extends Controller {
       this.updateRecordingUI(true);
 
     } catch (err) {
-      console.error('Recording error:', err);
+      window.FlukeLogger?.error('MessageRecorder', err, {
+        action: 'startRecording',
+        hasMediaDevices: !!navigator.mediaDevices,
+        hasGetUserMedia: !!navigator.mediaDevices?.getUserMedia
+      });
       this.showError('Microphone access denied or not available.');
     }
   }
@@ -266,7 +270,7 @@ export default class extends Controller {
     alert(message);
   }
 
-  handleFormSubmit(_event) {
+  handleFormSubmit() {
     // Clean up on form submit
     if (this.isPlaying) {
       this.pausePlayback();

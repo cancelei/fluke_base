@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Users::RegistrationsController < Devise::RegistrationsController
-  before_action :validate_cloudflare_turnstile, only: [ :create ]
+  before_action :validate_cloudflare_turnstile, only: [ :create ], if: -> { Rails.env.production? && RailsCloudflareTurnstile.configuration.enabled }
 
   # The path used after sign up.
   def after_sign_up_path_for(resource)
@@ -14,7 +14,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def handle_turnstile_failure
     self.resource = build_resource(sign_up_params)
     resource.errors.add(:base, "Security verification failed. Please try again.")
-    render :new, status: :unprocessable_entity
+    render :new, status: :unprocessable_content
   end
 
   # Rescue from the gem's exception

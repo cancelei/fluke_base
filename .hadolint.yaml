@@ -1,0 +1,17 @@
+---
+# Hadolint configuration file
+# See: https://github.com/hadolint/hadolint
+
+# Rules to ignore (can be useful for Rails apps with specific needs)
+ignored:
+  - DL3059  # Multiple consecutive RUN instructions - sometimes needed for Rails setup
+
+# Rules that should be warnings instead of errors
+warning:
+  - DL3008  # Pin versions in apt get install - can be overly strict for development
+
+# Trusted registries for base images
+trustedRegistries:
+  - docker.io
+  - registry-1.docker.io
+  - ghcr.io

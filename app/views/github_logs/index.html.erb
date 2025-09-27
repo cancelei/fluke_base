@@ -1,3 +1,11 @@
-<%= turbo_stream_from "project_#{@project.id}_github_commits" %>
-
-<%= render "github_logs" %>
+<% if @project.present? %>
+  <%= turbo_stream_from "project_#{@project.id}_github_commits" %>
+  <%= render "github_logs" %>
+<% else %>
+  <div class="max-w-4xl mx-auto my-10 rounded-xl bg-white/90 border border-gray-200 shadow-sm p-8 text-center">
+    <h2 class="text-xl font-semibold text-gray-800">GitHub activity is unavailable</h2>
+    <p class="mt-3 text-sm text-gray-600">
+      We couldn't load repository data because the project context is missing. Please reopen this page from a specific project.
+    </p>
+  </div>
+<% end %>

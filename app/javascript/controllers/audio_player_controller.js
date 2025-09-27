@@ -29,26 +29,35 @@ export default class extends Controller {
 
       // Set the source if provided via data attribute
       if (this.srcValue) {
-        console.log('Setting audio source:', this.srcValue);
+        window.FlukeLogger?.mediaEvent('source set', { src: this.srcValue });
         this.audioTarget.src = this.srcValue;
         this.audioTarget.load(); // Force load the audio
       }
     } else {
-      console.error('Audio target not found for audio player controller');
+      window.FlukeLogger?.error('AudioPlayer', new Error('Audio target not found'), {
+        action: 'connect',
+        hasAudioTarget: !!this.audioTarget
+      });
     }
   }
 
   onLoadStart() {
-    console.log('Audio loading started');
+    window.FlukeLogger?.mediaEvent('loading started');
   }
 
   onCanPlay() {
-    console.log('Audio can play');
+    window.FlukeLogger?.mediaEvent('can play', {
+      duration: this.audioTarget.duration,
+      readyState: this.audioTarget.readyState
+    });
   }
 
   onLoadedMetadata() {
     this.duration = this.audioTarget.duration;
-    console.log('Audio metadata loaded, duration:', this.duration);
+    window.FlukeLogger?.mediaEvent('metadata loaded', {
+      duration: this.duration,
+      durationFormatted: this.formatTime(this.duration)
+    });
     this.updateDurationDisplay();
   }
 
@@ -68,8 +77,8 @@ export default class extends Controller {
   }
 
   onAudioError(event) {
-    console.error('Audio playback error:', event);
-    console.error('Audio error details:', {
+    window.FlukeLogger?.error('AudioPlayer', event, {
+      action: 'playback',
       error: this.audioTarget.error,
       networkState: this.audioTarget.networkState,
       readyState: this.audioTarget.readyState,
@@ -97,7 +106,7 @@ export default class extends Controller {
           this.animateWaveform();
         })
         .catch(error => {
-          console.error('Playback failed:', error);
+          window.FlukeLogger?.error('AudioPlayer', error, { action: 'playback' });
           this.showError('Playback failed');
         });
     }
@@ -150,7 +159,7 @@ export default class extends Controller {
 
   generateWaveform() {
     if (!this.hasWaveformTarget) {
-      console.warn('Waveform target not found');
+      window.FlukeLogger?.warning('AudioPlayer', 'Waveform target not found', { action: 'generateWaveform' });
       return;
     }
 
@@ -171,7 +180,10 @@ export default class extends Controller {
       waveformContainer.appendChild(bar);
     }
 
-    console.log('Generated waveform with', this.waveformBars.length, 'bars');
+    window.FlukeLogger?.mediaEvent('waveform generated', {
+      barCount: this.waveformBars.length,
+      duration: this.duration
+    });
   }
 
   animateWaveform() {
@@ -201,7 +213,7 @@ export default class extends Controller {
   }
 
   showError(message) {
-    console.error('Audio Player Error:', message);
+    window.FlukeLogger?.error('AudioPlayer', new Error(message), { action: 'showError' });
     // You could integrate with your flash message system here
   }
 

@@ -1,52 +1,33 @@
 require 'rails_helper'
 
+# TODO: Rewrite this test - milestones are nested under projects
 RSpec.describe "Milestones", type: :request do
-  describe "GET /index" do
-    it "returns http success" do
-      get "/milestones/index"
-      expect(response).to have_http_status(:success)
-    end
+  let(:owner) { create(:user) }
+  let(:project) { create(:project, user: owner) }
+
+  before { sign_in owner }
+
+  it "GET /projects/:project_id/milestones#index responds ok" do
+    get project_milestones_path(project)
+    expect(response).to have_http_status(:ok)
   end
 
-  describe "GET /show" do
-    it "returns http success" do
-      get "/milestones/show"
-      expect(response).to have_http_status(:success)
-    end
+  it "POST /projects/:project_id/milestones#create creates milestone" do
+    post project_milestones_path(project), params: { milestone: { title: 'Plan', due_date: Date.today + 7, status: Milestone::PENDING } }
+    expect(response).to redirect_to(project_path(project))
+    expect(project.milestones.reload.count).to be >= 1
   end
 
-  describe "GET /new" do
-    it "returns http success" do
-      get "/milestones/new"
-      expect(response).to have_http_status(:success)
-    end
+  it "PATCH /projects/:project_id/milestones/:id#update renders edit with 422 when invalid" do
+    ms = project.milestones.create!(title: 'T', due_date: Date.today + 1, status: Milestone::PENDING)
+    patch project_milestone_path(project, ms), params: { milestone: { title: '' } }
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.body).to include('Edit Milestone').or include('error').or include('can\'t be blank')
   end
 
-  describe "GET /create" do
-    it "returns http success" do
-      get "/milestones/create"
-      expect(response).to have_http_status(:success)
-    end
-  end
-
-  describe "GET /edit" do
-    it "returns http success" do
-      get "/milestones/edit"
-      expect(response).to have_http_status(:success)
-    end
-  end
-
-  describe "GET /update" do
-    it "returns http success" do
-      get "/milestones/update"
-      expect(response).to have_http_status(:success)
-    end
-  end
-
-  describe "GET /destroy" do
-    it "returns http success" do
-      get "/milestones/destroy"
-      expect(response).to have_http_status(:success)
-    end
+  it "POST /projects/:project_id/milestones/:id#confirm (HTML) redirects with notice" do
+    ms = project.milestones.create!(title: 'T', due_date: Date.today + 1, status: Milestone::IN_PROGRESS)
+    post confirm_project_milestone_path(project, ms)
+    expect(response).to redirect_to(project_path(project))
   end
 end

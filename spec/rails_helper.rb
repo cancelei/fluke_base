@@ -1,7 +1,8 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
+# Set test environment before any Rails loading
+ENV['RAILS_ENV'] = 'test'
 require 'support/coverage'
 require 'spec_helper'
-ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
@@ -10,6 +11,7 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 # return unless Rails.env.test?
 require 'rspec/rails'
 require 'shoulda-matchers'
+require 'rails-controller-testing'
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -25,7 +27,7 @@ require 'shoulda-matchers'
 # directory. Alternatively, in the individual `*_spec.rb` files, manually
 # require only the support files necessary.
 #
-# Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
+Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
 
 # Checks for pending migrations and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove these lines.
@@ -34,7 +36,49 @@ begin
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
+
+# Ensure routes are loaded for all tests - force clear and reload
+Rails.application.routes.clear!
+Rails.application.reload_routes!
+
 RSpec.configure do |config|
+  # Configure host authorization for tests
+  config.before(:each, type: :request) do
+    # Ensure routes are loaded for each request test
+    Rails.application.routes.clear!
+    Rails.application.reload_routes!
+    host! "localhost"
+  end
+
+  config.before(:each, type: :controller) do
+    # Ensure routes are loaded for each controller test
+    Rails.application.routes.clear!
+    Rails.application.reload_routes!
+  end
+
+  config.before(:each, type: :system) do
+    host! "localhost"
+  end
+
+  # Conditionally skip JS-enabled system specs when Chrome/Chromium is unavailable
+  chrome_available = begin
+    ENV['FORCE_SYSTEM_JS'] == '1' || %w[google-chrome chrome chromium chromium-browser].any? do |cmd|
+      system("which #{cmd} >/dev/null 2>&1")
+    end
+  rescue StandardError
+    false
+  end
+
+  selenium_enabled = ENV['USE_SELENIUM'] == '1' && chrome_available
+
+  # Exclude JS-enabled system specs entirely unless explicitly enabled
+  config.filter_run_excluding js: true, type: :system unless selenium_enabled
+
+  config.before(:each, type: :system, js: true) do |example|
+    unless selenium_enabled
+      skip "Selenium not enabled; set USE_SELENIUM=1 to run JS system specs"
+    end
+  end
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
@@ -79,8 +123,60 @@ RSpec.configure do |config|
 
   # Configure Devise test helpers
   config.include Devise::Test::IntegrationHelpers, type: :request
+  config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include Devise::Test::IntegrationHelpers, type: :system
+
+  # Include Rails route helpers for request specs
+  config.include Rails.application.routes.url_helpers, type: :request
+
+  # Configure Warden test helpers for system tests
+  config.include Warden::Test::Helpers, type: :system
+
+  # Clean up Warden after each test
+  config.after(:each, type: :system) do
+    Warden.test_reset!
+  end
+
+  # Configure Capybara for system tests
+  config.before(:each, type: :system) do |example|
+    if example.metadata[:js] && selenium_enabled
+      driven_by :selenium, using: :chrome, screen_size: [ 1400, 1400 ] do |options|
+        options.add_argument('--headless') if ENV['HEADLESS']
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-web-security')
+        options.add_argument('--disable-features=VizDisplayCompositor')
+      end
+    else
+      driven_by :rack_test
+      # For rack_test, we need to set the app host
+      Capybara.app_host = "http://localhost"
+    end
+  end
+
+  # Configure database cleaning for system tests
+  config.before(:each, type: :system) do
+    config.use_transactional_fixtures = false
+  end
+
+  config.after(:each, type: :system) do
+    config.use_transactional_fixtures = true
+  end
 end
 
+# Enable template assertions for controller and view specs
+Rails::Controller::Testing.install if defined?(Rails::Controller::Testing)
+RSpec.configure do |config|
+  config.include Rails::Controller::Testing::TemplateAssertions, type: :view
+  config.include Rails::Controller::Testing::TemplateAssertions, type: :controller
+end
+
+# Ensure view filename annotations are disabled for view specs comparisons
+begin
+  ActionView::Base.annotate_rendered_view_with_filenames = false
+rescue StandardError
+  # noop
+end
 # Configure Shoulda Matchers
 Shoulda::Matchers.configure do |config|
   config.integrate do |with|

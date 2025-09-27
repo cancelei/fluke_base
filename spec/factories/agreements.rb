@@ -50,8 +50,8 @@ FactoryBot.define do
     end
 
     trait :with_participants do
-      initiator { create(:user, :alice) }
-      other_party { create(:user, :bob) }
+      association :initiator, factory: :user
+      association :other_party, factory: :user
     end
 
     trait :accepted do

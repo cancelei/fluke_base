@@ -18,7 +18,7 @@ class GithubService
     return [] if repo_path.blank?
 
     load_users
-    client = github_client(access_token)
+    client = @client
 
     # If a specific branch is requested, fetch commits only from that branch
     if branch.present?

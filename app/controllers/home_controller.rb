@@ -1,6 +1,5 @@
 class HomeController < ApplicationController
   skip_before_action :authenticate_user!, only: [ :index, :stats ]
-  skip_before_action :verify_authenticity_token, only: [ :csp_violation_report ]
 
   def index
     # Get community counts for the landing page with optimized single query
@@ -58,11 +57,6 @@ class HomeController < ApplicationController
     end
   end
 
-  def csp_violation_report
-    # Handle CSP violation reports
-    Rails.logger.warn "CSP Violation: #{request.body.read}" if Rails.env.development?
-    head :ok
-  end
 
   private
 

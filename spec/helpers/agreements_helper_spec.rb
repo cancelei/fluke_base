@@ -11,5 +11,21 @@ require 'rails_helper'
 #   end
 # end
 RSpec.describe AgreementsHelper, type: :helper do
-  pending "add some examples to (or delete) #{__FILE__}"
+  describe '#fetch_initiator_data' do
+    let(:user) { create(:user, first_name: 'Alice', last_name: 'Smith') }
+
+    it 'returns [name, role] when meta has id and role' do
+      meta = { 'id' => user.id, 'role' => 'entrepreneur' }
+      expect(helper.fetch_initiator_data(meta)).to eq([ user.full_name, 'entrepreneur' ])
+    end
+
+    it 'returns nil when meta is blank' do
+      expect(helper.fetch_initiator_data(nil)).to be_nil
+    end
+
+    it 'returns [nil, role] when user not found' do
+      meta = { 'id' => 999_999, 'role' => 'mentor' }
+      expect(helper.fetch_initiator_data(meta)).to eq([ nil, 'mentor' ])
+    end
+  end
 end

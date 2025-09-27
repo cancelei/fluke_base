@@ -53,9 +53,9 @@ class MeetingsController < ApplicationController
       else
         format.html do
           if turbo_frame_request?
-            render partial: "form", locals: { meeting: @meeting, agreement: @agreement }, status: :unprocessable_entity
+            render partial: "form", locals: { meeting: @meeting, agreement: @agreement }, status: :unprocessable_content
           else
-            render :new, status: :unprocessable_entity
+            render :new, status: :unprocessable_content
           end
         end
         format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_meeting_form", partial: "form", locals: { meeting: @meeting, agreement: @agreement }) }
@@ -88,9 +88,9 @@ class MeetingsController < ApplicationController
       else
         format.html do
           if turbo_frame_request?
-            render partial: "form", locals: { meeting: @meeting, agreement: @agreement }, status: :unprocessable_entity
+            render partial: "form", locals: { meeting: @meeting, agreement: @agreement }, status: :unprocessable_content
           else
-            render :edit, status: :unprocessable_entity
+            render :edit, status: :unprocessable_content
           end
         end
         format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@meeting)}_form", partial: "form", locals: { meeting: @meeting, agreement: @agreement }) }

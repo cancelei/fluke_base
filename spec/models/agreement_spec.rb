@@ -108,7 +108,10 @@ RSpec.describe Agreement, type: :model do
     it "orders by creation date" do
       older = create(:agreement, created_at: 2.days.ago)
       newer = create(:agreement, created_at: 1.day.ago)
-      expect(Agreement.recent_first).to eq([ newer, older ])
+
+      # Verify relative ordering without destructive global cleanup
+      ids = Agreement.recent_first.pluck(:id)
+      expect(ids.index(newer.id)).to be < ids.index(older.id)
     end
   end
 
@@ -344,6 +347,68 @@ RSpec.describe Agreement, type: :model do
       agreement.valid? # Trigger callbacks
       expect(agreement.status).to eq(Agreement::ACCEPTED)
       expect(agreement.agreement_type).to eq(Agreement::CO_FOUNDER)
+    end
+  end
+
+  describe "payment boundaries and date edges" do
+    it "allows same-day start and end dates" do
+      project = create(:project)
+      agreement = build(:agreement, :co_founder, project: project, start_date: Date.today, end_date: Date.today)
+      expect(agreement).to be_valid
+    end
+
+    context "hourly payments" do
+      it "requires hourly_rate and accepts 0+" do
+        project = create(:project)
+        a = build(:agreement, :mentorship, project: project, payment_type: Agreement::HOURLY, hourly_rate: nil)
+        expect(a).not_to be_valid
+        a.hourly_rate = 0
+        expect(a).to be_valid
+        a.hourly_rate = -1
+        expect(a).not_to be_valid
+      end
+    end
+
+    context "equity payments" do
+      it "requires equity_percentage and enforces 0..100" do
+        project = create(:project)
+        a = build(:agreement, :co_founder, project: project, payment_type: Agreement::EQUITY, equity_percentage: nil)
+        expect(a).not_to be_valid
+        a.equity_percentage = 0
+        expect(a).to be_valid
+        a.equity_percentage = 100
+        expect(a).to be_valid
+        a.equity_percentage = 101
+        expect(a).not_to be_valid
+      end
+    end
+
+    context "hybrid payments" do
+      it "require both hourly_rate and equity_percentage" do
+        project = create(:project)
+        a = build(:agreement, :mentorship, project: project, payment_type: Agreement::HYBRID, hourly_rate: nil, equity_percentage: 10)
+        expect(a).not_to be_valid
+        a.hourly_rate = 30
+        a.equity_percentage = nil
+        expect(a).not_to be_valid
+        a.equity_percentage = 5
+        expect(a).to be_valid
+      end
+    end
+
+    context "mentorship requirements" do
+      it "requires weekly_hours and milestone_ids" do
+        project = create(:project)
+        a = build(:agreement, :mentorship, project: project)
+        # Remove milestone_ids to test presence
+        a.milestone_ids = []
+        expect(a).not_to be_valid
+        a.milestone_ids = [ create(:milestone, project: project).id ]
+        a.weekly_hours = nil
+        expect(a).not_to be_valid
+        a.weekly_hours = 5
+        expect(a).to be_valid
+      end
     end
   end
 end

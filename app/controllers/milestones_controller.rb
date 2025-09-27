@@ -21,7 +21,7 @@ class MilestonesController < ApplicationController
     if @milestone.save
       redirect_to project_path(@project), notice: "Milestone was successfully created."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -33,7 +33,7 @@ class MilestonesController < ApplicationController
     if @milestone.update(milestone_params)
       redirect_to project_path(@project), notice: "Milestone was successfully updated."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

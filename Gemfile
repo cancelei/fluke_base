@@ -102,6 +102,8 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   gem "shoulda-matchers"
+  # Enable assert_template and render_template matchers used in view/controller specs
+  gem "rails-controller-testing"
 
   # Test reporting
   gem "rspec_junit_formatter"

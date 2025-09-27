@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require 'open3'
+require 'fileutils'
 
 class LintRunner
   def initialize
@@ -8,6 +9,11 @@ class LintRunner
     @total_warnings = 0
     @start_time = Time.now
     @mutex = Mutex.new
+
+    # Ensure RuboCop cache writes to a workspace-writable location
+    @rubocop_cache_root = File.join(Dir.pwd, 'tmp', '.rubocop_cache')
+    FileUtils.mkdir_p(@rubocop_cache_root)
+    ENV['RUBOCOP_CACHE_ROOT'] = @rubocop_cache_root
   end
 
   def run_all
@@ -21,6 +27,8 @@ class LintRunner
     threads << Thread.new { run_brakeman }
     threads << Thread.new { run_erb_lint }
     threads << Thread.new { run_js_lint }
+    threads << Thread.new { run_dockerfile_lint }
+    threads << Thread.new { run_yaml_lint }
     
     # Wait for all threads to complete
     threads.each(&:join)
@@ -50,7 +58,7 @@ class LintRunner
 
   def run_rubocop
     @mutex.synchronize { puts "\n📝 Running RuboCop (Ruby linting)..." }
-    result = run_command('bundle exec rubocop --format=progress')
+    result = run_command("bundle exec rubocop --format=progress --cache-root #{@rubocop_cache_root}")
     @mutex.synchronize do
       @results[:rubocop] = result
       print_result('RuboCop', result)
@@ -59,7 +67,7 @@ class LintRunner
 
   def run_brakeman
     @mutex.synchronize { puts "\n🔒 Running Brakeman (Security analysis)..." }
-    result = run_command('bundle exec brakeman --quiet --format=json')
+    result = run_command('bundle exec brakeman --quiet --format=json --ignore-config config/brakeman.ignore')
     @mutex.synchronize do
       @results[:brakeman] = result
       print_result('Brakeman', result)
@@ -84,9 +92,40 @@ class LintRunner
     end
   end
 
+  def run_dockerfile_lint
+    @mutex.synchronize { puts "\n🐳 Running Hadolint (Dockerfile linting)..." }
+    result = run_command('bin/linters/hadolint --config .hadolint.yaml Dockerfile')
+    @mutex.synchronize do
+      @results[:dockerfile_lint] = result
+      print_result('Hadolint', result)
+    end
+  end
+
+  def run_yaml_lint
+    @mutex.synchronize { puts "\n📋 Running YAML Lint (YAML file linting)..." }
+    # Lint main config YAML files, excluding test fixtures and generated files
+    yaml_files = %w[
+      config/*.yml
+      .github/workflows/*.yml
+    ].flat_map { |pattern| Dir.glob(pattern) }.join(' ')
+
+    if yaml_files.empty?
+      @mutex.synchronize do
+        @results[:yaml_lint] = { success: true, stdout: "No YAML files found to lint", stderr: "", command: "yaml-lint" }
+        print_result('YAML Lint', @results[:yaml_lint])
+      end
+    else
+      result = run_command("npx yaml-lint #{yaml_files}")
+      @mutex.synchronize do
+        @results[:yaml_lint] = result
+        print_result('YAML Lint', result)
+      end
+    end
+  end
+
   def fix_rubocop
     @mutex.synchronize { puts "\n🔧 Auto-fixing RuboCop (Ruby linting)..." }
-    result = run_command('bundle exec rubocop -A')
+    result = run_command("bundle exec rubocop -A --cache-root #{@rubocop_cache_root}")
     @mutex.synchronize do
       if result[:success]
         puts "✅ RuboCop: Auto-fix completed"
@@ -194,6 +233,17 @@ class LintRunner
         errors = match[2].to_i
         warnings = match[3].to_i
       end
+    when 'Hadolint'
+      # Hadolint format: Each issue on a separate line with severity
+      # Count lines that contain Dockerfile issues (e.g., "Dockerfile:18 DL3008")
+      dockerfile_issues = output.scan(/^Dockerfile:\d+/)
+      errors = dockerfile_issues.length
+      warnings = output.scan(/\[1m\[93mwarning\[0m/).length + output.scan(/\[92minfo\[0m/).length
+    when 'YAML Lint'
+      # YAML Lint format: Reports errors in various formats
+      if output.include?('Error') || output.include?('error')
+        errors = output.scan(/error/i).length
+      end
     end
 
     [errors, warnings]
@@ -222,6 +272,8 @@ class LintRunner
       puts "   bundle exec brakeman         # Security analysis"
       puts "   bundle exec erb_lint         # ERB template linting"
       puts "   npm run lint:js              # JavaScript linting"
+      puts "   bin/linters/hadolint Dockerfile  # Dockerfile linting"
+      puts "   npx yaml-lint config/*.yml   # YAML file linting"
       puts "   npm run lint:js:fix          # Auto-fix JS issues"
     end
     
