@@ -7,8 +7,8 @@
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=3.2.1
+# Make sure RUBY_VERSION matches the Ruby version in .tool-versions
+ARG RUBY_VERSION=3.4.6
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
@@ -29,9 +29,9 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
-# Install build-time dependencies including Node.js 20.x and Yarn
+# Install build-time dependencies including Node.js 24.x and Yarn
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
     curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list && \
     apt-get update -qq && \
