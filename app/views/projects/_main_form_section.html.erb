@@ -1,0 +1,186 @@
+<%#
+  Main Project Form Section
+  This partial contains the main project form fields that get hidden/shown with stealth mode
+%>
+
+<div id="main-project-form" class="<%= "hidden" unless show_form %>" data-stealth-mode-target="mainForm">
+  <%= render "privacy_info" %>
+
+  <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+    <!-- Project Name -->
+    <%= render "form_field",
+               form: form,
+               field_name: :name,
+               project: project,
+               field_type: :text_field,
+               col_span: 6 %>
+
+    <!-- Project Stage -->
+    <%= render "form_field",
+               form: form,
+               field_name: :stage,
+               project: project,
+               field_type: :select,
+               col_span: 3,
+               options: {
+                 choices: [
+                   [ "Idea", Project::IDEA ],
+                   [ "Prototype", Project::PROTOTYPE ],
+                   [ "Launched", Project::LAUNCHED ],
+                   [ "Scaling", Project::SCALING ]
+                 ],
+                 select_options: {}
+               } %>
+
+    <!-- Category -->
+    <%= render "form_field",
+               form: form,
+               field_name: :category,
+               project: project,
+               field_type: :select,
+               col_span: 3,
+               options: {
+                 choices: [
+                   [ "Technology", "Technology" ],
+                   [ "Health", "Health" ],
+                   [ "Education", "Education" ],
+                   [ "Finance", "Finance" ],
+                   [ "Entertainment", "Entertainment" ],
+                   [ "E-commerce", "E-commerce" ],
+                   [ "AI/ML", "AI/ML" ],
+                   [ "Blockchain", "Blockchain" ],
+                   [ "Social", "Social" ],
+                   [ "Other", "Other" ]
+                 ],
+                 select_options: { include_blank: "Select a category" }
+               } %>
+
+    <!-- Looking For -->
+    <%= render "form_field",
+               form: form,
+               field_name: :collaboration_type,
+               project: project,
+               label: "Looking For",
+               field_type: :select,
+               col_span: 6,
+               help_text: "Indicate what type of collaboration you're seeking",
+               options: {
+                 choices: [
+                   [ "Mentor", Project::SEEKING_MENTOR ],
+                   [ "Co-Founder", Project::SEEKING_COFOUNDER ],
+                   [ "Both Mentor and Co-Founder", Project::SEEKING_BOTH ]
+                 ],
+                 select_options: { include_blank: "Select what you're looking for" }
+               } %>
+
+    <!-- Description -->
+    <%= render "form_field",
+               form: form,
+               field_name: :description,
+               project: project,
+               field_type: :text_area,
+               col_span: 6,
+               options: { rows: 4 } %>
+
+    <!-- GitHub Repository URL -->
+    <%= render "form_field",
+               form: form,
+               field_name: :repository_url,
+               project: project,
+               label: "GitHub Repository URL",
+               field_type: :url_field,
+               col_span: 6,
+               help_text: "Optional. The GitHub repository for this project (e.g., username/repository)",
+               options: {
+                 prefix: "github.com/",
+                 placeholder: "username/repository"
+               } %>
+
+    <!-- Project Link -->
+    <%= render "form_field",
+               form: form,
+               field_name: :project_link,
+               project: project,
+               label: "Project Link",
+               field_type: :url_field,
+               col_span: 6,
+               help_text: "Add hosted project link",
+               options: {
+                 prefix: "https://",
+                 placeholder: "example.com"
+               } %>
+
+    <!-- Section Header -->
+    <div class="sm:col-span-6">
+      <div class="border-t border-gray-200/50 pt-6 mt-6">
+        <h3 class="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">Additional Details</h3>
+        <p class="text-sm text-gray-600">These details help mentors understand your project better</p>
+      </div>
+    </div>
+
+    <!-- Current Project Stage -->
+    <%= render "form_field",
+               form: form,
+               field_name: :current_stage,
+               project: project,
+               label: "Current Project Stage",
+               field_type: :text_field,
+               col_span: 6,
+               help_text: "Describe your project's current development stage in more detail" %>
+
+    <!-- Target Market -->
+    <%= render "form_field",
+               form: form,
+               field_name: :target_market,
+               project: project,
+               label: "Target Market",
+               field_type: :text_area,
+               col_span: 6,
+               help_text: "Describe your target audience or customer base",
+               options: { rows: 3 } %>
+
+    <!-- Funding Status -->
+    <%= render "form_field",
+               form: form,
+               field_name: :funding_status,
+               project: project,
+               label: "Funding Status",
+               field_type: :select,
+               col_span: 3,
+               options: {
+                 choices: [
+                   [ "Bootstrapped", "Bootstrapped" ],
+                   [ "Seeking Funding", "Seeking Funding" ],
+                   [ "Pre-seed", "Pre-seed" ],
+                   [ "Seed", "Seed" ],
+                   [ "Series A", "Series A" ],
+                   [ "Series B+", "Series B+" ],
+                   [ "Profitable", "Profitable" ]
+                 ],
+                 select_options: { include_blank: "Select funding status" }
+               } %>
+
+    <!-- Team Size -->
+    <%= render "form_field",
+               form: form,
+               field_name: :team_size,
+               project: project,
+               label: "Team Size",
+               field_type: :select,
+               col_span: 3,
+               options: {
+                 choices: [
+                   [ "Solo Founder", "Solo Founder" ],
+                   [ "2-5 people", "2-5 people" ],
+                   [ "6-10 people", "6-10 people" ],
+                   [ "11-25 people", "11-25 people" ],
+                   [ "26-50 people", "26-50 people" ],
+                   [ "50+ people", "50+ people" ]
+                 ],
+                 select_options: { include_blank: "Select team size" }
+               } %>
+
+    <!-- Hidden field to handle unchecked checkboxes -->
+    <%= hidden_field_tag "project[public_fields][]", "" %>
+  </div>
+</div>

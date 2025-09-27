@@ -281,4 +281,79 @@ RSpec.describe Project, type: :model do
       expect(project).to be_valid
     end
   end
+
+  describe "stealth mode functionality" do
+    describe "scopes" do
+      let!(:public_project) { create(:project, stealth_mode: false, public_fields: [ 'name' ]) }
+      let!(:stealth_project) { create(:project, stealth_mode: true, public_fields: []) }
+
+      it "filters publicly visible projects" do
+        expect(Project.publicly_visible).to include(public_project)
+        expect(Project.publicly_visible).not_to include(stealth_project)
+      end
+
+      it "filters stealth projects" do
+        expect(Project.stealth_projects).to include(stealth_project)
+        expect(Project.stealth_projects).not_to include(public_project)
+      end
+    end
+
+    describe "stealth mode methods" do
+      let(:stealth_project) { create(:project, stealth_mode: true) }
+      let(:public_project) { create(:project, stealth_mode: false) }
+
+      it "identifies stealth projects" do
+        expect(stealth_project.stealth?).to be true
+        expect(public_project.stealth?).to be false
+      end
+
+      it "identifies publicly discoverable projects" do
+        expect(stealth_project.publicly_discoverable?).to be false
+        expect(public_project.publicly_discoverable?).to be true
+      end
+
+      it "can exit stealth mode" do
+        expect(stealth_project.stealth?).to be true
+        stealth_project.exit_stealth_mode!
+        expect(stealth_project.reload.stealth?).to be false
+      end
+
+      it "provides stealth display name" do
+        stealth_project.update(stealth_name: "Secret Project")
+        expect(stealth_project.stealth_display_name).to eq("Secret Project")
+      end
+
+      it "provides default stealth display name when none set" do
+        expect(stealth_project.stealth_display_name).to match(/Stealth Startup [A-F0-9]{4}/)
+      end
+
+      it "provides stealth display description" do
+        stealth_project.update(stealth_description: "Top secret innovation")
+        expect(stealth_project.stealth_display_description).to eq("Top secret innovation")
+      end
+
+      it "provides default stealth display description when none set" do
+        expect(stealth_project.stealth_display_description).to eq("Early-stage venture in development. Details available after connection.")
+      end
+    end
+
+    describe "stealth mode defaults" do
+      it "sets stealth defaults for new stealth projects" do
+        project = Project.new(name: "Test", description: "Test", stage: "idea", user: user, stealth_mode: true)
+        project.save!
+
+        expect(project.public_fields).to eq([])
+        expect(project.stealth_name).to match(/Stealth Startup [A-F0-9]{4}/)
+        expect(project.stealth_description).to eq("Early-stage venture in development. Details available after connection.")
+        expect(project.stealth_category).to eq("Technology")
+      end
+
+      it "sets default public fields for non-stealth projects" do
+        project = Project.new(name: "Test", description: "Test", stage: "idea", user: user, stealth_mode: false)
+        project.save!
+
+        expect(project.public_fields).to eq(Project::DEFAULT_PUBLIC_FIELDS)
+      end
+    end
+  end
 end

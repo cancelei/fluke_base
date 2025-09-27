@@ -1,0 +1,98 @@
+<%#
+  Stealth Mode Toggle Section
+  Parameters:
+  - form: form builder object
+  - project: project form object
+%>
+
+<div class="bg-gradient-to-r from-indigo-50/80 to-purple-50/80 backdrop-blur-sm border border-indigo-200/50 rounded-2xl p-6 mb-6 shadow-lg"
+     id="stealth-mode-section"
+     data-controller="stealth-mode"
+     data-stealth-mode-target="section">
+  <div class="flex items-start">
+    <div class="flex-shrink-0">
+      <div class="h-10 w-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+        <svg class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+          <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+    <div class="ml-4 flex-1">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent">Stealth Mode</h3>
+        <div class="flex items-center">
+          <%= form.check_box :stealth_mode,
+                            id: "stealth_mode_toggle",
+                            class: "h-5 w-5 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500 transition-all duration-200",
+                            data: {
+                              action: "change->stealth-mode#toggle",
+                              turbo_permanent: true,
+                              stealth_mode_target: "toggle"
+                            } %>
+          <%= form.label :stealth_mode, "Enable Stealth Mode",
+                        class: "ml-2 text-sm font-semibold text-indigo-700 cursor-pointer" %>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <p class="text-sm text-indigo-800 font-medium">
+          Start your project in stealth mode to keep it private while you develop your idea.
+        </p>
+        <div class="mt-2 text-sm text-indigo-700">
+          <p class="mb-2"><strong>When enabled:</strong></p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Your project won't appear in public explore results</li>
+            <li>All fields default to private (only you and collaborators can see them)</li>
+            <li>Smart defaults are applied to help you get started quickly</li>
+            <li>You can exit stealth mode anytime once you're ready to go public</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Stealth mode customization fields (hidden by default) -->
+      <div id="stealth-customization" class="mt-4 space-y-4 <%= "hidden" unless project.stealth_mode? %>" data-stealth-mode-target="customization">
+        <div class="bg-white/70 rounded-lg p-4 border border-indigo-200/50">
+          <h4 class="text-sm font-semibold text-indigo-800 mb-3">Stealth Mode Customization (Optional)</h4>
+          <p class="text-xs text-indigo-600 mb-3">These fields help pre-fill your project details when in stealth mode. You can change the main project fields anytime.</p>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <!-- Stealth Name -->
+            <div>
+              <%= form.label :stealth_name, "Stealth Display Name", class: "block text-xs font-medium text-indigo-700 mb-1" %>
+              <%= form.text_field :stealth_name,
+                                class: "block w-full rounded-md border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm",
+                                placeholder: "Secret Project Alpha" %>
+              <p class="text-xs text-indigo-600 mt-1">How your project appears to unauthorized users</p>
+            </div>
+
+            <!-- Stealth Category -->
+            <div>
+              <%= form.label :stealth_category, "Stealth Category", class: "block text-xs font-medium text-indigo-700 mb-1" %>
+              <%= form.select :stealth_category,
+                            [
+                              [ "Technology", "Technology" ],
+                              [ "Health", "Health" ],
+                              [ "Education", "Education" ],
+                              [ "Finance", "Finance" ],
+                              [ "Other", "Other" ]
+                            ],
+                            { include_blank: "Select category" },
+                            { class: "block w-full rounded-md border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" } %>
+            </div>
+          </div>
+
+          <!-- Stealth Description -->
+          <div class="mt-4">
+            <%= form.label :stealth_description, "Stealth Description", class: "block text-xs font-medium text-indigo-700 mb-1" %>
+            <%= form.text_area :stealth_description,
+                              rows: 3,
+                              class: "block w-full rounded-md border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm",
+                              placeholder: "Early-stage venture in development. Details available after connection." %>
+            <p class="text-xs text-indigo-600 mt-1">Generic description shown to unauthorized users</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

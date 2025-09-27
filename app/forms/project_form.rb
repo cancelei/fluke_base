@@ -18,6 +18,10 @@ class ProjectForm < ApplicationForm
   attribute :project_link, :string
   attribute :public_fields, default: -> { [] }
   attribute :user_id, :integer
+  attribute :stealth_mode, :boolean, default: false
+  attribute :stealth_name, :string
+  attribute :stealth_description, :string
+  attribute :stealth_category, :string
 
   validates :name, :description, :stage, presence: true
   validates :collaboration_type, inclusion: { in: [ "mentor", "co_founder", "both", nil ] }
@@ -78,6 +82,10 @@ class ProjectForm < ApplicationForm
     @project
   end
 
+  def stealth_mode?
+    stealth_mode == true
+  end
+
   private
 
   def perform_save
@@ -101,7 +109,11 @@ class ProjectForm < ApplicationForm
       repository_url: repository_url,
       project_link: project_link,
       public_fields: public_fields_array,
-      user_id: user_id
+      user_id: user_id,
+      stealth_mode: stealth_mode,
+      stealth_name: stealth_name,
+      stealth_description: stealth_description,
+      stealth_category: stealth_category
     )
   end
 
@@ -140,7 +152,35 @@ class ProjectForm < ApplicationForm
     self.stage ||= Project::IDEA
     self.current_stage ||= stage.humanize if stage.present?
     self.collaboration_type ||= Project::SEEKING_MENTOR
-    # Make essential fields public by default for better project discovery
-    self.public_fields = Project::DEFAULT_PUBLIC_FIELDS if public_fields_array.blank?
+
+    # Handle stealth mode defaults
+    if stealth_mode?
+      apply_stealth_defaults
+    else
+      # Make essential fields public by default for better project discovery
+      self.public_fields = Project::DEFAULT_PUBLIC_FIELDS if public_fields_array.blank?
+    end
+  end
+
+  def apply_stealth_defaults
+    # Stealth projects default to completely private
+    self.public_fields = [] if public_fields_array.blank?
+
+    # Apply stealth-specific pre-filled defaults only if fields are blank
+    if name.blank?
+      self.name = stealth_name.presence || generate_stealth_name
+    end
+
+    if description.blank?
+      self.description = stealth_description.presence || "Early-stage venture in development. Details available after connection."
+    end
+
+    if category.blank?
+      self.category = stealth_category.presence || "Technology"
+    end
+  end
+
+  def generate_stealth_name
+    "Stealth Startup #{SecureRandom.hex(2).upcase}"
   end
 end

@@ -2,6 +2,8 @@ class ProjectPresenter < ApplicationPresenter
   def display_name(current_user = nil)
     if current_user && (user_id == current_user.id || visible_to_user?(:name, current_user))
       name
+    elsif stealth? && !visibility_service.stealth_visible_to_user?(current_user)
+      stealth_display_name
     else
       "Project ##{id}"
     end
@@ -10,6 +12,10 @@ class ProjectPresenter < ApplicationPresenter
   def display_description(current_user = nil, options = {})
     if current_user && visible_to_user?(:description, current_user)
       desc = description
+      desc = truncate(desc, length: options[:length] || 150) if options[:truncate]
+      simple_format(desc)
+    elsif stealth? && !visibility_service.stealth_visible_to_user?(current_user)
+      desc = stealth_display_description
       desc = truncate(desc, length: options[:length] || 150) if options[:truncate]
       simple_format(desc)
     else
@@ -50,6 +56,11 @@ class ProjectPresenter < ApplicationPresenter
     end
 
     badges.join(" ").html_safe
+  end
+
+  def stealth_badge
+    return "" unless stealth?
+    "<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800\">🔒 Stealth</span>".html_safe
   end
 
   def progress_bar
@@ -156,6 +167,10 @@ class ProjectPresenter < ApplicationPresenter
 
 
   private
+
+  def visibility_service
+    @visibility_service ||= ProjectVisibilityService.new(self)
+  end
 
   def format_github_repo
     return nil if repository_url.blank?

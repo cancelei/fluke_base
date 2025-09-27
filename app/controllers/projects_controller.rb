@@ -55,6 +55,7 @@ class ProjectsController < ApplicationController
       GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
       redirect_to @project, notice: "Project was successfully created."
     else
+      # Maintain stealth mode state on validation errors
       render :new, status: :unprocessable_content
     end
   end
@@ -87,14 +88,19 @@ class ProjectsController < ApplicationController
     redirect_to projects_path, notice: "Project was successfully deleted."
   end
 
+
   private
+
+  def form_builder_for(object)
+    ActionView::Helpers::FormBuilder.new(:project, object, view_context, {})
+  end
 
   def set_project
     @project = Project.includes(:user, :milestones, agreements: :agreement_participants).find(params[:id])
   end
 
   def project_params
-    params.require(:project).permit(:name, :description, :stage, :category, :current_stage, :target_market, :funding_status, :team_size, :collaboration_type, :repository_url, :project_link, public_fields: [])
+    params.require(:project).permit(:name, :description, :stage, :category, :current_stage, :target_market, :funding_status, :team_size, :collaboration_type, :repository_url, :project_link, :stealth_mode, :stealth_name, :stealth_description, :stealth_category, public_fields: [])
   end
 
   def project_to_form_attributes(project)
@@ -111,7 +117,11 @@ class ProjectsController < ApplicationController
       repository_url: project.repository_url,
       project_link: project.project_link,
       public_fields: project.public_fields,
-      user_id: project.user_id
+      user_id: project.user_id,
+      stealth_mode: project.stealth_mode,
+      stealth_name: project.stealth_name,
+      stealth_description: project.stealth_description,
+      stealth_category: project.stealth_category
     }
   end
 end

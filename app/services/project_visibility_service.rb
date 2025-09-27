@@ -11,14 +11,27 @@ class ProjectVisibilityService
 
   def field_visible_to_user?(field_name, user)
     return true if user && (@project.user_id == user.id)
-    return true if field_public?(field_name)
+    return true if field_public?(field_name) && !@project.stealth?
     return true if user && user_has_project_access?(user)
+    return false if @project.stealth? && !user_has_stealth_access?(user)
     false
   end
 
   def get_field_value(field_name, user)
     return nil unless field_visible_to_user?(field_name, user)
+
+    # For stealth projects, return stealth display values for unauthorized users
+    if @project.stealth? && !user_has_stealth_access?(user)
+      return stealth_field_value(field_name)
+    end
+
     @project.send(field_name)
+  end
+
+  def stealth_visible_to_user?(user)
+    return true if user && (@project.user_id == user.id)
+    return true if user && user_has_project_access?(user)
+    false
   end
 
   # Batch check access for multiple users to reduce N+1 queries
@@ -45,5 +58,24 @@ class ProjectVisibilityService
     @user_access_cache[user.id] ||= @project.agreements
                                            .joins(:agreement_participants)
                                            .exists?(agreement_participants: { user_id: user.id })
+  end
+
+  def user_has_stealth_access?(user)
+    return false unless user
+    return true if @project.user_id == user.id
+    user_has_project_access?(user)
+  end
+
+  def stealth_field_value(field_name)
+    case field_name.to_s
+    when "name"
+      @project.stealth_display_name
+    when "description"
+      @project.stealth_display_description
+    when "category"
+      @project.stealth_category.presence || "Technology"
+    else
+      nil  # Other fields hidden for unauthorized users
+    end
   end
 end

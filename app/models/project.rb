@@ -206,6 +206,10 @@ class Project < ApplicationRecord
   scope :seeking_mentor, -> { where("collaboration_type = ? OR collaboration_type = ?", SEEKING_MENTOR, SEEKING_BOTH) }
   scope :seeking_cofounder, -> { where("collaboration_type = ? OR collaboration_type = ?", SEEKING_COFOUNDER, SEEKING_BOTH) }
 
+  # Stealth mode scopes
+  scope :publicly_visible, -> { where(stealth_mode: false) }
+  scope :stealth_projects, -> { where(stealth_mode: true) }
+
   # Helper methods for checking collaboration type
   def seeking_mentor?
     collaboration_type == SEEKING_MENTOR || collaboration_type == SEEKING_BOTH
@@ -257,6 +261,27 @@ class Project < ApplicationRecord
     stage == SCALING
   end
 
+  # Stealth mode methods
+  def stealth?
+    stealth_mode?
+  end
+
+  def publicly_discoverable?
+    !stealth_mode?
+  end
+
+  def exit_stealth_mode!
+    update!(stealth_mode: false)
+  end
+
+  def stealth_display_name
+    stealth_name.presence || "Stealth Project ##{id}"
+  end
+
+  def stealth_display_description
+    stealth_description.presence || "Early-stage venture in development. Details available after connection."
+  end
+
   # Check if project is connected to GitHub
   # @return [Boolean] True if the project has a repository URL set
   def github_connected?
@@ -277,7 +302,26 @@ class Project < ApplicationRecord
     self.stage ||= IDEA
     self.current_stage ||= stage.humanize if stage.present?
     self.collaboration_type ||= SEEKING_MENTOR
-    # Make essential fields public by default for better project discovery
-    self.public_fields = DEFAULT_PUBLIC_FIELDS if public_fields.blank?
+
+    # Handle stealth mode defaults
+    if stealth_mode?
+      # Stealth projects default to completely private
+      self.public_fields = [] if public_fields.blank?
+      # Set stealth-specific defaults if not already set
+      set_stealth_defaults
+    else
+      # Make essential fields public by default for better project discovery
+      self.public_fields = DEFAULT_PUBLIC_FIELDS if public_fields.blank?
+    end
+  end
+
+  def set_stealth_defaults
+    self.stealth_name ||= generate_stealth_name if stealth_name.blank?
+    self.stealth_description ||= "Early-stage venture in development. Details available after connection." if stealth_description.blank?
+    self.stealth_category ||= "Technology" if stealth_category.blank?
+  end
+
+  def generate_stealth_name
+    "Stealth Startup #{SecureRandom.hex(2).upcase}"
   end
 end
