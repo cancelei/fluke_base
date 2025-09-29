@@ -27,7 +27,7 @@ gem "httparty"
 gem "rails_cloudflare_turnstile"
 
 # Payments
-gem "pay", "~> 6.8"
+gem "pay", "~> 11.2"
 gem "stripe", "~> 9.0"
 
 # Calendar integration``
