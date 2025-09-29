@@ -36,3 +36,4 @@ else
 fi
 
 echo "Post-deploy hook completed for $KAMAL_DESTINATION"
+

@@ -17,7 +17,7 @@
                     <div class="mb-6">
                       <h2 class="text-lg font-medium text-gray-900">Project Details</h2>
                       <p class="mt-1 text-sm text-gray-500">
-                        <span class="font-medium">Project:</span> <%= @project.name %>
+                        <span class="font-medium">Project:</span> <%= present(@project).display_name(current_user) %>
                       </p>
                     </div>
                   <% end %>

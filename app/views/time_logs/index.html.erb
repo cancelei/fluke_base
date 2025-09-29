@@ -27,7 +27,7 @@
                   Time Tracking
                 </h1>
                 <p class="mt-1 text-sm text-gray-600">
-                  Project: <span class="font-semibold text-gray-900"><%= @project.name %></span>
+                  Project: <span class="font-semibold text-gray-900"><%= present(@project).display_name(current_user) %></span>
                 </p>
               </div>
             </div>

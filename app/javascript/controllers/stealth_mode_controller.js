@@ -3,34 +3,64 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="stealth-mode"
 export default class extends Controller {
   static targets = ["toggle", "customization"]
+  static values = { editMode: Boolean }
 
   connect() {
-    // Initialize form visibility based on current stealth mode state
+    // Initialize form visibility immediately without delay
     this.updateFormVisibility()
   }
 
-  toggle(event) {
+  toggle() {
     this.updateFormVisibility()
   }
 
   updateFormVisibility() {
-    const isStealthMode = this.hasToggleTarget ? this.toggleTarget.checked : false
+    const checkbox = this.hasToggleTarget ? this.toggleTarget : null
+    const isStealthMode = checkbox ? checkbox.checked : false
+
     const mainForm = document.getElementById('main-project-form')
     const stealthSummary = document.getElementById('stealth-mode-summary')
 
-    // Toggle customization section
+    // Update customization section
     if (this.hasCustomizationTarget) {
-      this.customizationTarget.classList.toggle('hidden', !isStealthMode)
+      if (isStealthMode) {
+        this.customizationTarget.classList.remove('hidden')
+      } else {
+        this.customizationTarget.classList.add('hidden')
+      }
     }
 
-    // Toggle main form visibility
+    // In edit mode, don't auto-hide the form on initialization if stealth mode is enabled
+    // This allows users to see the form when editing stealth projects
+    const isEditMode = this.hasEditModeValue && this.editModeValue
+    const shouldShowForm = !isStealthMode || (isEditMode && this.isInitialLoad)
+
+    // Track if this is the initial page load
+    if (!Object.prototype.hasOwnProperty.call(this, 'isInitialLoad')) {
+      this.isInitialLoad = true
+    }
+
+    // Update main form visibility
     if (mainForm) {
-      mainForm.classList.toggle('hidden', isStealthMode)
+      if (shouldShowForm) {
+        mainForm.classList.remove('hidden')
+      } else {
+        mainForm.classList.add('hidden')
+      }
     }
 
-    // Toggle stealth summary visibility
+    // Update stealth summary visibility
     if (stealthSummary) {
-      stealthSummary.classList.toggle('hidden', !isStealthMode)
+      if (isStealthMode && !shouldShowForm) {
+        stealthSummary.classList.remove('hidden')
+      } else {
+        stealthSummary.classList.add('hidden')
+      }
+    }
+
+    // After first update, mark as no longer initial load
+    if (this.isInitialLoad) {
+      this.isInitialLoad = false
     }
   }
 

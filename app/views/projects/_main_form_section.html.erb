@@ -13,7 +13,8 @@
                field_name: :name,
                project: project,
                field_type: :text_field,
-               col_span: 6 %>
+               col_span: 6,
+               options: project.stealth_mode? ? { placeholder: project.stealth_name.presence || "Stealth Startup #{SecureRandom.hex(2).upcase}" } : {} %>
 
     <!-- Project Stage -->
     <%= render "form_field",
@@ -52,7 +53,7 @@
                    [ "Social", "Social" ],
                    [ "Other", "Other" ]
                  ],
-                 select_options: { include_blank: "Select a category" }
+                 select_options: { include_blank: project.stealth_mode? ? "Technology (stealth default)" : "Select a category" }
                } %>
 
     <!-- Looking For -->
@@ -80,7 +81,10 @@
                project: project,
                field_type: :text_area,
                col_span: 6,
-               options: { rows: 4 } %>
+               options: project.stealth_mode? ? {
+                 rows: 4,
+                 placeholder: project.stealth_description.presence || "Early-stage venture in development. Details available after connection."
+               } : { rows: 4 } %>
 
     <!-- GitHub Repository URL -->
     <%= render "form_field",
@@ -126,7 +130,8 @@
                label: "Current Project Stage",
                field_type: :text_field,
                col_span: 6,
-               help_text: "Describe your project's current development stage in more detail" %>
+               help_text: "Describe your project's current development stage in more detail",
+               options: project.stealth_mode? ? { placeholder: "Building MVP with core features" } : {} %>
 
     <!-- Target Market -->
     <%= render "form_field",
@@ -137,7 +142,10 @@
                field_type: :text_area,
                col_span: 6,
                help_text: "Describe your target audience or customer base",
-               options: { rows: 3 } %>
+               options: project.stealth_mode? ? {
+                 rows: 3,
+                 placeholder: "Tech-savvy professionals and early adopters interested in innovative solutions"
+               } : { rows: 3 } %>
 
     <!-- Funding Status -->
     <%= render "form_field",

@@ -7,7 +7,7 @@
       <% elsif agreement.initiator&.id == current_user.id %>
         <%= presenter.project_link %>
       <% else %>
-        <span class="text-gray-500"><%= agreement.project.name %></span>
+        <span class="text-gray-500"><%= present(agreement.project).display_name(current_user) %></span>
         <span class="text-xs text-gray-400">(limited access)</span>
       <% end %>
     </div>

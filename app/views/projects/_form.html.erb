@@ -10,11 +10,13 @@
     <div class="px-6 py-6">
       <%= render "shared/form_errors", object: project %>
 
-      <%= render "stealth_mode_section", form: form, project: project %>
+      <div data-controller="stealth-mode" data-stealth-mode-edit-mode-value="<%= project.persisted? %>">
+        <%= render "stealth_mode_section", form: form, project: project %>
 
-      <%= render "main_form_section", form: form, project: project, show_form: !project.stealth_mode? %>
+        <%= render "stealth_summary_section", project: project, show_summary: false %>
 
-      <%= render "stealth_summary_section", project: project, show_summary: project.stealth_mode? %>
+        <%= render "main_form_section", form: form, project: project, show_form: true %>
+      </div>
 
       <!-- Form Actions -->
       <div class="px-6 py-4 bg-gradient-to-r from-gray-50/50 to-gray-100/50 border-t border-gray-100/50 rounded-b-2xl">

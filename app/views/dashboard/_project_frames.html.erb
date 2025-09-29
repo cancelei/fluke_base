@@ -1,10 +1,10 @@
 <div class="font-bold text-lg text-indigo-700">
-  <%= current_user.selected_project&.name || "No project selected" %>
+  <%= current_user.selected_project ? present(current_user.selected_project).display_name(current_user) : "No project selected" %>
 </div>
 
 <% if current_user.selected_project %>
   <div>
-    <h2 class="text-xl font-semibold mb-2">Dashboard for <%= current_user.selected_project.name %></h2>
+    <h2 class="text-xl font-semibold mb-2">Dashboard for <%= present(current_user.selected_project).display_name(current_user) %></h2>
     <!-- Add more project-specific dashboard content here -->
   </div>
 <% else %>

@@ -88,7 +88,6 @@ class ProjectsController < ApplicationController
     redirect_to projects_path, notice: "Project was successfully deleted."
   end
 
-
   private
 
   def form_builder_for(object)

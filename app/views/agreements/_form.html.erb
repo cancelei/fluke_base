@@ -30,7 +30,7 @@
               </h3>
               <div class="mt-2 text-sm text-blue-700">
                 <p>
-                  You'll be proposing to collaborate on project "<%= @project ? @project.name : "to be determined" %>". The entrepreneur will need to accept this agreement before collaboration can begin.
+                  You'll be proposing to collaborate on project "<%= @project ? present(@project).display_name(current_user) : "to be determined" %>". The entrepreneur will need to accept this agreement before collaboration can begin.
                 </p>
               </div>
             </div>
