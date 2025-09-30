@@ -133,7 +133,7 @@
 
   /* Better Visual Hierarchy */
   .elevated-card {
-    @apply bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl ring-1 ring-gray-200/50 border border-white/20 transition-all duration-300 hover:shadow-3xl hover:ring-blue-300/40 hover:scale-[1.01];
+    @apply bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl ring-1 ring-gray-200/50 border border-white/20 transition-all duration-300 hover:shadow-2xl hover:ring-blue-300/40 hover:scale-[1.01];
   }
 
   .interactive-card {
