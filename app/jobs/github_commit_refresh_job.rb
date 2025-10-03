@@ -18,8 +18,33 @@ class GithubCommitRefreshJob < ApplicationJob
       return
     end
 
-    Rails.logger.info "Starting commit refresh for project #{project_id}, branch: #{branch}"
-    fetch_and_store_commits(access_token, branch: branch)
+    # Get job ID (fallback for manual/console execution)
+    current_job_id = respond_to?(:job_id) ? job_id : SecureRandom.uuid
+    job_id_short = current_job_id[0..7]
+
+    # Use cache-based locking to prevent concurrent processing of the same branch
+    # If another job is already processing this branch, skip this execution
+    lock_key = "github_commit_refresh_lock:#{project_id}:#{branch}"
+
+    # Try to acquire lock for 10 minutes (max expected processing time)
+    acquired = Rails.cache.write(lock_key, current_job_id, unless_exist: true, expires_in: 10.minutes)
+
+    unless acquired
+      existing_job = Rails.cache.read(lock_key)
+      Rails.logger.warn "[Job:#{job_id_short}] Skipping - another job (#{existing_job[0..7]}) is already processing project #{project_id}, branch: '#{branch}'"
+      return
+    end
+
+    begin
+      @job_id_short = job_id_short  # Make available to fetch_and_store_commits
+      Rails.logger.info "[Job:#{job_id_short}] Starting commit refresh for project #{project_id}, branch: '#{branch}'"
+      result = fetch_and_store_commits(access_token, branch: branch)
+      Rails.logger.info "[Job:#{job_id_short}] Completed commit refresh for project #{project_id}, branch: '#{branch}' - #{result} commits processed"
+      result
+    ensure
+      # Always release the lock when done
+      Rails.cache.delete(lock_key)
+    end
   end
 
   private
@@ -27,13 +52,17 @@ class GithubCommitRefreshJob < ApplicationJob
   def fetch_and_store_commits(access_token = nil, branch: nil)
     return 0 if @project.repository_url.blank?
 
-    Rails.logger.info "Fetching commits for branch #{branch} in project #{@project.id}"
+    job_id_short = defined?(@job_id_short) ? @job_id_short : "manual"
+    Rails.logger.info "[Job:#{job_id_short}] Fetching commits for branch '#{branch}' in project #{@project.id}"
     service = GithubService.new(@project, access_token, branch: branch)
-    commits_data = service.fetch_commits
+    result = service.fetch_commits
 
-    # The service returns the processed commits data, not the raw commits
-    if commits_data.blank?
-      Rails.logger.info "No commits returned from service for branch #{branch}"
+    # Service now returns a hash with :commits (new commits to store) and :all_shas (all commits in branch)
+    commits_data = result[:commits] || []
+    all_commit_shas = result[:all_shas] || []
+
+    if all_commit_shas.blank?
+      Rails.logger.info "No commits found in branch #{branch}"
       return 0
     end
 
@@ -45,32 +74,39 @@ class GithubCommitRefreshJob < ApplicationJob
     end
 
     begin
-      # Store commits in database
-      commit_shas = commits_data.map { |c| c[:commit_sha] }
-      Rails.logger.info "Storing #{commits_data.length} commits for branch #{branch}"
+      # Store only NEW commits in database (to minimize API detail fetches)
+      if commits_data.any?
+        Rails.logger.info "[Job:#{job_id_short}] Storing #{commits_data.length} new commits for branch '#{branch}'"
+        GithubLog.upsert_all(
+          commits_data.map { |c| c.merge(project_id: @project.id) },
+          unique_by: :commit_sha
+        )
+      else
+        Rails.logger.info "[Job:#{job_id_short}] No new commits to store for branch '#{branch}'"
+      end
 
-      GithubLog.upsert_all(
-        commits_data.map { |c| c.merge(project_id: @project.id) },
-        unique_by: [ :project_id, :commit_sha ]
-      )
+      # Create branch-log relationships for ALL commits that exist in this branch on GitHub
+      # This ensures that shared commits (appearing in multiple branches) get associated with all branches
+      Rails.logger.info "[Job:#{job_id_short}] Creating branch associations for #{all_commit_shas.size} commits in branch '#{branch}'"
+      log_ids = GithubLog.where(project_id: @project.id, commit_sha: all_commit_shas).pluck(:id)
 
-      # Create branch-log relationships
-      log_ids = GithubLog.where(project_id: @project.id, commit_sha: commit_shas).pluck(:id)
-      github_branch_logs = log_ids.map { |id| { github_branch_id: db_branch.id, github_log_id: id } }
-
-      GithubBranchLog.upsert_all(
-        github_branch_logs,
-        unique_by: [ :github_branch_id, :github_log_id ]
-      )
-
-      Rails.logger.info "Stored #{commits_data.size} commits for branch '#{branch}' in project '#{@project.name}'"
+      if log_ids.any?
+        github_branch_logs = log_ids.map { |id| { github_branch_id: db_branch.id, github_log_id: id } }
+        GithubBranchLog.upsert_all(
+          github_branch_logs,
+          unique_by: [ :github_branch_id, :github_log_id ]
+        )
+        Rails.logger.info "[Job:#{job_id_short}] Created #{log_ids.size} branch-commit associations for branch '#{branch}'"
+      else
+        Rails.logger.warn "[Job:#{job_id_short}] No matching commits found in database for branch '#{branch}' SHAs"
+      end
 
       # Broadcast updated GitHub logs data
       broadcast_github_updates
 
-      Rails.logger.info "Broadcasted #{commits_data.size} commits for branch '#{branch}' in project '#{@project.name}'"
+      Rails.logger.info "[Job:#{job_id_short}] Completed sync for branch '#{branch}': #{commits_data.size} new, #{all_commit_shas.size} total"
 
-      commits_data.size
+      all_commit_shas.size
     rescue => e
       Rails.logger.error "Error storing commits: #{e.message}\n#{e.backtrace.join("\n")}"
       0

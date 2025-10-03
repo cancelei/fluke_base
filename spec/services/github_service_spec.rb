@@ -68,29 +68,94 @@ RSpec.describe GithubService do
       shallow1, full1 = build_commit(sha: 'a1', author_login: 'mentor')
       shallow2, full2 = build_commit(sha: 'b2', author_login: 'mentor')
 
-      # Paginated commits: two pages, then empty
-      # Mock to return 100 commits on page 1 to force pagination, then 1 on page 2
-      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([ shallow1 ])
-      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 2, per_page: 100)).and_return([ shallow2 ])
-      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 3, per_page: 100)).and_return([])
+      # Mock helper methods for SHA deduplication
+      allow(service).to receive(:get_existing_commit_shas).and_return(Set.new)
+
+      # Mock last_response for pagination
+      last_response = double('last_response', rels: {})
+      allow(client).to receive(:last_response).and_return(last_response)
+
+      # Return both commits on first page (since we're not testing pagination here)
+      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([ shallow1, shallow2 ])
+      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 2, per_page: 100)).and_return([])
 
       allow(client).to receive(:commit).with('testuser/testrepo', 'a1').and_return(full1)
       allow(client).to receive(:commit).with('testuser/testrepo', 'b2').and_return(full2)
 
       result = service.fetch_commits
-      expect(result.size).to eq(1)
-      expect(result.all? { |h| h[:project_id] == project.id }).to be true
-      expect(result.all? { |h| h[:commit_sha].present? }).to be true
-      expect(result.map { |h| h[:agreement_id] }.uniq).to include(agreement.id)
-      expect(result.map { |h| h[:user_id] }.uniq).to include(mentor.id)
+      expect(result).to be_a(Hash)
+      expect(result[:commits].size).to eq(2)
+      expect(result[:all_shas]).to contain_exactly('a1', 'b2')
+      expect(result[:commits].all? { |h| h[:project_id] == project.id }).to be true
+      expect(result[:commits].all? { |h| h[:commit_sha].present? }).to be true
+      expect(result[:commits].map { |h| h[:agreement_id] }.uniq).to include(agreement.id)
+      expect(result[:commits].map { |h| h[:user_id] }.uniq).to include(mentor.id)
+    end
+
+    it 'skips commits that already exist in the database' do
+      client = double('client')
+      allow_any_instance_of(described_class).to receive(:github_client).and_return(client)
+
+      service = described_class.new(project, nil, branch: 'main')
+
+      shallow1, full1 = build_commit(sha: 'a1', author_login: 'mentor')
+      shallow2, full2 = build_commit(sha: 'b2', author_login: 'mentor')
+      shallow3, full3 = build_commit(sha: 'c3', author_login: 'mentor')
+
+      # Mock that 'a1' and 'b2' already exist in database
+      allow(service).to receive(:get_existing_commit_shas).and_return(Set.new([ 'a1', 'b2' ]))
+
+      # Mock last_response for pagination
+      last_response = double('last_response', rels: {})
+      allow(client).to receive(:last_response).and_return(last_response)
+
+      # API returns all three commits
+      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([ shallow1, shallow2, shallow3 ])
+      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 2, per_page: 100)).and_return([])
+
+      # Only c3 should be fetched in detail
+      allow(client).to receive(:commit).with('testuser/testrepo', 'c3').and_return(full3)
+
+      result = service.fetch_commits
+      # Only one new commit should be processed (c3), but all three SHAs should be returned
+      expect(result[:commits].size).to eq(1)
+      expect(result[:all_shas]).to contain_exactly('a1', 'b2', 'c3')
+    end
+
+    it 'fetches all commits without using since parameter to ensure complete history' do
+      client = double('client')
+      allow_any_instance_of(described_class).to receive(:github_client).and_return(client)
+
+      service = described_class.new(project, nil, branch: 'main')
+
+      allow(service).to receive(:get_existing_commit_shas).and_return(Set.new)
+
+      shallow1, full1 = build_commit(sha: 'a1', author_login: 'mentor')
+
+      # Mock last_response for pagination
+      last_response = double('last_response', rels: {})
+      allow(client).to receive(:last_response).and_return(last_response)
+
+      # Expect API call WITHOUT since parameter (to ensure we get complete history)
+      # This prevents missing older commits in case of partial fetches
+      expect(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([ shallow1 ])
+
+      allow(client).to receive(:commit).with('testuser/testrepo', 'a1').and_return(full1)
+
+      result = service.fetch_commits
+
+      expect(result[:commits].size).to eq(1)
+      expect(result[:commits].first[:commit_sha]).to eq('a1')
     end
 
     it 'returns [] when DB branch missing' do
+      client = double('client')
       GithubBranch.where(project: project, branch_name: 'main').delete_all
       service = described_class.new(project, nil, branch: 'main')
-      client = double('client', commits: [])
       allow(service).to receive(:github_client).and_return(client)
-      expect(service.fetch_commits).to eq([])
+
+      result = service.fetch_commits
+      expect(result).to eq({ commits: [], all_shas: [] })
     end
   end
 end

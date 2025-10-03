@@ -12,65 +12,50 @@ class GithubService
   end
 
   def fetch_commits
-    return [] if project.repository_url.blank?
+    return { commits: [], all_shas: [] } if project.repository_url.blank?
 
     repo_path = extract_repo_path(project.repository_url)
-    return [] if repo_path.blank?
+    return { commits: [], all_shas: [] } if repo_path.blank?
+    return { commits: [], all_shas: [] } if branch.blank?
 
     load_users
-    client = @client
 
-    # If a specific branch is requested, fetch commits only from that branch
-    if branch.present?
-      all_commits = []
-      page = 1
-      per_page = 100 # Maximum allowed by GitHub API
-
-      # Keep fetching pages until we get fewer commits than the per_page limit
-      loop do
-        begin
-          commits = client.commits(repo_path, {
-            sha: branch,
-            per_page: per_page,
-            page: page
-          })
-
-          break if commits.empty?
-
-          all_commits.concat(commits)
-          page += 1
-
-          # If we got fewer commits than the per_page limit, we've reached the end
-          break if commits.size < per_page
-        rescue Octokit::TooManyRequests => e
-          # If we hit rate limit, wait and retry
-          reset_time = e.response_headers["x-ratelimit-reset"].to_i
-          wait_time = [ reset_time - Time.now.to_i + 1, 1 ].max
-          Rails.logger.warn "GitHub API rate limit reached. Waiting #{wait_time} seconds..."
-          sleep(wait_time)
-          retry
-        rescue Octokit::Error => e
-          Rails.logger.error "GitHub API Error: #{e.message}"
-          break
-        end
-      end
-
-      db_branch = GithubBranch.find_by(project_id: project.id, branch_name: branch)
-      unless db_branch
-        Rails.logger.error "No database branch found for #{branch}"
-        return []
-      end
-
-      puts "Processing commits for branch #{db_branch.branch_name}"
-      processed_commits = process_commits(project, all_commits, user_emails, user_github_identifiers, agreements, client, repo_path, db_branch.id)
-
-      return processed_commits
+    # Find the database branch record
+    db_branch = GithubBranch.find_by(project_id: project.id, branch_name: branch)
+    unless db_branch
+      Rails.logger.error "No database branch found for #{branch}"
+      return { commits: [], all_shas: [] }
     end
 
-    []
+    # Get existing commit SHAs globally (across all branches) to avoid duplicate API fetches
+    existing_shas = get_existing_commit_shas
+    Rails.logger.info "Found #{existing_shas.size} existing commits in project (checking globally)"
+
+    # NOTE: We intentionally DO NOT use the 'since' parameter here
+    # Reason: If we have a partial fetch (e.g., only 100 of 324 commits), using 'since'
+    # would only fetch commits NEWER than our most recent commit, missing all older commits.
+    # SHA deduplication handles efficiency - we skip fetching details for existing commits.
+    # This ensures we always get the COMPLETE commit history, even after partial fetches.
+
+    # Fetch commits from GitHub API with intelligent pagination
+    all_commit_shas, new_commits = fetch_commits_from_api(repo_path, existing_shas)
+
+    return { commits: [], all_shas: [] } if all_commit_shas.empty?
+
+    # Process only new commits (to minimize API detail fetches)
+    processed_commits = if new_commits.any?
+                          Rails.logger.info "Processing #{new_commits.size} new commits for branch #{branch}"
+                          process_commits(project, new_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch)
+    else
+                          Rails.logger.info "No new commits to process for branch #{branch}"
+                          []
+    end
+
+    # Return both new commits AND all commit SHAs in the branch
+    { commits: processed_commits, all_shas: all_commit_shas }
   rescue Octokit::Error => e
     Rails.logger.error "GitHub API Error: #{e.message}"
-    []
+    { commits: [], all_shas: [] }
   end
 
   def branches
@@ -146,6 +131,17 @@ class GithubService
 
   private
 
+  # Get existing commit SHAs globally across all branches to maximize API efficiency
+  # This prevents re-fetching the same commit when it appears in multiple branches
+  # @return [Set<String>] Set of commit SHAs already in the database
+  def get_existing_commit_shas
+    GithubLog
+      .where(project_id: project.id)
+      .pluck(:commit_sha)
+      .to_set
+  end
+
+
   def first_commit_on_branch(repo_path, branch_name)
     # Fetch all commits for the branch
     commits = client.commits(repo_path, sha: branch_name, per_page: 1, page: 1)
@@ -209,22 +205,35 @@ class GithubService
     end
   end
 
-  def process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_id)
+  # Process commits and prepare them for database insertion
+  # Note: This method fetches full commit data for each commit to get diff stats and file changes
+  # Only new commits (filtered by SHA) should be passed to this method to minimize API calls
+  # @param project [Project] The project
+  # @param shallow_commits [Array<Sawyer::Resource>] Array of commit objects from list_commits API
+  # @param user_emails [Hash] Hash of email => user_id
+  # @param user_github_identifiers [Hash] Hash of github_username => user_id
+  # @param agreements [Array<Agreement>] Array of agreements
+  # @param client [Octokit::Client] GitHub API client
+  # @param repo_path [String] Repository path (owner/repo)
+  # @param branch_name [String] Name of the branch being processed
+  # @return [Array<Hash>] Array of hashes ready for upsert
+  def process_commits(project, shallow_commits, user_emails, user_github_identifiers, agreements, client, repo_path, branch_name)
     i = 0
     shallow_commits.map do |shallow_commit|
       i += 1
       next if shallow_commit.sha.blank? || shallow_commit.commit.nil?
 
       # Fetch full commit data for diff stats and file changes
+      # This is necessary because list_commits doesn't include file changes
       commit = client.commit(repo_path, shallow_commit.sha)
-      puts "Processing #{i} out of #{shallow_commits.length} commits"
+      Rails.logger.info "[#{branch_name}] Fetching commit details #{i}/#{shallow_commits.length}: #{commit.sha[0..7]}"
       author_email = commit.author&.login.presence || commit.commit.author&.email.to_s.downcase
       next unless author_email.present?
 
       user_id = find_user_id(author_email, user_emails, user_github_identifiers, commit)
 
-    # Find agreement that includes this user as a participant
-    agreement = agreements.find { |a| a.agreement_participants.any? { |p| p.user_id == user_id } }
+      # Find agreement that includes this user as a participant
+      agreement = agreements.find { |a| a.agreement_participants.any? { |p| p.user_id == user_id } }
 
       stats = commit.stats || {}
       changed_files = commit.files.map do |file|
@@ -256,18 +265,82 @@ class GithubService
   end
 
 
+  # Fetch commits from GitHub API with intelligent pagination and deduplication
+  # Fetches ALL commits from the branch to ensure complete history, even after partial fetches
+  # @param repo_path [String] Repository path (owner/repo)
+  # @param existing_shas [Set<String>] Set of commit SHAs already in database
+  # @return [Array<Array>] [all_commit_shas, new_commits]
+  def fetch_commits_from_api(repo_path, existing_shas)
+    all_commit_shas = []
+    new_commits = []
+    page = 1
+    per_page = 100
+    total_pages_estimate = "unknown"
+
+    Rails.logger.info "Starting commit fetch for branch '#{branch}' (page size: #{per_page})"
+
+    loop do
+      api_options = { sha: branch, per_page: per_page, page: page }
+
+      commits = client.commits(repo_path, api_options)
+      break if commits.empty?
+
+      # Try to get total page count from response headers (if available)
+      if page == 1 && client.last_response.rels[:last]
+        total_pages_estimate = client.last_response.rels[:last].href.match(/page=(\d+)/)[1].to_i
+        Rails.logger.info "Estimated total pages: #{total_pages_estimate} (~#{total_pages_estimate * per_page} commits)"
+      end
+
+      # Collect ALL commit SHAs (for branch associations)
+      all_commit_shas.concat(commits.map(&:sha))
+
+      # Filter out commits we already have (intelligent deduplication)
+      page_new_commits = commits.reject { |c| existing_shas.include?(c.sha) }
+
+      if page_new_commits.any?
+        new_commits.concat(page_new_commits)
+        progress = total_pages_estimate != "unknown" ? "#{page}/#{total_pages_estimate}" : page.to_s
+        Rails.logger.info "Page #{progress}: Found #{page_new_commits.size} new commits out of #{commits.size} total"
+      else
+        progress = total_pages_estimate != "unknown" ? "#{page}/#{total_pages_estimate}" : page.to_s
+        Rails.logger.info "Page #{progress}: All #{commits.size} commits already exist (skipping duplicates)"
+      end
+
+      # Continue to next page if we got a full page (more commits may exist)
+      page += 1
+      break if commits.size < per_page
+    rescue Octokit::TooManyRequests => e
+      handle_rate_limit(e)
+      retry
+    rescue Octokit::Error => e
+      Rails.logger.error "GitHub API Error on page #{page}: #{e.message}"
+      break
+    end
+
+    Rails.logger.info "Fetch complete: #{all_commit_shas.size} total commits in branch, #{new_commits.size} new commits to process"
+    [ all_commit_shas, new_commits ]
+  end
+
+  # Handle GitHub API rate limiting
+  def handle_rate_limit(error)
+    reset_time = error.response_headers["x-ratelimit-reset"].to_i
+    wait_time = [ reset_time - Time.now.to_i + 1, 1 ].max
+    Rails.logger.warn "GitHub API rate limit reached. Waiting #{wait_time} seconds..."
+    sleep(wait_time)
+  end
+
   def find_user_id(author_identifier, user_emails, user_github_identifiers, commit)
-    # First try to find by email
+    # Try email lookup first
     user_id = user_emails[author_identifier.downcase]
     return user_id if user_id
 
-    # Then try to find by GitHub login from the commit
+    # Try GitHub login from commit
     if commit.author&.login
       user_id = user_github_identifiers[commit.author.login.downcase]
       return user_id if user_id
     end
 
-    # Finally, try to find by the author identifier if it's an email
+    # Try identifier as email
     if author_identifier.include?("@")
       user_id = user_github_identifiers[author_identifier.downcase]
       return user_id if user_id
