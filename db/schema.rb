@@ -155,6 +155,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_191807) do
     t.index ["commit_date"], name: "index_github_logs_on_commit_date", comment: "Improves time-based queries for commit history"
     t.index ["commit_sha"], name: "index_github_logs_on_commit_sha", unique: true
     t.index ["project_id", "commit_date"], name: "index_github_logs_on_project_id_and_commit_date", comment: "Composite index for project commit timeline"
+    t.index ["project_id", "commit_sha"], name: "index_github_logs_on_project_id_and_commit_sha_unique", unique: true
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id", "commit_date"], name: "index_github_logs_on_user_id_and_commit_date", comment: "Composite index for user commit activity"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
