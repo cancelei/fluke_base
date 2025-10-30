@@ -28,7 +28,7 @@ gem "rails_cloudflare_turnstile"
 
 # Payments
 gem "pay", "~> 6.8"
-gem "stripe", "~> 9.0"
+gem "stripe", "~> 17.1"
 
 # Calendar integration``
 gem "google-api-client", require: "google/apis/calendar_v3"
