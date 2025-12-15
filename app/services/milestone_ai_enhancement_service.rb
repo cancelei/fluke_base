@@ -1,4 +1,7 @@
-class MilestoneAiEnhancementService
+# frozen_string_literal: true
+
+# Service for AI-powered milestone description enhancement
+class MilestoneAiEnhancementService < ApplicationService
   attr_reader :project, :agent
 
   def initialize(project)
@@ -7,6 +10,13 @@ class MilestoneAiEnhancementService
     validate_configuration!
   end
 
+  # @return [Dry::Monads::Result] Success(enhanced_text) or Failure(error)
+  def call(title:, description:)
+    augment_description(title: title, description: description)
+  end
+
+  # @return [String] Enhanced description text (raises on error)
+  # @deprecated Use #call instead for Result type handling
   def augment_description(title:, description:)
     return "" if title.blank? && description.blank?
 

@@ -1,179 +1,112 @@
 import { Controller } from '@hotwired/stimulus';
 
+/**
+ * Navbar Controller
+ *
+ * Handles mobile drawer navigation and dropdown exclusivity.
+ * Uses click delegation for reliable dropdown management.
+ */
 export default class extends Controller {
-  static targets = ['mobileMenu', 'menuIcon', 'closeIcon'];
-
   connect() {
-    // Initialize the menu state
-    this.mobileMenuTarget.classList.add('hidden');
-    this.setupInitialState();
-
-    // Bind event handlers
-    this.handleClickOutside = this.handleClickOutside.bind(this);
+    // Bind methods for proper event listener removal
+    this.handleClick = this.handleClick.bind(this);
+    this.handleEscape = this.handleEscape.bind(this);
     this.handleResize = this.handleResize.bind(this);
-    this.handleKeydown = this.handleKeydown.bind(this);
+    this.syncSwapWithDrawer = this.syncSwapWithDrawer.bind(this);
 
-    // Add event listeners
-    document.addEventListener('click', this.handleClickOutside);
+    // Click anywhere to handle dropdown exclusivity
+    document.addEventListener('click', this.handleClick);
+    document.addEventListener('keydown', this.handleEscape);
     window.addEventListener('resize', this.handleResize);
-    document.addEventListener('keydown', this.handleKeydown);
 
-    // Add click event listener to menu items for smooth closing
-    this.addMenuItemListeners();
+    // Sync swap component with drawer checkbox
+    this.setupSwapLink();
   }
 
   disconnect() {
-    // Clean up all event listeners when controller is disconnected
-    document.removeEventListener('click', this.handleClickOutside);
+    document.removeEventListener('click', this.handleClick);
+    document.removeEventListener('keydown', this.handleEscape);
     window.removeEventListener('resize', this.handleResize);
-    document.removeEventListener('keydown', this.handleKeydown);
-    this.removeMenuItemListeners();
   }
 
-  setupInitialState() {
-    // Ensure proper initial icon states
-    if (this.hasMenuIconTarget && this.hasCloseIconTarget) {
-      this.menuIconTarget.classList.remove('hidden');
-      this.closeIconTarget.classList.add('hidden');
-    }
+  handleClick(event) {
+    const clickedSummary = event.target.closest('details.dropdown > summary');
 
-    // Set initial ARIA attributes
-    const button = this.element.querySelector('[data-action*="toggleMobileMenu"]');
-    if (button) {
-      button.setAttribute('aria-expanded', 'false');
-    }
-  }
+    if (clickedSummary) {
+      // Clicked on a dropdown summary - close all OTHER dropdowns after native toggle
+      const clickedDropdown = clickedSummary.parentElement;
 
-  addMenuItemListeners() {
-    // Add listeners to navigation links and buttons in mobile menu
-    const menuItems = this.mobileMenuTarget.querySelectorAll('a, button[type="submit"]');
-    menuItems.forEach(item => {
-      item.addEventListener('click', this.handleMenuItemClick.bind(this));
-    });
-  }
-
-  removeMenuItemListeners() {
-    const menuItems = this.mobileMenuTarget.querySelectorAll('a, button[type="submit"]');
-    menuItems.forEach(item => {
-      item.removeEventListener('click', this.handleMenuItemClick.bind(this));
-    });
-  }
-
-  handleMenuItemClick(event) {
-    // Don't close immediately for external links or buttons that might need processing
-    const link = event.target.closest('a, button');
-
-    if (link) {
-      // Add a small delay to ensure the action completes
+      // Use setTimeout to run after the native details toggle
       setTimeout(() => {
-        this.closeMenu();
-      }, 100);
-    }
-  }
-
-  handleClickOutside(event) {
-    const menu = this.mobileMenuTarget;
-    const button = this.element.querySelector('[data-action*="toggleMobileMenu"]');
-
-    // If menu is visible and click is outside both menu and button, close the menu
-    if (!menu.classList.contains('hidden') &&
-        !menu.contains(event.target) &&
-        !button.contains(event.target)) {
-      this.closeMenu();
-    }
-  }
-
-  closeMenu() {
-    this.setMenuState(false);
-  }
-
-  openMenu() {
-    this.setMenuState(true);
-  }
-
-  setMenuState(isOpen) {
-    const menu = this.mobileMenuTarget;
-    const button = this.element.querySelector('[data-action*="toggleMobileMenu"]');
-
-    if (isOpen) {
-      // Open menu with animation
-      menu.classList.remove('hidden');
-
-      // Trigger animation after removing hidden class
-      requestAnimationFrame(() => {
-        menu.style.opacity = '0';
-        menu.style.transform = 'translateY(-10px)';
-        menu.style.transition = 'all 0.2s ease-out';
-
-        requestAnimationFrame(() => {
-          menu.style.opacity = '1';
-          menu.style.transform = 'translateY(0)';
+        this.element
+          .querySelectorAll('details.dropdown[open]')
+          .forEach(dropdown => {
+            if (dropdown !== clickedDropdown) {
+              dropdown.removeAttribute('open');
+            }
+          });
+      }, 0);
+    } else if (!event.target.closest('details.dropdown')) {
+      // Clicked outside all dropdowns - close all
+      this.element
+        .querySelectorAll('details.dropdown[open]')
+        .forEach(dropdown => {
+          dropdown.removeAttribute('open');
         });
-      });
-
-      // Update icons
-      if (this.hasMenuIconTarget && this.hasCloseIconTarget) {
-        this.menuIconTarget.classList.add('hidden');
-        this.closeIconTarget.classList.remove('hidden');
-      }
-
-      // Update ARIA state
-      if (button) {
-        button.setAttribute('aria-expanded', 'true');
-      }
-
-      // Prevent body scroll when menu is open
-      document.body.style.overflow = 'hidden';
-
-    } else {
-      // Close menu with animation
-      menu.style.opacity = '0';
-      menu.style.transform = 'translateY(-10px)';
-
-      setTimeout(() => {
-        menu.classList.add('hidden');
-        menu.style.opacity = '';
-        menu.style.transform = '';
-        menu.style.transition = '';
-      }, 200);
-
-      // Update icons
-      if (this.hasMenuIconTarget && this.hasCloseIconTarget) {
-        this.menuIconTarget.classList.remove('hidden');
-        this.closeIconTarget.classList.add('hidden');
-      }
-
-      // Update ARIA state
-      if (button) {
-        button.setAttribute('aria-expanded', 'false');
-      }
-
-      // Restore body scroll
-      document.body.style.overflow = 'auto';
     }
   }
 
-  toggleMobileMenu(event) {
-    event.preventDefault();
-    event.stopPropagation();
+  handleEscape(event) {
+    if (event.key !== 'Escape') {
+      return;
+    }
 
-    const menu = this.mobileMenuTarget;
-    const isCurrentlyHidden = menu.classList.contains('hidden');
+    this.element.querySelectorAll('details.dropdown[open]').forEach(d => {
+      d.removeAttribute('open');
+    });
 
-    this.setMenuState(isCurrentlyHidden);
+    const drawer = document.getElementById('mobile-drawer');
+
+    if (drawer) {
+      drawer.checked = false;
+      this.syncSwapWithDrawer();
+    }
   }
 
-  // Handle window resize to ensure menu closes on desktop
   handleResize() {
-    if (window.innerWidth >= 1024) { // lg breakpoint in Tailwind
-      this.closeMenu();
+    if (window.innerWidth >= 1024) {
+      const drawer = document.getElementById('mobile-drawer');
+
+      if (drawer) {
+        drawer.checked = false;
+        this.syncSwapWithDrawer();
+      }
     }
   }
 
-  // Add support for keyboard navigation
-  handleKeydown(event) {
-    if (event.key === 'Escape') {
-      this.closeMenu();
+  setupSwapLink() {
+    const drawer = document.getElementById('mobile-drawer');
+    const swap = document.getElementById('mobile-drawer-swap');
+
+    if (!drawer || !swap) {
+      return;
+    }
+
+    // Sync swap when drawer changes
+    drawer.addEventListener('change', this.syncSwapWithDrawer);
+
+    // Sync drawer when swap changes (for accessibility)
+    swap.addEventListener('change', e => {
+      drawer.checked = e.target.checked;
+    });
+  }
+
+  syncSwapWithDrawer() {
+    const drawer = document.getElementById('mobile-drawer');
+    const swap = document.getElementById('mobile-drawer-swap');
+
+    if (drawer && swap) {
+      swap.checked = drawer.checked;
     }
   }
 }

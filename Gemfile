@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.0.4"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use postgresql as the database for Active Record
@@ -14,10 +14,15 @@ gem "importmap-rails"
 gem "turbo-rails"
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "stimulus-rails"
+# TurboBoost Commands for reactive server interactions
+gem "turbo_boost-commands", "~> 0.3"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 # Use Tailwind CSS for styling
-gem "tailwindcss-rails"
+gem "tailwindcss-rails", "~> 4.0"
+
+# ViewComponent for encapsulated, testable view components
+gem "view_component", "~> 3.20"
 
 # Authentication
 gem "devise"
@@ -25,6 +30,9 @@ gem "httparty"
 
 # Cloudflare Turnstile integration
 gem "rails_cloudflare_turnstile"
+
+# Rate limiting and attack protection
+gem "rack-attack"
 
 # Payments
 gem "pay", "~> 6.8"
@@ -38,6 +46,9 @@ gem "octokit", "~> 6.1"
 
 # AI Agent integration for milestone AI augmentation
 gem "ruby_llm"
+
+# Result types for explicit success/failure handling
+gem "dry-monads", "~> 1.6"
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
@@ -78,6 +89,7 @@ group :development, :test do
   # Testing framework
   gem "rspec-rails"
   gem "factory_bot_rails"
+  gem "pundit-matchers"
 
   # Code coverage
   gem "simplecov", require: false
@@ -113,7 +125,7 @@ gem "cssbundling-rails", "~> 1.4"
 
 gem "kaminari", "~> 1.2"
 
-gem "cancancan", "~> 3.6"
+gem "pundit"
 
 gem "letter_avatar"
 

@@ -1,4 +1,8 @@
-class GithubService
+# frozen_string_literal: true
+
+# Service for interacting with GitHub API to fetch commits and branches
+# Returns Result types for explicit error handling
+class GithubService < ApplicationService
   attr_reader :project, :access_token, :branch, :repo_path, :client, :user_emails, :user_github_identifiers, :agreements
 
   # Initialize the service with project, access token, and optional branch
@@ -11,12 +15,13 @@ class GithubService
     @client = github_client(access_token)
   end
 
+  # @return [Dry::Monads::Result] Success({ commits:, all_shas: }) or Failure(error)
   def fetch_commits
-    return { commits: [], all_shas: [] } if project.repository_url.blank?
+    return failure_result(:missing_config, "Repository URL is blank") if project.repository_url.blank?
 
     repo_path = extract_repo_path(project.repository_url)
-    return { commits: [], all_shas: [] } if repo_path.blank?
-    return { commits: [], all_shas: [] } if branch.blank?
+    return failure_result(:missing_config, "Repository path is blank") if repo_path.blank?
+    return failure_result(:missing_config, "Branch is blank") if branch.blank?
 
     load_users
 
@@ -24,7 +29,7 @@ class GithubService
     db_branch = GithubBranch.find_by(project_id: project.id, branch_name: branch)
     unless db_branch
       Rails.logger.error "No database branch found for #{branch}"
-      return { commits: [], all_shas: [] }
+      return failure_result(:not_found, "No database branch found for #{branch}")
     end
 
     # Get existing commit SHAs globally (across all branches) to avoid duplicate API fetches
@@ -40,7 +45,7 @@ class GithubService
     # Fetch commits from GitHub API with intelligent pagination
     all_commit_shas, new_commits = fetch_commits_from_api(repo_path, existing_shas)
 
-    return { commits: [], all_shas: [] } if all_commit_shas.empty?
+    return Success({ commits: [], all_shas: [] }) if all_commit_shas.empty?
 
     # Process only new commits (to minimize API detail fetches)
     processed_commits = if new_commits.any?
@@ -52,21 +57,22 @@ class GithubService
     end
 
     # Return both new commits AND all commit SHAs in the branch
-    { commits: processed_commits, all_shas: all_commit_shas }
+    Success({ commits: processed_commits, all_shas: all_commit_shas })
   rescue Octokit::Error => e
     Rails.logger.error "GitHub API Error: #{e.message}"
-    { commits: [], all_shas: [] }
+    failure_result(:api_error, e.message, exception_class: e.class.name)
   end
 
   def branches
     client.branches(repo_path)
   end
 
+  # @return [Dry::Monads::Result] Success(branch_owners) or Failure(error)
   def fetch_branches_with_owner
-    return [] if project.repository_url.blank?
+    return failure_result(:missing_config, "Repository URL is blank") if project.repository_url.blank?
 
     repo_path = extract_repo_path(project.repository_url)
-    return [] if repo_path.blank?
+    return failure_result(:missing_config, "Repository path is blank") if repo_path.blank?
 
     load_users
     branch_owners = []
@@ -76,12 +82,12 @@ class GithubService
       branches
     rescue Octokit::Error => e
       Rails.logger.error "Error fetching branches: #{e.message}"
-      return []
+      return failure_result(:api_error, e.message, exception_class: e.class.name)
     end
 
     if all_branches.blank?
       Rails.logger.warn "No branches found for repository: #{repo_path}"
-      return []
+      return Success([])
     end
 
     Rails.logger.info "Processing #{all_branches.size} branches for #{repo_path}"
@@ -126,7 +132,7 @@ class GithubService
       Rails.logger.warn "No valid branches found for project #{project.id}"
     end
 
-    branch_owners
+    Success(branch_owners)
   end
 
   private

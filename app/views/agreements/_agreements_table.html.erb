@@ -1,6 +1,6 @@
 <div class="<%= responsive_classes %>">
-  <table class="min-w-full divide-y divide-gray-200 <%= table_classes %>">
-    <thead class="bg-gray-50">
+  <table class="table table-zebra <%= table_classes %>">
+    <thead>
       <tr>
         <% columns.each do |column| %>
           <th scope="col" class="<%= column[:th_class] %>">
@@ -12,7 +12,7 @@
         </th>
       </tr>
     </thead>
-    <tbody class="bg-white divide-y divide-gray-200 <%= tbody_class %>" id="<%= tbody_id %>">
+    <tbody class="<%= tbody_class %>" id="<%= tbody_id %>">
       <% agreements.each do |agreement| %>
         <%= render "agreement_index_row", agreement: agreement %>
       <% end %>

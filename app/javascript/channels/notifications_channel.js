@@ -11,6 +11,7 @@ consumer.subscriptions.create('NotificationsChannel', {
 
   received(data) {
     const notification = document.createElement('div');
+
     notification.className = `notification ${data.type}`;
     notification.textContent = data.message;
     document.getElementById('notifications').appendChild(notification);

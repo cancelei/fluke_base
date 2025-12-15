@@ -12,6 +12,9 @@ Rails.application.configure do
   # Full error reports are disabled.
   config.consider_all_requests_local = false
 
+  # Use custom error pages
+  config.exceptions_app = self.routes
+
   # Turn on fragment caching in view templates.
   config.action_controller.perform_caching = true
 
@@ -21,8 +24,8 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # Store uploaded files on iDrive e2 S3-compatible storage (see config/storage.yml for options).
+  config.active_storage.service = :idrive_production
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true

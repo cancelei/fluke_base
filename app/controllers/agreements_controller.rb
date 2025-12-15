@@ -1,5 +1,6 @@
 class AgreementsController < ApplicationController
   include ActionView::RecordIdentifier
+  include ResultHandling
 
   before_action :authenticate_user!
   before_action :set_agreement, only: %i[show edit update destroy accept reject complete cancel counter_offer meetings_section github_section time_logs_section counter_offers_section]
@@ -128,7 +129,7 @@ class AgreementsController < ApplicationController
   end
 
   def edit
-    authorize! :edit, @agreement
+    authorize @agreement
     @project = @agreement.project
 
     # Get participants using AgreementParticipants
@@ -170,14 +171,15 @@ class AgreementsController < ApplicationController
 
       # Determine success message based on whether it's a counter offer
       if @agreement_form.is_counter_offer?
-        notice_message = "Counter offer was successfully created."
+        notice_message = "Counter offer was successfully created and sent to #{@agreement.other_party&.full_name || 'the other party'}. They'll be notified to review your proposal."
         notify_and_message_other_party(:counter_offer)
       else
-        notice_message = "Agreement was successfully created."
+        notice_message = "Agreement proposal sent to #{@agreement.other_party&.full_name || 'the other party'}! They'll be notified to review and respond."
         notify_and_message_other_party(:create)
       end
 
-      redirect_to agreements_path, notice: notice_message
+      # Redirect to the agreement show page for better context
+      redirect_to @agreement, notice: notice_message
     else
       @agreement_form.errors.full_messages.each { |error| flash[:alert] = error }
       @project = @agreement_form.project
@@ -188,7 +190,7 @@ class AgreementsController < ApplicationController
   end
 
   def update
-    authorize! :edit, @agreement
+    authorize @agreement
 
     # Use AgreementForm to handle the update properly
     form_params = agreement_params.merge(
@@ -237,7 +239,7 @@ class AgreementsController < ApplicationController
   end
 
   def destroy
-    authorize! :destroy, @agreement
+    authorize @agreement
     @agreement.destroy
     redirect_to agreements_url, notice: "Agreement was successfully destroyed."
   end
@@ -245,38 +247,26 @@ class AgreementsController < ApplicationController
   def accept
     return unless authorize_agreement_action
 
-    if @agreement.accept!
-      notify_and_message_other_party(:accept)
+    result = @agreement.accept!
 
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:notice] = "Agreement was successfully accepted."
-          render :accept
-        end
-        format.html do
-          redirect_to @agreement, notice: "Agreement was successfully accepted."
-        end
-      end
-    else
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:alert] = "Unable to accept agreement."
-          if params[:context] == "index"
-            render turbo_stream: turbo_stream.prepend(
-              "flash_messages",
-              partial: "shared/flash_message",
-              locals: { type: "alert", message: flash.now[:alert] }
-            )
-          else
-            render turbo_stream: turbo_stream.prepend(
-              "flash_messages",
-              partial: "shared/flash_message",
-              locals: { type: "alert", message: flash.now[:alert] }
-            )
+    handle_result(result) do |type, value|
+      case type
+      when :success
+        notify_and_message_other_party(:accept)
+        respond_to do |format|
+          format.turbo_stream do
+            flash.now[:notice] = "Agreement was successfully accepted."
+            render :accept
+          end
+          format.html do
+            redirect_to @agreement, notice: "Agreement was successfully accepted."
           end
         end
-        format.html do
-          redirect_to @agreement, alert: "Unable to accept agreement."
+      when :failure
+        alert_message = error_message(value)
+        respond_to do |format|
+          format.turbo_stream { render_turbo_flash_error(alert_message) }
+          format.html { redirect_to @agreement, alert: alert_message }
         end
       end
     end
@@ -285,62 +275,54 @@ class AgreementsController < ApplicationController
   def reject
     return unless authorize_agreement_action
 
-    if @agreement.reject!
-      notify_and_message_other_party(:reject)
+    result = @agreement.reject!
 
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:notice] = "Agreement was successfully rejected."
-          render :reject
+    handle_result(result) do |type, value|
+      case type
+      when :success
+        notify_and_message_other_party(:reject)
+        respond_to do |format|
+          format.turbo_stream do
+            flash.now[:notice] = "Agreement was successfully rejected."
+            render :reject
+          end
+          format.html do
+            redirect_to @agreement, notice: "Agreement was successfully rejected."
+          end
         end
-        format.html do
-          redirect_to @agreement, notice: "Agreement was successfully rejected."
-        end
-      end
-    else
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:alert] = "Unable to reject agreement."
-          render turbo_stream: turbo_stream.prepend(
-            "flash_messages",
-            partial: "shared/flash_message",
-            locals: { type: "alert", message: flash.now[:alert] }
-          )
-        end
-        format.html do
-          redirect_to @agreement, alert: "Unable to reject agreement."
+      when :failure
+        alert_message = error_message(value)
+        respond_to do |format|
+          format.turbo_stream { render_turbo_flash_error(alert_message) }
+          format.html { redirect_to @agreement, alert: alert_message }
         end
       end
     end
   end
 
   def complete
-    authorize! :complete, @agreement
+    authorize @agreement, :complete?
 
-    if @agreement.complete!
-      notify_and_message_other_party(:complete)
+    result = @agreement.complete!
 
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:notice] = "This agreement has been marked as completed."
-          render :complete
+    handle_result(result) do |type, value|
+      case type
+      when :success
+        notify_and_message_other_party(:complete)
+        respond_to do |format|
+          format.turbo_stream do
+            flash.now[:notice] = "This agreement has been marked as completed."
+            render :complete
+          end
+          format.html do
+            redirect_to @agreement, notice: "This agreement has been marked as completed."
+          end
         end
-        format.html do
-          redirect_to @agreement, notice: "This agreement has been marked as completed."
-        end
-      end
-    else
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:alert] = "This agreement cannot be marked as completed."
-          render turbo_stream: turbo_stream.prepend(
-            "flash_messages",
-            partial: "shared/flash_message",
-            locals: { type: "alert", message: flash.now[:alert] }
-          )
-        end
-        format.html do
-          redirect_to @agreement, alert: "This agreement cannot be marked as completed."
+      when :failure
+        alert_message = error_message(value)
+        respond_to do |format|
+          format.turbo_stream { render_turbo_flash_error(alert_message) }
+          format.html { redirect_to @agreement, alert: alert_message }
         end
       end
     end
@@ -349,27 +331,25 @@ class AgreementsController < ApplicationController
   def cancel
     return unless authorize_agreement_action
 
-    if @agreement.cancel!
-      notify_and_message_other_party(:cancel)
+    result = @agreement.cancel!
 
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:notice] = "Agreement was successfully cancelled."
-          render :cancel
+    handle_result(result) do |type, value|
+      case type
+      when :success
+        notify_and_message_other_party(:cancel)
+        respond_to do |format|
+          format.turbo_stream do
+            flash.now[:notice] = "Agreement was successfully cancelled."
+            render :cancel
+          end
+          format.html { redirect_to @agreement, notice: "Agreement was successfully cancelled." }
         end
-        format.html { redirect_to @agreement, notice: "Agreement was successfully cancelled." }
-      end
-    else
-      respond_to do |format|
-        format.turbo_stream do
-          flash.now[:alert] = "Unable to cancel agreement."
-          render turbo_stream: turbo_stream.prepend(
-            "flash_messages",
-            partial: "shared/flash_message",
-            locals: { type: "alert", message: flash.now[:alert] }
-          )
+      when :failure
+        alert_message = error_message(value)
+        respond_to do |format|
+          format.turbo_stream { render_turbo_flash_error(alert_message) }
+          format.html { redirect_to @agreement, alert: alert_message }
         end
-        format.html { redirect_to @agreement, alert: "Unable to cancel agreement." }
       end
     end
   end
@@ -388,115 +368,62 @@ class AgreementsController < ApplicationController
 
   # Lazy loading sections
   def meetings_section
-    begin
+    render_lazy_section("meetings", "Meetings", "Scheduled meetings and collaboration sessions") do
       @project = @agreement.project
-      # Optimized query with proper includes to avoid N+1
-      @meetings = if @agreement.active? || @agreement.completed?
-        @agreement.meetings
-                  .includes(:agreement)
-                  .order(start_time: :asc)
-      else
-        []
-      end
-
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_meetings", partial: "meetings_section", locals: { agreement: @agreement, meetings: @meetings, project: @project }) }
-        format.html { render partial: "meetings_section", locals: { agreement: @agreement, meetings: @meetings, project: @project } }
-      end
-    rescue => e
-      Rails.logger.error "Error loading meetings section: #{e.message}"
-      Rails.logger.error "Backtrace: #{e.backtrace.first(5).join('\n')}"
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_meetings", partial: "lazy_loading_error", locals: { title: "Meetings", description: "Scheduled meetings and collaboration sessions" }) }
-        format.html do
-          html = view_context.turbo_frame_tag("#{dom_id(@agreement)}_meetings") do
-            view_context.render(partial: "lazy_loading_error", locals: { title: "Meetings", description: "Scheduled meetings and collaboration sessions" })
-          end
-          render html: html
-        end
-      end
+      @meetings = (@agreement.active? || @agreement.completed?) ? @agreement.meetings.includes(:agreement).order(start_time: :asc) : []
+      { agreement: @agreement, meetings: @meetings, project: @project }
     end
   end
 
   def github_section
-    begin
+    render_lazy_section("github", "GitHub Integration", "Repository access and development activity") do
       @can_view_full_details = @agreement.can_view_full_project_details?(current_user)
-
-      # Preload github logs to avoid N+1 queries
       @project = Project.includes(:github_logs).find(@agreement.project.id)
-
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_github", partial: "github_section", locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details }) }
-        format.html { render partial: "github_section", locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details } }
-      end
-    rescue => e
-      Rails.logger.error "Error loading github section: #{e.message}"
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_github", partial: "lazy_loading_error", locals: { title: "GitHub Integration", description: "Repository access and development activity" }) }
-        format.html do
-          html = view_context.turbo_frame_tag("#{dom_id(@agreement)}_github") do
-            view_context.render(partial: "lazy_loading_error", locals: { title: "GitHub Integration", description: "Repository access and development activity" })
-          end
-          render html: html
-        end
-      end
+      { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details }
     end
   end
 
   def time_logs_section
-    begin
+    render_lazy_section("time_logs", "Time Tracking", "Hours spent and remaining time for this agreement") do
       @project = @agreement.project
       @can_view_full_details = @agreement.can_view_full_project_details?(current_user)
-
-      # Preload time logs with users to avoid N+1 queries
       @project = Project.includes(time_logs: :user).find(@project.id) if @can_view_full_details
-
-      # Get time logs for agreement participants only
       agreement_participant_ids = @agreement.agreement_participants.pluck(:user_id)
       @agreement_participant_time_logs = @project.time_logs.where(user_id: agreement_participant_ids)
-
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_time_logs", partial: "time_logs_section", locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details, agreement_participant_time_logs: @agreement_participant_time_logs }) }
-        format.html { render partial: "time_logs_section", locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details, agreement_participant_time_logs: @agreement_participant_time_logs } }
-      end
-    rescue => e
-      Rails.logger.error "Error loading time logs section: #{e.message}"
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_time_logs", partial: "lazy_loading_error", locals: { title: "Time Tracking", description: "Hours spent and remaining time for this agreement" }) }
-        format.html do
-          html = view_context.turbo_frame_tag("#{dom_id(@agreement)}_time_logs") do
-            view_context.render(partial: "lazy_loading_error", locals: { title: "Time Tracking", description: "Hours spent and remaining time for this agreement" })
-          end
-          render html: html
-        end
-      end
+      { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details, agreement_participant_time_logs: @agreement_participant_time_logs }
     end
   end
 
   def counter_offers_section
-    begin
-      # Build agreement chain with optimized loading
+    render_lazy_section("counter_offers", "Negotiation History", "Changes and counter-offers made during negotiation") do
       @agreement_chain = build_agreement_chain_optimized(@agreement)
-
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_counter_offers", partial: "counter_offers_section", locals: { agreement: @agreement, agreement_chain: @agreement_chain }) }
-        format.html { render partial: "counter_offers_section", locals: { agreement: @agreement, agreement_chain: @agreement_chain } }
-      end
-    rescue => e
-      Rails.logger.error "Error loading counter offers section: #{e.message}"
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_counter_offers", partial: "lazy_loading_error", locals: { title: "Negotiation History", description: "Changes and counter-offers made during negotiation" }) }
-        format.html do
-          html = view_context.turbo_frame_tag("#{dom_id(@agreement)}_counter_offers") do
-            view_context.render(partial: "lazy_loading_error", locals: { title: "Negotiation History", description: "Changes and counter-offers made during negotiation" })
-          end
-          render html: html
-        end
-      end
+      { agreement: @agreement, agreement_chain: @agreement_chain }
     end
   end
 
   private
+
+    # Unified lazy section renderer with error handling
+    def render_lazy_section(section_name, error_title, error_description)
+      locals = yield
+      partial_name = "#{section_name}_section"
+      frame_id = "#{dom_id(@agreement)}_#{section_name}"
+
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace(frame_id, partial: partial_name, locals: locals) }
+        format.html { render partial: partial_name, locals: locals }
+      end
+    rescue => e
+      Rails.logger.error "Error loading #{section_name} section: #{e.message}"
+      frame_id = "#{dom_id(@agreement)}_#{section_name}"
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace(frame_id, partial: "lazy_loading_error", locals: { title: error_title, description: error_description }) }
+        format.html do
+          html = view_context.turbo_frame_tag(frame_id) { view_context.render(partial: "lazy_loading_error", locals: { title: error_title, description: error_description }) }
+          render html: html
+        end
+      end
+    end
 
     # --- Refactored helpers below ---
 
@@ -664,23 +591,9 @@ class AgreementsController < ApplicationController
     end
 
     def authorize_agreement
-      authorized = (
-        current_user.id == @agreement.initiator&.id ||
-        current_user.id == @agreement.other_party&.id
-      )
-
-      # If not directly involved, check if user is involved in the original agreement (for counter offers)
-      if !authorized && @agreement.counter_to_id.present?
-        original = @agreement.counter_to
-        authorized = (
-          original.present? &&
-          (current_user.id == original.initiator&.id || current_user.id == original.other_party&.id)
-        )
-      end
-
-      unless authorized
-        redirect_to agreements_path, alert: "You are not authorized to view this agreement."
-      end
+      authorize @agreement
+    rescue Pundit::NotAuthorizedError
+      redirect_to agreements_path, alert: "You are not authorized to view this agreement."
     end
 
     def check_project_ownership
@@ -726,7 +639,8 @@ class AgreementsController < ApplicationController
 
     def agreement_params
       permitted_params = params.require(:agreement).permit(
-        :project_id, :agreement_type, :payment_type, :start_date, :end_date,
+        :project_id, :initiator_user_id, :other_party_user_id,
+        :agreement_type, :payment_type, :start_date, :end_date,
         :tasks, :weekly_hours, :hourly_rate, :equity_percentage,
         :counter_agreement_id, :status, :terms, milestone_ids: []
       )
@@ -739,8 +653,8 @@ class AgreementsController < ApplicationController
     end
 
   def authorize_agreement_action
-    action = params[:action].to_sym
-    unless can?(action, @agreement)
+    action = "#{params[:action]}?".to_sym
+    unless policy(@agreement).public_send(action)
       respond_to do |format|
         format.turbo_stream do
           flash.now[:alert] = "You are not authorized to perform this action."

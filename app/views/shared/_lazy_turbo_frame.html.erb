@@ -1,3 +1,7 @@
 <%= turbo_frame_tag frame_id, src: src_path, loading: "lazy" do %>
-  <%= render "shared/lazy_loading_placeholder", title: title, description: description %>
+  <% if defined?(skeleton_variant) && skeleton_variant.present? %>
+    <%= render Ui::SkeletonComponent.new(variant: skeleton_variant) %>
+  <% else %>
+    <%= render "shared/lazy_loading_placeholder", title: title, description: description %>
+  <% end %>
 <% end %>

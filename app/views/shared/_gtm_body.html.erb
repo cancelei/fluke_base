@@ -1,0 +1,6 @@
+<% if ENV['GTM_ID'].present? %>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<%= ERB::Util.url_encode(ENV["GTM_ID"].to_s) %>"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<% end %>

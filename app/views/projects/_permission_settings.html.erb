@@ -1,0 +1,170 @@
+<%# DaisyUI Permission Settings Card %>
+<%# Usage: render 'projects/permission_settings', project: @project %>
+<% project ||= @project %>
+<% memberships = project.project_memberships.includes(:user, :invited_by).order(:role, :created_at) %>
+
+<div class="card bg-base-100 shadow-xl">
+  <div class="card-body">
+    <%# Header %>
+    <h2 class="card-title">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+      Team Permissions
+    </h2>
+
+    <p class="text-sm text-base-content/60 mb-4">
+      Manage who can access this project and what they can do.
+    </p>
+
+    <%# Members Table %>
+    <% if memberships.any? %>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Role</th>
+              <th>Joined</th>
+              <% if policy(project).manage_members? %>
+                <th>Actions</th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <% memberships.each do |membership| %>
+              <tr>
+                <%# Member Info %>
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div class="avatar">
+                      <div class="mask mask-squircle w-10 h-10">
+                        <% if membership.user.avatar.attached? %>
+                          <%= image_tag membership.user.avatar, alt: membership.user.full_name %>
+                        <% else %>
+                          <div class="bg-neutral-focus text-neutral-content flex items-center justify-center h-full">
+                            <span class="text-sm font-bold"><%= membership.user.initials %></span>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="font-bold"><%= membership.user.full_name %></div>
+                      <div class="text-sm text-base-content/50"><%= membership.user.email %></div>
+                    </div>
+                  </div>
+                </td>
+
+                <%# Role Badge %>
+                <td>
+                  <%= render Ui::RoleBadgeComponent.new(role: membership.role, size: :sm) %>
+                  <% if membership.pending? %>
+                    <span class="badge badge-warning badge-xs ml-1">Pending</span>
+                  <% end %>
+                </td>
+
+                <%# Joined Date %>
+                <td>
+                  <% if membership.accepted_at %>
+                    <%= membership.accepted_at.strftime("%b %d, %Y") %>
+                  <% else %>
+                    <span class="text-base-content/50">Invited <%= membership.invited_at&.strftime("%b %d") || "recently" %></span>
+                  <% end %>
+                </td>
+
+                <%# Actions %>
+                <% if policy(project).manage_members? %>
+                  <td>
+                    <% unless membership.owner? %>
+                      <div class="dropdown dropdown-end">
+                        <label tabindex="0" class="btn btn-ghost btn-xs">
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                          </svg>
+                        </label>
+                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-50">
+                          <%# Change Role submenu %>
+                          <li>
+                            <details>
+                              <summary>Change Role</summary>
+                              <ul class="p-2">
+                                <% ProjectMembership::ROLES.each do |role| %>
+                                  <% next if role == "owner" || role == membership.role %>
+                                  <li>
+                                    <%= button_to role.titleize,
+                                        project_membership_path(project, membership),
+                                        method: :patch,
+                                        params: { project_membership: { role: role } },
+                                        class: "w-full text-left" %>
+                                  </li>
+                                <% end %>
+                              </ul>
+                            </details>
+                          </li>
+                          <%# Remove Member %>
+                          <li>
+                            <%= button_to "Remove",
+                                project_membership_path(project, membership),
+                                method: :delete,
+                                data: { turbo_confirm: "Are you sure you want to remove #{membership.user.full_name} from this project?" },
+                                class: "text-error" %>
+                          </li>
+                        </ul>
+                      </div>
+                    <% else %>
+                      <span class="text-base-content/50 text-xs">Owner</span>
+                    <% end %>
+                  </td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>No team members yet. Invite someone to collaborate!</span>
+      </div>
+    <% end %>
+
+    <%# Invite Button %>
+    <% if policy(project).manage_members? %>
+      <div class="card-actions justify-end mt-4">
+        <%= link_to new_project_membership_path(project), class: "btn btn-primary btn-sm" do %>
+          <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+          Invite Member
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%# Role Legend %>
+<div class="card bg-base-200 mt-4">
+  <div class="card-body py-4">
+    <h3 class="text-sm font-semibold mb-2">Role Permissions</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+      <div class="flex items-start gap-2">
+        <%= render Ui::RoleBadgeComponent.new(role: :owner, size: :xs) %>
+        <span class="text-base-content/70">Full access, can delete project and manage all settings</span>
+      </div>
+      <div class="flex items-start gap-2">
+        <%= render Ui::RoleBadgeComponent.new(role: :admin, size: :xs) %>
+        <span class="text-base-content/70">Can manage team, view all data, edit project settings</span>
+      </div>
+      <div class="flex items-start gap-2">
+        <%= render Ui::RoleBadgeComponent.new(role: :member, size: :xs) %>
+        <span class="text-base-content/70">Can view project, create agreements, track time</span>
+      </div>
+      <div class="flex items-start gap-2">
+        <%= render Ui::RoleBadgeComponent.new(role: :guest, size: :xs) %>
+        <span class="text-base-content/70">Read-only access to public project information</span>
+      </div>
+    </div>
+  </div>
+</div>

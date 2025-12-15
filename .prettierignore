@@ -1,0 +1,10 @@
+tmp/
+app/assets/builds/
+public/builds/
+coverage/
+node_modules/
+vendor/
+.git/
+*.min.js
+*.min.css
+package-lock.json

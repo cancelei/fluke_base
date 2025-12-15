@@ -1,14 +1,107 @@
 #!/bin/bash -e
 
-# Enable jemalloc for reduced memory usage and latency.
+# =============================================================================
+# Docker Entrypoint Script - Standardized across Rails projects
+# =============================================================================
+# Purpose: Prepare database and environment before starting Rails server
+# Usage: Automatically invoked by Docker ENTRYPOINT directive
+# =============================================================================
+
+# Enable jemalloc for reduced memory usage and latency
 if [ -z "${LD_PRELOAD+x}" ]; then
     LD_PRELOAD=$(find /usr/lib -name libjemalloc.so.2 -print -quit)
     export LD_PRELOAD
 fi
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
-  ./bin/rails db:prepare
+# Ensure Rails tmp directories exist for Puma and cache writes
+mkdir -p tmp/pids tmp/cache
+
+# =============================================================================
+# Database Preparation - Runs for rails server or start-production
+# =============================================================================
+if [[ "${*}" == *"rails server"* ]] || [[ "${*}" == *"start-production"* ]]; then
+  echo "=== Database Preparation Phase ==="
+
+  # Step 1: Wait for PostgreSQL to be ready (with timeout)
+  if [ -n "$DATABASE_URL" ]; then
+    echo "Waiting for PostgreSQL to be ready..."
+
+    # Extract connection details from DATABASE_URL
+    # Handles both postgres:// and postgresql:// schemas
+    DB_USER=$(echo $DATABASE_URL | sed -E "s/^postgres(ql)?:\/\/([^:]+):.*/\2/")
+    DB_PASS=$(echo $DATABASE_URL | sed -E "s/^postgres(ql)?:\/\/[^:]+:([^@]+)@.*/\2/")
+    DB_HOST=$(echo $DATABASE_URL | sed -E "s/^postgres(ql)?:\/\/[^@]+@([^:\/]+).*/\2/")
+    DB_PORT=$(echo $DATABASE_URL | sed -E "s/^postgres(ql)?:\/\/[^@]+@[^:]+:([0-9]+)\/.*/\2/")
+    DB_NAME=$(echo $DATABASE_URL | sed -E "s/^postgres(ql)?:\/\/[^@]+@[^\/]+\/(.*)/\2/" | cut -d'?' -f1)
+
+    # Default to 5432 if port extraction failed
+    if [ -z "$DB_PORT" ] || [ "$DB_PORT" = "$DATABASE_URL" ]; then
+      DB_PORT=5432
+    fi
+
+    # Wait with timeout (max 60 seconds)
+    RETRY_COUNT=0
+    MAX_RETRIES=30
+    until PGPASSWORD=$DB_PASS psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1" > /dev/null 2>&1; do
+      RETRY_COUNT=$((RETRY_COUNT + 1))
+      if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+        echo "❌ ERROR: PostgreSQL not ready after ${MAX_RETRIES} attempts (60s)"
+        exit 1
+      fi
+      echo "  Waiting for PostgreSQL... (attempt $RETRY_COUNT/$MAX_RETRIES)"
+      sleep 2
+    done
+
+    echo "✅ PostgreSQL is ready"
+  fi
+
+  # Step 2: Run database migrations with retry logic
+  echo "=== Running database migrations ==="
+  RETRY_COUNT=0
+  MAX_RETRIES=10
+  until ./bin/rails db:prepare; do
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+      echo "❌ ERROR: db:prepare failed after $MAX_RETRIES attempts"
+      exit 1
+    fi
+    echo "⚠️  db:prepare failed (attempt $RETRY_COUNT/$MAX_RETRIES), retrying in 2s..."
+    sleep 2
+  done
+  echo "✅ Database migrations completed"
+
+  # Step 3: Database seeding (environment-aware)
+  if [ "$RAILS_ENV" = "production" ]; then
+    # Production: Only seed if explicitly enabled
+    if [ "$SEED_PRODUCTION" = "true" ]; then
+      echo "🌱 Running production seeds (SEED_PRODUCTION=true)..."
+      ./bin/rails db:seed || echo "⚠️  WARNING: Production seeds failed"
+    else
+      echo "ℹ️  Skipping production seeds (set SEED_PRODUCTION=true to enable)"
+    fi
+  elif [ "$RAILS_ENV" = "staging" ]; then
+    # Staging: Auto-seed unless skipped
+    if [ "$SKIP_SEED" != "true" ]; then
+      echo "🌱 Running staging seeds..."
+      ./bin/rails db:seed || echo "⚠️  WARNING: Staging seeds failed, but continuing with startup"
+    else
+      echo "⏭️  Skipping staging seeds (SKIP_SEED=true)"
+    fi
+  else
+    # Development/Test: Always seed
+    echo "🌱 Running development seeds..."
+    ./bin/rails db:seed || echo "⚠️  WARNING: Seeds failed in development"
+  fi
+
+  # Step 4: Project-specific post-migration tasks
+  # Call a custom hook if it exists (allows per-project customization)
+  if [ -f "./bin/post-migration-tasks" ]; then
+    echo "=== Running project-specific post-migration tasks ==="
+    ./bin/post-migration-tasks
+  fi
+
+  echo "=== Database preparation complete ==="
 fi
 
+# Execute the main command (e.g., bin/start-production, rails server, etc.)
 exec "${@}"

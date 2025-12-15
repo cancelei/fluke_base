@@ -1,16 +1,31 @@
-<h2>Resend confirmation instructions</h2>
-
-<%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
-
-  <div class="field">
-    <%= f.label :email %><br>
-    <%= f.email_field :email, autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %>
+<div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h2 class="mt-6 text-center text-3xl font-bold tracking-tight">Resend confirmation instructions</h2>
+    <p class="mt-2 text-center text-sm text-base-content/70">
+      Didn't receive the confirmation email? We'll send it again.
+    </p>
   </div>
 
-  <div class="actions">
-    <%= f.submit "Resend confirmation instructions" %>
-  </div>
-<% end %>
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post, class: "space-y-4" }) do |f| %>
+          <%= render "devise/shared/error_messages", resource: resource %>
 
-<%= render "devise/shared/links" %>
+          <fieldset class="fieldset">
+            <%= f.label :email, "Email", class: "fieldset-legend" %>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email), class: "input w-full" %>
+          </fieldset>
+
+          <div class="mt-6">
+            <%= f.submit "Resend confirmation instructions", class: "btn btn-primary w-full" %>
+          </div>
+        <% end %>
+
+        <div class="divider my-4"></div>
+
+        <%= render "devise/shared/links" %>
+      </div>
+    </div>
+  </div>
+</div>

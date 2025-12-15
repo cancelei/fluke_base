@@ -1,20 +1,20 @@
 <%= turbo_frame_tag "#{dom_id(agreement)}_meetings" do %>
-  <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+  <div class="mt-8 card bg-base-100 shadow-xl overflow-hidden">
     <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
       <div>
-        <h3 class="text-lg leading-6 font-medium text-gray-900">
+        <h3 class="text-lg leading-6 font-medium">
           Meetings
         </h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        <p class="mt-1 max-w-2xl text-sm text-base-content/70">
           Scheduled meetings and collaboration sessions
         </p>
       </div>
 
       <% if agreement.active? %>
         <%= link_to new_agreement_meeting_path(agreement),
-            class: "inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
+            class: "btn btn-primary btn-sm gap-2",
             data: { turbo_frame: "#{dom_id(agreement)}_meeting_form" } do %>
-          <svg class="-ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
           </svg>
           <span>New Meeting</span>
@@ -22,28 +22,28 @@
       <% end %>
     </div>
 
-    <div class="border-t border-gray-200">
+    <div class="border-t border-base-200">
       <% if agreement.active? || agreement.completed? %>
         <%= render "meetings/meetings_list", meetings: meetings || [], agreement: agreement %>
 
         <!-- Meeting Form Frame -->
         <%= turbo_frame_tag "#{dom_id(agreement)}_meeting_form", loading: "lazy" do %>
           <% if agreement.active? %>
-            <div class="text-center py-4 border-t border-gray-200">
+            <div class="text-center py-4 border-t border-base-200">
               <%= link_to "Schedule a Meeting", new_agreement_meeting_path(agreement),
-                  class: "text-indigo-600 hover:text-indigo-900 text-sm",
+                  class: "link link-primary text-sm",
                   data: { turbo_frame: "#{dom_id(agreement)}_meeting_form" } %>
             </div>
           <% end %>
         <% end %>
       <% else %>
         <div class="px-4 py-8 text-center">
-          <div class="text-gray-400">
+          <div class="text-base-content/40">
             <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3a4 4 0 118 0v4m-4 8a2 2 0 100-4 2 2 0 000 4zm6-13a1 1 0 10-2 0v4H6a1 1 0 100 2v6a1 1 0 001 1h10a1 1 0 001-1V9a1 1 0 100-2h-4V3z" />
             </svg>
           </div>
-          <p class="mt-2 text-sm text-gray-500">
+          <p class="mt-2 text-sm text-base-content/70">
             Meeting scheduling will be available once the agreement is active.
           </p>
         </div>

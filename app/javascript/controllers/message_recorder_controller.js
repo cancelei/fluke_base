@@ -2,9 +2,21 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
   static targets = [
-    'recordBtn', 'micIcon', 'recordingIndicator', 'audioInput', 'form',
-    'recordingReview', 'playBtn', 'playIcon', 'pauseIcon', 'audioPlayer',
-    'waveform', 'duration', 'clearRecordingBtn', 'sendBtn', 'textInput'
+    'recordBtn',
+    'micIcon',
+    'recordingIndicator',
+    'audioInput',
+    'form',
+    'recordingReview',
+    'playBtn',
+    'playIcon',
+    'pauseIcon',
+    'audioPlayer',
+    'waveform',
+    'duration',
+    'clearRecordingBtn',
+    'sendBtn',
+    'textInput'
   ];
 
   connect() {
@@ -21,22 +33,43 @@ export default class extends Controller {
 
   setupEventListeners() {
     if (this.hasRecordBtnTarget) {
-      this.recordBtnTarget.addEventListener('click', this.handleRecording.bind(this));
+      this.recordBtnTarget.addEventListener(
+        'click',
+        this.handleRecording.bind(this)
+      );
     }
     if (this.hasPlayBtnTarget) {
-      this.playBtnTarget.addEventListener('click', this.togglePlayback.bind(this));
+      this.playBtnTarget.addEventListener(
+        'click',
+        this.togglePlayback.bind(this)
+      );
     }
     if (this.hasClearRecordingBtnTarget) {
-      this.clearRecordingBtnTarget.addEventListener('click', this.clearRecording.bind(this));
+      this.clearRecordingBtnTarget.addEventListener(
+        'click',
+        this.clearRecording.bind(this)
+      );
     }
     if (this.hasFormTarget) {
-      this.formTarget.addEventListener('submit', this.handleFormSubmit.bind(this));
+      this.formTarget.addEventListener(
+        'submit',
+        this.handleFormSubmit.bind(this)
+      );
       // Listen for successful Turbo form submission
-      this.formTarget.addEventListener('turbo:submit-end', this.handleTurboSubmitEnd.bind(this));
+      this.formTarget.addEventListener(
+        'turbo:submit-end',
+        this.handleTurboSubmitEnd.bind(this)
+      );
     }
     if (this.hasAudioPlayerTarget) {
-      this.audioPlayerTarget.addEventListener('ended', this.onAudioEnded.bind(this));
-      this.audioPlayerTarget.addEventListener('timeupdate', this.updateProgress.bind(this));
+      this.audioPlayerTarget.addEventListener(
+        'ended',
+        this.onAudioEnded.bind(this)
+      );
+      this.audioPlayerTarget.addEventListener(
+        'timeupdate',
+        this.updateProgress.bind(this)
+      );
     }
   }
 
@@ -53,17 +86,21 @@ export default class extends Controller {
   async startRecording() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       this.showError('Recording not supported in this browser.');
+
       return;
     }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
       this.mediaRecorder = new MediaRecorder(stream);
       this.audioChunks = [];
       this.recordingStartTime = Date.now();
 
       this.mediaRecorder.ondataavailable = e => {
-        if (e.data.size > 0) this.audioChunks.push(e.data);
+        if (e.data.size > 0) {
+          this.audioChunks.push(e.data);
+        }
       };
 
       this.mediaRecorder.onstop = () => {
@@ -74,7 +111,6 @@ export default class extends Controller {
 
       this.mediaRecorder.start();
       this.updateRecordingUI(true);
-
     } catch (err) {
       window.FlukeLogger?.error('MessageRecorder', err, {
         action: 'startRecording',
@@ -97,13 +133,17 @@ export default class extends Controller {
     this.audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
 
     // Create file for form submission
-    const file = new File([this.audioBlob], 'voice-message.webm', { type: 'audio/webm' });
+    const file = new File([this.audioBlob], 'voice-message.webm', {
+      type: 'audio/webm'
+    });
     const dt = new DataTransfer();
+
     dt.items.add(file);
     this.audioInputTarget.files = dt.files;
 
     // Setup audio player for review
     const audioUrl = URL.createObjectURL(this.audioBlob);
+
     this.audioPlayerTarget.src = audioUrl;
 
     // Show recording review UI
@@ -115,7 +155,10 @@ export default class extends Controller {
 
   showRecordingReview() {
     this.recordingReviewTarget.classList.remove('hidden');
-    this.recordingReviewTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    this.recordingReviewTarget.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest'
+    });
 
     // Update duration display
     this.updateDurationDisplay(this.recordingDuration / 1000);
@@ -129,15 +172,18 @@ export default class extends Controller {
   generateWaveform() {
     // Create a simple animated waveform visualization
     const waveformContainer = this.waveformTarget;
+
     waveformContainer.innerHTML = '';
 
     // Generate random heights for waveform bars (in a real app, you'd analyze the audio)
     const barCount = 40;
+
     this.waveformBars = [];
 
     for (let i = 0; i < barCount; i++) {
       const bar = document.createElement('div');
       const height = Math.random() * 20 + 4; // Random height between 4-24px
+
       bar.className = 'bg-indigo-300 rounded-full transition-all duration-200';
       bar.style.width = '2px';
       bar.style.height = `${height}px`;
@@ -181,17 +227,22 @@ export default class extends Controller {
 
   updateProgress() {
     if (this.audioPlayerTarget.duration) {
-      const remaining = this.audioPlayerTarget.duration - this.audioPlayerTarget.currentTime;
+      const remaining =
+        this.audioPlayerTarget.duration - this.audioPlayerTarget.currentTime;
+
       this.updateDurationDisplay(remaining);
     }
   }
 
   animateWaveform() {
-    if (!this.isPlaying) return;
+    if (!this.isPlaying) {
+      return;
+    }
 
     // Animate waveform bars during playback
     this.waveformBars.forEach((bar, index) => {
       const delay = index * 50; // Stagger animation
+
       setTimeout(() => {
         if (this.isPlaying) {
           bar.classList.add('bg-indigo-600');
@@ -208,7 +259,10 @@ export default class extends Controller {
 
     // Continue animation if still playing
     if (this.isPlaying) {
-      setTimeout(() => this.animateWaveform(), this.waveformBars.length * 50 + 500);
+      setTimeout(
+        () => this.animateWaveform(),
+        this.waveformBars.length * 50 + 500
+      );
     }
   }
 
@@ -248,7 +302,10 @@ export default class extends Controller {
       micSvg.setAttribute('fill', 'red');
       this.recordingIndicatorTarget.classList.remove('hidden');
       this.recordBtnTarget.classList.add('bg-red-100', 'hover:bg-red-200');
-      this.recordBtnTarget.classList.remove('bg-gray-200', 'hover:bg-indigo-100');
+      this.recordBtnTarget.classList.remove(
+        'bg-gray-200',
+        'hover:bg-indigo-100'
+      );
       this.recordBtnTarget.title = 'Stop recording';
     } else {
       micSvg.setAttribute('fill', '#000000');
@@ -262,12 +319,47 @@ export default class extends Controller {
   updateDurationDisplay(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
+
     this.durationTarget.textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
   showError(message) {
-    // You could integrate with your flash message system here
-    alert(message);
+    this.displayFlashMessage(message, 'error');
+  }
+
+  displayFlashMessage(message, type = 'info') {
+    const flashContainer = document.getElementById('flash_messages');
+
+    if (!flashContainer) {
+      return;
+    }
+
+    const alertClasses = {
+      error: 'alert-error',
+      success: 'alert-success',
+      info: 'alert-info',
+      warning: 'alert-warning'
+    };
+
+    const alertClass = alertClasses[type] || alertClasses.info;
+    const wrapper = document.createElement('div');
+
+    wrapper.className = `alert ${alertClass} mb-4 shadow-lg`;
+    wrapper.setAttribute('role', 'alert');
+
+    const messageSpan = document.createElement('span');
+
+    messageSpan.textContent = message;
+    wrapper.appendChild(messageSpan);
+
+    flashContainer.innerHTML = '';
+    flashContainer.appendChild(wrapper);
+
+    setTimeout(() => {
+      if (flashContainer.contains(wrapper)) {
+        wrapper.remove();
+      }
+    }, 5000);
   }
 
   handleFormSubmit() {
@@ -319,7 +411,10 @@ export default class extends Controller {
     // Reset send button
     if (this.hasSendBtnTarget) {
       this.sendBtnTarget.textContent = 'Send';
-      this.sendBtnTarget.classList.remove('bg-purple-600', 'hover:bg-purple-500');
+      this.sendBtnTarget.classList.remove(
+        'bg-purple-600',
+        'hover:bg-purple-500'
+      );
       this.sendBtnTarget.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
     }
   }

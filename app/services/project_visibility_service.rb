@@ -1,4 +1,8 @@
-class ProjectVisibilityService
+# frozen_string_literal: true
+
+# Service for checking project visibility and field access
+# Query service - returns direct values (no Result types needed for queries)
+class ProjectVisibilityService < ApplicationService
   def initialize(project)
     @project = project
     @user_access_cache = {}

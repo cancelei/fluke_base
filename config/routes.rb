@@ -29,6 +29,9 @@ Rails.application.routes.draw do
   # User project selection
   patch "/users/selected_project", to: "users#update_selected_project", as: :update_selected_project
 
+  # User theme preference
+  patch "/users/preferences/theme", to: "users/preferences#update_theme", as: :update_theme_preference
+
   # People directory
   get "people/explore", to: "people#explore", as: :explore_people
   get "people/:id", to: "people#show", as: :person
@@ -53,6 +56,14 @@ Rails.application.routes.draw do
 
     resources :github_logs, only: [ :index ] do
       post :refresh, on: :collection
+    end
+
+    # Project team membership management
+    resources :memberships, controller: "project_memberships", except: [ :show ] do
+      member do
+        post :accept
+        post :reject
+      end
     end
 
     collection do
@@ -120,4 +131,9 @@ Rails.application.routes.draw do
       match "create_conversation", to: "data#create_conversation", via: [ :get, :post ]
     end
   end
+
+  # Custom error pages
+  match "/404", to: "errors#not_found", via: :all
+  match "/422", to: "errors#unprocessable_entity", via: :all
+  match "/500", to: "errors#internal_server_error", via: :all
 end

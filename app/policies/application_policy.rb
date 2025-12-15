@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplicationPolicy
   attr_reader :user, :record
 
@@ -34,6 +36,28 @@ class ApplicationPolicy
     false
   end
 
+  protected
+
+  # Helper methods for common authorization patterns
+  def admin?
+    user&.admin?
+  end
+
+  def signed_in?
+    user.present?
+  end
+
+  def owner?
+    return false unless signed_in?
+    return record == user if record.is_a?(User)
+    return false unless record.respond_to?(:user_id)
+    record.user_id == user.id
+  end
+
+  def admin_or_owner?
+    admin? || owner?
+  end
+
   class Scope
     def initialize(user, scope)
       @user = user
@@ -41,7 +65,7 @@ class ApplicationPolicy
     end
 
     def resolve
-      raise NotImplementedError, "You must define #resolve in #{self.class}"
+      raise NoMethodError, "You must define #resolve in #{self.class}"
     end
 
     private

@@ -9,7 +9,8 @@ test('add milestone to a project via form with required fields', async ({ page, 
 
   // Go to projects and open the project
   await page.goto('/projects');
-  await page.getByRole('link', { name: projectName }).click();
+  // Use exact: true to match only the project title link, not the "View" button
+  await page.getByRole('link', { name: projectName, exact: true }).click();
 
   // Click Add Milestone
   await page.getByRole('link', { name: /add milestone/i }).first().click();

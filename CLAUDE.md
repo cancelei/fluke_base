@@ -1,7 +1,7 @@
 # Claude Code Configuration
 
 ## Testing Commands
-- `rails server` - Start development server (port 3000)
+- `rails server` - Start development server (port 3006)
 - `rails console` - Start Rails console
 - `./bin/test` - Run essential tests (models + helpers)
 - `./bin/test --coverage` - Run tests with coverage reporting
@@ -17,9 +17,9 @@
 ## Testing Endpoints (No Authentication Required)
 
 Test the Turbo implementations using these endpoints:
-- `http://localhost:3000/test/turbo` - Turbo fixes summary
-- `http://localhost:3000/test/agreements` - Agreements Turbo features test
-- `http://localhost:3000/up` - Rails health check
+- `http://localhost:3006/test/turbo` - Turbo fixes summary
+- `http://localhost:3006/test/agreements` - Agreements Turbo features test
+- `http://localhost:3006/up` - Rails health check
 
 These endpoints work without authentication and confirm all Turbo implementations are working.
 
@@ -32,8 +32,12 @@ These endpoints work without authentication and confirm all Turbo implementation
 ## Linting Commands
 - `./bin/lint` - Run all linters in parallel (RuboCop, Brakeman, ERB Lint, ESLint)
 - `./bin/lint --fix` - Run linters with auto-fix where possible
-- `npm run lint:js` - Run ESLint for JavaScript files
-- `npm run lint:js:fix` - Run ESLint with auto-fix
+- `npm run js-lint` - Run ESLint for JavaScript files
+- `npm run js-lint-fix` - Run ESLint with auto-fix
+- `npm run css-lint` - Run Stylelint for CSS files
+- `npm run css-lint-fix` - Run Stylelint with auto-fix
+- `npm run format-check` - Check code formatting with Prettier
+- `npm run format-fix` - Fix code formatting with Prettier
 - `bundle exec rubocop` - Ruby code style checker
 - `bundle exec brakeman` - Security vulnerability scanner
 - `bundle exec erb_lint` - ERB template linter

@@ -1,65 +1,65 @@
 <div id="filter_results">
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+  <div class="bg-base-100 shadow overflow-hidden sm:rounded-lg">
     <div class="px-4 py-5 sm:px-6">
-      <h3 class="text-lg leading-6 font-medium text-gray-900">
+      <h3 class="text-lg leading-6 font-medium text-base-content">
         Time Logs Pending Confirmation
       </h3>
     </div>
-    <div class="border-t border-gray-200">
+    <div class="border-t border-base-300">
       <% if milestones_pending_confirmation.any? { |milestone| selected_user ? milestone.time_logs.where(user_id: selected_user.id).exists? : true } %>
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-base-300">
+          <thead class="bg-base-200">
           <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Project
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               User
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Milestone
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Due Date
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Started
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Ended
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Duration
             </th>
           </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="bg-base-100 divide-y divide-base-300">
           <% milestones_pending_confirmation.each do |milestone| %>
           <% time_log_users = milestone.time_logs.map(&:user).uniq %>
             <% (selected_user ? [ selected_user ] : time_log_users).each do |user| %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-indigo-600 truncate">
+                  <div class="text-sm font-medium text-primary truncate">
                     <%= milestone.project.name %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-indigo-600 truncate">
+                  <div class="text-sm font-medium text-primary truncate">
                     <%= user.full_name %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-indigo-600 truncate">
+                  <div class="text-sm font-medium text-primary truncate">
                     <%= milestone.title %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
+                  <div class="text-sm text-base-content">
                     <%= milestone.due_date.strftime("%b %d, %Y %I:%M %p") %>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
+                  <div class="text-sm text-base-content">
                     <ul>
                       <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
                         <li><%= log.strftime("%b %d, %Y %I:%M %p") %></li>
@@ -68,7 +68,7 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
+                  <div class="text-sm text-base-content">
                     <ul>
                       <% milestone.time_logs.where(user:).pluck(:ended_at).each do |log| %>
                         <li><%= log&.strftime("%b %d, %Y %I:%M %p") || "-" %></li>
@@ -76,7 +76,7 @@
                     </ul>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-base-content/70">
                   <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
                   <%= hours_spend > 0 ? "#{hours_spend} hours" : "Less than an hour" %>
                 </td>
@@ -86,74 +86,74 @@
           </tbody>
         </table>
       <% else %>
-        <div class="px-4 py-4 text-center text-gray-500">
+        <div class="px-4 py-4 text-center text-base-content/70">
           No time logs found. Start tracking time for a milestone above.
         </div>
       <% end %>
     </div>
   </div>
 
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg mt-3">
+  <div class="bg-base-100 shadow overflow-hidden sm:rounded-lg mt-3">
     <div class="px-4 py-5 sm:px-6">
-      <h3 class="text-lg leading-6 font-medium text-gray-900">
+      <h3 class="text-lg leading-6 font-medium text-base-content">
         Time Logs for Completed Tasks
       </h3>
     </div>
-    <div class="border-t border-gray-200">
+    <div class="border-t border-base-300">
       <% if time_logs_completed.any? { |milestone| selected_user ? milestone.time_logs.where(user_id: selected_user.id).exists? : true } %>
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-base-300">
+          <thead class="bg-base-200">
           <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Project
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               User
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Milestone
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Due Date
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Started
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Ended
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-base-content/70 uppercase tracking-wider">
               Duration
             </th>
           </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="bg-base-100 divide-y divide-base-300">
           <% time_logs_completed.each do |milestone| %>
             <% time_log_users = milestone.time_logs.map(&:user).uniq %>
               <% (selected_user ? [ selected_user ] : time_log_users).each do |user| %>
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-indigo-600 truncate">
+                    <div class="text-sm font-medium text-primary truncate">
                       <%= milestone.project.name %>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-indigo-600 truncate">
+                    <div class="text-sm font-medium text-primary truncate">
                       <%= user.full_name %>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-indigo-600 truncate">
+                    <div class="text-sm font-medium text-primary truncate">
                       <%= milestone.title %>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">
+                    <div class="text-sm text-base-content">
                       <%= milestone.due_date.strftime("%b %d, %Y %I:%M %p") %>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">
+                    <div class="text-sm text-base-content">
                       <ul>
                         <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
                           <li><%= log.strftime("%b %d, %Y %I:%M %p") %></li>
@@ -162,7 +162,7 @@
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">
+                    <div class="text-sm text-base-content">
                       <ul>
                         <% milestone.time_logs.where(user:).pluck(:ended_at).each do |log| %>
                           <li><%= log&.strftime("%b %d, %Y %I:%M %p") || "-" %></li>
@@ -170,7 +170,7 @@
                       </ul>
                     </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-base-content/70">
                     <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
                     <%= hours_spend > 0 ? "#{hours_spend} hours" : "Less than an hour" %>
                   </td>
@@ -180,26 +180,26 @@
           <% time_logs_manual.each do |log| %>
             <tr>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-indigo-600 truncate">
+                <div class="text-sm font-medium text-primary truncate">
                   <%= log.description %>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">
+                <div class="text-sm text-base-content">
                   -
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">
+                <div class="text-sm text-base-content">
                   <%= log.started_at.strftime("%b %d, %Y %I:%M %p") %>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">
+                <div class="text-sm text-base-content">
                   <%= log.ended_at.strftime("%b %d, %Y %I:%M %p") %>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-base-content/70">
                 <%= log.hours_spent > 0 ? "#{log.hours_spent} hours" : "Less than an hour" %>
               </td>
             </tr>
@@ -207,7 +207,7 @@
           </tbody>
         </table>
       <% else %>
-        <div class="px-4 py-4 text-center text-gray-500">
+        <div class="px-4 py-4 text-center text-base-content/70">
           No time logs found. Start tracking time for a milestone above.
         </div>
       <% end %>

@@ -1,11 +1,11 @@
 <% presenter = present(agreement) %>
 <% if agreement.payment_type.present? %>
-  <div class="text-sm text-gray-900">
+  <div class="text-sm">
     <%= presenter.payment_type_badge %>
-    <div class="text-xs text-gray-500 mt-1">
+    <div class="text-xs text-base-content/70 mt-1">
       <%= presenter.formatted_payment_details %>
     </div>
   </div>
 <% else %>
-  <span class="text-xs text-gray-500">Not specified</span>
+  <span class="text-xs text-base-content/70">Not specified</span>
 <% end %>

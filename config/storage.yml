@@ -10,6 +10,19 @@ staging:
   service: Disk
   root: <%= Rails.root.join("storage/staging") %>
 
+# iDrive e2 S3-compatible storage for production
+idrive_production:
+  service: S3
+  access_key_id: <%= ENV['IDRIVE_E2_ACCESS_KEY_ID'] %>
+  secret_access_key: <%= ENV['IDRIVE_E2_SECRET_ACCESS_KEY'] %>
+  region: us-southwest-1
+  endpoint: https://s3.us-southwest-1.idrivee2.com
+  bucket: <%= ENV.fetch('IDRIVE_E2_BUCKET', 'fluke-base-production') %>
+  force_path_style: true
+  http_open_timeout: 15
+  http_read_timeout: 60
+  retry_limit: 3
+
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:
 #   service: S3

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_27_191807) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_13_205300) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -264,6 +264,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_191807) do
     t.index ["project_id"], name: "index_project_agents_on_project_id"
   end
 
+  create_table "project_memberships", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "user_id", null: false
+    t.string "role", default: "member", null: false
+    t.datetime "invited_at"
+    t.datetime "accepted_at"
+    t.bigint "invited_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invited_by_id"], name: "index_project_memberships_on_invited_by_id"
+    t.index ["project_id", "user_id"], name: "index_project_memberships_on_project_id_and_user_id", unique: true
+    t.index ["project_id"], name: "index_project_memberships_on_project_id"
+    t.index ["user_id", "role"], name: "index_project_memberships_on_user_id_and_role"
+    t.index ["user_id"], name: "index_project_memberships_on_user_id"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'admin'::character varying::text, 'member'::character varying::text, 'guest'::character varying::text])", name: "project_memberships_role_check"
+  end
+
   create_table "projects", force: :cascade do |t|
     t.string "name", null: false
     t.text "description", null: false
@@ -486,6 +503,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_191807) do
     t.string "facebook"
     t.string "tiktok"
     t.boolean "multi_project_tracking", default: false, null: false
+    t.string "theme_preference", default: "nord", null: false
+    t.string "instagram"
+    t.boolean "admin", default: false, null: false
+    t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["selected_project_id"], name: "index_users_on_selected_project_id"
@@ -530,6 +551,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_191807) do
   add_foreign_key "milestones", "projects"
   add_foreign_key "notifications", "users"
   add_foreign_key "project_agents", "projects"
+  add_foreign_key "project_memberships", "projects"
+  add_foreign_key "project_memberships", "users"
+  add_foreign_key "project_memberships", "users", column: "invited_by_id"
   add_foreign_key "projects", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

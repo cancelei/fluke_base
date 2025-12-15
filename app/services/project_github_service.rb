@@ -1,4 +1,8 @@
-class ProjectGithubService
+# frozen_string_literal: true
+
+# Service for GitHub integration queries for a project
+# Query service - returns direct values
+class ProjectGithubService < ApplicationService
   def initialize(project)
     @project = project
   end

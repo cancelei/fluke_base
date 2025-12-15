@@ -1,4 +1,4 @@
-<div class="font-bold text-lg text-indigo-700">
+<div class="font-bold text-lg text-primary">
   <%= current_user.selected_project ? present(current_user.selected_project).display_name(current_user) : "No project selected" %>
 </div>
 
@@ -8,5 +8,5 @@
     <!-- Add more project-specific dashboard content here -->
   </div>
 <% else %>
-  <div class="text-gray-500">Select a project to view dashboard content.</div>
+  <div class="text-base-content/70">Select a project to view dashboard content.</div>
 <% end %>

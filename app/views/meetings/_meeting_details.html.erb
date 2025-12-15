@@ -1,65 +1,67 @@
 <%= turbo_frame_tag dom_id(meeting) do %>
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
-      <div>
-        <h3 class="text-lg leading-6 font-medium text-gray-900">
-          <%= h(meeting.title) %>
-        </h3>
-        <p class="mt-1 max-w-2xl text-sm text-gray-500">
-          <%= meeting.start_time.strftime("%B %d, %Y at %I:%M %p") %> - <%= meeting.end_time.strftime("%I:%M %p") %>
-        </p>
-      </div>
+  <div class="card bg-base-100 shadow-xl overflow-hidden">
+    <div class="card-body">
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="card-title">
+            <%= h(meeting.title) %>
+          </h3>
+          <p class="text-sm text-base-content/60">
+            <%= meeting.start_time.strftime("%B %d, %Y at %I:%M %p") %> - <%= meeting.end_time.strftime("%I:%M %p") %>
+          </p>
+        </div>
 
-      <div class="flex space-x-2">
-        <%= link_to "Edit", edit_agreement_meeting_path(agreement, meeting),
-            class: "inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50",
-            data: { turbo_frame: "#{dom_id(meeting)}_form" } %>
+        <div class="flex space-x-2">
+          <%= link_to "Edit", edit_agreement_meeting_path(agreement, meeting),
+              class: "btn btn-outline btn-sm",
+              data: { turbo_frame: "#{dom_id(meeting)}_form" } %>
 
-        <%= button_to "Delete", agreement_meeting_path(agreement, meeting),
-            method: :delete,
-            class: "inline-flex items-center rounded-md border border-transparent bg-red-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700",
-            data: {
-              turbo_confirm: "Are you sure you want to delete this meeting?",
-              turbo_method: :delete
-            } %>
+          <%= button_to "Delete", agreement_meeting_path(agreement, meeting),
+              method: :delete,
+              class: "btn btn-error btn-sm",
+              data: {
+                turbo_confirm: "Are you sure you want to delete this meeting?",
+                turbo_method: :delete
+              } %>
+        </div>
       </div>
     </div>
 
-    <div class="border-t border-gray-200">
-      <dl>
-        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Start Time</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+    <div class="border-t border-base-200">
+      <dl class="divide-y divide-base-200">
+        <div class="bg-base-200/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-base-content/60">Start Time</dt>
+          <dd class="mt-1 text-sm text-base-content sm:col-span-2 sm:mt-0">
             <%= meeting.start_time.strftime("%B %d, %Y at %I:%M %p") %>
           </dd>
         </div>
 
-        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">End Time</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+        <div class="bg-base-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-base-content/60">End Time</dt>
+          <dd class="mt-1 text-sm text-base-content sm:col-span-2 sm:mt-0">
             <%= meeting.end_time.strftime("%B %d, %Y at %I:%M %p") %>
           </dd>
         </div>
 
-        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Duration</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+        <div class="bg-base-200/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-base-content/60">Duration</dt>
+          <dd class="mt-1 text-sm text-base-content sm:col-span-2 sm:mt-0">
             <%= distance_of_time_in_words(meeting.start_time, meeting.end_time) %>
           </dd>
         </div>
 
         <% if meeting.description.present? %>
-          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Description</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+          <div class="bg-base-100 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-base-content/60">Description</dt>
+            <dd class="mt-1 text-sm text-base-content sm:col-span-2 sm:mt-0">
               <%= simple_format(h(meeting.description)) %>
             </dd>
           </div>
         <% end %>
 
-        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Participants</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+        <div class="bg-base-200/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-base-content/60">Participants</dt>
+          <dd class="mt-1 text-sm text-base-content sm:col-span-2 sm:mt-0">
             <% presenter = present(agreement) %>
             <%= presenter.parties_display %>
           </dd>

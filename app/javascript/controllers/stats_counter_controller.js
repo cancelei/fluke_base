@@ -20,7 +20,7 @@ export default class extends Controller {
       threshold: 0.3
     };
 
-    this.observer = new IntersectionObserver((entries) => {
+    this.observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           this.animateCards();
@@ -66,12 +66,12 @@ export default class extends Controller {
   animateNumber(element, start, end, duration) {
     const startTime = performance.now();
 
-    const updateNumber = (currentTime) => {
+    const updateNumber = currentTime => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
       // Use easing function for smoother animation
-      const easeOutExpo = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const easeOutExpo = progress === 1 ? 1 : 1 - 2 ** (-10 * progress);
       const currentValue = Math.round(start + (end - start) * easeOutExpo);
 
       element.textContent = currentValue;

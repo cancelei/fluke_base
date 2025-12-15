@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  include CanCan::ControllerAdditions
+  include Pundit::Authorization
   include RailsCloudflareTurnstile::ControllerHelpers
   # Allow browsers with reasonable modern feature support while not being overly restrictive
   allow_browser versions: { chrome: 100, safari: 15, firefox: 100, opera: 85, ie: false }
@@ -21,7 +21,7 @@ class ApplicationController < ActionController::Base
   # DRY helper: Require role or redirect
   # Role requirement methods removed - all users have access to all features
 
-  rescue_from CanCan::AccessDenied, with: :user_not_authorized
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
   helper_method :selected_project, :present
 
@@ -72,12 +72,13 @@ class ApplicationController < ActionController::Base
       # Enhanced project resolution for mentors and entrepreneurs
       if selected_project_id.present?
         # Find project through ownership or agreements (unified logic for all users)
+        # Include both Accepted and Completed agreement statuses
         @selected_project = current_user.projects.find_by(id: selected_project_id) ||
                            current_user.initiated_agreements
-                                      .where(project_id: selected_project_id, status: "Accepted")
+                                      .where(project_id: selected_project_id, status: %w[Accepted Completed])
                                       .first&.project ||
                            current_user.received_agreements
-                                      .where(project_id: selected_project_id, status: "Accepted")
+                                      .where(project_id: selected_project_id, status: %w[Accepted Completed])
                                       .first&.project
       end
 

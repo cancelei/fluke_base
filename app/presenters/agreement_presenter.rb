@@ -4,50 +4,50 @@ class AgreementPresenter < ApplicationPresenter
   def status_badge
     status_class = case status
     when Agreement::ACCEPTED
-      "bg-green-100 text-green-800"
+      "badge-success"
     when Agreement::PENDING
-      "bg-yellow-100 text-yellow-800"
+      "badge-warning"
     when Agreement::COMPLETED
-      "bg-blue-100 text-blue-800"
+      "badge-info"
     when Agreement::REJECTED
-      "bg-red-100 text-red-800"
+      "badge-error"
     when Agreement::CANCELLED
-      "bg-gray-100 text-gray-800"
+      "badge-ghost"
     when Agreement::COUNTERED
-      "bg-orange-100 text-orange-800"
+      "badge-warning"
     else
-      "bg-gray-100 text-gray-800"
+      "badge-ghost"
     end
 
-    "<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{status_class}\">#{status}</span>".html_safe
+    "<span class=\"badge #{status_class}\">#{status}</span>".html_safe
   end
 
   def agreement_type_badge
     type_class = case agreement_type
     when Agreement::MENTORSHIP
-      "bg-green-100 text-green-800"
+      "badge-success"
     when Agreement::CO_FOUNDER
-      "bg-purple-100 text-purple-800"
+      "badge-secondary"
     else
-      "bg-gray-100 text-gray-800"
+      "badge-ghost"
     end
 
-    "<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{type_class}\">#{agreement_type}</span>".html_safe
+    "<span class=\"badge #{type_class}\">#{agreement_type}</span>".html_safe
   end
 
   def payment_type_badge
     type_class = case payment_type
     when Agreement::HOURLY
-      "bg-blue-100 text-blue-800"
+      "badge-info"
     when Agreement::EQUITY
-      "bg-yellow-100 text-yellow-800"
+      "badge-warning"
     when Agreement::HYBRID
-      "bg-purple-100 text-purple-800"
+      "badge-secondary"
     else
-      "bg-gray-100 text-gray-800"
+      "badge-ghost"
     end
 
-    "<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{type_class}\">#{payment_type}</span>".html_safe
+    "<span class=\"badge #{type_class}\">#{payment_type}</span>".html_safe
   end
 
   def formatted_payment_details
@@ -185,7 +185,7 @@ class AgreementPresenter < ApplicationPresenter
 
   def project_link
     h.link_to project.name, h.project_path(project),
-            class: "text-blue-600 hover:text-blue-800 font-medium",
+            class: "link link-primary font-medium",
             data: { turbo_frame: "_top" }
   end
 

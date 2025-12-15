@@ -1,161 +1,107 @@
 import { Controller } from '@hotwired/stimulus';
-import toastr from 'toastr';
 
+/**
+ * DaisyUI Toast Controller
+ * Handles toast notifications using DaisyUI's native toast component.
+ * No external dependencies required - pure CSS-based styling.
+ */
 export default class extends Controller {
   static values = {
-    message: String,
-    type: String,
-    title: String,
-    timeout: { type: Number, default: 5000 },
-    closeButton: { type: Boolean, default: true },
-    progressBar: { type: Boolean, default: true },
-    positionClass: { type: String, default: 'toast-top-right' },
-    preventDuplicates: { type: Boolean, default: true },
-    maxToasts: { type: Number, default: 5 },
-    queue: { type: Boolean, default: true },
-    announceToScreenReader: { type: Boolean, default: true }
+    timeout: { type: Number, default: 5000 }
   };
 
   connect() {
-    this.configureToastr();
-    this.showToast();
+    this.setupAccessibility();
+    this.scheduleRemoval();
+    this.addKeyboardSupport();
   }
 
-  configureToastr() {
-    toastr.options = {
-      closeButton: this.closeButtonValue,
-      debug: false,
-      newestOnTop: true,
-      progressBar: this.progressBarValue,
-      positionClass: this.positionClassValue,
-      preventDuplicates: this.preventDuplicatesValue,
-      onclick: null,
-      showDuration: '300',
-      hideDuration: '1000',
-      timeOut: this.timeoutValue,
-      extendedTimeOut: '1000',
-      showEasing: 'swing',
-      hideEasing: 'linear',
-      showMethod: 'fadeIn',
-      hideMethod: 'fadeOut'
-    };
+  disconnect() {
+    if (this.removalTimeout) {
+      clearTimeout(this.removalTimeout);
+    }
   }
 
-  showToast() {
-    if (!this.messageValue) return;
+  /**
+   * Dismiss the toast with fade-out animation
+   */
+  dismiss() {
+    // Add fade-out animation
+    this.element.classList.add(
+      'opacity-0',
+      'transition-opacity',
+      'duration-300'
+    );
 
-    // Check toast queue limits
-    if (this.queueValue && this.getActiveToastCount() >= this.maxToastsValue) {
-      this.removeOldestToast();
-    }
-
-    const type = this.normalizeType(this.typeValue);
-    const title = this.titleValue || '';
-    const toastId = this.element.dataset.toastId;
-
-    // Announce to screen readers if enabled
-    if (this.announceToScreenReaderValue) {
-      this.announceToScreenReader(this.messageValue, type);
-    }
-
-    // Show the toast
-    let toastElement;
-    switch (type) {
-    case 'success':
-      toastElement = toastr.success(this.messageValue, title);
-      break;
-    case 'info':
-      toastElement = toastr.info(this.messageValue, title);
-      break;
-    case 'warning':
-      toastElement = toastr.warning(this.messageValue, title);
-      break;
-    case 'error':
-      toastElement = toastr.error(this.messageValue, title);
-      break;
-    default:
-      toastElement = toastr.info(this.messageValue, title);
-    }
-
-    // Enhance the toast element with accessibility features
-    if (toastElement && toastElement.length) {
-      this.enhanceToastAccessibility(toastElement[0], type, toastId);
-    }
-
-    // Remove the trigger element after showing the toast
-    this.element.remove();
+    // Remove element after animation completes
+    setTimeout(() => {
+      this.element.remove();
+    }, 300);
   }
 
-  normalizeType(type) {
-    const typeMap = {
-      'notice': 'success',
-      'alert': 'error',
-      'success': 'success',
-      'error': 'error',
-      'warning': 'warning',
-      'info': 'info'
-    };
-
-    return typeMap[type] || 'info';
+  /**
+   * Schedule automatic removal after timeout
+   */
+  scheduleRemoval() {
+    if (this.timeoutValue > 0) {
+      this.removalTimeout = setTimeout(() => {
+        this.dismiss();
+      }, this.timeoutValue);
+    }
   }
 
-  // Accessibility enhancements
-  enhanceToastAccessibility(toastElement, type, toastId) {
-    // Add ARIA attributes
-    toastElement.setAttribute('role', 'alert');
-    toastElement.setAttribute('aria-live', 'polite');
-    toastElement.setAttribute('aria-atomic', 'true');
-    toastElement.setAttribute('data-toast-id', toastId);
+  /**
+   * Setup ARIA attributes for accessibility
+   */
+  setupAccessibility() {
+    // The component already sets role="alert" in the Ruby template
+    // Add live region attributes for screen readers
+    this.element.setAttribute('aria-live', 'polite');
+    this.element.setAttribute('aria-atomic', 'true');
 
-    // Add keyboard navigation
-    toastElement.setAttribute('tabindex', '0');
+    // Announce to screen readers
+    this.announceToScreenReader();
+  }
 
-    // Add close button accessibility
-    const closeButton = toastElement.querySelector('.toast-close-button');
-    if (closeButton) {
-      closeButton.setAttribute('aria-label', 'Close notification');
-      closeButton.setAttribute('title', 'Close notification');
+  /**
+   * Add keyboard support for dismissing toast
+   */
+  addKeyboardSupport() {
+    this.element.setAttribute('tabindex', '0');
+    this.element.addEventListener('keydown', this.handleKeydown.bind(this));
+  }
+
+  /**
+   * Handle keyboard events
+   */
+  handleKeydown(event) {
+    if (event.key === 'Escape') {
+      this.dismiss();
+    }
+  }
+
+  /**
+   * Announce toast message to screen readers
+   */
+  announceToScreenReader() {
+    const message = this.element.querySelector('span')?.textContent;
+
+    if (!message) {
+      return;
     }
 
-    // Add keyboard event listeners
-    toastElement.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this.closeToast(toastElement);
-      }
-    });
-  }
-
-  // Screen reader announcements
-  announceToScreenReader(message, type) {
     const announcement = document.createElement('div');
+
     announcement.setAttribute('aria-live', 'assertive');
     announcement.setAttribute('aria-atomic', 'true');
     announcement.className = 'sr-only';
-    announcement.textContent = `${type}: ${message}`;
+    announcement.textContent = message;
 
     document.body.appendChild(announcement);
 
-    // Remove after announcement
+    // Remove after announcement is complete
     setTimeout(() => {
-      document.body.removeChild(announcement);
+      announcement.remove();
     }, 1000);
-  }
-
-  // Performance and queue management
-  getActiveToastCount() {
-    return document.querySelectorAll('#toast-container > div').length;
-  }
-
-  removeOldestToast() {
-    const container = document.getElementById('toast-container');
-    if (container && container.firstChild) {
-      container.removeChild(container.firstChild);
-    }
-  }
-
-  closeToast(toastElement) {
-    if (toastElement && toastElement.parentNode) {
-      toastElement.parentNode.removeChild(toastElement);
-    }
   }
 }

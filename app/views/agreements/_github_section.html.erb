@@ -1,40 +1,40 @@
 <%= turbo_frame_tag "#{dom_id(agreement)}_github" do %>
-  <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+  <div class="mt-8 card bg-base-100 shadow-xl overflow-hidden">
     <div class="px-4 py-5 sm:px-6">
-      <h3 class="text-lg leading-6 font-medium text-gray-900">
+      <h3 class="text-lg leading-6 font-medium">
         GitHub Integration
       </h3>
-      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+      <p class="mt-1 max-w-2xl text-sm text-base-content/70">
         Repository access and development activity
       </p>
     </div>
 
-    <div class="border-t border-gray-200">
+    <div class="border-t border-base-200">
       <% if agreement.active? && project.repository_url.present? && can_view_full_details %>
-        <dl>
+        <dl class="divide-y divide-base-200">
           <% repo = format_github_repo(project.repository_url) %>
-          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">GitHub Repository</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <%= link_to repo[:url], target: "_blank", rel: "noopener noreferrer", class: "text-indigo-600 hover:text-indigo-900 flex items-center" do %>
+          <div class="px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-base-content/70">GitHub Repository</dt>
+            <dd class="mt-1 text-sm sm:mt-0 sm:col-span-2">
+              <%= link_to repo[:url], { target: "_blank", rel: "noopener noreferrer", class: "link link-primary flex items-center" } do %>
                 <svg class="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
                 </svg>
                 <%= repo[:display] %>
               <% end %>
-              <p class="mt-1 text-xs text-gray-500">This repository is only visible to you because you have an accepted agreement for this project.</p>
+              <p class="mt-1 text-xs text-base-content/60">This repository is only visible to you because you have an accepted agreement for this project.</p>
             </dd>
           </div>
 
           <!-- GitHub Activity Section -->
           <% if project.github_logs.any? %>
-            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Recent Activity</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+            <div class="bg-base-200/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-base-content/70">Recent Activity</dt>
+              <dd class="mt-1 text-sm sm:col-span-2 sm:mt-0">
                 <div class="space-y-2">
                   <% project.github_logs.order(created_at: :desc).limit(5).each do |log| %>
-                    <div class="flex items-center text-xs text-gray-600">
-                      <div class="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                    <div class="flex items-center text-xs text-base-content/80">
+                      <div class="flex-shrink-0 w-2 h-2 bg-success rounded-full mr-2"></div>
                       <span class="truncate">
                         <%= log.commit_message %> -
                         <%= log.created_at.strftime("%b %d, %Y at %I:%M %p") %>
@@ -43,13 +43,13 @@
                   <% end %>
                 </div>
                 <%= link_to "View all activity", project_github_logs_path(project),
-                    class: "text-indigo-600 hover:text-indigo-900 text-xs block mt-2" %>
+                    class: "link link-primary text-xs block mt-2" %>
               </dd>
             </div>
           <% else %>
-            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-gray-500">Recent Activity</dt>
-              <dd class="mt-1 text-sm text-gray-500 sm:col-span-2 sm:mt-0">
+            <div class="bg-base-200/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-base-content/70">Recent Activity</dt>
+              <dd class="mt-1 text-sm text-base-content/70 sm:col-span-2 sm:mt-0">
                 No recent GitHub activity recorded
               </dd>
             </div>
@@ -57,12 +57,12 @@
         </dl>
       <% else %>
         <div class="px-4 py-8 text-center">
-          <div class="text-gray-400">
+          <div class="text-base-content/40">
             <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p class="mt-2 text-sm text-gray-500">
+          <p class="mt-2 text-sm text-base-content/70">
             <% if !agreement.active? %>
               GitHub integration will be available once the agreement is active.
             <% elsif !can_view_full_details %>

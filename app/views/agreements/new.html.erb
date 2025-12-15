@@ -2,21 +2,21 @@
   <div class="py-10">
     <header>
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-bold leading-tight tracking-tight text-gray-900">New Agreement</h1>
+        <h1 class="text-3xl font-bold leading-tight tracking-tight">New Agreement</h1>
       </div>
     </header>
     <main>
       <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="px-4 py-8 sm:px-0">
-          <div class="rounded-lg bg-white shadow">
-            <div class="px-4 py-5 sm:p-6">
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
               <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <!-- Left column for project and mentor details -->
                 <div class="lg:col-span-1">
                   <% if @project %>
                     <div class="mb-6">
-                      <h2 class="text-lg font-medium text-gray-900">Project Details</h2>
-                      <p class="mt-1 text-sm text-gray-500">
+                      <h2 class="text-lg font-medium">Project Details</h2>
+                      <p class="mt-1 text-sm text-base-content/70">
                         <span class="font-medium">Project:</span> <%= present(@project).display_name(current_user) %>
                       </p>
                     </div>
@@ -24,11 +24,11 @@
                   <% details = fetch_initiator_data(@initiator_details) %>
                   <% if details %>
                     <div class="mb-6">
-                      <h2 class="text-lg font-medium text-gray-900">Agreement Initiator Details</h2>
-                      <p class="mt-1 text-sm text-gray-500">
+                      <h2 class="text-lg font-medium">Agreement Initiator Details</h2>
+                      <p class="mt-1 text-sm text-base-content/70">
                         <span class="font-medium">Name:</span> <%= details.first %>
                       </p>
-                      <p class="mt-1 text-sm text-gray-500">
+                      <p class="mt-1 text-sm text-base-content/70">
                         <span class="font-medium">Role:</span> <%= details.last %>
                       </p>
                     </div>
@@ -36,7 +36,7 @@
 
                   <% if @other_party %>
                     <div class="mb-6">
-                      <h2 class="text-lg font-medium text-gray-900">Other Party Details</h2>
+                      <h2 class="text-lg font-medium">Other Party Details</h2>
                       <div class="mt-2 flex items-center space-x-3">
                         <% if @other_party.avatar.attached? %>
                           <%= image_tag @other_party.avatar, class: "h-12 w-12 rounded-full" %>
@@ -44,8 +44,8 @@
                           <img src="<%= @other_party.avatar_url %>" class="h-12 w-12 rounded-full">
                         <% end %>
                         <div>
-                          <p class="text-sm font-medium text-gray-900"><%= @other_party.full_name %></p>
-                          <p class="text-sm text-gray-500">Community Person</p>
+                          <p class="text-sm font-medium"><%= @other_party.full_name %></p>
+                          <p class="text-sm text-base-content/70">Community Person</p>
                         </div>
                       </div>
                     </div>

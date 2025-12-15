@@ -1,51 +1,76 @@
-
 <%= turbo_frame_tag "agreement_results" do %>
-  <!-- Entrepreneur Agreements -->
-  <div class="bg-white shadow sm:rounded-lg mb-8">
-    <div class="px-4 py-5 sm:px-6 flex items-center justify-between">
+  <!-- Your Projects Agreements -->
+  <div class="card bg-base-100 shadow-xl mb-8">
+    <div class="card-body">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 class="card-title">Your Projects</h2>
+          <p class="text-sm text-base-content/70">
+            Agreements for projects you own
+            <% if @query.active_filters? %>
+              <span class="badge badge-primary badge-sm ml-2">filtered</span>
+            <% end %>
+          </p>
+        </div>
+        <% if current_user.projects.any? %>
+          <%= link_to explore_people_path, class: "btn btn-primary btn-sm gap-2" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Find People
+          <% end %>
+        <% else %>
+          <%= link_to new_project_path, class: "btn btn-primary btn-sm gap-2" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Create Project First
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="divider my-2"></div>
+
+      <% if @my_agreements.any? %>
+        <%= turbo_frame_tag "agreements_my" do %>
+          <%= render "my_agreements_section", my_agreements: @my_agreements, query: @query %>
+        <% end %>
+      <% else %>
+        <%= render "shared/empty_state",
+            title: "No agreements",
+            description: "Get started by creating a new agreement for one of your projects.",
+            action_text: current_user.projects.any? ? "Find People" : "Create Project First",
+            action_url: current_user.projects.any? ? explore_people_path : new_project_path,
+            options: { icon: :document } %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Your Mentorships Agreements -->
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
       <div>
-        <h2 class="text-lg font-medium text-gray-900">Your Projects</h2>
-        <p class="mt-1 text-sm text-gray-500">
-          Agreements for projects you own
+        <h2 class="card-title">Your Mentorships</h2>
+        <p class="text-sm text-base-content/70">
+          Agreements where you are mentoring other projects
           <% if @query.active_filters? %>
-            <span class="text-indigo-600">(filtered results)</span>
+            <span class="badge badge-primary badge-sm ml-2">filtered</span>
           <% end %>
         </p>
       </div>
-      <% if current_user.projects.any? %>
-        <%= link_to "Find people", explore_people_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
-      <% else %>
-        <%= link_to "Create Project First", new_project_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
-      <% end %>
-    </div>
 
-    <% if @my_agreements.any? %>
-      <%= turbo_frame_tag "agreements_my" do %>
-        <%= render "my_agreements_section", my_agreements: @my_agreements, query: @query %>
-      <% end %>
-    <% else %>
-      <%= render "empty_state_entrepreneur" %>
-    <% end %>
-  </div>
+      <div class="divider my-2"></div>
 
-  <!-- Mentor Agreements -->
-  <div class="bg-white shadow sm:rounded-lg">
-    <div class="px-4 py-5 sm:px-6">
-      <h2 class="text-lg font-medium text-gray-900">Your Mentorships</h2>
-      <p class="mt-1 text-sm text-gray-500">
-        Agreements where you are mentoring other projects
-        <% if @query.active_filters? %>
-          <span class="text-indigo-600">(filtered results)</span>
+      <% if @other_party_agreements.any? %>
+        <%= turbo_frame_tag "agreements_other" do %>
+          <%= render "other_agreements_section", other_party_agreements: @other_party_agreements, query: @query %>
         <% end %>
-      </p>
-    </div>
-
-    <% if @other_party_agreements.any? %>
-      <%= turbo_frame_tag "agreements_other" do %>
-        <%= render "other_agreements_section", other_party_agreements: @other_party_agreements, query: @query %>
+      <% else %>
+        <%= render "shared/empty_state",
+            title: "No mentorships",
+            description: "You haven't been invited to mentor any projects yet.",
+            options: { icon: :plus } %>
       <% end %>
-    <% else %>
-      <%= render "empty_state_mentor" %>
-    <% end %>
+    </div>
   </div>
 <% end %>

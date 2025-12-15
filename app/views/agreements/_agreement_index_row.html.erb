@@ -1,46 +1,60 @@
 <% presenter = present(agreement) %>
-<tr id="<%= dom_id(agreement) %>">
-  <td class="px-2 py-2 whitespace-nowrap truncate">
-    <div class="text-sm font-medium text-gray-900">
+<tr id="<%= dom_id(agreement) %>"
+    class="group hover:bg-base-200 transition-colors cursor-pointer"
+    onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON' && !event.target.closest('a, button')) { Turbo.visit(<%= agreement_path(agreement).to_json %>); }">
+  <td class="px-2 py-3 whitespace-nowrap truncate">
+    <div class="font-medium group-hover:text-primary transition-colors">
       <% if agreement.active? || agreement.completed? %>
-        <%= presenter.project_link %>
+        <%= present(agreement.project).display_name(current_user) %>
       <% elsif agreement.initiator&.id == current_user.id %>
-        <%= presenter.project_link %>
+        <%= present(agreement.project).display_name(current_user) %>
       <% else %>
-        <span class="text-gray-500"><%= present(agreement.project).display_name(current_user) %></span>
-        <span class="text-xs text-gray-400">(limited access)</span>
+        <span class="text-base-content/60"><%= present(agreement.project).display_name(current_user) %></span>
+        <span class="text-xs text-base-content/40">(limited access)</span>
       <% end %>
     </div>
   </td>
-  <td class="px-2 py-2 whitespace-nowrap">
-    <%= presenter.agreement_type_badge %>
-    <% if agreement.initiator&.id == current_user.id %>
-      <%= presenter.payment_type_badge %>
-    <% end %>
-  </td>
-  <td class="px-2 py-2 whitespace-nowrap truncate max-w-xs">
-    <div class="text-sm text-gray-900">
+  <td class="px-2 py-3 whitespace-nowrap">
+    <div class="flex items-center gap-1 flex-wrap">
+      <%= presenter.agreement_type_badge %>
       <% if agreement.initiator&.id == current_user.id %>
-        <%= agreement.other_party&.full_name %>
-      <% else %>
-        <%= agreement.project.user.full_name %>
+        <%= presenter.payment_type_badge %>
       <% end %>
     </div>
   </td>
-  <td class="px-2 py-2 whitespace-nowrap">
+  <td class="px-2 py-3 whitespace-nowrap truncate max-w-xs">
+    <div class="flex items-center gap-2">
+      <div class="avatar placeholder">
+        <div class="bg-neutral text-neutral-content rounded-full w-6">
+          <span class="text-xs">
+            <% other_party = agreement.initiator&.id == current_user.id ? agreement.other_party : agreement.project.user %>
+            <%= other_party&.initials %>
+          </span>
+        </div>
+      </div>
+      <span class="text-sm">
+        <% if agreement.initiator&.id == current_user.id %>
+          <%= agreement.other_party&.full_name %>
+        <% else %>
+          <%= agreement.project.user.full_name %>
+        <% end %>
+      </span>
+    </div>
+  </td>
+  <td class="px-2 py-3 whitespace-nowrap">
     <%= render "agreement_status", agreement: agreement %>
   </td>
-  <td class="px-2 py-2 whitespace-nowrap">
+  <td class="px-2 py-3 whitespace-nowrap">
     <% if agreement.initiator&.id == current_user.id %>
-      <span class="text-sm text-gray-500"><%= presenter.created_timeframe_simple %></span>
+      <span class="text-sm text-base-content/60"><%= presenter.created_timeframe_simple %></span>
     <% else %>
       <%= presenter.payment_type_badge %>
     <% end %>
   </td>
-  <td class="px-2 py-2 whitespace-nowrap text-right text-sm font-medium">
-    <%= presenter.time_remaining %>
+  <td class="px-2 py-3 whitespace-nowrap text-right text-sm">
+    <span class="font-medium"><%= presenter.time_remaining %></span>
   </td>
-  <td class="px-2 py-2 whitespace-nowrap text-right text-sm font-medium">
+  <td class="px-2 py-3 whitespace-nowrap text-right">
     <%= render "agreement_actions", agreement: agreement %>
   </td>
 </tr>

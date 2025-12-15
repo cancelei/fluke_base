@@ -1,4 +1,8 @@
-class AvatarService
+# frozen_string_literal: true
+
+# Service for generating user avatars
+# Utility service - returns direct values (no Result types needed)
+class AvatarService < ApplicationService
   def initialize(user)
     @user = user
   end

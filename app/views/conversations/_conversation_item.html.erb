@@ -1,39 +1,43 @@
 <% other_user = conversation.other_user(current_user) %>
-<li id="conversation_<%= conversation.id %>_item"
-    class="p-4 block transition-colors duration-200 <%= "hover:bg-gray-50" unless current_conversation == conversation %> <%= "bg-indigo-200 text-white" if current_conversation == conversation %>">
+<li id="conversation_<%= conversation.id %>_item">
   <%= link_to conversation_path(conversation),
+        class: "flex items-center gap-3 p-3 rounded-lg transition-colors #{current_conversation == conversation ? 'bg-primary/10 text-primary' : 'hover:bg-base-200'}",
         data: {
-          controller: "conversation",
           turbo_stream: true,
-          action: "click->conversation#selectConversation",
+          turbo_command: "Messages::MarkAsReadCommand#execute",
           conversation_id: conversation.id
         } do %>
-    <div class="flex items-center space-x-3">
-      <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+    <!-- Avatar -->
+    <div class="avatar <%= "online" if other_user.respond_to?(:online?) && other_user.online? %> placeholder">
+      <div class="<%= current_conversation == conversation ? "bg-primary text-primary-content" : "bg-base-200" %> rounded-full w-12">
         <% if other_user.avatar.attached? %>
-          <%= image_tag other_user.avatar, class: "h-10 w-10 rounded-full" %>
+          <%= image_tag other_user.avatar, class: "rounded-full" %>
         <% else %>
-          <svg class="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
+          <span class="text-sm font-medium"><%= other_user.initials %></span>
         <% end %>
       </div>
-      <div class="min-w-0 flex-1">
-        <p class="text-sm font-medium text-gray-900 truncate"><%= other_user.full_name %></p>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center justify-between">
+        <p class="font-medium truncate"><%= other_user.full_name %></p>
         <% if conversation.last_message.present? %>
-          <p class="text-sm text-gray-500 truncate">
-            <%= conversation.last_message.body.truncate(30) %>
-          </p>
-          <p class="text-xs text-gray-400">
-            <%= time_ago_in_words(conversation.last_message.created_at) %> ago
-          </p>
+          <span class="text-xs text-base-content/60 whitespace-nowrap ml-2">
+            <%= time_ago_in_words(conversation.last_message.created_at) %>
+          </span>
         <% end %>
       </div>
-      <% if conversation.unread_messages_for?(current_user) %>
-        <div class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600">
-          <span class="text-xs font-medium text-white"></span>
-        </div>
+      <% if conversation.last_message.present? %>
+        <p class="text-sm text-base-content/70 truncate">
+          <%= conversation.last_message.body.truncate(40) %>
+        </p>
       <% end %>
     </div>
+
+    <!-- Unread indicator -->
+    <% if conversation.unread_messages_for?(current_user) %>
+      <span class="badge badge-primary badge-sm"></span>
+    <% end %>
   <% end %>
 </li>

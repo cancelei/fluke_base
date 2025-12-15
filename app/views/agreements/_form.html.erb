@@ -3,11 +3,11 @@
   @milestone_ids = @agreement_form&.milestone_ids_array || []
 %>
 
-<div data-controller="agreement-form">
+<div data-controller="agreement-form form-submission">
   <% form_options = if agreement.persisted?
-       { model: agreement, url: agreement_path(agreement), method: :patch, class: "space-y-6" }
+       { model: agreement, url: agreement_path(agreement), method: :patch, class: "space-y-6", data: { action: "submit->form-submission#submit" } }
      else
-       { model: agreement, class: "space-y-6", data: { turbo: false } }
+       { model: agreement, class: "space-y-6", data: { turbo: false, action: "submit->form-submission#submit" } }
      end %>
   <%= form_with(**form_options) do |form| %>
       <%= form.hidden_field :project_id, value: @project.id if @project %>
@@ -17,174 +17,169 @@
       <%= form.hidden_field :counter_agreement_id, value: params[:counter_to_id] %>
 
       <% if current_user.id != @project&.user_id %>
-        <div class="bg-blue-50 p-4 rounded-md mb-6">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-blue-800">
-                You're initiating an agreement with <%= @project ? @project.user&.full_name : "an entrepreneur" %>
-              </h3>
-              <div class="mt-2 text-sm text-blue-700">
-                <p>
-                  You'll be proposing to collaborate on project "<%= @project ? present(@project).display_name(current_user) : "to be determined" %>". The entrepreneur will need to accept this agreement before collaboration can begin.
-                </p>
-              </div>
+        <div class="alert alert-info mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <div>
+            <h3 class="font-bold">
+              You're initiating an agreement with <%= @project ? @project.user&.full_name : "an entrepreneur" %>
+            </h3>
+            <div class="text-sm">
+              You'll be proposing to collaborate on project "<%= @project ? present(@project).display_name(current_user) : "to be determined" %>". The entrepreneur will need to accept this agreement before collaboration can begin.
             </div>
           </div>
         </div>
       <% end %>
 
-      <div class="sm:col-span-3">
-        <%= form.label :start_date, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.date_field :start_date, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-        </div>
-      </div>
+      <fieldset class="fieldset">
+        <%= form.label :start_date, class: "fieldset-legend" %>
+        <%= form.date_field :start_date, class: "input input-bordered w-full" %>
+      </fieldset>
 
-      <div class="sm:col-span-3">
-        <%= form.label :end_date, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.date_field :end_date, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-        </div>
-      </div>
+      <fieldset class="fieldset">
+        <%= form.label :end_date, class: "fieldset-legend" %>
+        <%= form.date_field :end_date, class: "input input-bordered w-full" %>
+      </fieldset>
 
-      <div class="sm:col-span-3">
-        <%= form.label :weekly_hours, "Weekly Hours Commitment", class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.number_field :weekly_hours, min: 1, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-        </div>
-        <p class="mt-1 text-sm text-gray-500">Estimated hours of work per week (leave blank for co-founder agreement)</p>
-      </div>
+      <fieldset class="fieldset">
+        <%= form.label :weekly_hours, "Weekly Hours Commitment", class: "fieldset-legend" %>
+        <%= form.number_field :weekly_hours, min: 1, class: "input input-bordered w-full" %>
+        <p class="text-xs text-base-content/60 mt-1">Estimated hours of work per week (leave blank for co-founder agreement)</p>
+      </fieldset>
 
-      <div class="sm:col-span-6">
-        <label class="block text-sm font-medium text-gray-700">Payment Type</label>
-        <div class="mt-1 space-y-2">
-          <div class="flex items-center">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Payment Type</legend>
+        <div class="space-y-2">
+          <label class="flex items-center gap-3 cursor-pointer">
             <%= form.radio_button :payment_type, Agreement::HOURLY,
                 data: {
                   action: "change->agreement-form#togglePaymentFields",
                   agreement_form_target: "paymentType"
                 },
-                class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
-            <label for="agreement_payment_type_hourly" class="ml-3 block text-sm font-medium text-gray-700">
-              Hourly Rate
-            </label>
-          </div>
-          <div class="flex items-center">
+                class: "radio radio-primary" %>
+            <span class="text-sm">Hourly Rate</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
             <%= form.radio_button :payment_type, Agreement::EQUITY,
                 data: {
                   action: "change->agreement-form#togglePaymentFields",
                   agreement_form_target: "paymentType"
                 },
-                class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
-            <label for="agreement_payment_type_equity" class="ml-3 block text-sm font-medium text-gray-700">
-              Equity Only
-            </label>
-          </div>
-          <div class="flex items-center">
+                class: "radio radio-primary" %>
+            <span class="text-sm">Equity Only</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
             <%= form.radio_button :payment_type, Agreement::HYBRID,
                 data: {
                   action: "change->agreement-form#togglePaymentFields",
                   agreement_form_target: "paymentType"
                 },
-                class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" %>
-            <label for="agreement_payment_type_hybrid" class="ml-3 block text-sm font-medium text-gray-700">
-              Hybrid (Hourly + Equity)
-            </label>
-          </div>
+                class: "radio radio-primary" %>
+            <span class="text-sm">Hybrid (Hourly + Equity)</span>
+          </label>
         </div>
-      </div>
+      </fieldset>
 
-      <div class="sm:col-span-3 hourly-field" data-agreement-form-target="hourlyField">
-        <%= form.label :hourly_rate, "Hourly Rate (USD)", class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.number_field :hourly_rate, min: 0, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", style: "display: block;" %>
-        </div>
-      </div>
+      <fieldset class="fieldset hourly-field" data-agreement-form-target="hourlyField">
+        <%= form.label :hourly_rate, "Hourly Rate (USD)", class: "fieldset-legend" %>
+        <%= form.number_field :hourly_rate, min: 0, step: 0.01, class: "input input-bordered w-full" %>
+      </fieldset>
 
-      <div class="sm:col-span-3 equity-field" data-agreement-form-target="equityField">
-        <%= form.label :equity_percentage, "Equity Percentage (%)", class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.number_field :equity_percentage, min: 0.01, max: 99.99, step: 0.01, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm", style: "display: block;" %>
-        </div>
-      </div>
+      <fieldset class="fieldset equity-field" data-agreement-form-target="equityField">
+        <%= form.label :equity_percentage, "Equity Percentage (%)", class: "fieldset-legend" %>
+        <%= form.number_field :equity_percentage, min: 0.01, max: 99.99, step: 0.01, class: "input input-bordered w-full" %>
+      </fieldset>
 
-      <div class="sm:col-span-6">
-        <%= form.label :tasks, "Tasks and Responsibilities", class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.text_area :tasks, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-        </div>
-        <p class="mt-1 text-sm text-gray-500">Describe the specific tasks and responsibilities for this agreement</p>
-      </div>
+      <fieldset class="fieldset">
+        <%= form.label :tasks, "Tasks and Responsibilities", class: "fieldset-legend" %>
+        <%= form.text_area :tasks, rows: 4, class: "textarea textarea-bordered w-full" %>
+        <p class="text-xs text-base-content/60 mt-1">Describe the specific tasks and responsibilities for this agreement</p>
+      </fieldset>
 
-      <div class="sm:col-span-6">
-        <%= form.label :milestones, "Milestones", class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <% @milestones.each_with_index do |milestone, index| %>
-            <%= check_box_tag "agreement[milestone_ids][]", milestone.id, @milestone_ids.include?(milestone.id),
-                id: "milestone_#{index}",
-                class: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" %>
-            <%= label_tag "milestone_#{index}", milestone.title, class: "inline-block text-sm font-medium text-gray-700 ml-2 mr-4" %>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Milestones</legend>
+        <div class="space-y-2">
+          <% if @milestones.any? %>
+            <% @milestones.each_with_index do |milestone, index| %>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <%= check_box_tag "agreement[milestone_ids][]", milestone.id, @milestone_ids.include?(milestone.id),
+                    id: "milestone_#{index}",
+                    class: "checkbox checkbox-primary" %>
+                <span class="text-sm"><%= milestone.title %></span>
+              </label>
+            <% end %>
+          <% else %>
+            <div class="alert alert-warning">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              <div>
+                <h3 class="font-bold">No milestones available</h3>
+                <div class="text-sm">This project needs milestones before you can create an agreement.
+                  <% if @project && policy(@project).manage_milestones? %>
+                    <%= link_to "Add milestones", project_path(@project, anchor: "milestones"), class: "link link-primary" %>
+                  <% else %>
+                    Please ask the project owner to add milestones first.
+                  <% end %>
+                </div>
+              </div>
+            </div>
           <% end %>
           <% if agreement.errors[:milestone_ids] %>
-            <p class="mt-2 text-sm text-red-600">
-              Select at least one milestone
-            </p>
+            <p class="text-xs text-error mt-1">Select at least one milestone</p>
           <% end %>
         </div>
-      </div>
+      </fieldset>
 
-      <div class="sm:col-span-6">
-        <%= form.label :terms, "Additional Terms", class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1">
-          <%= form.text_area :terms, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
-        </div>
-      </div>
+      <fieldset class="fieldset">
+        <%= form.label :terms, "Additional Terms", class: "fieldset-legend" %>
+        <%= form.text_area :terms, rows: 4, class: "textarea textarea-bordered w-full" %>
+      </fieldset>
 
-    <div class="mt-6 flex justify-end space-x-3">
+    <div class="mt-6 flex justify-end gap-3">
       <% if !agreement.persisted? && @project %>
         <% if params[:counter_to_id].present? %>
-          <%= form.submit "Counter Offer", class: "btn-warning" %>
+          <%= form.submit "Counter Offer",
+              class: "btn btn-warning",
+              data: { form_submission_target: "submit", loading_text: "Submitting counter offer..." },
+              disabled: @milestones.empty? %>
         <% else %>
-          <%= form.submit "Create Agreement", class: "btn-primary" %>
+          <%= form.submit "Create Agreement",
+              class: "btn btn-primary",
+              data: { form_submission_target: "submit", loading_text: "Creating agreement..." },
+              disabled: @milestones.empty? %>
         <% end %>
       <% elsif agreement.persisted? %>
-# Get current user's participant to check permissions %>
         <% current_participant = agreement.agreement_participants.find_by(user_id: current_user.id) %>
 
-        <% if can?(:edit, @agreement) && !@agreement.countered? %>
-          <%= form.submit "Update Agreement", class: "btn-primary" %>
+        <% if policy(@agreement).edit? && !@agreement.countered? %>
+          <%= form.submit "Update Agreement",
+              class: "btn btn-primary",
+              data: { form_submission_target: "submit", loading_text: "Updating agreement..." } %>
         <% end %>
 
         <% if current_participant&.can_accept_agreement? %>
           <%= button_to "Accept Agreement", accept_agreement_path(@agreement),
               method: :patch,
-              class: "btn-success",
+              class: "btn btn-success",
               data: { turbo_confirm: "Are you sure you want to accept this agreement?" } %>
         <% end %>
 
         <% if current_participant&.can_reject_agreement? %>
           <%= button_to "Reject Agreement", reject_agreement_path(@agreement),
               method: :patch,
-              class: "btn-danger",
+              class: "btn btn-error",
               data: { turbo_confirm: "Are you sure you want to reject this agreement?" } %>
         <% end %>
 
         <% if current_participant&.can_make_counter_offer? %>
           <%= button_to "Counter Offer", counter_offer_agreement_path(@agreement),
               method: :post,
-              class: "btn-warning",
+              class: "btn btn-warning",
               data: { turbo_confirm: "Are you sure you want to make a counter offer?" } %>
         <% end %>
 
-        <% if can?(:cancel, @agreement) && !@agreement.countered? %>
+        <% if policy(@agreement).cancel? && !@agreement.countered? %>
           <%= button_to "Cancel Agreement", cancel_agreement_path(@agreement),
               method: :patch,
-              class: "btn-danger",
+              class: "btn btn-error",
               data: { turbo_confirm: "Are you sure you want to cancel this agreement?" } %>
         <% end %>
       <% end %>

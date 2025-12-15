@@ -1,75 +1,123 @@
 <%= turbo_frame_tag "#{dom_id(agreement)}_meetings_list" do %>
-  <div class="relative overflow-x-auto">
+  <div class="relative">
     <% if meetings.any? %>
-      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Title
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date & Time
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Duration
-            </th>
-            <th scope="col" class="relative px-6 py-3">
-              <span class="sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <% meetings.each do |meeting| %>
+      <!-- Timeline View for Meetings -->
+      <ul class="timeline timeline-vertical">
+        <% meetings.order(start_time: :asc).each_with_index do |meeting, index| %>
+          <% is_upcoming = meeting.start_time > Time.current %>
+          <% is_ongoing = meeting.start_time <= Time.current && meeting.end_time >= Time.current %>
+          <% is_past = meeting.end_time < Time.current %>
+          <li>
+            <% if index > 0 %>
+              <hr class="<%= is_past ? "bg-base-300" : "bg-primary" %>">
+            <% end %>
+
+            <div class="timeline-start <%= is_past ? "text-base-content/40" : "text-base-content" %>">
+              <%= meeting.start_time.strftime("%b %d") %>
+              <div class="text-xs text-base-content/60">
+                <%= meeting.start_time.strftime("%I:%M %p") %>
+              </div>
+            </div>
+
+            <div class="timeline-middle">
+              <% if is_ongoing %>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-success">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                </svg>
+              <% elsif is_upcoming %>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-primary">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+                </svg>
+              <% else %>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-base-300">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                </svg>
+              <% end %>
+            </div>
+
             <%= turbo_frame_tag dom_id(meeting) do %>
-              <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">
-                    <%= meeting.title %>
-                  </div>
-                  <% if meeting.description.present? %>
-                    <div class="text-sm text-gray-500 truncate max-w-xs">
-                      <%= meeting.description %>
+              <div class="timeline-end timeline-box <%= is_past ? "bg-base-200/50" : "bg-base-100" %> <%= is_ongoing ? "border-success border-2" : "" %>">
+                <div class="flex justify-between items-start gap-4">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                      <h4 class="font-semibold text-base-content">
+                        <%= meeting.title %>
+                      </h4>
+                      <% if is_ongoing %>
+                        <span class="badge badge-success badge-sm gap-1 animate-pulse">
+                          <span class="w-2 h-2 rounded-full bg-success-content"></span>
+                          Live
+                        </span>
+                      <% elsif is_upcoming %>
+                        <span class="badge badge-primary badge-sm">Upcoming</span>
+                      <% end %>
                     </div>
-                  <% end %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
-                    <%= meeting.start_time.strftime("%b %d, %Y") %>
+
+                    <% if meeting.description.present? %>
+                      <p class="text-sm text-base-content/70 line-clamp-2 mb-2">
+                        <%= meeting.description %>
+                      </p>
+                    <% end %>
+
+                    <div class="flex flex-wrap gap-2 items-center text-xs text-base-content/60">
+                      <span class="flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <%= distance_of_time_in_words(meeting.start_time, meeting.end_time) %>
+                      </span>
+
+                      <!-- Countdown for Upcoming Meetings -->
+                      <% if is_upcoming %>
+                        <% time_until = ((meeting.start_time - Time.current) / 1.day).ceil %>
+                        <span class="countdown flex items-center gap-1">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          In <%= distance_of_time_in_words_to_now(meeting.start_time) %>
+                        </span>
+                      <% end %>
+                    </div>
                   </div>
-                  <div class="text-sm text-gray-500">
-                    <%= meeting.start_time.strftime("%I:%M %p") %> - <%= meeting.end_time.strftime("%I:%M %p") %>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <%= distance_of_time_in_words(meeting.start_time, meeting.end_time) %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div class="flex space-x-2">
-                    <%= link_to "Edit", edit_agreement_meeting_path(agreement, meeting),
-                        class: "text-indigo-600 hover:text-indigo-900",
-                        data: { turbo_frame: "#{dom_id(agreement)}_meeting_form" } %>
-                    <%= button_to "Delete", agreement_meeting_path(agreement, meeting),
+
+                  <div class="join join-vertical lg:join-horizontal">
+                    <%= link_to edit_agreement_meeting_path(agreement, meeting),
+                        class: "btn btn-ghost btn-xs join-item",
+                        data: { turbo_frame: "#{dom_id(agreement)}_meeting_form" } do %>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    <% end %>
+                    <%= button_to agreement_meeting_path(agreement, meeting),
                         method: :delete,
-                        class: "text-red-600 hover:text-red-900 border-none bg-transparent p-0 underline",
+                        class: "btn btn-ghost btn-xs join-item text-error",
                         data: {
                           turbo_confirm: "Are you sure you want to delete this meeting?",
                           turbo_method: :delete
-                        } %>
+                        } do %>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    <% end %>
                   </div>
-                </td>
-              </tr>
+                </div>
+              </div>
             <% end %>
-          <% end %>
-        </tbody>
-      </table>
+
+            <% if index < meetings.count - 1 %>
+              <hr class="<%= is_past ? "bg-base-300" : "bg-primary" %>">
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
     <% else %>
       <div class="text-center py-6">
-        <p class="text-gray-500 text-sm">No meetings scheduled yet.</p>
+        <p class="text-base-content/60 text-sm">No meetings scheduled yet.</p>
         <% if agreement.active? %>
-          <p class="text-gray-400 text-xs mt-2">
+          <p class="text-base-content/40 text-xs mt-2">
             <%= link_to "Schedule your first meeting",
                 new_agreement_meeting_path(agreement),
-                class: "text-indigo-600 hover:text-indigo-900",
+                class: "link link-primary",
                 data: { turbo_frame: "#{dom_id(agreement)}_meeting_form" } %>
           </p>
         <% end %>

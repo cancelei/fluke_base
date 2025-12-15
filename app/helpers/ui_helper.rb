@@ -1,53 +1,47 @@
 module UiHelper
-  def status_badge_class(status)
-    case status.to_s.downcase
-    when "completed", "accepted", "active"
-      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
-    when "in_progress", "pending", "countered"
-      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"
-    when "rejected", "cancelled", "failed"
-      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
-    when "not_started", "draft"
-      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800"
-    else
-      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
-    end
-  end
-
+  # Delegate to BadgeComponent for status badges
   def status_badge(status, text = nil)
     text ||= status.to_s.humanize
-    content_tag :span, text, class: status_badge_class(status)
+    render(Ui::BadgeComponent.new(text: text, status: status.to_s))
   end
 
+  # Legacy method kept for backwards compatibility - returns CSS class string
+  # Prefer using status_badge helper or Ui::BadgeComponent directly
+  def status_badge_class(status)
+    variant = Ui::BadgeComponent::STATUS_MAPPING[status.to_s.downcase.to_sym] || :info
+    variant_class = Ui::BadgeComponent::VARIANTS[variant]
+    "badge #{variant_class}"
+  end
+
+  # Returns DaisyUI badge class for KPI/performance status indicators
+  # Used in agreement KPIs, time tracking analytics, and performance views
+  # @param status [String, Symbol] The KPI status (excellent, good, on_track, fair, poor, etc.)
+  # @return [String] DaisyUI badge class (e.g., "badge-success", "badge-warning")
+  def kpi_badge_class(status)
+    Ui::SharedConstants.kpi_badge_class(status)
+  end
+
+  # Render restricted field message with lock icon
   def render_restricted_field_message
     content_tag(:div, class: "flex items-center") do
       concat content_tag(:span, "Available after agreement acceptance", class: "text-gray-400")
-      concat content_tag(:svg, tag.path(fill_rule: "evenodd", d: "M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z", clip_rule: "evenodd"), class: "ml-2 h-4 w-4 text-gray-400", fill: "currentColor", viewBox: "0 0 20 20")
+      concat render(Ui::IconComponent.new(name: :lock, size: :sm, css_class: "ml-2 text-gray-400"))
     end
   end
 
-  def icon_svg(icon_name, options = {})
-    case icon_name.to_s
-    when "lock"
-      content_tag(:svg, tag.path(fill_rule: "evenodd", d: "M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z", clip_rule: "evenodd"),
-        class: "h-4 w-4 #{options[:class]}", fill: "currentColor", viewBox: "0 0 20 20")
-    else
-      ""
-    end
-  end
-
+  # Delegate to BadgeComponent
+  # Collaboration type badges with type-specific variants
   def collaboration_badge(type, text = nil)
     text ||= type.to_s.humanize
-    case type.to_s.downcase
-    when "mentor"
-      content_tag(:span, text, class: "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800")
-    when "co_founder", "co-founder"
-      content_tag(:span, text, class: "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800")
-    else
-      content_tag(:span, text, class: "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800")
+    variant = case type.to_s.downcase
+    when "mentor" then :success
+    when "co_founder", "co-founder" then :purple
+    else :info
     end
+    render(Ui::BadgeComponent.new(text: text, variant: variant, rounded: :default, size: :sm))
   end
 
+  # Delegate to ButtonComponent
   # Enhanced Button Helper Methods
   def ui_button(text, url_or_options = {}, options = {}, &block)
     if url_or_options.is_a?(Hash)
@@ -58,126 +52,71 @@ module UiHelper
     end
 
     variant = options.delete(:variant) || :primary
-    size = options.delete(:size) || :default
+    size = options.delete(:size) || :md
+    size = :md if size == :default
     icon = options.delete(:icon)
+    css_class = options.delete(:class)
+    method = options.delete(:method)
+    data = options.delete(:data) || {}
 
-    css_class = "btn btn-#{variant}"
-    css_class += " btn-#{size}" if size != :default
-    css_class += " #{options.delete(:class)}" if options[:class]
-
-    options[:class] = css_class
-
-    content = []
-    content << ui_icon(icon, class: "-ml-0.5 mr-1.5 h-5 w-5") if icon
-    content << text
-
-    if block_given?
-      content << capture(&block)
-    end
-
-    if url
-      link_to(safe_join(content), url, options)
-    else
-      button_to(safe_join(content), options)
+    render(Ui::ButtonComponent.new(
+      text: text,
+      url: url,
+      variant: variant,
+      size: size,
+      icon: icon,
+      method: method,
+      data: data,
+      css_class: css_class,
+      **options
+    )) do
+      block_given? ? capture(&block) : nil
     end
   end
 
+  # Delegate to IconComponent
   def ui_icon(icon_name, options = {})
     return "" if icon_name.blank?
-
-    css_class = "h-5 w-5 #{options[:class]}"
-
-    case icon_name.to_s
-    when "plus"
-      content_tag(:svg,
-        tag.path(fill_rule: "evenodd", d: "M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z", clip_rule: "evenodd"),
-        class: css_class, fill: "currentColor", viewBox: "0 0 20 20")
-    when "edit"
-      content_tag(:svg,
-        tag.path(d: "M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"),
-        class: css_class, fill: "currentColor", viewBox: "0 0 20 20")
-    when "trash"
-      content_tag(:svg,
-        tag.path(fill_rule: "evenodd", d: "M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z", clip_rule: "evenodd"),
-        class: css_class, fill: "currentColor", viewBox: "0 0 20 20")
-    when "eye"
-      content_tag(:svg,
-        tag.path(d: "M10 12a2 2 0 100-4 2 2 0 000 4z") +
-        tag.path(fill_rule: "evenodd", d: "M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z", clip_rule: "evenodd"),
-        class: css_class, fill: "currentColor", viewBox: "0 0 20 20")
-    when "message"
-      content_tag(:svg,
-        tag.path(d: "M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z") +
-        tag.path(d: "M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"),
-        class: css_class, fill: "currentColor", viewBox: "0 0 20 20")
-    when "lock"
-      content_tag(:svg,
-        tag.path(fill_rule: "evenodd", d: "M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z", clip_rule: "evenodd"),
-        class: css_class, fill: "currentColor", viewBox: "0 0 20 20")
-    when "github"
-      content_tag(:svg,
-        tag.path(fill_rule: "evenodd", d: "M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.1-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z", clip_rule: "evenodd"),
-        class: css_class, fill: "currentColor", viewBox: "0 0 24 24")
-    when "exclamation-triangle"
-      content_tag(:svg,
-        tag.path(fill_rule: "evenodd", d: "M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z", clip_rule: "evenodd"),
-        class: css_class, fill: "currentColor", viewBox: "0 0 20 20")
-    else
-      ""
-    end
+    render(Ui::IconComponent.new(name: icon_name, size: :md, css_class: options[:class]))
   end
 
+  # Delegate to BadgeComponent
   def ui_badge(text, variant = :primary, options = {})
-    css_class = "badge badge-#{variant}"
-    css_class += " #{options[:class]}" if options[:class]
-
-    content_tag(:span, text, class: css_class)
+    render(Ui::BadgeComponent.new(text: text, variant: variant, css_class: options[:class]))
   end
 
+  # Delegate to CardComponent
+  # Note: For full CardComponent features (header/footer slots), use the component directly
   def ui_card(options = {}, &block)
-    css_class = "card"
-    css_class += " #{options[:class]}" if options[:class]
-
-    content_tag(:div, class: css_class, &block)
+    variant = options.delete(:variant) || :default
+    css_class = options.delete(:class)
+    render(Ui::CardComponent.new(variant: variant, css_class: css_class, **options), &block)
   end
 
+  # Render a card header - for simple use cases
+  # For complex headers, use CardComponent with header slot directly
   def ui_card_header(title, subtitle = nil, options = {})
-    css_class = "card-header"
-    css_class += " #{options[:class]}" if options[:class]
-
-    content_tag(:div, class: css_class) do
+    css_class = options.delete(:class)
+    content_tag(:div, class: "px-6 py-4 border-b border-base-200 bg-base-200/30 #{css_class}") do
       content = []
-      content << content_tag(:h3, title, class: "text-lg font-medium leading-6 text-gray-900")
-      content << content_tag(:p, subtitle, class: "mt-1 max-w-2xl text-sm text-gray-500") if subtitle
+      content << content_tag(:h3, title, class: "card-title text-lg font-semibold")
+      content << content_tag(:p, subtitle, class: "mt-1 text-sm opacity-70") if subtitle
       safe_join(content)
     end
   end
 
+  # Delegate to EmptyStateComponent
   def ui_empty_state(title, description, action_text = nil, action_url = nil, options = {})
-    content_tag(:div, class: "text-center py-12") do
-      content = []
-
-      # Icon
-      icon = options[:icon] || "folder"
-      content << content_tag(:div, class: "mx-auto h-12 w-12 text-gray-400") do
-        ui_icon(icon, class: "mx-auto h-12 w-12")
-      end
-
-      # Title
-      content << content_tag(:h3, title, class: "mt-2 text-sm font-medium text-gray-900")
-
-      # Description
-      content << content_tag(:p, description, class: "mt-1 text-sm text-gray-500")
-
-      # Action button
-      if action_text && action_url
-        content << content_tag(:div, class: "mt-6") do
-          ui_button(action_text, action_url, variant: :primary, icon: "plus")
-        end
-      end
-
-      safe_join(content)
-    end
+    icon = options.delete(:icon) || :folder
+    css_class = options.delete(:class)
+    render(Ui::EmptyStateComponent.new(
+      title: title,
+      description: description,
+      icon: icon,
+      action_text: action_text,
+      action_url: action_url,
+      css_class: css_class
+    ))
   end
 
   def ui_search_form(url, options = {}, &block)
@@ -205,54 +144,167 @@ module UiHelper
     end
   end
 
-  # User Card Helper Methods - Simplified for unified user system
-  def user_card_color_scheme
-    {
-      container: "border-indigo-200",
-      avatar_bg: "bg-indigo-50",
-      avatar_icon: "text-indigo-300",
-      badge: "bg-blue-100 text-blue-700",
-      footer_border: "border-indigo-100",
-      footer_text: "text-indigo-600 group-hover:text-indigo-800",
-      message_btn: "text-indigo-700 ring-indigo-200 hover:bg-indigo-50"
-    }
-  end
-
-  def default_bio
-    "Active person in the FlukeBase community"
-  end
-
-  def render_user_card_content(user)
-    content = []
-
-    # Skills (if available)
-    if user.skills&.any?
-      content << content_tag(:div, class: "flex flex-wrap gap-1") do
-        user.skills.first(3).map do |skill|
-          content_tag(:span, skill, class: "inline-flex items-center rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700")
-        end.join.html_safe
-      end
-    end
-
-    # Stats
-    content << content_tag(:div, class: "flex flex-col gap-1 text-xs text-gray-600") do
-      stats = []
-      stats << "Projects: <strong>#{user.projects.count}</strong>"
-      stats << "Active Agreements: <strong>#{user.all_agreements.where(status: Agreement::ACCEPTED).count}</strong>"
-      safe_join(stats.map { |stat| content_tag(:span, stat.html_safe) })
-    end
-
-    content << content_tag(:div, class: "mt-2") do
-      render partial: "shared/achievements", locals: { user: user }
-    end
-
-    safe_join(content)
-  end
-
+  # Delegate to BadgeComponent
   def stage_badge(stage)
     return "" unless stage.present?
+    render(Ui::BadgeComponent.new(text: stage.capitalize, variant: :info))
+  end
 
-    content_tag(:span, stage.capitalize,
-      class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800")
+  # Form helper that auto-attaches form-submission controller for loading states
+  # Usage: fluke_form_with(model: @project) do |f| ... end
+  def fluke_form_with(model: nil, scope: nil, url: nil, format: nil, **options, &block)
+    html_options = options.delete(:html) || {}
+    data = html_options[:data] || options.delete(:data) || {}
+
+    # Auto-attach form-submission controller unless opted out
+    unless options.delete(:skip_loading_states)
+      existing_controller = data[:controller]
+      data[:controller] = [ existing_controller, "form-submission" ].compact.join(" ")
+      existing_action = data[:action]
+      data[:action] = [ existing_action, "submit->form-submission#submit" ].compact.join(" ")
+    end
+
+    html_options[:data] = data
+
+    form_with(
+      model: model,
+      scope: scope,
+      url: url,
+      format: format,
+      builder: FlukeFormBuilder,
+      **options.merge(html: html_options),
+      &block
+    )
+  end
+
+  # Submit button helper for use outside of fluke_form_with
+  # Usage: ui_submit_button("Save", variant: :primary, loading_text: "Saving...")
+  def ui_submit_button(text, options = {})
+    variant = options.delete(:variant) || :primary
+    size = options.delete(:size) || :md
+    loading_text = options.delete(:loading_text) || "Processing..."
+    icon = options.delete(:icon)
+    css_class = options.delete(:class)
+    disabled = options.delete(:disabled) || false
+
+    data = options.delete(:data) || {}
+    data[:"form-submission-target"] = "submit"
+    data[:loading_text] = loading_text
+
+    render(Ui::ButtonComponent.new(
+      text: text,
+      type: "submit",
+      variant: variant,
+      size: size,
+      icon: icon,
+      css_class: css_class,
+      disabled: disabled,
+      form_submission_target: true,
+      loading_text: loading_text,
+      data: data
+    ))
+  end
+
+  # Enhanced button_to with DaisyUI styling and loading states
+  # Usage: ui_button_to("Delete", item_path(item), method: :delete, variant: :danger)
+  def ui_button_to(text, url, options = {})
+    variant = options.delete(:variant) || :primary
+    size = options.delete(:size) || :md
+    loading_text = options.delete(:loading_text)
+    icon = options.delete(:icon)
+    css_class = options.delete(:class)
+    method = options.delete(:method)
+    confirm = options.delete(:confirm)
+
+    # Build button classes
+    button_classes = class_names(
+      "btn",
+      Ui::ButtonComponent::VARIANTS[variant.to_sym],
+      Ui::ButtonComponent::SIZES[size.to_sym],
+      css_class
+    )
+
+    # Build data attributes
+    data = options.delete(:data) || {}
+    data[:turbo_confirm] = confirm if confirm
+
+    # Form wrapper data for loading states
+    form_data = options.delete(:form) || {}
+    if loading_text
+      form_data[:controller] ||= "form-submission"
+      form_data[:action] ||= "submit->form-submission#submit"
+    end
+
+    # Button data attributes
+    button_data = {}
+    if loading_text
+      button_data[:"form-submission-target"] = "submit"
+      button_data[:loading_text] = loading_text
+    end
+
+    button_to(
+      url,
+      method: method,
+      class: button_classes,
+      data: data.merge(button_data),
+      form: form_data.present? ? { data: form_data } : {},
+      **options
+    ) do
+      button_content_for(text, icon)
+    end
+  end
+
+  # Render a modal dialog with content
+  # Usage:
+  #   ui_modal(id: "confirm-modal", title: "Confirm") do
+  #     <p>Are you sure?</p>
+  #   end
+  def ui_modal(id:, title: nil, size: :md, position: :middle, closeable: true, close_button_text: "Close", classes: "", &block)
+    render(Ui::ModalComponent.new(
+      id: id,
+      title: title,
+      size: size,
+      position: position,
+      closeable: closeable,
+      close_button_text: close_button_text,
+      classes: classes
+    ), &block)
+  end
+
+  # Render a button that opens a modal
+  # Usage: ui_modal_trigger("Open Modal", modal_id: "my-modal", variant: :primary)
+  def ui_modal_trigger(text, modal_id:, variant: :primary, size: :md, icon: nil, css_class: nil)
+    button_tag(
+      type: "button",
+      class: class_names(
+        "btn",
+        Ui::ButtonComponent::VARIANTS[variant.to_sym],
+        Ui::ButtonComponent::SIZES[size.to_sym],
+        css_class
+      ),
+      onclick: "document.getElementById('#{modal_id}').showModal()"
+    ) do
+      if icon
+        safe_join([
+          render(Ui::IconComponent.new(name: icon, size: :sm, css_class: "-ml-0.5 mr-1.5")),
+          text
+        ])
+      else
+        text
+      end
+    end
+  end
+
+  private
+
+  def button_content_for(text, icon)
+    if icon
+      safe_join([
+        render(Ui::IconComponent.new(name: icon, size: :sm, css_class: "-ml-0.5 mr-1.5")),
+        text
+      ])
+    else
+      text
+    end
   end
 end

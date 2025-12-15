@@ -1,18 +1,18 @@
-<div id="milestones_section" class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 mb-6">
-  <div class="px-6 py-5 bg-gradient-to-r from-purple-50/50 to-indigo-50/50 border-b border-gray-100/50">
+<div id="milestones_section" class="card bg-base-100 shadow-xl mb-6">
+  <div class="px-6 py-5 bg-secondary/10 border-b border-base-200">
     <div class="flex justify-between items-center">
-      <h3 class="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent flex items-center">
-        <svg class="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <h3 class="text-lg font-bold text-secondary flex items-center">
+        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
         </svg>
         Project Milestones
       </h3>
     </div>
-    <p class="mt-1 text-sm text-gray-600">
+    <p class="mt-1 text-sm text-base-content/70">
       Track time for milestones in this project
     </p>
   </div>
-  <div class="divide-y divide-gray-100/50">
+  <div class="divide-y divide-base-200">
     <% milestones.not_completed.each do |milestone| %>
       <% active_log = project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id) %>
       <%= render "time_logs/milestone_row", milestone: milestone, project: project, active_log: active_log %>

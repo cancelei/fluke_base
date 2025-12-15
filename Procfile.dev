@@ -1,3 +1,3 @@
-web: env RUBY_DEBUG_OPEN=true bin/rails server
-css: bin/rails tailwindcss:watch
+web: bin/rails server
+css: ./bin/tailwindcss -i ./app/assets/tailwind/application.css -o ./app/assets/builds/tailwind.css --watch=always
 queue: bin/rails solid_queue:start

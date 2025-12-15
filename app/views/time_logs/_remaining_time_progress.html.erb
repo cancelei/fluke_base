@@ -36,112 +36,100 @@
   <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
 <% end %>
 <div class="mb-8">
-  <div class="flex justify-between items-center mb-1">
-    <span class="text-sm font-medium text-indigo-700">Time Used</span>
-    <span class="text-sm font-medium text-indigo-700">
+  <div class="flex justify-between items-center mb-2">
+    <span class="text-sm font-medium text-primary">Time Used</span>
+    <span class="text-sm font-medium text-primary">
       <%= used_hours %> / <%= total_allowed_hours %> hours
     </span>
   </div>
   <% if local_assigns[:agreement] %>
-<%# # Agreement-specific progress bar with participant breakdown %>
-    <div class="relative group">
-      <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-300 cursor-pointer">
-        <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+    <%# Agreement-specific progress bar with participant breakdown %>
+    <div class="dropdown dropdown-hover w-full">
+      <div tabindex="0" role="button" class="w-full cursor-pointer">
+        <progress class="progress progress-primary w-full h-3" value="<%= percent_used %>" max="100"></progress>
       </div>
-      <div class="absolute z-10 left-0 mt-2 w-full bg-white border border-gray-200 rounded shadow-lg p-4 text-xs text-gray-700 min-w-[250px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200">
+      <div tabindex="0" class="dropdown-content z-[1] card card-compact shadow-xl bg-base-100 w-72 p-4">
         <div class="font-semibold mb-2">Agreement Participants</div>
-        <ul>
+        <ul class="space-y-1 text-sm">
           <% agreement.agreement_participants.includes(:user).each do |participant| %>
             <% participant_used = project.time_logs.where(user_id: participant.user_id).where.not(status: "in_progress").sum(:hours_spent) + (project.time_logs.where(user_id: participant.user_id).in_progress.any? ? ((Time.zone.now - project.time_logs.where(user_id: participant.user_id).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
             <% participant_total = agreement.weekly_hours * agreement.duration_in_weeks %>
             <% participant_percent = participant_total > 0 ? [ (participant_used.to_f / participant_total * 100).round, 100 ].min : 0 %>
-            <li class="mb-1 flex justify-between items-center">
-              <span>
-                <%= participant.user&.full_name || participant.user&.email || "User" %>
-              </span>
-              <span class="ml-2">
-                <%= participant_used %> / <%= participant_total %>h (<%= participant_percent %>%)
-              </span>
+            <li class="flex justify-between items-center">
+              <span><%= participant.user&.full_name || participant.user&.email || "User" %></span>
+              <span class="badge badge-sm badge-ghost"><%= participant_used %> / <%= participant_total %>h (<%= participant_percent %>%)</span>
             </li>
           <% end %>
         </ul>
       </div>
     </div>
   <% elsif local_assigns[:project_wide] %>
-    <div class="relative group">
-      <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-300 cursor-pointer">
-        <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+    <div class="dropdown dropdown-hover w-full">
+      <div tabindex="0" role="button" class="w-full cursor-pointer">
+        <progress class="progress progress-primary w-full h-3" value="<%= percent_used %>" max="100"></progress>
       </div>
       <% if local_assigns[:owner] %>
-        <div class="absolute z-10 left-0 mt-2 w-full bg-white border border-gray-200 rounded shadow-lg p-4 text-xs text-gray-700 min-w-[250px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200">
+        <div tabindex="0" class="dropdown-content z-[1] card card-compact shadow-xl bg-base-100 w-72 p-4">
           <div class="font-semibold mb-2">All Project Contributors</div>
-          <ul>
-<%# Get all users who have logged time for this project %>
+          <ul class="space-y-1 text-sm">
             <% project.time_logs.joins(:user).group("users.id").sum(:hours_spent).each do |user_id, user_hours| %>
               <% user = User.find(user_id) %>
-              <li class="mb-1 flex justify-between items-center">
+              <li class="flex justify-between items-center">
                 <span>
                   <%= user.full_name || user.email || "User" %>
                   <% if user_id == project.user_id %>
-                    <span class="text-gray-500">(Owner)</span>
+                    <span class="badge badge-xs badge-neutral">Owner</span>
                   <% end %>
                 </span>
-                <span class="ml-2">
-                  <%= user_hours %>h
-                </span>
+                <span class="badge badge-sm badge-ghost"><%= user_hours %>h</span>
               </li>
             <% end %>
           </ul>
-          <div class="border-t border-gray-200 mt-2 pt-2 font-semibold">
-            Total: <%= used_hours %>h of <%= total_allowed_hours %>h allocated
-          </div>
+          <div class="divider my-2"></div>
+          <div class="font-semibold text-sm">Total: <%= used_hours %>h of <%= total_allowed_hours %>h allocated</div>
         </div>
       <% else %>
-        <div class="absolute z-10 left-0 mt-2 w-full bg-white border border-gray-200 rounded shadow-lg p-4 text-xs text-gray-700 min-w-[200px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200">
+        <div tabindex="0" class="dropdown-content z-[1] card card-compact shadow-xl bg-base-100 w-64 p-4">
           <div class="font-semibold mb-2">Your Time Contribution</div>
-          <div>
+          <div class="text-sm space-y-1">
             <% if user_agreement %>
-              Agreement: <%= user_agreement.agreement_type %><br>
-              Weekly commitment: <%= user_agreement.weekly_hours %>h<br>
-              Duration: <%= user_agreement.duration_in_weeks %> weeks
+              <p>Agreement: <span class="badge badge-sm badge-primary"><%= user_agreement.agreement_type %></span></p>
+              <p>Weekly commitment: <%= user_agreement.weekly_hours %>h</p>
+              <p>Duration: <%= user_agreement.duration_in_weeks %> weeks</p>
             <% else %>
-              No active agreement found
+              <div class="alert alert-warning text-xs py-2">
+                <span>No active agreement found</span>
+              </div>
             <% end %>
           </div>
         </div>
       <% end %>
     </div>
   <% elsif local_assigns[:owner] %>
-    <div class="relative group">
-      <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-300 cursor-pointer">
-        <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
+    <div class="dropdown dropdown-hover w-full">
+      <div tabindex="0" role="button" class="w-full cursor-pointer">
+        <progress class="progress progress-primary w-full h-3" value="<%= percent_used %>" max="100"></progress>
       </div>
-      <div class="absolute z-10 left-0 mt-2 w-full bg-white border border-gray-200 rounded shadow-lg p-4 text-xs text-gray-700 min-w-[250px] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-200">
+      <div tabindex="0" class="dropdown-content z-[1] card card-compact shadow-xl bg-base-100 w-72 p-4">
         <div class="font-semibold mb-2">Agreements Breakdown</div>
-        <ul>
+        <ul class="space-y-1 text-sm">
           <% agreements.each do |a| %>
             <% other_user = (a.initiator&.id == current_user.id ? a.other_party : a.initiator) %>
             <% a_used = project.time_logs.where.not(status: "in_progress").where(user_id: other_user.id).sum(:hours_spent) + (project.time_logs.where(user_id: other_user.id).in_progress.any? ? ((Time.zone.now - project.time_logs.in_progress.where(user_id: other_user.id).last.started_at) / 1.hour).round(2) : 0) %>
             <% a_total = a.weekly_hours * a.duration_in_weeks %>
             <% a_percent = a_total > 0 ? [ (a_used.to_f / a_total * 100).round, 100 ].min : 0 %>
-            <li class="mb-1 flex justify-between items-center">
-              <span>
-                <%= other_user&.full_name || other_user&.email || "User" %>
-              </span>
-              <span class="ml-2">
-                <%= a_used %> / <%= a_total %>h (<%= a_percent %>%)
-              </span>
+            <li class="flex justify-between items-center">
+              <span><%= other_user&.full_name || other_user&.email || "User" %></span>
+              <span class="badge badge-sm badge-ghost"><%= a_used %> / <%= a_total %>h (<%= a_percent %>%)</span>
             </li>
           <% end %>
         </ul>
       </div>
     </div>
   <% else %>
-    <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-300">
-      <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: <%= percent_used %>%"></div>
-    </div>
+    <progress class="progress progress-primary w-full h-3" value="<%= percent_used %>" max="100"></progress>
   <% end %>
-  <div class="text-xs text-gray-500 mt-1">
+  <div class="text-xs text-base-content/60 mt-1">
     <%= percent_used %>% of allowed hours used
   </div>
 </div>

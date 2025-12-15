@@ -20,6 +20,14 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  # Available DaisyUI themes
+  AVAILABLE_THEMES = %w[
+    light nord cupcake emerald corporate
+    dark night dracula forest business
+  ].freeze
+
+  DEFAULT_THEME = "nord".freeze
+
   # Pay integration
   include Pay::Billable
 
@@ -27,10 +35,16 @@ class User < ApplicationRecord
   validates :github_token, length: { maximum: 255 }, allow_blank: true
   validates :github_username, format: { with: /\A[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\z/i, message: "is not a valid GitHub username", allow_blank: true }
   validates :first_name, :last_name, presence: true
+  validates :theme_preference, inclusion: { in: AVAILABLE_THEMES }
 
   # Relationships
   has_many :projects, dependent: :destroy
   has_many :time_logs
+
+  # Membership associations for tiered access control
+  has_many :project_memberships, dependent: :destroy
+  has_many :member_projects, through: :project_memberships, source: :project
+  has_many :invitations_sent, class_name: "ProjectMembership", foreign_key: :invited_by_id
 
   # Avatar
   has_one_attached :avatar
@@ -68,17 +82,42 @@ class User < ApplicationRecord
   end
 
   def show_project_context_nav?
-    # Returns the user's preference for showing the project context navigation
-    # This column defaults to true, so users will see the nav by default
-    self[:show_project_context_nav]
+    # Project context navigation is now always shown for all users
+    # This method is kept for backwards compatibility but always returns true
+    true
   end
 
   def accessible_projects
-    # Return all projects the user has access to through ownership, agreements, or collaboration
+    # Return all projects the user has access to through ownership or active agreements
     owned_projects = projects
-    agreement_projects = (initiated_agreements.includes(:project).map(&:project) +
-                         received_agreements.includes(:project).map(&:project)).compact
+    # Only include projects from Accepted or Completed agreements
+    active_statuses = %w[Accepted Completed]
+    agreement_projects = (
+      initiated_agreements.where(status: active_statuses).includes(:project).map(&:project) +
+      received_agreements.where(status: active_statuses).includes(:project).map(&:project)
+    ).compact
 
     (owned_projects + agreement_projects).uniq
+  end
+
+  # Membership helper methods
+  def projects_with_role(role = nil)
+    if role
+      project_memberships.where(role: role).includes(:project).map(&:project)
+    else
+      project_memberships.includes(:project).map(&:project)
+    end
+  end
+
+  def role_in_project(project)
+    project.effective_role_for(self)
+  end
+
+  def can_access_project?(project)
+    project.user_has_access?(self)
+  end
+
+  def admin_projects
+    project_memberships.admins.includes(:project).map(&:project)
   end
 end

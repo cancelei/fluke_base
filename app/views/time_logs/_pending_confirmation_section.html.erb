@@ -1,7 +1,7 @@
-<div id="pending_confirmation_section" class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20">
-  <div class="px-6 py-5 bg-gradient-to-r from-orange-50/50 to-red-50/50 border-b border-gray-100/50">
-    <h3 class="text-lg font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent flex items-center">
-      <svg class="h-5 w-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div id="pending_confirmation_section" class="card bg-base-100 shadow-xl mb-6">
+  <div class="px-6 py-5 bg-warning/10 border-b border-base-200">
+    <h3 class="text-lg font-bold text-warning flex items-center">
+      <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
       Time Logs Pending Confirmation
@@ -10,63 +10,61 @@
   <div class="overflow-hidden">
     <% if milestones_pending_confirmation.any? %>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-100/50">
-          <thead class="bg-gradient-to-r from-gray-50/50 to-gray-100/50">
+        <table class="table table-zebra">
+          <thead>
           <tr>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <th class="text-xs font-semibold uppercase tracking-wider">
               User
             </th>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <th class="text-xs font-semibold uppercase tracking-wider">
               Milestone
             </th>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <th class="text-xs font-semibold uppercase tracking-wider">
               Due Date
             </th>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <th class="text-xs font-semibold uppercase tracking-wider">
               Started
             </th>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <th class="text-xs font-semibold uppercase tracking-wider">
               Ended
             </th>
-            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <th class="text-xs font-semibold uppercase tracking-wider">
               Duration
             </th>
             <% if owner %>
-              <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              <th class="text-xs font-semibold uppercase tracking-wider">
                 Action
               </th>
             <% end %>
           </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody>
           <% time_log_users = owner ? project.time_logs.map(&:user).uniq : [ current_user, project.user ].compact %>
           <% time_log_users.each do |user| %>
             <% milestones_pending_confirmation.each do |milestone| %>
               <% next unless milestone.time_logs.where(user: user).any? %>
 
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-indigo-600 truncate">
+              <tr class="hover">
+                <td class="whitespace-nowrap">
+                  <div class="text-sm font-medium text-primary truncate">
                     <%= user.full_name %>
                     <% if user.id == project.user_id %>
-                      <div class="'ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600">
-                        owner
-                      </div>
+                      <span class="badge badge-success badge-sm ml-2">owner</span>
                     <% end %>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-indigo-600 truncate">
+                <td class="whitespace-nowrap">
+                  <div class="text-sm font-medium text-primary truncate">
                     <%= milestone.title %>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
+                <td class="whitespace-nowrap">
+                  <div class="text-sm">
                     <%= milestone.due_date.strftime("%b %d, %Y %I:%M %p") %>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
+                <td class="whitespace-nowrap">
+                  <div class="text-sm">
                     <ul>
                       <% milestone.time_logs.where(user:).pluck(:started_at).each do |log| %>
                         <li><%= log.strftime("%b %d, %Y %I:%M %p") %></li>
@@ -74,18 +72,18 @@
                     </ul>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">
+                <td class="whitespace-nowrap">
+                  <div class="text-sm">
                     <ul>
                       <% milestone.time_logs.where(user:).each do |log| %>
-                        <li>
+                        <li class="flex items-center gap-2">
                           <%= log.ended_at&.strftime("%b %d, %Y %I:%M %p") || "-" %>
                             <% if log.manual_entry %>
-                            <div class="relative group ml-4 inline-flex items-center px-1 py-1 border border-transparent text-sm leading-3 font-medium rounded-md text-white bg-green-600 cursor-pointer">
-                              m
-                              <div class="absolute left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white border border-gray-300 rounded shadow-lg p-2 text-gray-700 text-xs z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                              <strong>Justification:</strong>
-                              <div><%= log.description.presence || "No justification provided." %></div>
+                            <div class="dropdown dropdown-hover dropdown-left">
+                              <div tabindex="0" role="button" class="badge badge-success badge-sm cursor-pointer">m</div>
+                              <div tabindex="0" class="dropdown-content z-[1] card card-compact shadow-xl bg-base-100 w-64 p-3">
+                                <div class="font-semibold text-sm">Justification:</div>
+                                <div class="text-sm text-base-content/70"><%= log.description.presence || "No justification provided." %></div>
                               </div>
                             </div>
                             <% end %>
@@ -94,7 +92,7 @@
                     </ul>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="whitespace-nowrap text-sm text-base-content/70">
                   <% hours_spend = milestone.time_logs.where(user:).pluck(:hours_spent).sum %>
                   <%= hours_spend > 0 ? "#{hours_spend} hours" : "Less than an hour" %>
                 </td>
@@ -102,7 +100,7 @@
                   <% if owner %>
                     <%= button_to "Mark as Completed", confirm_project_milestone_path(project, milestone),
                                   method: :post,
-                                  class: "ml-4 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500",
+                                  class: "btn btn-success btn-sm",
                                   form: { data: { turbo: true } },
                                   data: { confirm: "Are you sure you want to mark this milestone as completed?" } %>
                   <% end %>
@@ -113,7 +111,7 @@
           </tbody>
         </table>
       <% else %>
-        <div class="px-4 py-4 text-center text-gray-500">
+        <div class="px-4 py-8 text-center text-base-content/60">
           No time logs found. Start tracking time for a milestone above.
         </div>
       <% end %>

@@ -20,11 +20,12 @@ export default class extends Controller {
       threshold: 0.1
     };
 
-    this.observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
+    this.observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
           // Add staggered delay for multiple elements
-          const delay = Array.from(this.elementTargets).indexOf(entry.target) * 100;
+          const delay =
+            Array.from(this.elementTargets).indexOf(entry.target) * 100;
 
           setTimeout(() => {
             this.revealElement(entry.target);
@@ -39,7 +40,8 @@ export default class extends Controller {
     this.elementTargets.forEach(element => {
       element.style.opacity = '0';
       element.style.transform = 'translateY(50px)';
-      element.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      element.style.transition =
+        'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 
       this.observer.observe(element);
     });
@@ -63,7 +65,9 @@ export default class extends Controller {
 
     // Create demo modal
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4';
+
+    modal.className =
+      'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4';
     modal.innerHTML = `
       <div class="bg-white rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-8">
@@ -138,6 +142,7 @@ export default class extends Controller {
 
   closeDemo(event) {
     const modal = event.target.closest('.fixed');
+
     if (modal) {
       modal.style.opacity = '0';
       setTimeout(() => {

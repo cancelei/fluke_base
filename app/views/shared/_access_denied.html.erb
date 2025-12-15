@@ -1,0 +1,41 @@
+<%# DaisyUI Access Denied Component %>
+<%# Usage: render 'shared/access_denied', message: 'Custom message', show_back: true %>
+<% message ||= "You don't have permission to access this resource." %>
+<% show_back ||= true %>
+<% show_dashboard ||= true %>
+
+<div class="hero min-h-[50vh]">
+  <div class="hero-content text-center">
+    <div class="max-w-md">
+      <%# Error Icon %>
+      <div class="text-error mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+
+      <%# Title %>
+      <h1 class="text-3xl font-bold text-error">Access Denied</h1>
+
+      <%# Message %>
+      <p class="py-6 text-base-content/70">
+        <%= message %>
+      </p>
+
+      <%# Action Buttons %>
+      <div class="flex gap-2 justify-center flex-wrap">
+        <% if show_back %>
+          <%= link_to "Go Back", "javascript:history.back()", class: "btn btn-outline" %>
+        <% end %>
+        <% if show_dashboard && defined?(dashboard_path) %>
+          <%= link_to "Dashboard", dashboard_path, class: "btn btn-primary" %>
+        <% end %>
+      </div>
+
+      <%# Help Text %>
+      <div class="mt-8 text-sm text-base-content/50">
+        <p>If you believe this is an error, please contact the project owner.</p>
+      </div>
+    </div>
+  </div>
+</div>

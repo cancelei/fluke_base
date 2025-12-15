@@ -1,75 +1,95 @@
 <%= turbo_frame_tag "#{dom_id(agreement)}_counter_offers" do %>
-  <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+  <div class="mt-8 card bg-base-100 shadow-xl overflow-hidden">
     <div class="px-4 py-5 sm:px-6">
-      <h3 class="text-lg leading-6 font-medium text-gray-900">
+      <h3 class="text-lg leading-6 font-medium">
         Negotiation History
       </h3>
-      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+      <p class="mt-1 max-w-2xl text-sm text-base-content/70">
         Changes and counter-offers made during negotiation
       </p>
     </div>
 
-    <div class="border-t border-gray-200">
+    <div class="border-t border-base-200">
       <% if agreement_chain.any? %>
+        <!-- DaisyUI Timeline Component -->
         <div class="px-4 py-5">
-          <% agreement_chain.each_with_index do |(current_agreement, previous_agreement), idx| %>
-            <div class="mb-6 <%= "pb-6 border-b border-gray-200" unless idx == agreement_chain.length - 1 %>">
-              <h4 class="font-bold text-indigo-700 mb-3 flex items-center">
-                <% if idx == 0 %>
-                  <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  Initial Agreement
-                <% else %>
-                  <svg class="h-5 w-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m0-4l4-4"></path>
-                  </svg>
-                  Counter Offer <%= idx %>
+          <ul class="timeline timeline-snap-icon timeline-compact timeline-vertical">
+            <% agreement_chain.each_with_index do |(current_agreement, previous_agreement), idx| %>
+              <li>
+                <% unless idx == 0 %>
+                  <hr class="bg-base-300">
                 <% end %>
 
-                <span class="ml-2 text-sm font-normal text-gray-600">
-                  by <%= current_agreement.initiator&.full_name %>
-                </span>
+                <!-- Timeline Icon -->
+                <div class="timeline-middle">
+                  <% if idx == 0 %>
+                    <svg class="h-5 w-5 text-info" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                  <% else %>
+                    <svg class="h-5 w-5 text-warning" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  <% end %>
+                </div>
 
-                <% if current_agreement.initiator&.id == current_user.id %>
-                  <span class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">You</span>
-                <% end %>
-              </h4>
+                <!-- Timeline Start: Date -->
+                <div class="timeline-start text-sm text-base-content/70 mb-1">
+                  <%= current_agreement.created_at.strftime("%b %d, %Y") %>
+                  <div class="text-xs text-base-content/50">
+                    <%= current_agreement.created_at.strftime("%I:%M %p") %>
+                  </div>
+                </div>
 
-              <div class="bg-gray-50 rounded-lg p-4">
-                <%= render partial: "agreement_changes", locals: { agreement: current_agreement, previous_agreement: previous_agreement } %>
+                <!-- Timeline End: Content -->
+                <div class="timeline-end timeline-box mb-8">
+                  <!-- Header -->
+                  <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-bold text-base-content flex items-center gap-2">
+                      <% if idx == 0 %>
+                        <span class="badge badge-info badge-sm">Initial</span>
+                      <% else %>
+                        <span class="badge badge-warning badge-sm">Counter <%= idx %></span>
+                      <% end %>
+                      <span class="font-normal text-sm">by <%= current_agreement.initiator&.full_name %></span>
+                      <% if current_agreement.initiator&.id == current_user.id %>
+                        <span class="badge badge-primary badge-xs">You</span>
+                      <% end %>
+                    </h4>
 
-                <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
-                  <span>
-                    Created: <%= current_agreement.created_at.strftime("%B %d, %Y at %I:%M %p") %>
-                  </span>
-                  <span class="flex items-center">
-                    Status:
-                    <span class="ml-1 px-2 py-1 rounded-full text-xs font-medium <%=
+                    <!-- Status Badge -->
+                    <span class="badge badge-sm <%=
                       case current_agreement.status
-                      when "accepted" then "bg-green-100 text-green-800"
-                      when "rejected" then "bg-red-100 text-red-800"
-                      when "pending" then "bg-yellow-100 text-yellow-800"
-                      when "countered" then "bg-orange-100 text-orange-800"
-                      else "bg-gray-100 text-gray-800"
+                      when "accepted" then "badge-success"
+                      when "rejected" then "badge-error"
+                      when "pending" then "badge-warning"
+                      when "countered" then "badge-warning"
+                      else "badge-ghost"
                       end
-                                                                                 %>">
+                                                %>">
                       <%= current_agreement.status.humanize %>
                     </span>
-                  </span>
+                  </div>
+
+                  <!-- Changes -->
+                  <%= render partial: "agreement_changes", locals: { agreement: current_agreement, previous_agreement: previous_agreement } %>
                 </div>
-              </div>
-            </div>
-          <% end %>
+
+                <% if idx < agreement_chain.length - 1 %>
+                  <hr class="bg-base-300">
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
         </div>
       <% else %>
         <div class="px-4 py-8 text-center">
-          <div class="text-gray-400">
+          <div class="text-base-content/40">
             <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p class="mt-2 text-sm text-gray-500">
+          <p class="mt-2 text-sm text-base-content/70">
             This agreement has no counter-offer history.
           </p>
         </div>

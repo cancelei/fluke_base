@@ -32,7 +32,7 @@
         const submitButton = form.querySelector('input[type="submit"]');
         if (submitButton) {
           submitButton.disabled = false;
-          submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+          submitButton.classList.remove('text-base-content/50', 'cursor-not-allowed');
         }
       }
     };
@@ -59,7 +59,7 @@
           const submitButton = form.querySelector('input[type="submit"]');
           if (submitButton) {
             submitButton.disabled = false;
-            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            submitButton.classList.remove('text-base-content/50', 'cursor-not-allowed');
           }
         }
       } else {
@@ -69,7 +69,7 @@
           const submitButton = form.querySelector('input[type="submit"]');
           if (submitButton) {
             submitButton.disabled = true;
-            submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+            submitButton.classList.add('text-base-content/50', 'cursor-not-allowed');
           }
         }
       }
@@ -92,7 +92,7 @@
         const submitButton = form.querySelector('input[type="submit"]');
         if (submitButton) {
           submitButton.disabled = true;
-          submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+          submitButton.classList.add('text-base-content/50', 'cursor-not-allowed');
         }
       }
     };
@@ -105,17 +105,17 @@
         if (submitButton) {
           // Disable submit button until Turnstile verification completes
           submitButton.disabled = true;
-          submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+          submitButton.classList.add('text-base-content/50', 'cursor-not-allowed');
         }
       }
     });
   </script>
 <% elsif Rails.env.development? %>
-  <div class="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+  <div class="text-sm text-info bg-info/10 p-3 rounded-md">
     ℹ️ Turnstile is disabled in development for easier local testing.
   </div>
 <% else %>
-  <div class="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md">
+  <div class="text-sm text-warning bg-warning/10 p-3 rounded-md">
     ⚠️ Turnstile is not configured. Please set TURNSTILE_SITE_KEY environment variable.
   </div>
 <% end %>

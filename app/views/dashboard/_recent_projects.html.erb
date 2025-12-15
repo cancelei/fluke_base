@@ -1,37 +1,49 @@
 <% cache([ current_user, "recent_projects", @projects.maximum(:updated_at) ]) do %>
-  <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-    <div class="px-6 py-6 sm:px-8 flex justify-between items-center bg-gradient-to-r from-blue-50/50 to-purple-50/50">
-      <h3 class="text-lg font-semibold text-gray-900">Recent Projects</h3>
-      <%= link_to "View all", projects_path, class: "text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline" %>
-    </div>
-    <div class="border-t border-gray-200">
-      <ul role="list" class="divide-y divide-gray-200">
-        <% if @projects.present? %>
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body p-0">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-4 pb-0">
+        <h3 class="card-title text-lg">Recent Projects</h3>
+        <%= link_to "View all", projects_path, class: "btn btn-ghost btn-sm" %>
+      </div>
+
+      <!-- Content -->
+      <div class="divider my-2"></div>
+
+      <% if @projects.present? %>
+        <ul class="menu p-0">
           <% @projects.each do |project| %>
             <% cache([ project, current_user ]) do %>
               <%= render "shared/project_summary", project: project, current_user: current_user %>
             <% end %>
           <% end %>
-        <% else %>
-          <li class="px-6 py-8 sm:px-8 text-center">
-            <p class="text-sm text-gray-500 mb-4">No projects yet.</p>
-            <%= link_to "Create a project", new_project_path, class: "inline-flex items-center rounded-xl border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105" %>
-          </li>
-        <% end %>
-      </ul>
-
-      <%# Show mentor opportunities to all users %>
-        <div class="px-6 py-6 sm:px-8 bg-gradient-to-r from-blue-50/80 to-purple-50/80 border-t border-blue-100/50">
-          <div class="flex flex-col items-center justify-center space-y-3">
-            <h4 class="text-sm font-semibold text-blue-700">Looking to mentor or collaborate on projects?</h4>
-            <%= link_to explore_projects_path, class: "w-full inline-flex justify-center items-center rounded-xl border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105" do %>
-              <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </ul>
+      <% else %>
+        <div class="text-center p-6">
+          <div class="avatar placeholder mb-4">
+            <div class="bg-base-200 text-base-content/40 rounded-full w-12">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              Explore Available Projects
-            <% end %>
+            </div>
           </div>
+          <p class="text-sm text-base-content/70 mb-4">No projects yet.</p>
+          <%= link_to "Create a project", new_project_path, class: "btn btn-primary btn-sm" %>
         </div>
+      <% end %>
+
+      <!-- Mentor CTA -->
+      <div class="bg-primary/10 border-t border-primary/20 p-4 rounded-b-2xl">
+        <div class="text-center">
+          <p class="text-sm font-medium text-primary mb-3">Looking to mentor or collaborate on projects?</p>
+          <%= link_to explore_projects_path, class: "btn btn-primary btn-sm w-full gap-2" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Explore Available Projects
+          <% end %>
+        </div>
+      </div>
     </div>
   </div>
 <% end %>

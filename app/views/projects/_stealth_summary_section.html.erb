@@ -4,7 +4,7 @@
 %>
 
 <div id="stealth-mode-summary" class="<%= "hidden" unless show_summary %>" data-stealth-mode-target="summary">
-  <div class="bg-gradient-to-r from-green-50/80 to-emerald-50/80 backdrop-blur-sm border border-green-200/50 rounded-2xl p-6 shadow-lg">
+  <div class="bg-gradient-to-r from-green-50/80 to-emerald-50/80 backdrop-blur-sm border border-success/40/50 rounded-2xl p-6 shadow-lg">
     <div class="flex items-start">
       <div class="flex-shrink-0">
         <div class="h-10 w-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
@@ -15,40 +15,40 @@
       </div>
       <div class="ml-4">
         <h3 class="text-lg font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent mb-3">Stealth Mode Active</h3>
-        <p class="text-sm text-green-800 mb-4 font-medium">
+        <p class="text-sm text-success mb-4 font-medium">
           Your project will be created with smart defaults to protect your privacy while you develop your idea.
         </p>
 
         <div class="space-y-3">
-          <div class="bg-white/70 rounded-lg p-4 border border-green-200/50">
-            <h4 class="text-sm font-semibold text-green-800 mb-2">What happens next:</h4>
-            <ul class="text-sm text-green-700 space-y-1">
+          <div class="bg-white/70 rounded-lg p-4 border border-success/40/50">
+            <h4 class="text-sm font-semibold text-success mb-2">What happens next:</h4>
+            <ul class="text-sm text-success space-y-1">
               <li class="flex items-start">
-                <svg class="h-4 w-4 text-green-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="h-4 w-4 text-success mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
                 Project name: <strong><%= project.name.present? ? project.name : "Generated unique stealth identifier" %></strong>
               </li>
               <li class="flex items-start">
-                <svg class="h-4 w-4 text-green-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="h-4 w-4 text-success mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
                 Description: <strong><%= project.description.present? ? truncate(project.description, length: 60) : "Professional placeholder text" %></strong>
               </li>
               <li class="flex items-start">
-                <svg class="h-4 w-4 text-green-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="h-4 w-4 text-success mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
                 Category: <strong><%= project.category.present? ? project.category : "Technology (default)" %></strong>
               </li>
               <li class="flex items-start">
-                <svg class="h-4 w-4 text-green-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="h-4 w-4 text-success mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
                 Privacy: <strong>All fields private by default</strong>
               </li>
               <li class="flex items-start">
-                <svg class="h-4 w-4 text-green-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="h-4 w-4 text-success mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
                 Discovery: <strong>Hidden from public explore results</strong>
@@ -56,14 +56,14 @@
             </ul>
           </div>
 
-          <div class="bg-blue-50/70 rounded-lg p-4 border border-blue-200/50">
+          <div class="bg-info/10/70 rounded-lg p-4 border border-info/40/50">
             <div class="flex items-center justify-between">
-              <p class="text-xs text-blue-700">
+              <p class="text-xs text-info">
                 <strong>💡 Tip:</strong> You can customize these defaults above, edit all details after creation, or disable stealth mode anytime to make your project public.
               </p>
               <button type="button"
                       data-action="click->stealth-mode#showFullForm"
-                      class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors duration-200 font-medium">
+                      class="text-xs bg-info text-white px-3 py-1.5 rounded-md hover:bg-info transition-colors duration-200 font-medium">
                 Show Full Form
               </button>
             </div>

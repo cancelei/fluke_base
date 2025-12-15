@@ -25,6 +25,7 @@ export default class extends Controller {
 
   scrollToBottom() {
     const container = this.element.closest('.overflow-y-auto');
+
     if (container) {
       container.scrollTop = container.scrollHeight;
     }

@@ -1,19 +1,19 @@
 <div class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
   <div class="px-4 py-8 sm:px-0">
-    <!-- Modern Header Section with Glass-morphism -->
-    <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl mb-8">
-      <div class="px-6 py-8 sm:px-8">
-        <div class="flex items-center justify-between">
+    <%# Header Section with DaisyUI Card %>
+    <div class="card bg-base-100 shadow-xl mb-8">
+      <div class="card-body">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">My Projects</h1>
-            <p class="mt-2 text-sm text-gray-600">Manage and track all your projects in one place</p>
+            <h1 class="card-title text-3xl font-bold">My Projects</h1>
+            <p class="mt-2 text-sm text-base-content/70">Manage and track all your projects in one place</p>
           </div>
           <div class="flex-shrink-0">
-            <%= link_to new_project_path, class: "group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25" do %>
-              <svg class="-ml-0.5 mr-2 h-5 w-5 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
+            <%= link_to new_project_path, class: "btn btn-primary gap-2" do %>
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
               </svg>
-              <span class="relative z-10">New Project</span>
+              New Project
             <% end %>
           </div>
         </div>
@@ -22,230 +22,178 @@
 
     <% if @projects.present? %>
       <%= turbo_frame_tag "projects_index" do %>
-      <!-- Responsive Project Cards Grid -->
-      <div class="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-        <% @projects.each do |project| %>
-          <% presenter = present(project) %>
-          <article class="group relative overflow-hidden"
-                   data-controller="project-card"
-                   data-project-id="<%= project.id %>"
-                   data-project-card-target="article">
-            <!-- Enhanced Card with Better Visual Structure -->
-            <div class="bg-white/95 backdrop-blur-md shadow-xl rounded-2xl border border-gray-200/50 hover:shadow-2xl hover:border-blue-300/50 transition-all duration-300 hover:scale-[1.02] cursor-pointer flex flex-col min-h-[420px] max-h-[500px]">
+        <%# Responsive Project Cards Grid %>
+        <div class="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          <% @projects.each do |project| %>
+            <% presenter = present(project) %>
+            <article class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 group"
+                     data-controller="project-card"
+                     data-project-id="<%= project.id %>"
+                     data-project-card-target="article">
 
-              <!-- Card Header with Status Bar -->
-              <div class="relative p-6 pb-4">
-                <!-- Status Indicator Bar -->
-                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 rounded-t-2xl"></div>
+              <%# Status Indicator Bar %>
+              <div class="h-1 bg-gradient-to-r from-primary via-secondary to-primary rounded-t-2xl"></div>
 
-                <!-- Project Icon and Title Section -->
+              <div class="card-body p-6">
+                <%# Project Icon and Title Section %>
                 <div class="flex items-start gap-4 mb-4">
                   <div class="flex-shrink-0">
-                    <div class="relative h-14 w-14 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-200/50 group-hover:from-blue-100 group-hover:via-indigo-100 group-hover:to-purple-100 group-hover:border-blue-300/50 transition-all duration-300 group-hover:scale-110">
-                      <svg class="h-7 w-7 text-blue-600 group-hover:text-blue-700 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                      </svg>
-                      <!-- Subtle glow effect -->
-                      <div class="absolute inset-0 rounded-2xl bg-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+                    <div class="avatar placeholder">
+                      <div class="bg-primary/10 text-primary rounded-xl w-14 h-14 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
 
                   <div class="flex-1 min-w-0">
-                    <h3 id="project-<%= project.id %>-title" class="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
+                    <h2 class="card-title text-lg group-hover:text-primary transition-colors">
                       <%= link_to presenter.display_name(current_user), project_path(project),
-                          class: "hover:underline decoration-2 underline-offset-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md line-clamp-2",
+                          class: "hover:underline decoration-2 underline-offset-2 line-clamp-2",
                           data: { turbo_frame: "_top" },
                           title: presenter.display_name(current_user) %>
-                    </h3>
+                    </h2>
 
-                    <!-- Badges and Meta Info -->
-                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                    <%# Badges %>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
                       <%= presenter.stage_badge %>
                       <% if project.category.present? && field_visible_to_user?(project, :category, current_user) %>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                          <%= project.category %>
-                        </span>
+                        <div class="badge badge-info badge-sm"><%= project.category %></div>
                       <% end %>
                     </div>
 
-                    <div class="flex items-center text-xs text-gray-500">
-                      <svg class="h-3 w-3 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center text-xs text-base-content/60 mt-2">
+                      <svg class="h-3 w-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span>Updated <%= time_ago_in_words(project.updated_at) %> ago</span>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Card Body with Content - Flexible with Controlled Height -->
-              <div class="px-6 pb-4 flex-1 min-h-0">
-                <!-- Project Description -->
+                <%# Project Description %>
                 <% if project.description.present? && field_visible_to_user?(project, :description, current_user) %>
-                  <div class="mb-4">
-                    <p class="text-sm text-gray-600 line-clamp-2 leading-relaxed" title="<%= strip_tags(presenter.display_description(current_user)) %>">
-                      <%= presenter.display_description(current_user, truncate: true, length: 100) %>
-                    </p>
-                  </div>
+                  <p class="text-sm text-base-content/70 line-clamp-2 mb-4" title="<%= strip_tags(presenter.display_description(current_user)) %>">
+                    <%= presenter.display_description(current_user, truncate: true, length: 100) %>
+                  </p>
                 <% end %>
 
-                <!-- Project Link (if present) -->
+                <%# Project Link %>
                 <% if project.project_link.present? && field_visible_to_user?(project, :project_link, current_user) %>
                   <div class="mb-4">
-                    <div class="flex items-center p-2.5 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-lg border border-gray-100 group-hover:border-blue-200 transition-colors duration-200">
-                      <svg class="h-3.5 w-3.5 text-blue-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="flex items-center p-2.5 bg-base-200 rounded-lg">
+                      <svg class="h-3.5 w-3.5 text-primary mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
                       <a href="<%= project.project_link.start_with?("http") ? project.project_link : "https://#{project.project_link}" %>"
                          target="_blank"
                          rel="noopener noreferrer"
-                         class="text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline truncate focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
+                         class="text-sm link link-primary truncate"
                          title="<%= project.project_link %>">
                         <%= project.project_link.gsub(/^https?:\/\//, "") %>
                       </a>
                     </div>
                   </div>
                 <% end %>
-              </div>
 
-              <!-- Compact Stats Section -->
-              <div class="px-6 pb-3">
-                <div class="bg-gradient-to-r from-gray-50/80 to-blue-50/30 rounded-lg p-2.5 border border-gray-100/50">
-                  <div class="grid grid-cols-2 gap-2">
-                    <div class="flex items-center min-w-0">
-                      <div class="flex items-center justify-center h-6 w-6 bg-white rounded-md mr-2 shadow-sm border border-gray-200 group-hover:border-blue-200 group-hover:bg-blue-50 transition-all duration-200 flex-shrink-0">
-                        <svg class="h-3 w-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 0 012 2" />
-                        </svg>
-                      </div>
-                      <div class="min-w-0">
-                        <p class="text-xs text-gray-500 font-medium">Milestones</p>
-                        <p class="text-xs font-semibold text-gray-900 truncate"><%= presenter.milestones_summary %></p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-center min-w-0">
-                      <div class="flex items-center justify-center h-6 w-6 bg-white rounded-md mr-2 shadow-sm border border-gray-200 group-hover:border-blue-200 group-hover:bg-blue-50 transition-all duration-200 flex-shrink-0">
-                        <svg class="h-3 w-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </div>
-                      <div class="min-w-0">
-                        <p class="text-xs text-gray-500 font-medium">Agreements</p>
-                        <p class="text-xs font-semibold text-gray-900 truncate"><%= pluralize(project.agreements.count, "agreement") %></p>
-                      </div>
-                    </div>
+                <%# Stats Section %>
+                <div class="stats stats-horizontal bg-base-200 shadow-sm w-full">
+                  <div class="stat py-2 px-3">
+                    <div class="stat-title text-xs">Milestones</div>
+                    <div class="stat-value text-sm"><%= presenter.milestones_summary %></div>
+                  </div>
+                  <div class="stat py-2 px-3">
+                    <div class="stat-title text-xs">Agreements</div>
+                    <div class="stat-value text-sm"><%= project.agreements.count %></div>
                   </div>
                 </div>
               </div>
-            </div>
 
-              <!-- Compact Card Footer with Better Responsivity -->
-              <div class="px-4 sm:px-6 pb-3 sm:pb-4 pt-2 border-t border-gray-100/50 bg-gradient-to-r from-gray-50/30 to-white/30 mt-auto flex-shrink-0">
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:justify-between">
-                  <!-- Primary Action with Enhanced Styling -->
-                  <%= link_to project_path(project),
-                      class: "group inline-flex items-center justify-center px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg shadow-md hover:from-blue-700 hover:to-blue-800 hover:shadow-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 order-2 sm:order-1",
-                      data: {
-                        turbo_frame: "_top",
-                        action: "click->project-card#navigate"
-                      },
-                      "aria-label": "View #{presenter.display_name(current_user)} project" do %>
-                    <svg class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                    </svg>
-                    <span class="relative">View Project</span>
-                  <% end %>
+              <%# Card Actions %>
+              <div class="card-actions justify-between items-center p-4 pt-0">
+                <%= link_to project_path(project),
+                    class: "btn btn-primary btn-sm gap-2",
+                    data: { turbo_frame: "_top", action: "click->project-card#navigate" },
+                    "aria-label": "View #{presenter.display_name(current_user)} project" do %>
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  View
+                <% end %>
 
-                  <% if current_user.id == project.user_id %>
-                    <!-- Owner Actions with Enhanced Mobile Layout -->
-                    <div class="flex items-center gap-2 order-1 sm:order-2">
-                      <%= link_to edit_project_path(project),
-                          class: "group flex-1 sm:flex-none inline-flex items-center justify-center px-2 sm:px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-                          data: { turbo_frame: "_top" },
-                          title: "Edit #{presenter.display_name(current_user)} project" do %>
-                        <svg class="h-3.5 w-3.5 sm:mr-1.5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                <% if current_user.id == project.user_id %>
+                  <div class="flex items-center gap-2">
+                    <%= link_to edit_project_path(project),
+                        class: "btn btn-ghost btn-sm gap-1",
+                        data: { turbo_frame: "_top" },
+                        title: "Edit project" do %>
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                      <span class="hidden sm:inline">Edit</span>
+                    <% end %>
+
+                    <div class="dropdown dropdown-end">
+                      <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-square" title="More options">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
                         </svg>
-                        <span class="hidden sm:inline">Edit</span>
-                      <% end %>
-
-                      <div class="relative" data-controller="dropdown">
-                        <button type="button"
-                                class="group inline-flex items-center justify-center p-2 bg-white border border-gray-300 text-gray-600 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 hover:text-gray-700 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                data-action="click->dropdown#toggle"
-                                title="More options for <%= presenter.display_name(current_user) %>"
-                                aria-haspopup="true"
-                                aria-expanded="false">
-                          <svg class="h-4 w-4 group-hover:scale-110 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
-                          </svg>
-                        </button>
-                        <div data-dropdown-target="menu"
-                             class="hidden absolute right-0 bottom-full z-50 mb-2 w-48 origin-bottom-right rounded-xl bg-white py-2 shadow-2xl ring-1 ring-black/10 border border-gray-200 focus:outline-none backdrop-blur-sm"
-                             role="menu"
-                             aria-orientation="vertical">
-                          <!-- Copy Link -->
-                          <button type="button"
-                                  class="flex items-center w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg mx-2 transition-colors duration-150 focus:outline-none focus:bg-gray-50 group"
-                                  data-action="click->project-card#copyLink"
-                                  role="menuitem">
-                            <svg class="h-4 w-4 mr-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      </div>
+                      <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-48 p-2 shadow-xl border border-base-300">
+                        <li>
+                          <button type="button" data-action="click->project-card#copyLink" class="gap-2">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
                             Copy Link
                           </button>
-
-                          <!-- Separator -->
-                          <div class="border-t border-gray-100 my-1 mx-2"></div>
-
-                          <!-- Delete -->
+                        </li>
+                        <li>
                           <%= button_to project_path(project),
                               method: :delete,
-                              data: {
-                                turbo_confirm: "Are you sure you want to delete this project? This action cannot be undone.",
-                                turbo_frame: "_top"
-                              },
-                              class: "flex items-center w-full px-4 py-3 text-left text-sm text-red-700 hover:bg-red-50 hover:text-red-900 rounded-lg mx-2 transition-colors duration-150 focus:outline-none focus:bg-red-50 group",
-                              role: "menuitem" do %>
-                            <svg class="h-4 w-4 mr-3 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                              data: { turbo_confirm: "Are you sure you want to delete this project? This action cannot be undone.", turbo_frame: "_top" },
+                              class: "text-error gap-2" do %>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
-                            Delete Project
+                            Delete
                           <% end %>
-                        </div>
-                      </div>
+                        </li>
+                      </ul>
                     </div>
-                  <% end %>
-                </div>
+                  </div>
+                <% end %>
               </div>
-          </article>
-        <% end %>
-      </div>
+            </article>
+          <% end %>
+        </div>
 
-      <!-- Pagination using our shared component (Turbo) -->
-      <div class="mt-8">
-        <%= render partial: "shared/pagination", locals: { records: @projects, class_name: "flex justify-center", remote: true } %>
-      </div>
+        <%# Pagination %>
+        <div class="mt-8">
+          <%= render partial: "shared/pagination", locals: { records: @projects, class_name: "flex justify-center", remote: true } %>
+        </div>
       <% end %>
     <% else %>
-      <!-- Enhanced Empty State with Modern Styling -->
-      <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl">
-        <div class="px-6 py-16 sm:px-8 text-center">
-          <div class="mx-auto h-24 w-24 text-gray-300 mb-6">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="h-full w-full">
+      <%# Empty State with DaisyUI Card %>
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body items-center text-center py-16">
+          <div class="text-base-content/30 mb-6">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="h-24 w-24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">No projects yet</h3>
-          <p class="text-sm text-gray-600 mb-6 max-w-md mx-auto">Get started by creating your first project. You can track milestones, manage agreements, and collaborate with others.</p>
-          <%= link_to new_project_path, class: "inline-flex items-center rounded-xl border border-transparent bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105" do %>
-            <svg class="-ml-0.5 mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-            </svg>
-            Create Your First Project
-          <% end %>
+          <h3 class="card-title text-lg">No projects yet</h3>
+          <p class="text-sm text-base-content/70 max-w-md">Get started by creating your first project. You can track milestones, manage agreements, and collaborate with others.</p>
+          <div class="card-actions mt-6">
+            <%= link_to new_project_path, class: "btn btn-primary gap-2" do %>
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+              </svg>
+              Create Your First Project
+            <% end %>
+          </div>
         </div>
       </div>
     <% end %>

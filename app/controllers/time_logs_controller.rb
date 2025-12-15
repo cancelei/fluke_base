@@ -1,4 +1,6 @@
 class TimeLogsController < ApplicationController
+  include ResultHandling
+
   before_action :authenticate_user!
   before_action :set_project, except: [ :filter ]
   before_action :set_milestone, only: [ :create, :stop_tracking ]

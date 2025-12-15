@@ -1,48 +1,53 @@
-<div id="manual_time_log_form" class="border-t border-gray-100/50">
+<div id="manual_time_log_form" class="border-t border-base-200">
   <div class="px-6 py-6">
     <%= form_with(model: time_log_manual, url: create_manual_time_logs_path(@project), method: :post, data: { turbo: true }, html: { autocomplete: "off" }) do |f| %>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <%= f.hidden_field :manual_entry, value: true %>
 
         <div class="md:col-span-2">
-          <%= f.label :description, class: "block text-sm font-semibold text-gray-700 mb-2" %>
-          <%= f.text_area :description, class: "w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", rows: 3, placeholder: "Describe the work performed..." %>
+          <%= f.label :description, class: "label" do %>
+            <span class="label-text font-semibold">Description</span>
+          <% end %>
+          <%= f.text_area :description, class: "textarea textarea-bordered w-full", rows: 3, placeholder: "Describe the work performed..." %>
           <% if time_log_manual.errors[:description].any? %>
-            <p class="mt-2 text-sm text-red-600"><%= time_log_manual.errors[:description].first %></p>
+            <p class="mt-2 text-sm text-error"><%= time_log_manual.errors[:description].first %></p>
           <% end %>
         </div>
 
         <div>
-          <%= f.label :started_at, "Start Time", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-          <%= f.datetime_field :started_at,
-                               class: "w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+          <%= f.label :started_at, class: "label" do %>
+            <span class="label-text font-semibold">Start Time</span>
+          <% end %>
+          <%= f.datetime_field :started_at, class: "input input-bordered w-full" %>
           <% if time_log_manual.errors[:started_at].any? %>
-            <p class="mt-2 text-sm text-red-600"><%= time_log_manual.errors[:started_at].first %></p>
+            <p class="mt-2 text-sm text-error"><%= time_log_manual.errors[:started_at].first %></p>
           <% end %>
         </div>
 
         <div>
-          <%= f.label :ended_at, "End Time", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-          <%= f.datetime_field :ended_at,
-                               class: "w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
-                               max: Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
+          <%= f.label :ended_at, class: "label" do %>
+            <span class="label-text font-semibold">End Time</span>
+          <% end %>
+          <%= f.datetime_field :ended_at, class: "input input-bordered w-full", max: Time.zone.now.strftime("%Y-%m-%dT%H:%M") %>
           <% if time_log_manual.errors[:ended_at].any? %>
-            <p class="mt-2 text-sm text-red-600"><%= time_log_manual.errors[:ended_at].first %></p>
+            <p class="mt-2 text-sm text-error"><%= time_log_manual.errors[:ended_at].first %></p>
           <% end %>
         </div>
 
         <div class="md:col-span-2">
-          <%= f.label :milestone_id, "Milestone", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+          <%= f.label :milestone_id, class: "label" do %>
+            <span class="label-text font-semibold">Milestone</span>
+          <% end %>
           <%= f.collection_select :milestone_id, milestones, :id, :title,
                 { include_blank: "Select a milestone..." },
-                { class: "w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
+                { class: "select select-bordered w-full" } %>
           <% if time_log_manual.errors[:milestone_id].any? %>
-            <p class="mt-2 text-sm text-red-600"><%= time_log_manual.errors[:milestone_id].first %></p>
+            <p class="mt-2 text-sm text-error"><%= time_log_manual.errors[:milestone_id].first %></p>
           <% end %>
         </div>
       </div>
       <div class="mt-6">
-        <%= f.submit "Add Time Log", class: "inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 shadow-lg hover:shadow-xl transition-all duration-200" %>
+        <%= f.submit "Add Time Log", class: "btn btn-warning" %>
       </div>
     <% end %>
   </div>

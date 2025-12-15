@@ -24,6 +24,7 @@ export default class MilestoneAiController extends Controller {
 
     if (!title && !description) {
       this.showError('Please provide a title or description to enhance.');
+
       return;
     }
 
@@ -34,6 +35,7 @@ export default class MilestoneAiController extends Controller {
     // Call the backend using Turbo's fetch
     const url = `/projects/${this.projectIdValue}/milestones/ai_enhance`;
     const formData = new FormData();
+
     formData.append('title', title);
     formData.append('description', description);
 
@@ -50,13 +52,16 @@ export default class MilestoneAiController extends Controller {
         method: 'POST',
         body: formData,
         headers: {
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'X-CSRF-Token': document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute('content'),
           'Accept': 'text/vnd.turbo-stream.html'
         }
       });
 
       if (response.ok) {
         const turboStream = await response.text();
+
         Turbo.renderStreamMessage(turboStream);
 
         // For existing milestones, start polling
@@ -70,14 +75,22 @@ export default class MilestoneAiController extends Controller {
         // For new milestones, the DirectMilestoneEnhancementJob will broadcast directly
       } else {
         this.showError('AI enhancement failed. Please try again.');
-        window.FlukeLogger?.error('MilestoneAI', new Error('AI enhancement failed'), {
-          action: 'enhanceMilestone',
-          status: response.status
-        });
+        window.FlukeLogger?.error(
+          'MilestoneAI',
+          new Error('AI enhancement failed'),
+          {
+            action: 'enhanceMilestone',
+            status: response.status
+          }
+        );
       }
     } catch (error) {
-      window.FlukeLogger?.error('MilestoneAI', error, { action: 'enhanceMilestone' });
-      this.showError('AI enhancement failed. Please check your connection and try again.');
+      window.FlukeLogger?.error('MilestoneAI', error, {
+        action: 'enhanceMilestone'
+      });
+      this.showError(
+        'AI enhancement failed. Please check your connection and try again.'
+      );
     } finally {
       this.enhanceButtonTarget.disabled = false;
       this.enhanceButtonTarget.textContent = 'Enhance';
@@ -90,13 +103,19 @@ export default class MilestoneAiController extends Controller {
 
     if (!enhancementId) {
       this.showError('Enhancement ID not found.');
+
       return;
     }
 
     // Get the enhanced description from the UI
-    const enhancementContainer = document.getElementById('ai-suggestion-container');
-    const enhancedDescription = enhancementContainer ?
-      enhancementContainer.querySelector('.enhanced-description-text')?.textContent?.trim() : null;
+    const enhancementContainer = document.getElementById(
+      'ai-suggestion-container'
+    );
+    const enhancedDescription = enhancementContainer
+      ? enhancementContainer
+          .querySelector('.enhanced-description-text')
+          ?.textContent?.trim()
+      : null;
 
     if (enhancedDescription && this.hasDescriptionTarget) {
       // Update the form field directly
@@ -107,7 +126,9 @@ export default class MilestoneAiController extends Controller {
       enhancementContainer.innerHTML = '';
     } else {
       // Fallback to server-side apply if we can't get the enhanced description
-      await this.sendEnhancementAction('apply_ai_enhancement', { enhancement_id: enhancementId });
+      await this.sendEnhancementAction('apply_ai_enhancement', {
+        enhancementId
+      });
     }
   }
 
@@ -117,13 +138,19 @@ export default class MilestoneAiController extends Controller {
 
     if (!enhancementId) {
       this.showError('Enhancement ID not found.');
+
       return;
     }
 
     // Get the original description from the enhancement data
-    const enhancementContainer = document.getElementById('ai-suggestion-container');
-    const originalDescription = enhancementContainer ?
-      enhancementContainer.querySelector('.original-description-text')?.textContent?.trim() : null;
+    const enhancementContainer = document.getElementById(
+      'ai-suggestion-container'
+    );
+    const originalDescription = enhancementContainer
+      ? enhancementContainer
+          .querySelector('.original-description-text')
+          ?.textContent?.trim()
+      : null;
 
     if (originalDescription && this.hasDescriptionTarget) {
       // Update the form field with original description
@@ -134,7 +161,9 @@ export default class MilestoneAiController extends Controller {
       enhancementContainer.innerHTML = '';
     } else {
       // Fallback to server-side revert if we can't get the original description
-      await this.sendEnhancementAction('revert_ai_enhancement', { enhancement_id: enhancementId });
+      await this.sendEnhancementAction('revert_ai_enhancement', {
+        enhancementId
+      });
     }
   }
 
@@ -142,7 +171,10 @@ export default class MilestoneAiController extends Controller {
     event.preventDefault();
 
     // Clear the suggestion container
-    const suggestionContainer = document.getElementById('ai-suggestion-container');
+    const suggestionContainer = document.getElementById(
+      'ai-suggestion-container'
+    );
+
     if (suggestionContainer) {
       suggestionContainer.innerHTML = '';
     }
@@ -193,10 +225,15 @@ export default class MilestoneAiController extends Controller {
   }
 
   discardDirectEnhancement(event) {
-    if (event) event.preventDefault();
+    if (event) {
+      event.preventDefault();
+    }
 
     // Clear the suggestion container
-    const suggestionContainer = document.getElementById('ai-suggestion-container');
+    const suggestionContainer = document.getElementById(
+      'ai-suggestion-container'
+    );
+
     if (suggestionContainer) {
       suggestionContainer.innerHTML = '';
     }
@@ -207,20 +244,20 @@ export default class MilestoneAiController extends Controller {
     const { enhancement } = event.detail;
 
     if (enhancement.status === 'completed') {
-      this.showSuccess('Enhancement completed! You can now apply or discard it.');
+      this.showSuccess(
+        'Enhancement completed! You can now apply or discard it.'
+      );
     } else if (enhancement.status === 'failed') {
       this.showError('Enhancement failed. Please try again.');
     }
   }
-
-  private;
 
   async sendEnhancementAction(action, data) {
     const url = `/projects/${this.projectIdValue}/milestones/${action}`;
     const formData = new FormData();
 
     Object.entries(data).forEach(([key, value]) => {
-      formData.append(key, value);
+      formData.append(this.toSnakeCase(key), value);
     });
 
     try {
@@ -228,30 +265,40 @@ export default class MilestoneAiController extends Controller {
         method: 'POST',
         body: formData,
         headers: {
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'X-CSRF-Token': document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute('content'),
           'Accept': 'text/vnd.turbo-stream.html'
         }
       });
 
       if (response.ok) {
         const turboStream = await response.text();
+
         Turbo.renderStreamMessage(turboStream);
       } else {
         this.showError('Action failed. Please try again.');
-        window.FlukeLogger?.error('MilestoneAI', new Error(`${action} failed`), {
-          action: action,
-          status: response.status
-        });
+        window.FlukeLogger?.error(
+          'MilestoneAI',
+          new Error(`${action} failed`),
+          {
+            action,
+            status: response.status
+          }
+        );
       }
     } catch (error) {
-      window.FlukeLogger?.error('MilestoneAI', error, { action: action });
-      this.showError('Action failed. Please check your connection and try again.');
+      window.FlukeLogger?.error('MilestoneAI', error, { action });
+      this.showError(
+        'Action failed. Please check your connection and try again.'
+      );
     }
   }
 
   showError(message) {
     // Use Turbo to show error message
     const flashContainer = document.getElementById('flash_messages');
+
     if (flashContainer) {
       flashContainer.innerHTML = `
         <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-4">
@@ -269,6 +316,7 @@ export default class MilestoneAiController extends Controller {
   showSuccess(message) {
     // Use Turbo to show success message
     const flashContainer = document.getElementById('flash_messages');
+
     if (flashContainer) {
       flashContainer.innerHTML = `
         <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded relative mb-4">
@@ -288,19 +336,25 @@ export default class MilestoneAiController extends Controller {
 
     // Get milestone ID from the AI suggestion container if not set
     if (!this.milestoneIdValue) {
-      const suggestionContainer = document.getElementById('ai-suggestion-container');
+      const suggestionContainer = document.getElementById(
+        'ai-suggestion-container'
+      );
+
       if (suggestionContainer && suggestionContainer.dataset.milestoneId) {
-        this.milestoneIdValue = parseInt(suggestionContainer.dataset.milestoneId);
+        this.milestoneIdValue = parseInt(
+          suggestionContainer.dataset.milestoneId
+        );
       } else {
         // Try again after a short delay - milestone ID might appear after Turbo Stream update
         setTimeout(() => {
           this.startPollingForCompletion();
         }, 1000);
+
         return;
       }
     }
 
-    this.pollingInterval = setInterval(async() => {
+    this.pollingInterval = setInterval(async () => {
       await this.checkEnhancementStatus();
     }, 3000); // Poll every 3 seconds
 
@@ -320,6 +374,7 @@ export default class MilestoneAiController extends Controller {
   async checkEnhancementStatus() {
     if (!this.milestoneIdValue) {
       this.stopPolling();
+
       return;
     }
 
@@ -328,7 +383,9 @@ export default class MilestoneAiController extends Controller {
 
       const response = await fetch(url, {
         headers: {
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'X-CSRF-Token': document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute('content'),
           'Accept': 'application/json'
         }
       });
@@ -346,57 +403,67 @@ export default class MilestoneAiController extends Controller {
             this.showError('Enhancement failed. Please try again.');
           }
         }
-      } else {
-        if (response.status === 404) {
-          this.stopPolling();
-        }
+      } else if (response.status === 404) {
+        this.stopPolling();
       }
     } catch (error) {
-      window.FlukeLogger?.error('MilestoneAI', error, { action: 'checkEnhancementStatus' });
+      window.FlukeLogger?.error('MilestoneAI', error, {
+        action: 'checkEnhancementStatus'
+      });
     }
   }
 
   async refreshEnhancementDisplay() {
-    if (!this.milestoneIdValue) return;
+    if (!this.milestoneIdValue) {
+      return;
+    }
 
     try {
       const url = `/projects/${this.projectIdValue}/milestones/${this.milestoneIdValue}/enhancement_display`;
       const response = await fetch(url, {
         headers: {
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'X-CSRF-Token': document
+            .querySelector('meta[name="csrf-token"]')
+            .getAttribute('content'),
           'Accept': 'text/vnd.turbo-stream.html'
         }
       });
 
       if (response.ok) {
         const turboStream = await response.text();
+
         Turbo.renderStreamMessage(turboStream);
       }
     } catch (error) {
-      window.FlukeLogger?.error('MilestoneAI', error, { action: 'refreshEnhancementDisplay' });
+      window.FlukeLogger?.error('MilestoneAI', error, {
+        action: 'refreshEnhancementDisplay'
+      });
     }
   }
 
   // Parse enhanced content to extract title and description
   parseEnhancedContent(enhancedText) {
     // Look for "Title: [title]" and "Description: [description]" pattern
-    const titleMatch = enhancedText.match(/Title:\s*(.+?)(?:\n|$)/i);
-    const descriptionMatch = enhancedText.match(/Description:\s*([\s\S]+)/i);
+    const titleMatch = enhancedText.match(/Title:\s*(.+?)(?:\n|$)/iu);
+    const descriptionMatch = enhancedText.match(/Description:\s*([\s\S]+)/iu);
 
     // Extract title if found, otherwise use original enhanced text for description only
     const title = titleMatch ? titleMatch[1].trim() : null;
 
     // Extract description if found, otherwise use the full enhanced text
-    let description = descriptionMatch ? descriptionMatch[1].trim() : enhancedText;
+    let description = descriptionMatch
+      ? descriptionMatch[1].trim()
+      : enhancedText;
 
     // Clean up the description by removing any remaining "Title: ..." line if it exists
     if (titleMatch && !descriptionMatch) {
-      description = enhancedText.replace(/Title:\s*.+?\n/i, '').trim();
+      description = enhancedText.replace(/Title:\s*.+?\n/iu, '').trim();
     }
 
-    return {
-      title: title,
-      description: description
-    };
+    return { title, description };
+  }
+
+  toSnakeCase(key) {
+    return key.replace(/[A-Z]/gu, letter => `_${letter.toLowerCase()}`);
   }
 }

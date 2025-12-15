@@ -1,16 +1,20 @@
-class ProjectSelectionService
+# frozen_string_literal: true
+
+# Service for selecting a project for the current user
+class ProjectSelectionService < ApplicationService
   def initialize(user, session, project_id)
     @user = user
     @session = session
     @project_id = project_id
   end
 
+  # @return [Dry::Monads::Result] Success(project) or Failure(error)
   def call
-    return false unless project
+    return failure_result(:not_found, "Project not found") unless project
 
     update_user_selection
     update_session
-    true
+    Success(project)
   end
 
   def project

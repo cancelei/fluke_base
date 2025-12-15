@@ -1,39 +1,41 @@
-<div id="milestone_<%= milestone.id %>" class="px-6 py-4 hover:bg-gray-50/30 transition-colors duration-200">
+<div id="milestone_<%= milestone.id %>" class="px-6 py-4 hover:bg-base-200/50 transition-colors duration-200">
   <div class="flex items-center justify-between">
-    <div class="flex items-center flex-1">
-      <div class="flex-shrink-0">
-        <% if milestone.status == 'completed' %>
-          <div class="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-            <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+    <div class="flex items-center flex-1 gap-4">
+      <!-- Radial Progress for Milestone Completion -->
+      <div class="flex-shrink-0 tooltip" data-tip="<%= milestone.status == "completed" ? "100%" : milestone.status == "in_progress" ? "In Progress" : "Not Started" %>">
+        <%
+          total_hours = milestone.time_logs.where.not(status: "in_progress").sum(:hours_spent)
+          percent_complete = milestone.status == "completed" ? 100 : (milestone.status == "in_progress" ? 50 : 0)
+        %>
+        <div class="radial-progress <%= milestone.status == "completed" ? "text-success" : milestone.status == "in_progress" ? "text-warning" : "text-base-300" %>"
+             style="--value:<%= percent_complete %>; --size:3rem; --thickness:4px;">
+          <% if milestone.status == 'completed' %>
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
-          </div>
-        <% elsif milestone.status == 'in_progress' %>
-          <div class="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
-            <svg class="h-4 w-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+          <% elsif milestone.status == 'in_progress' %>
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
             </svg>
-          </div>
-        <% else %>
-          <div class="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
-            <svg class="h-4 w-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+          <% else %>
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
             </svg>
-          </div>
-        <% end %>
+          <% end %>
+        </div>
       </div>
       <div class="ml-4 flex-1">
-        <div class="text-sm font-semibold text-gray-900">
+        <div class="text-sm font-semibold text-base-content">
           <%= milestone.title %>
         </div>
-        <div class="mt-1 flex items-center text-xs text-gray-600 space-x-4">
+        <div class="mt-1 flex items-center text-xs text-base-content/70 space-x-4">
           <span class="flex items-center">
-            <svg class="h-3 w-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="h-3 w-3 mr-1 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Due: <%= milestone.due_date.strftime("%B %d, %Y") %>
           </span>
-          <span class="px-2 py-1 rounded-full text-xs font-medium <%= milestone.status == "completed" ? "bg-green-100 text-green-800" : milestone.status == "in_progress" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800" %>">
+          <span class="badge <%= milestone.status == "completed" ? "badge-success" : milestone.status == "in_progress" ? "badge-warning" : "badge-ghost" %> badge-sm">
             <%= milestone.status.humanize %>
           </span>
         </div>
@@ -41,8 +43,8 @@
     </div>
     <div class="ml-4 flex-shrink-0">
       <% if local_assigns[:active_log] %>
-        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800">
-          <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+        <span class="badge badge-warning gap-1">
+          <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
           </svg>
           In Progress
@@ -51,7 +53,7 @@
         <% if TimeLog.in_progress.where(milestone_id: milestone.id, user_id: current_user.id).where.not(project_id: project.id).empty? %>
           <%= button_to time_logs_path(project, milestone_id: milestone.id),
                         method: :post,
-                        class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200",
+                        class: "btn btn-primary btn-sm gap-1",
                         data: { confirm: "Start tracking time for this milestone?" } do %>
             <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-9-4V8a2 2 0 012-2h8a2 2 0 012 2v2M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -59,7 +61,7 @@
             Start Tracking
           <% end %>
         <% else %>
-          <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+          <span class="badge badge-ghost badge-sm">
             Being tracked elsewhere
           </span>
         <% end %>

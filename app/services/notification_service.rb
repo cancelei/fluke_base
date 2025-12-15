@@ -1,10 +1,15 @@
-class NotificationService
+# frozen_string_literal: true
+
+# Service for creating and broadcasting user notifications
+class NotificationService < ApplicationService
   attr_reader :user
 
   def initialize(user)
     @user = user
   end
 
+  # @param attributes [Hash] notification attributes (title, message, url)
+  # @return [Dry::Monads::Result] Success(notification) or Failure(error)
   def notify(attributes = {})
     notification = user.notifications.build(
       title: attributes[:title],
@@ -12,10 +17,12 @@ class NotificationService
       url: attributes[:url]
     )
 
-    return false unless notification.save
-
-    broadcast_notification(notification)
-    notification
+    if notification.save
+      broadcast_notification(notification)
+      Success(notification)
+    else
+      failure_result(:save_failed, notification.errors.full_messages.to_sentence, errors: notification.errors)
+    end
   end
 
   private

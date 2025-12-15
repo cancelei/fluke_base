@@ -1,7 +1,17 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-  static targets = ['audio', 'playBtn', 'playIcon', 'pauseIcon', 'progress', 'duration', 'currentTime', 'waveform'];
+  static targets = [
+    'audio',
+    'playBtn',
+    'playIcon',
+    'pauseIcon',
+    'progress',
+    'duration',
+    'currentTime',
+    'waveform'
+  ];
+
   static values = { src: String };
 
   connect() {
@@ -20,12 +30,21 @@ export default class extends Controller {
   setupAudio() {
     if (this.hasAudioTarget) {
       // Add event listeners
-      this.audioTarget.addEventListener('loadedmetadata', this.onLoadedMetadata.bind(this));
-      this.audioTarget.addEventListener('timeupdate', this.onTimeUpdate.bind(this));
+      this.audioTarget.addEventListener(
+        'loadedmetadata',
+        this.onLoadedMetadata.bind(this)
+      );
+      this.audioTarget.addEventListener(
+        'timeupdate',
+        this.onTimeUpdate.bind(this)
+      );
       this.audioTarget.addEventListener('ended', this.onAudioEnded.bind(this));
       this.audioTarget.addEventListener('error', this.onAudioError.bind(this));
       this.audioTarget.addEventListener('canplay', this.onCanPlay.bind(this));
-      this.audioTarget.addEventListener('loadstart', this.onLoadStart.bind(this));
+      this.audioTarget.addEventListener(
+        'loadstart',
+        this.onLoadStart.bind(this)
+      );
 
       // Set the source if provided via data attribute
       if (this.srcValue) {
@@ -34,10 +53,14 @@ export default class extends Controller {
         this.audioTarget.load(); // Force load the audio
       }
     } else {
-      window.FlukeLogger?.error('AudioPlayer', new Error('Audio target not found'), {
-        action: 'connect',
-        hasAudioTarget: !!this.audioTarget
-      });
+      window.FlukeLogger?.error(
+        'AudioPlayer',
+        new Error('Audio target not found'),
+        {
+          action: 'connect',
+          hasAudioTarget: !!this.audioTarget
+        }
+      );
     }
   }
 
@@ -106,7 +129,9 @@ export default class extends Controller {
           this.animateWaveform();
         })
         .catch(error => {
-          window.FlukeLogger?.error('AudioPlayer', error, { action: 'playback' });
+          window.FlukeLogger?.error('AudioPlayer', error, {
+            action: 'playback'
+          });
           this.showError('Playback failed');
         });
     }
@@ -133,6 +158,7 @@ export default class extends Controller {
   updateProgress() {
     if (this.hasProgressTarget && this.duration > 0) {
       const percentage = (this.currentTime / this.duration) * 100;
+
       this.progressTarget.style.width = `${percentage}%`;
     }
   }
@@ -150,30 +176,40 @@ export default class extends Controller {
   }
 
   formatTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
+    if (isNaN(seconds)) {
+      return '0:00';
+    }
 
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
+
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
   generateWaveform() {
     if (!this.hasWaveformTarget) {
-      window.FlukeLogger?.warning('AudioPlayer', 'Waveform target not found', { action: 'generateWaveform' });
+      window.FlukeLogger?.warning('AudioPlayer', 'Waveform target not found', {
+        action: 'generateWaveform'
+      });
+
       return;
     }
 
     const waveformContainer = this.waveformTarget;
+
     waveformContainer.innerHTML = '';
 
     // Generate random heights for waveform bars (in a real app, you'd analyze the audio)
     const barCount = 30;
+
     this.waveformBars = [];
 
     for (let i = 0; i < barCount; i++) {
       const bar = document.createElement('div');
       const height = Math.random() * 16 + 2; // Random height between 2-18px
-      bar.className = 'bg-current opacity-40 rounded-full transition-all duration-200';
+
+      bar.className =
+        'bg-current opacity-40 rounded-full transition-all duration-200';
       bar.style.width = '2px';
       bar.style.height = `${height}px`;
       this.waveformBars.push(bar);
@@ -187,11 +223,14 @@ export default class extends Controller {
   }
 
   animateWaveform() {
-    if (!this.isPlaying || !this.waveformBars.length) return;
+    if (!this.isPlaying || !this.waveformBars.length) {
+      return;
+    }
 
     // Animate waveform bars during playback
     this.waveformBars.forEach((bar, index) => {
       const delay = index * 30; // Stagger animation
+
       setTimeout(() => {
         if (this.isPlaying && bar) {
           bar.classList.remove('opacity-40');
@@ -208,18 +247,26 @@ export default class extends Controller {
 
     // Continue animation if still playing
     if (this.isPlaying) {
-      setTimeout(() => this.animateWaveform(), this.waveformBars.length * 30 + 300);
+      setTimeout(
+        () => this.animateWaveform(),
+        this.waveformBars.length * 30 + 300
+      );
     }
   }
 
   showError(message) {
-    window.FlukeLogger?.error('AudioPlayer', new Error(message), { action: 'showError' });
+    window.FlukeLogger?.error('AudioPlayer', new Error(message), {
+      action: 'showError'
+    });
     // You could integrate with your flash message system here
   }
 
   disconnect() {
     if (this.hasAudioTarget) {
-      this.audioTarget.removeEventListener('loadedmetadata', this.onLoadedMetadata);
+      this.audioTarget.removeEventListener(
+        'loadedmetadata',
+        this.onLoadedMetadata
+      );
       this.audioTarget.removeEventListener('timeupdate', this.onTimeUpdate);
       this.audioTarget.removeEventListener('ended', this.onAudioEnded);
       this.audioTarget.removeEventListener('error', this.onAudioError);

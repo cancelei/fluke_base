@@ -34,7 +34,7 @@ RSpec.describe TimeLogsQuery do
     it 'filters by selected date and orders desc' do
       m = create(:milestone, project: project)
       create(:time_log, project: project, milestone: m, user: owner, started_at: Time.zone.parse('2024-01-01 10:00'))
-      today_log = create(:time_log, project: project, milestone: m, user: owner, started_at: Time.zone.now.change(hour: 12), ended_at: Time.zone.now.change(hour: 13))
+      today_log = create(:time_log, project: project, milestone: m, user: owner, started_at: 2.hours.ago, ended_at: 1.hour.ago)
       list = query_for_owner.time_logs_for_project(project, Date.current)
       expect(list).to include(today_log)
       expect(list.first.started_at).to be >= list.last.started_at if list.size > 1
@@ -45,8 +45,8 @@ RSpec.describe TimeLogsQuery do
     it 'applies user filter and date' do
       m = create(:milestone, project: project)
       today = Date.current
-      a = create(:time_log, project: project, milestone: m, user: owner, started_at: Time.zone.now.change(hour: 9))
-      b = create(:time_log, project: project, milestone: m, user: participant, started_at: Time.zone.now.change(hour: 10))
+      a = create(:time_log, project: project, milestone: m, user: owner, started_at: 2.hours.ago, ended_at: 1.hour.ago)
+      b = create(:time_log, project: project, milestone: m, user: participant, started_at: 2.hours.ago, ended_at: 1.hour.ago)
 
       list = query_for_owner.filtered_time_logs(project, owner, today, [ project ], [ m ])
       expect(list).to include(a)

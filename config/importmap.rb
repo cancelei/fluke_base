@@ -6,6 +6,7 @@ pin "@hotwired/stimulus", to: "stimulus.min.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
 pin_all_from "app/javascript/controllers", under: "controllers"
 pin_all_from "app/javascript/utils", under: "utils"
-pin "flash_messages", to: "flash_messages.js"
-pin "toastr" # @2.1.4
-pin "jquery" # @3.7.1
+
+# TurboBoost Commands - reactive server interactions
+pin "@turbo-boost/streams", to: "@turbo-boost/streams.js"
+pin "@turbo-boost/commands", to: "@turbo-boost/commands.js"

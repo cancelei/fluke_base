@@ -1,44 +1,32 @@
 <% if total_commits > 0 %>
-  <div class="bg-gray-50 px-4 py-5 sm:p-6 sm:rounded-lg">
-    <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-      <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
-        <dt class="text-sm font-medium text-gray-500 truncate">Total Commits</dt>
-        <dd class="mt-1 text-3xl font-semibold text-gray-900">
-          <%= number_with_delimiter(total_commits) %>
-        </dd>
-      </div>
-      <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
-        <dt class="text-sm font-medium text-gray-500 truncate">Lines Added</dt>
-        <dd class="mt-1 text-3xl font-semibold text-green-600">+<%= number_with_delimiter(total_additions) %>
-        </dd>
-      </div>
-      <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
-        <dt class="text-sm font-medium text-gray-500 truncate">Lines Removed</dt>
-        <dd class="mt-1 text-3xl font-semibold text-red-600">-<%= number_with_delimiter(total_deletions) %>
-        </dd>
-      </div>
-    </dl>
-  </div>
-<% else %>
-  <div class="bg-gray-50 px-4 py-5 sm:p-6 sm:rounded-lg">
-    <div class="text-center">
-      <div class="animate-pulse">
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
-            <dt class="text-sm font-medium text-gray-500 truncate">Total Commits</dt>
-            <dd class="mt-1 text-3xl font-semibold text-gray-900">-</dd>
-          </div>
-          <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
-            <dt class="text-sm font-medium text-gray-500 truncate">Lines Added</dt>
-            <dd class="mt-1 text-3xl font-semibold text-green-600">-</dd>
-          </div>
-          <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
-            <dt class="text-sm font-medium text-gray-500 truncate">Lines Removed</dt>
-            <dd class="mt-1 text-3xl font-semibold text-red-600">-</dd>
-          </div>
-        </div>
-      </div>
-      <p class="mt-4 text-sm text-gray-500">Fetching repository statistics...</p>
+  <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-6">
+    <div class="stat">
+      <div class="stat-title">Total Commits</div>
+      <div class="stat-value"><%= number_with_delimiter(total_commits) %></div>
+    </div>
+    <div class="stat">
+      <div class="stat-title">Lines Added</div>
+      <div class="stat-value text-success">+<%= number_with_delimiter(total_additions) %></div>
+    </div>
+    <div class="stat">
+      <div class="stat-title">Lines Removed</div>
+      <div class="stat-value text-error">-<%= number_with_delimiter(total_deletions) %></div>
     </div>
   </div>
+<% else %>
+  <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-6">
+    <div class="stat">
+      <div class="stat-title">Total Commits</div>
+      <div class="stat-value animate-pulse">-</div>
+    </div>
+    <div class="stat">
+      <div class="stat-title">Lines Added</div>
+      <div class="stat-value text-success animate-pulse">-</div>
+    </div>
+    <div class="stat">
+      <div class="stat-title">Lines Removed</div>
+      <div class="stat-value text-error animate-pulse">-</div>
+    </div>
+  </div>
+  <p class="text-center text-sm text-base-content/60">Fetching repository statistics...</p>
 <% end %>

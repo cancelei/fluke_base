@@ -2,47 +2,78 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-  RUBY_VERSION: '3.2.1'
-  NODE_VERSION: '20'
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: postgres
-  POSTGRES_DB: fluke_base_test
+  RAILS_ENV: test
+  DATABASE_URL: postgres://postgres:postgres@localhost:5432/fluke_base_test
   CI: true
 
+permissions: {}
+
 jobs:
-  # Essential linting - run in parallel
-  lint:
-    name: 🔍 Lint
+  # Security audit
+  security:
+    name: 🔒 Security Audit
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        linter: [rubocop, brakeman, erb_lint, eslint, hadolint, yaml_lint]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Ruby
-        if: matrix.linter != 'eslint' && matrix.linter != 'hadolint' && matrix.linter != 'yaml_lint'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ env.RUBY_VERSION }}
+          ruby-version-file: .ruby-version
+          bundler-cache: true
+
+      - name: Run Brakeman security scan
+        run: bundle exec brakeman --quiet --format=text
+
+  # Parallel linting with matrix strategy
+  lint:
+    name: 🔍 Lint (${{ matrix.linter }})
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        linter: [rubocop, erb_lint, eslint, hadolint]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        if: contains(fromJSON('["rubocop", "erb_lint"]'), matrix.linter)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version-file: .ruby-version
           bundler-cache: true
 
       - name: Set up Node.js
-        if: matrix.linter == 'eslint' || matrix.linter == 'yaml_lint'
+        if: matrix.linter == 'eslint'
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          node-version-file: .node-version
+          cache: npm
 
       - name: Install Node dependencies
-        if: matrix.linter == 'eslint' || matrix.linter == 'yaml_lint'
+        if: matrix.linter == 'eslint'
         run: npm ci
 
       - name: Install Hadolint
@@ -56,126 +87,174 @@ jobs:
         if: matrix.linter == 'rubocop'
         run: bundle exec rubocop --format=github
 
-      - name: Run Brakeman
-        if: matrix.linter == 'brakeman'
-        run: bundle exec brakeman --quiet --format=text
-
       - name: Run ERB Lint
         if: matrix.linter == 'erb_lint'
         run: bundle exec erb_lint --lint-all --format=compact
 
       - name: Run ESLint
         if: matrix.linter == 'eslint'
-        run: npm run lint:js
+        run: npm run js-lint
 
       - name: Run Hadolint
         if: matrix.linter == 'hadolint'
         run: hadolint --config .hadolint.yaml Dockerfile
 
-      - name: Run YAML Lint
-        if: matrix.linter == 'yaml_lint'
-        run: npx yaml-lint config/*.yml .github/workflows/*.yml
-
-  # Essential tests only
+  # Tests
   test:
     name: 🧪 Tests
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
     services:
       postgres:
         image: postgres:16
+        ports: [5432:5432]
         env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fluke_base_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 5432:5432
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install OS packages
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ env.RUBY_VERSION }}
+          ruby-version-file: .ruby-version
           bundler-cache: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          node-version-file: .node-version
+          cache: npm
 
-      - name: Install dependencies
-        run: |
-          # Install PostgreSQL client tools
-          sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client
-          bundle install --jobs 4 --retry 3
-          npm ci
+      - name: Install Node dependencies
+        run: npm ci
 
-      - name: Setup test database
-        env:
-          DATABASE_URL: postgres://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@localhost:5432/${{ env.POSTGRES_DB }}
-          RAILS_ENV: test
-          PGUSER: ${{ env.POSTGRES_USER }}
-          PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          PGHOST: localhost
-          PGPORT: 5432
+      - name: Setup database
         run: |
-          # Wait for PostgreSQL to be ready
           until pg_isready -h localhost -p 5432 -U postgres; do
             echo "Waiting for PostgreSQL..."
             sleep 2
           done
-          
-          # Create database only if it doesn't exist
-          bundle exec rails db:create || echo "Database already exists"
-          
-          # Run primary migrations
-          bundle exec rails db:migrate
-          
-          # Skip additional migrations for now to simplify CI
-          echo "Database setup completed successfully"
+          bin/rails db:prepare
 
-      - name: Run tests with coverage
+      - name: Run RSpec with coverage
         env:
-          DATABASE_URL: postgres://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@localhost:5432/${{ env.POSTGRES_DB }}
-          RAILS_ENV: test
           COVERAGE: true
-          CI: true
-        run: |
-          # Run essential tests (models and helpers)
-          test_dirs=""
-          [ -d "spec/models" ] && test_dirs="$test_dirs spec/models"
-          [ -d "spec/helpers" ] && test_dirs="$test_dirs spec/helpers"
-          
-          if [ -n "$test_dirs" ]; then
-            bundle exec rspec $test_dirs --format progress
-          else
-            echo "No test directories found, skipping test execution"
-          fi
+        run: bundle exec rspec spec --format progress
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-artifacts
+          path: |
+            tmp/capybara
+            tmp/screenshots
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload coverage reports
-        if: always()
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: coverage-reports
+          name: coverage
           path: coverage/
+          retention-days: 7
+
+  # E2E tests
+  e2e:
+    name: 🎭 E2E Tests
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16
+        ports: [5432:5432]
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fluke_base_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install OS packages
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version-file: .ruby-version
+          bundler-cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          bundle install
+          PLAYWRIGHT_INSTALL=1 npm ci
+
+      - name: Prepare database
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          bin/rails db:prepare
+
+      - name: Run Playwright E2E tests
+        env:
+          E2E_COVERAGE: 1
+        run: npm run test:e2e
+
+      - name: Upload Playwright artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-artifacts
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 7
 
   # Summary
   summary:
     name: 📊 Summary
     runs-on: ubuntu-latest
-    needs: [lint, test, e2e]
+    needs: [security, lint, test, e2e]
     if: always()
-    
+
     steps:
       - name: Generate summary
         run: |
@@ -183,127 +262,20 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔒 Security | ${{ needs.security.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔍 Linting | ${{ needs.lint.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🧪 Tests | ${{ needs.test.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🎭 E2E | ${{ needs.e2e.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test.result }}" != "success" || "${{ needs.e2e.result }}" != "success" ]]; then
+
+          if [[ "${{ needs.security.result }}" != "success" || "${{ needs.lint.result }}" != "success" || "${{ needs.test.result }}" != "success" || "${{ needs.e2e.result }}" != "success" ]]; then
             echo "**🔧 Quick Fixes:**" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
             echo "./bin/lint --fix    # Auto-fix linting issues" >> $GITHUB_STEP_SUMMARY
-            echo "./bin/test          # Run tests locally" >> $GITHUB_STEP_SUMMARY
+            echo "bundle exec rspec  # Run tests locally" >> $GITHUB_STEP_SUMMARY
+            echo "npm run test:e2e   # Run E2E tests locally" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            exit 1
           else
             echo "🎉 **All checks passed!**" >> $GITHUB_STEP_SUMMARY
           fi
-
-      - name: Check overall status
-        run: |
-          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test.result }}" != "success" || "${{ needs.e2e.result }}" != "success" ]]; then
-            echo "❌ CI failed - please fix issues and try again"
-            exit 1
-          else
-            echo "✅ All CI checks passed!"
-          fi
-
-  # Playwright E2E job with artifacts upload
-  e2e:
-    name: 🎭 Playwright E2E
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ env.RUBY_VERSION }}
-          bundler-cache: true
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install OS deps and packages
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client
-          bundle install --jobs 4 --retry 3
-          PLAYWRIGHT_INSTALL=1 npm ci
-
-      - name: Prepare test database
-        env:
-          DATABASE_URL: postgres://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@localhost:5432/${{ env.POSTGRES_DB }}
-          RAILS_ENV: test
-          PGUSER: ${{ env.POSTGRES_USER }}
-          PGPASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          PGHOST: localhost
-          PGPORT: 5432
-        run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            echo "Waiting for PostgreSQL..."
-            sleep 2
-          done
-          bundle exec rails db:create || echo "DB exists"
-          bundle exec rails db:migrate
-
-      - name: Run Playwright (headless)
-        env:
-          DATABASE_URL: postgres://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@localhost:5432/${{ env.POSTGRES_DB }}
-          RAILS_ENV: test
-          CI: true
-          E2E_COVERAGE: 1
-        run: |
-          # Run E2E; Playwright will auto-start Rails server via webServer config
-          npm run test:e2e || EXIT_CODE=$?
-          # Always try to generate a report summary line
-          echo "Playwright exit code: ${EXIT_CODE:-0}"
-          if [ -n "$EXIT_CODE" ]; then exit $EXIT_CODE; fi
-
-      - name: Upload Playwright artifacts (HTML report, traces, videos, screenshots)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-artifacts
-          path: |
-            playwright-report/**
-            test-results/**
-          retention-days: 7
-
-      - name: Upload E2E backend coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-e2e
-          path: coverage/e2e/**
-          retention-days: 7
-
-      - name: Merge coverage (RSpec + E2E)
-        if: always()
-        run: |
-          bundle exec rake coverage:merge || true
-
-      - name: Upload merged coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-merged
-          path: coverage/combined/**
-          retention-days: 7

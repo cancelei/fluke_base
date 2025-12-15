@@ -15,7 +15,7 @@ class ProjectsController < ApplicationController
   end
 
   def show
-    authorize! :read, @project
+    authorize @project
     @milestones = @project.milestones.includes(:time_logs).order(created_at: :desc)
 
     # Check if the current user has an agreement with the project
@@ -61,13 +61,13 @@ class ProjectsController < ApplicationController
   end
 
   def edit
-    authorize! :update, @project
+    authorize @project
 
     @project_form = ProjectForm.new(project_to_form_attributes(@project))
   end
 
   def update
-    authorize! :update, @project
+    authorize @project
 
     # Pre-fill form with existing attributes to allow partial updates
     base_attrs = project_to_form_attributes(@project)
@@ -83,7 +83,7 @@ class ProjectsController < ApplicationController
 
   def destroy
     current_user.update(selected_project_id: nil) if current_user.selected_project_id == @project.id
-    authorize! :destroy, @project
+    authorize @project
     @project.destroy
     redirect_to projects_path, notice: "Project was successfully deleted."
   end

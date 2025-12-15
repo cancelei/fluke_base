@@ -7,12 +7,12 @@
     per_page:      number of items to fetch per page
     remote:        data-remote -%>
 <% if page.current? %>
-  <a class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 ring-1 ring-blue-600 focus:z-20 focus:outline-offset-0 rounded-lg">
+  <a class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-info ring-1 ring-blue-600 focus:z-20 focus:outline-offset-0 rounded-lg">
     <%= page %>
   </a>
 <% else %>
   <%= link_to page, url,
-      class: "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-blue-50 hover:text-blue-700 hover:ring-blue-300 focus:z-20 focus:outline-offset-0 rounded-lg transition-all duration-200",
+      class: "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-base-content/90 ring-1 ring-inset ring-gray-200 hover:bg-info/10 hover:text-info hover:ring-blue-300 focus:z-20 focus:outline-offset-0 rounded-lg transition-all duration-200",
       rel: page.rel,
       data: { turbo_frame: params[:turbo_frame] } %>
 <% end %>

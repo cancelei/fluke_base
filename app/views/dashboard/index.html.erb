@@ -1,80 +1,96 @@
-<div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl">
-  <div class="px-6 py-8 sm:px-8">
-    <h3 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Dashboard</h3>
-    <p class="mt-3 max-w-2xl text-sm text-gray-600">Your overview of projects, agreements, and upcoming meetings.</p>
+<!-- Dashboard Header -->
+<div class="card bg-base-100 shadow-xl mb-8">
+  <div class="card-body">
+    <h1 class="card-title text-2xl md:text-3xl">Dashboard</h1>
+    <p class="text-base-content/70">Your overview of projects, agreements, and upcoming meetings.</p>
   </div>
 </div>
 
-<div class="mt-8">
-  <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-    <!-- Projects section -->
-    <%= render "recent_projects" %>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+  <!-- Projects section -->
+  <%= render "recent_projects" %>
 
-    <!-- Agreements section -->
-    <%= render "recent_agreements" %>
+  <!-- Agreements section -->
+  <%= render "recent_agreements" %>
 
-    <!-- Upcoming Meetings section -->
-    <%= render "upcoming_meetings" %>
-  </div>
+  <!-- Upcoming Meetings section -->
+  <%= render "upcoming_meetings" %>
 </div>
 
-<!-- Explorable Projects section for mentors -->
-<%# Show explorable projects to all users %>
-  <div class="mt-12">
-    <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-2xl">
-      <div class="px-6 py-8 sm:px-8 flex justify-between items-center bg-gradient-to-r from-blue-50/50 to-purple-50/50">
+<!-- Explorable Projects Section -->
+<div class="mt-10">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h3 class="text-xl font-bold text-gray-900">Projects Looking for Mentors</h3>
-          <p class="mt-2 max-w-2xl text-sm text-gray-600">
-            These projects are seeking mentorship or co-founders.
-          </p>
+          <h2 class="card-title text-xl">Projects Looking for Mentors</h2>
+          <p class="text-sm text-base-content/70 mt-1">These projects are seeking mentorship or co-founders.</p>
         </div>
-        <%= link_to "See all", explore_projects_path, class: "text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline" %>
+        <%= link_to explore_projects_path, class: "btn btn-ghost btn-sm gap-1" do %>
+          See all
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        <% end %>
       </div>
 
       <% if @explorable_projects.present? %>
-        <div class="border-t border-gray-200/50">
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 p-6">
-            <% @explorable_projects.each do |project| %>
-              <div class="relative rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm px-6 py-5 shadow-lg hover:shadow-xl hover:border-blue-300/50 transition-all duration-300 hover:scale-[1.02] ring-1 ring-gray-100">
-                <div class="flex justify-between items-start">
-                  <h3 class="text-sm font-semibold text-gray-900 truncate"><%= display_project_name(project, current_user) %></h3>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <% @explorable_projects.each do |project| %>
+            <div class="card card-compact bg-base-200 hover:shadow-lg transition-shadow">
+              <div class="card-body">
+                <!-- Header -->
+                <div class="flex items-start justify-between gap-2">
+                  <h3 class="card-title text-sm font-semibold truncate">
+                    <%= display_project_name(project, current_user) %>
+                  </h3>
                   <%= display_project_stage_badge(project, current_user) %>
                 </div>
 
-                <div class="mt-3">
-                  <%= display_project_description(project, current_user, truncate: true, class: "text-sm text-gray-600 line-clamp-2") %>
+                <!-- Description -->
+                <div class="min-h-[2.5rem]">
+                  <%= display_project_description(project, current_user, truncate: true, class: "text-sm text-base-content/70 line-clamp-2") %>
                 </div>
 
-                <div class="mt-4 flex items-center justify-between">
-                  <div class="flex items-center">
-                    <span class="inline-block h-7 w-7 rounded-lg overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50 ring-1 ring-gray-200">
-                      <svg class="h-full w-full text-gray-400 p-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                    </span>
-                    <p class="ml-2 text-xs font-medium text-gray-600"><%= project.user.full_name %></p>
+                <!-- Footer -->
+                <div class="card-actions justify-between items-center mt-2 pt-2 border-t border-base-300">
+                  <div class="flex items-center gap-2">
+                    <div class="avatar placeholder">
+                      <div class="bg-neutral text-neutral-content rounded-full w-6">
+                        <span class="text-xs"><%= project.user.initials %></span>
+                      </div>
+                    </div>
+                    <span class="text-xs text-base-content/70"><%= project.user.full_name %></span>
                   </div>
-
-                  <%= link_to project_path(project), class: "text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline" do %>
-                    View Project
-                  <% end %>
+                  <%= link_to "View", project_path(project), class: "btn btn-primary btn-xs" %>
                 </div>
 
+                <!-- Collaboration badges -->
                 <%= display_collaboration_badges(project, current_user) %>
               </div>
-            <% end %>
-          </div>
+            </div>
+          <% end %>
         </div>
       <% else %>
-        <div class="border-t border-gray-200/50 px-6 py-8">
-          <div class="text-center">
-            <p class="text-sm text-gray-500 mb-4">No projects found. Check back later or explore all available projects.</p>
-            <%= link_to explore_projects_path, class: "inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl shadow-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:scale-105" do %>
-              Explore All Projects
-            <% end %>
+        <!-- Empty State -->
+        <div class="text-center py-8">
+          <div class="avatar placeholder mb-4">
+            <div class="bg-base-200 text-base-content/40 rounded-full w-16">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
           </div>
+          <p class="text-sm text-base-content/70 mb-4">No projects found. Check back later or explore all available projects.</p>
+          <%= link_to explore_projects_path, class: "btn btn-primary gap-2" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Explore All Projects
+          <% end %>
         </div>
       <% end %>
     </div>
   </div>
+</div>

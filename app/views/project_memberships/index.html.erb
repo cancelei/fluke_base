@@ -1,0 +1,39 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <%# Breadcrumb %>
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><%= link_to "Projects", projects_path %></li>
+      <li><%= link_to @project.name, project_path(@project) %></li>
+      <li>Team</li>
+    </ul>
+  </div>
+
+  <%# Page Header %>
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold">Team Members</h1>
+      <p class="text-base-content/60">Manage who has access to <%= @project.name %></p>
+    </div>
+    <% if policy(@project).manage_members? %>
+      <%= link_to new_project_membership_path(@project), class: "btn btn-primary" do %>
+        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        </svg>
+        Invite Member
+      <% end %>
+    <% end %>
+  </div>
+
+  <%# Permission Settings Card %>
+  <%= render "projects/permission_settings", project: @project %>
+
+  <%# Back Link %>
+  <div class="mt-6">
+    <%= link_to project_path(@project), class: "btn btn-ghost btn-sm" do %>
+      <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Back to Project
+    <% end %>
+  </div>
+</div>

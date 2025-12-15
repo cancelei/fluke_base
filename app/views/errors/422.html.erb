@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nord">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unprocessable Entity - FlukeBase</title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+</head>
+
+<body class="bg-base-200">
+  <div class="hero min-h-screen">
+    <div class="hero-content text-center">
+      <div class="max-w-2xl">
+        <div class="text-9xl font-bold text-warning mb-8">422</div>
+
+        <h2 class="text-5xl font-bold mb-4">Unprocessable Entity</h2>
+        <p class="text-lg text-base-content/70 mb-8">
+          The request was well-formed but we couldn't process it. This usually happens when the data you submitted didn't meet our validation requirements.
+        </p>
+
+        <div class="alert alert-warning shadow-lg mb-8">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div class="text-left">
+            <h3 class="font-bold">What you can do:</h3>
+            <ul class="text-sm list-disc list-inside mt-2">
+              <li>Check that all required fields are filled out</li>
+              <li>Verify that your data meets the required format</li>
+              <li>Try submitting your request again</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex gap-4 justify-center flex-wrap">
+          <button onclick="window.history.back()" class="btn btn-primary min-h-[44px] sm:min-h-[48px]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Go Back & Fix
+          </button>
+          <a href="/" class="btn btn-outline min-h-[44px] sm:min-h-[48px]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Start Over
+          </a>
+        </div>
+
+        <div class="divider my-8"></div>
+
+        <div class="text-sm text-base-content/60">
+          <p>If this problem persists, please contact our support team:</p>
+          <a href="mailto:support@flukebase.com" class="link link-primary">support@flukebase.com</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

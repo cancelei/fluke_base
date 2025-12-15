@@ -1,199 +1,185 @@
-<div class="mt-8 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
-  <div class="flex items-center mb-6">
-    <svg class="h-6 w-6 text-green-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2m-6 0h6" />
-    </svg>
-    <h4 class="text-lg font-semibold text-green-900">Completed Agreement - Time Summary</h4>
-  </div>
+<div class="card bg-success/5 shadow-lg border border-success/20 mt-8">
+  <div class="card-body">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="bg-success/10 p-2 rounded-lg">
+        <svg class="h-6 w-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2m-6 0h6" />
+        </svg>
+      </div>
+      <h4 class="card-title text-success">Completed Agreement - Time Summary</h4>
+    </div>
 
-  <%
-    # Calculate comprehensive time analytics
-    total_hours = agreement_participant_time_logs.sum(&:hours_spent) || 0
-    expected_total_hours = agreement.weekly_hours * agreement.duration_in_weeks
-    completed_logs = agreement_participant_time_logs.select { |log| log.status == "completed" }
+    <%
+      # Calculate comprehensive time analytics
+      total_hours = agreement_participant_time_logs.sum(&:hours_spent) || 0
+      expected_total_hours = agreement.weekly_hours * agreement.duration_in_weeks
+      completed_logs = agreement_participant_time_logs.select { |log| log.status == "completed" }
 
-    # Time distribution analysis
-    start_date = agreement.start_date
-    end_date = agreement.updated_at.to_date # When it was completed
-    actual_duration_days = (end_date - start_date).to_i
-    planned_duration_days = (agreement.end_date - start_date).to_i
+      # Time distribution analysis
+      start_date = agreement.start_date
+      end_date = agreement.updated_at.to_date # When it was completed
+      actual_duration_days = (end_date - start_date).to_i
+      planned_duration_days = (agreement.end_date - start_date).to_i
 
-    # Weekly breakdown
-    logs_by_week = {}
-    if completed_logs.any?
-      completed_logs.each do |log|
-        week_start = log.started_at.beginning_of_week
-        week_key = week_start.strftime("%Y-W%U")
-        logs_by_week[week_key] ||= { date: week_start, hours: 0, sessions: 0 }
-        logs_by_week[week_key][:hours] += log.hours_spent.to_f
-        logs_by_week[week_key][:sessions] += 1
+      # Weekly breakdown
+      logs_by_week = {}
+      if completed_logs.any?
+        completed_logs.each do |log|
+          week_start = log.started_at.beginning_of_week
+          week_key = week_start.strftime("%Y-W%U")
+          logs_by_week[week_key] ||= { date: week_start, hours: 0, sessions: 0 }
+          logs_by_week[week_key][:hours] += log.hours_spent.to_f
+          logs_by_week[week_key][:sessions] += 1
+        end
       end
-    end
 
-    # Calculate averages
-    weeks_worked = logs_by_week.keys.size
-    avg_hours_per_week = weeks_worked > 0 ? (total_hours / weeks_worked.to_f).round(1) : 0
-    total_sessions = completed_logs.size
-    avg_session_length = total_sessions > 0 ? (total_hours / total_sessions.to_f).round(1) : 0
-  %>
+      # Calculate averages
+      weeks_worked = logs_by_week.keys.size
+      avg_hours_per_week = weeks_worked > 0 ? (total_hours / weeks_worked.to_f).round(1) : 0
+      total_sessions = completed_logs.size
+      avg_session_length = total_sessions > 0 ? (total_hours / total_sessions.to_f).round(1) : 0
+      efficiency = expected_total_hours > 0 ? (total_hours / expected_total_hours * 100).round : 0
+    %>
 
-  <!-- Summary Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <!-- Total Hours Card -->
-    <div class="bg-white rounded-lg p-4 border border-green-200 shadow-sm">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-600">Total Hours Logged</p>
-          <p class="text-2xl font-bold text-green-900"><%= total_hours.round(1) %></p>
-          <p class="text-xs text-gray-500">of <%= expected_total_hours %> contracted hours</p>
-        </div>
-        <div class="text-right">
-          <% efficiency = expected_total_hours > 0 ? (total_hours / expected_total_hours * 100).round : 0 %>
-          <div class="text-sm font-semibold <%= efficiency >= 90 ? "text-green-600" : efficiency >= 70 ? "text-yellow-600" : "text-red-600" %>">
-            <%= efficiency %>%
-          </div>
-          <div class="text-xs text-gray-500">efficiency</div>
+    <!-- Summary Stats -->
+    <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-6">
+      <div class="stat">
+        <div class="stat-title">Total Hours Logged</div>
+        <div class="stat-value text-success"><%= total_hours.round(1) %></div>
+        <div class="stat-desc">of <%= expected_total_hours %> contracted hours</div>
+        <div class="stat-figure">
+          <span class="badge <%= efficiency >= 90 ? "badge-success" : efficiency >= 70 ? "badge-warning" : "badge-error" %>">
+            <%= efficiency %>% efficiency
+          </span>
         </div>
       </div>
-    </div>
 
-    <!-- Timeline Card -->
-    <div class="bg-white rounded-lg p-4 border border-green-200 shadow-sm">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-600">Duration</p>
-          <p class="text-2xl font-bold text-green-900"><%= actual_duration_days %></p>
-          <p class="text-xs text-gray-500">days (planned: <%= planned_duration_days %>)</p>
-        </div>
-        <div class="text-right">
-          <% timeline_efficiency = planned_duration_days > 0 ? (planned_duration_days.to_f / actual_duration_days * 100).round : 0 %>
-          <div class="text-sm font-semibold <%= timeline_efficiency >= 100 ? "text-green-600" : timeline_efficiency >= 90 ? "text-yellow-600" : "text-red-600" %>">
-            <% if actual_duration_days <= planned_duration_days %>
-              On Time
-            <% else %>
-              +<%= actual_duration_days - planned_duration_days %>d
-            <% end %>
-          </div>
-          <div class="text-xs text-gray-500">vs. plan</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Productivity Card -->
-    <div class="bg-white rounded-lg p-4 border border-green-200 shadow-sm">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-600">Avg. Weekly Hours</p>
-          <p class="text-2xl font-bold text-green-900"><%= avg_hours_per_week %></p>
-          <p class="text-xs text-gray-500">across <%= weeks_worked %> weeks</p>
-        </div>
-        <div class="text-right">
-          <div class="text-sm font-semibold text-gray-700"><%= total_sessions %></div>
-          <div class="text-xs text-gray-500">work sessions</div>
-          <div class="text-xs text-gray-400"><%= avg_session_length %>h avg</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Weekly Progress Chart -->
-  <% if logs_by_week.any? %>
-    <div class="bg-white rounded-lg p-4 border border-green-200">
-      <h5 class="text-sm font-medium text-gray-900 mb-4">Weekly Time Distribution</h5>
-      <div class="space-y-3">
-        <% logs_by_week.sort_by { |k, v| v[:date] }.each do |week_key, week_data| %>
-          <div class="flex items-center">
-            <div class="w-20 text-xs text-gray-500">
-              <%= week_data[:date].strftime("%b %d") %>
-            </div>
-            <div class="flex-1 mx-3">
-              <div class="bg-gray-200 rounded-full h-3 relative">
-                <% bar_width = agreement.weekly_hours > 0 ? [ week_data[:hours] / agreement.weekly_hours * 100, 100 ].min : 0 %>
-                <div class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: <%= bar_width %>%"></div>
-                <% if bar_width > 100 %>
-                  <div class="bg-yellow-400 h-3 rounded-full absolute top-0 transition-all duration-300" style="width: <%= [ bar_width - 100, 50 ].min %>%; left: 100%"></div>
-                <% end %>
-              </div>
-            </div>
-            <div class="w-20 text-right">
-              <span class="text-sm font-medium text-gray-900"><%= week_data[:hours].round(1) %>h</span>
-              <div class="text-xs text-gray-500"><%= week_data[:sessions] %> sessions</div>
-            </div>
-          </div>
-        <% end %>
-      </div>
-      <div class="mt-3 pt-3 border-t border-gray-200">
-        <div class="flex items-center text-xs text-gray-500">
-          <div class="flex items-center mr-4">
-            <div class="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
-            Target pace
-          </div>
-          <% if logs_by_week.any? { |k, v| v[:hours] > agreement.weekly_hours } %>
-            <div class="flex items-center">
-              <div class="w-3 h-3 bg-yellow-400 rounded-full mr-1"></div>
-              Overtime
-            </div>
+      <div class="stat">
+        <div class="stat-title">Duration</div>
+        <div class="stat-value"><%= actual_duration_days %></div>
+        <div class="stat-desc">days (planned: <%= planned_duration_days %>)</div>
+        <div class="stat-figure">
+          <% if actual_duration_days <= planned_duration_days %>
+            <span class="badge badge-success">On Time</span>
+          <% else %>
+            <span class="badge badge-warning">+<%= actual_duration_days - planned_duration_days %>d</span>
           <% end %>
         </div>
       </div>
-    </div>
-  <% end %>
 
-  <!-- Cost Analysis (if hourly) -->
-  <% if agreement.hourly_rate.present? && total_hours > 0 %>
-    <div class="mt-4 bg-white rounded-lg p-4 border border-green-200">
-      <h5 class="text-sm font-medium text-gray-900 mb-3">Cost Analysis</h5>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-        <div>
-          <p class="text-gray-500">Actual Cost</p>
-          <p class="font-semibold text-gray-900"><%= number_to_currency(total_hours * agreement.hourly_rate) %></p>
-        </div>
-        <div>
-          <p class="text-gray-500">Budgeted Cost</p>
-          <p class="font-semibold text-gray-900"><%= number_to_currency(expected_total_hours * agreement.hourly_rate) %></p>
-        </div>
-        <div>
-          <p class="text-gray-500">Cost Per Hour</p>
-          <p class="font-semibold text-gray-900"><%= number_to_currency(agreement.hourly_rate) %></p>
-        </div>
-        <div>
-          <p class="text-gray-500">Variance</p>
-          <% cost_variance = (total_hours - expected_total_hours) * agreement.hourly_rate %>
-          <p class="font-semibold <%= cost_variance <= 0 ? "text-green-600" : "text-red-600" %>">
-            <%= cost_variance >= 0 ? "+" : "" %><%= number_to_currency(cost_variance) %>
-          </p>
+      <div class="stat">
+        <div class="stat-title">Avg. Weekly Hours</div>
+        <div class="stat-value"><%= avg_hours_per_week %></div>
+        <div class="stat-desc">across <%= weeks_worked %> weeks</div>
+        <div class="stat-figure text-base-content/60">
+          <div class="text-sm"><%= total_sessions %> sessions</div>
+          <div class="text-xs"><%= avg_session_length %>h avg</div>
         </div>
       </div>
     </div>
-  <% end %>
 
-  <!-- Key Insights -->
-  <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-    <h5 class="text-sm font-medium text-blue-900 mb-2">Key Insights</h5>
-    <ul class="text-sm text-blue-800 space-y-1">
-      <% if efficiency >= 90 %>
-        <li>✅ Excellent time utilization - work was completed efficiently within the contracted hours</li>
-      <% elsif efficiency >= 70 %>
-        <li>🟡 Good time utilization - minor variance from contracted hours</li>
-      <% else %>
-        <li>🔴 Time variance detected - actual hours significantly different from contract</li>
-      <% end %>
+    <!-- Weekly Progress Chart -->
+    <% if logs_by_week.any? %>
+      <div class="card bg-base-100 shadow">
+        <div class="card-body">
+          <h5 class="font-medium mb-4">Weekly Time Distribution</h5>
+          <div class="space-y-3">
+            <% logs_by_week.sort_by { |k, v| v[:date] }.each do |week_key, week_data| %>
+              <div class="flex items-center gap-3">
+                <div class="w-20 text-xs text-base-content/60">
+                  <%= week_data[:date].strftime("%b %d") %>
+                </div>
+                <div class="flex-1">
+                  <% bar_width = agreement.weekly_hours > 0 ? [ week_data[:hours] / agreement.weekly_hours * 100, 100 ].min : 0 %>
+                  <progress class="progress progress-success w-full" value="<%= bar_width %>" max="100"></progress>
+                </div>
+                <div class="w-24 text-right">
+                  <span class="badge badge-sm"><%= week_data[:hours].round(1) %>h</span>
+                  <div class="text-xs text-base-content/60"><%= week_data[:sessions] %> sessions</div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="divider my-2"></div>
+          <div class="flex items-center gap-4 text-xs text-base-content/60">
+            <div class="flex items-center gap-1">
+              <div class="w-3 h-3 bg-success rounded-full"></div>
+              Target pace
+            </div>
+            <% if logs_by_week.any? { |k, v| v[:hours] > agreement.weekly_hours } %>
+              <div class="flex items-center gap-1">
+                <div class="w-3 h-3 bg-warning rounded-full"></div>
+                Overtime
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
 
-      <% if actual_duration_days <= planned_duration_days %>
-        <li>✅ Project completed on time or early</li>
-      <% elsif actual_duration_days - planned_duration_days <= 7 %>
-        <li>🟡 Minor timeline extension - completed within one week of deadline</li>
-      <% else %>
-        <li>🔴 Significant timeline extension - completed <%= actual_duration_days - planned_duration_days %> days late</li>
-      <% end %>
+    <!-- Cost Analysis (if hourly) -->
+    <% if agreement.hourly_rate.present? && total_hours > 0 %>
+      <div class="card bg-base-100 shadow mt-4">
+        <div class="card-body">
+          <h5 class="font-medium mb-3">Cost Analysis</h5>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <p class="text-base-content/60">Actual Cost</p>
+              <p class="font-semibold"><%= number_to_currency(total_hours * agreement.hourly_rate) %></p>
+            </div>
+            <div>
+              <p class="text-base-content/60">Budgeted Cost</p>
+              <p class="font-semibold"><%= number_to_currency(expected_total_hours * agreement.hourly_rate) %></p>
+            </div>
+            <div>
+              <p class="text-base-content/60">Cost Per Hour</p>
+              <p class="font-semibold"><%= number_to_currency(agreement.hourly_rate) %></p>
+            </div>
+            <div>
+              <p class="text-base-content/60">Variance</p>
+              <% cost_variance = (total_hours - expected_total_hours) * agreement.hourly_rate %>
+              <p class="font-semibold <%= cost_variance <= 0 ? "text-success" : "text-error" %>">
+                <%= cost_variance >= 0 ? "+" : "" %><%= number_to_currency(cost_variance) %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
 
-      <% if avg_hours_per_week > 0 %>
-        <li>📊 Average productivity: <%= avg_hours_per_week %> hours per week over <%= weeks_worked %> active weeks</li>
-      <% end %>
+    <!-- Key Insights -->
+    <div class="alert alert-info mt-4">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div>
+        <h5 class="font-medium mb-2">Key Insights</h5>
+        <ul class="text-sm space-y-1">
+          <% if efficiency >= 90 %>
+            <li>Excellent time utilization - work was completed efficiently within the contracted hours</li>
+          <% elsif efficiency >= 70 %>
+            <li>Good time utilization - minor variance from contracted hours</li>
+          <% else %>
+            <li>Time variance detected - actual hours significantly different from contract</li>
+          <% end %>
 
-      <% if total_sessions > 0 %>
-        <li>⏱️ Work pattern: <%= total_sessions %> sessions averaging <%= avg_session_length %> hours each</li>
-      <% end %>
-    </ul>
+          <% if actual_duration_days <= planned_duration_days %>
+            <li>Project completed on time or early</li>
+          <% elsif actual_duration_days - planned_duration_days <= 7 %>
+            <li>Minor timeline extension - completed within one week of deadline</li>
+          <% else %>
+            <li>Significant timeline extension - completed <%= actual_duration_days - planned_duration_days %> days late</li>
+          <% end %>
+
+          <% if avg_hours_per_week > 0 %>
+            <li>Average productivity: <%= avg_hours_per_week %> hours per week over <%= weeks_worked %> active weeks</li>
+          <% end %>
+
+          <% if total_sessions > 0 %>
+            <li>Work pattern: <%= total_sessions %> sessions averaging <%= avg_session_length %> hours each</li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
   </div>
 </div>

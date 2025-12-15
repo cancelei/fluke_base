@@ -7,15 +7,15 @@
     </div>
 
     <!-- Modern Header Section -->
-    <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl mb-6">
-      <div class="px-6 py-6 sm:px-8">
+    <div class="card bg-base-100 shadow-xl mb-6">
+      <div class="card-body">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div class="flex-1">
             <div class="flex items-start gap-4">
               <!-- Time Tracking Icon -->
               <div class="flex-shrink-0">
-                <div class="h-12 w-12 flex items-center justify-center rounded-2xl bg-gradient-to-r from-green-50 to-blue-50">
-                  <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <div class="h-12 w-12 flex items-center justify-center rounded-2xl bg-success/10">
+                  <svg class="h-6 w-6 text-success" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -23,11 +23,11 @@
 
               <!-- Header Info -->
               <div class="flex-1 min-w-0">
-                <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <h1 class="text-2xl font-bold text-base-content">
                   Time Tracking
                 </h1>
-                <p class="mt-1 text-sm text-gray-600">
-                  Project: <span class="font-semibold text-gray-900"><%= present(@project).display_name(current_user) %></span>
+                <p class="mt-1 text-sm text-base-content/70">
+                  Project: <span class="font-semibold text-base-content"><%= present(@project).display_name(current_user) %></span>
                 </p>
               </div>
             </div>
@@ -46,8 +46,8 @@
     </div>
 
   <!-- Expanded Time Used Section -->
-  <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl mb-6">
-    <div class="px-6 py-6 sm:px-8">
+  <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body">
       <%= render "time_logs/expanded_time_used", project: @project, current_log: current_log, owner: @owner %>
     </div>
   </div>
@@ -56,21 +56,21 @@
     <%= render "time_logs/milestones_section", milestones: @milestones, project: @project %>
 
     <!-- Manual Time Log Entry -->
-    <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl border border-white/20 mb-6"
+    <div class="card bg-base-100 shadow-xl mb-6"
          data-controller="time-log">
       <button type="button"
               data-action="click->time-log#toggleForm"
-              class="w-full px-6 py-4 bg-gradient-to-r from-orange-50/50 to-red-50/50 hover:from-orange-100/50 hover:to-red-100/50 transition-all duration-200 rounded-2xl flex items-center justify-between group">
+              class="w-full px-6 py-4 bg-warning/10 hover:bg-warning/20 transition-all duration-200 rounded-2xl flex items-center justify-between group">
         <div class="flex items-center">
-          <svg class="h-5 w-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="h-5 w-5 mr-2 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          <h3 class="text-lg font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+          <h3 class="text-lg font-bold text-warning">
             Add Manual Time Log
           </h3>
         </div>
         <svg data-time-log-target="chevron"
-             class="h-5 w-5 text-orange-600 transform transition-transform duration-200"
+             class="h-5 w-5 text-warning transform transition-transform duration-200"
              fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>

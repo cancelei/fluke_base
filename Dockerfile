@@ -15,6 +15,7 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 WORKDIR /rails
 
 # Install runtime dependencies
+# hadolint ignore=DL3008
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
     curl libjemalloc2 libvips postgresql-client && \
@@ -31,6 +32,7 @@ FROM base AS build
 
 # Install build-time dependencies including Node.js 24.x and Yarn
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# hadolint ignore=DL3008
 RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
     curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list && \
@@ -81,10 +83,10 @@ RUN groupadd --system --gid 1000 rails && \
 USER rails:rails
 
 # Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/start.sh"]
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start both Rails server and SolidQueue worker via production startup script
-# The bin/production_start script supervises both processes with graceful shutdown handling
+# The bin/start-production script supervises both processes with graceful shutdown handling
 # Alternative: Use ["./bin/thrust", "./bin/rails", "server"] for web-only deployment
 EXPOSE 80
-CMD ["./bin/production_start"]
+CMD ["./bin/start-production"]

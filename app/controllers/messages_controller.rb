@@ -1,4 +1,6 @@
 class MessagesController < ApplicationController
+  include ResultHandling
+
   before_action :authenticate_user!
   before_action :set_conversation
 

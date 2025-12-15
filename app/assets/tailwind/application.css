@@ -1,1 +1,646 @@
 @import "tailwindcss";
+@plugin "daisyui";
+
+/*
+ * DaisyUI CSS - FlukeBase
+ * Theme: Nord
+ * Tailwind CSS v4 + DaisyUI v5
+ */
+
+/* DaisyUI theme configuration - all available themes for theme selector */
+@plugin "daisyui" {
+  themes: light --default, nord, cupcake, emerald, corporate, dark --prefersdark, night, dracula, forest, business;
+}
+
+/* Theme customization with Nord colors */
+@theme {
+  --font-sans: "Inter var", ui-sans-serif, system-ui, sans-serif;
+
+  /* Nord Polar Night (dark) */
+  --color-polar-night-1: #2E3440;
+  --color-polar-night-2: #3B4252;
+  --color-polar-night-3: #434C5E;
+  --color-polar-night-4: #4C566A;
+
+  /* Nord Snow Storm (light) */
+  --color-snow-storm-1: #D8DEE9;
+  --color-snow-storm-2: #E5E9F0;
+  --color-snow-storm-3: #ECEFF4;
+
+  /* Nord Frost (accent blues/teals) */
+  --color-frost-1: #8FBCBB;
+  --color-frost-2: #88C0D0;
+  --color-frost-3: #81A1C1;
+  --color-frost-4: #5E81AC;
+
+  /* Nord Aurora (semantic colors) */
+  --color-aurora-red: #BF616A;
+  --color-aurora-orange: #D08770;
+  --color-aurora-yellow: #EBCB8B;
+  --color-aurora-green: #A3BE8C;
+  --color-aurora-purple: #B48EAD;
+}
+
+/* ================================
+   Accessibility Enhancements
+   WCAG 2.1 AA/AAA Compliance
+   ================================ */
+
+/* Component-level accessibility improvements */
+@layer components {
+  /* Form inputs with minimum touch targets */
+  .input,
+  .select,
+  .textarea {
+    min-height: 44px;
+    font-size: 1rem; /* 16px - prevents iOS zoom */
+    line-height: 1.5;
+  }
+
+  @media (max-width: 640px) {
+    .input,
+    .select,
+    .textarea {
+      min-height: 48px; /* Larger touch targets on mobile */
+    }
+  }
+
+  /* Buttons with minimum touch targets */
+  .btn {
+    min-height: 44px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  @media (max-width: 640px) {
+    .btn {
+      min-height: 48px;
+    }
+  }
+
+  /* Checkbox and radio buttons with proper touch targets */
+  .checkbox,
+  .radio {
+    min-width: 20px;
+    min-height: 20px;
+  }
+
+  /* Ensure checkbox/radio have adequate clickable area */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 20px;
+    min-height: 20px;
+    cursor: pointer;
+  }
+
+  /* Label touch targets for checkboxes/radios */
+  .form-control label {
+    cursor: pointer;
+    padding: 0.5rem 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+  }
+
+  /* Links with adequate spacing */
+  a:not(.btn) {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.2s ease;
+  }
+
+  a:not(.btn):hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Enhanced focus indicators */
+  .input:focus,
+  .select:focus,
+  .textarea:focus,
+  .btn:focus {
+    outline: 2px solid var(--color-frost-3);
+    outline-offset: 2px;
+  }
+
+  /* Card interactive elements */
+  .card .btn,
+  .card a {
+    min-height: 44px;
+  }
+
+  /* Timeline touch targets */
+  .timeline .timeline-box {
+    padding: 1rem;
+  }
+
+  /* Collapse component accessibility */
+  .collapse .collapse-title {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Badge minimum size for readability */
+  .badge {
+    min-height: 1.5rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  /* Tab navigation */
+  .tab {
+    min-height: 44px;
+    padding: 0.75rem 1.5rem;
+  }
+
+  /* Dropdown items */
+  .dropdown-content a,
+  .dropdown-content button {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Menu items */
+  .menu li > *,
+  .menu li > a {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Modal close button */
+  .modal-action .btn {
+    min-height: 44px;
+  }
+
+  /* Steps component accessibility */
+  .steps .step {
+    min-height: 44px;
+  }
+}
+
+/* Base layer styles */
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-padding-top: 4rem;
+  }
+}
+
+/* Nord Gradient Utilities */
+@utility gradient-frost {
+  background: linear-gradient(135deg, var(--color-frost-1), var(--color-frost-4));
+}
+
+@utility gradient-frost-horizontal {
+  background: linear-gradient(90deg, var(--color-frost-1), var(--color-frost-4));
+}
+
+@utility gradient-aurora {
+  background: linear-gradient(135deg, var(--color-aurora-purple), var(--color-aurora-green));
+}
+
+@utility gradient-aurora-warm {
+  background: linear-gradient(135deg, var(--color-aurora-red), var(--color-aurora-yellow));
+}
+
+@utility gradient-polar {
+  background: linear-gradient(135deg, var(--color-polar-night-1), var(--color-polar-night-4));
+}
+
+@utility gradient-snow {
+  background: linear-gradient(135deg, var(--color-snow-storm-3), var(--color-snow-storm-1));
+}
+
+/* Nord Text Color Utilities */
+@utility text-frost-1 {
+  color: var(--color-frost-1);
+}
+
+@utility text-frost-2 {
+  color: var(--color-frost-2);
+}
+
+@utility text-frost-3 {
+  color: var(--color-frost-3);
+}
+
+@utility text-frost-4 {
+  color: var(--color-frost-4);
+}
+
+@utility text-aurora-red {
+  color: var(--color-aurora-red);
+}
+
+@utility text-aurora-orange {
+  color: var(--color-aurora-orange);
+}
+
+@utility text-aurora-yellow {
+  color: var(--color-aurora-yellow);
+}
+
+@utility text-aurora-green {
+  color: var(--color-aurora-green);
+}
+
+@utility text-aurora-purple {
+  color: var(--color-aurora-purple);
+}
+
+/* Nord Background Color Utilities */
+@utility bg-frost-1 {
+  background-color: var(--color-frost-1);
+}
+
+@utility bg-frost-2 {
+  background-color: var(--color-frost-2);
+}
+
+@utility bg-frost-3 {
+  background-color: var(--color-frost-3);
+}
+
+@utility bg-frost-4 {
+  background-color: var(--color-frost-4);
+}
+
+@utility bg-aurora-red {
+  background-color: var(--color-aurora-red);
+}
+
+@utility bg-aurora-orange {
+  background-color: var(--color-aurora-orange);
+}
+
+@utility bg-aurora-yellow {
+  background-color: var(--color-aurora-yellow);
+}
+
+@utility bg-aurora-green {
+  background-color: var(--color-aurora-green);
+}
+
+@utility bg-aurora-purple {
+  background-color: var(--color-aurora-purple);
+}
+
+@utility bg-polar-1 {
+  background-color: var(--color-polar-night-1);
+}
+
+@utility bg-polar-2 {
+  background-color: var(--color-polar-night-2);
+}
+
+@utility bg-polar-3 {
+  background-color: var(--color-polar-night-3);
+}
+
+@utility bg-polar-4 {
+  background-color: var(--color-polar-night-4);
+}
+
+@utility bg-snow-1 {
+  background-color: var(--color-snow-storm-1);
+}
+
+@utility bg-snow-2 {
+  background-color: var(--color-snow-storm-2);
+}
+
+@utility bg-snow-3 {
+  background-color: var(--color-snow-storm-3);
+}
+
+/* Nord Border Color Utilities */
+@utility border-frost-1 {
+  border-color: var(--color-frost-1);
+}
+
+@utility border-frost-2 {
+  border-color: var(--color-frost-2);
+}
+
+@utility border-frost-3 {
+  border-color: var(--color-frost-3);
+}
+
+@utility border-frost-4 {
+  border-color: var(--color-frost-4);
+}
+
+@utility border-aurora-red {
+  border-color: var(--color-aurora-red);
+}
+
+@utility border-aurora-green {
+  border-color: var(--color-aurora-green);
+}
+
+@utility border-aurora-yellow {
+  border-color: var(--color-aurora-yellow);
+}
+
+/* Custom utility classes */
+@utility content-grid {
+  display: grid;
+  gap: 1.5rem;
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@utility content-section {
+  & > * + * {
+    margin-top: 1.5rem;
+  }
+}
+
+@utility section-title {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+@utility section-subtitle {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  opacity: 0.7;
+  margin-bottom: 1.5rem;
+}
+
+/* Interactive card hover utility */
+@utility interactive-card {
+  transition: all 0.2s ease-in-out;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Screen reader only class for accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Toast animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+.animate-fade-out-down {
+  animation: fadeOutDown 0.3s ease-in forwards;
+}
+
+/* DaisyUI Drawer fix for proper mobile navigation */
+/* Hide drawer-side on large screens (desktop) - show only on mobile */
+@media (min-width: 1024px) {
+  .drawer-side {
+    display: none !important;
+  }
+}
+
+/* On mobile: drawer-side must be hidden by default and only appear when triggered */
+@media (max-width: 1023px) {
+  .drawer-side {
+    position: fixed !important;
+    inset: 0 !important;
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    overflow: hidden;
+    z-index: 9999;
+    scroll-behavior: smooth;
+  }
+
+  .drawer-side > .drawer-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    cursor: pointer;
+  }
+
+  .drawer-side > *:not(.drawer-overlay) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    max-height: 100vh;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  /* When drawer is open (checkbox checked) */
+  .drawer > .drawer-toggle:checked ~ .drawer-side {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    overflow-y: auto;
+  }
+
+  .drawer > .drawer-toggle:checked ~ .drawer-side > .drawer-overlay {
+    opacity: 1;
+  }
+
+  .drawer > .drawer-toggle:checked ~ .drawer-side > *:not(.drawer-overlay) {
+    transform: translateX(0);
+  }
+}
+
+/* Mobile conversation list responsive styles */
+@media screen and (max-width: 768px) {
+  #conversation_list {
+    width: 80%;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    z-index: 10;
+    background-color: oklch(var(--b1));
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  #conversation_list.active {
+    padding-top: 100px;
+    left: 0;
+  }
+}
+
+/* Turbo busy indicator for agreements results */
+#agreement_results [data-loading-indicator] {
+  display: none;
+}
+
+#agreement_results[busy] [data-loading-indicator] {
+  display: block;
+}
+
+/* GitHub log accordion content */
+[data-github-log-target="changesContainer"] {
+  transition: max-height 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+/* Enhanced focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-frost-3);
+  outline-offset: 2px;
+}
+
+/* Selection highlighting with Nord colors */
+::selection {
+  background-color: var(--color-frost-2);
+  color: var(--color-polar-night-1);
+}
+
+/* Scrollbar styling for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-snow-storm-2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-frost-3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-frost-4);
+}
+
+/* ================================
+   Skeleton Loading Animations
+   ================================ */
+
+/* Shimmer animation for skeleton elements */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Wave animation variant */
+@utility animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Skeleton loader container states */
+.skeleton-loader {
+  position: relative;
+}
+
+.skeleton-loader.skeleton-loading {
+  pointer-events: none;
+}
+
+.skeleton-loader.skeleton-loaded [data-skeleton-loader-target="skeleton"] {
+  display: none;
+}
+
+/* Smooth fade transition for skeleton to content */
+.skeleton-loader [data-skeleton-loader-target="content"] {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.skeleton-loader [data-skeleton-loader-target="skeleton"] {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Stagger animation delays for multiple skeleton items */
+.skeleton-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.skeleton-stagger > *:nth-child(2) { animation-delay: 75ms; }
+.skeleton-stagger > *:nth-child(3) { animation-delay: 150ms; }
+.skeleton-stagger > *:nth-child(4) { animation-delay: 225ms; }
+.skeleton-stagger > *:nth-child(5) { animation-delay: 300ms; }
+.skeleton-stagger > *:nth-child(6) { animation-delay: 375ms; }
+
+/* Pulse animation variant */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton-pulse {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Lazy loading frame skeleton styles */
+turbo-frame[loading] .skeleton,
+turbo-frame[busy] .skeleton {
+  opacity: 1;
+}
+
+turbo-frame:not([loading]):not([busy]) .skeleton-placeholder {
+  display: none;
+}
+
+/* Hide skeleton when Turbo frame is loaded */
+turbo-frame[complete] [data-skeleton-loader-target="skeleton"] {
+  display: none;
+}
+
+turbo-frame[complete] [data-skeleton-loader-target="content"] {
+  display: block;
+}

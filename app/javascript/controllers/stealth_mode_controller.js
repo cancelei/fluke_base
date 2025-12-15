@@ -1,115 +1,117 @@
-import { Controller } from "@hotwired/stimulus"
+import { Controller } from '@hotwired/stimulus';
 
 // Connects to data-controller="stealth-mode"
 export default class extends Controller {
-  static targets = ["toggle", "customization"]
-  static values = { editMode: Boolean }
+  static targets = ['toggle', 'customization'];
+  static values = { editMode: Boolean };
 
   connect() {
     // Initialize form visibility immediately without delay
-    this.updateFormVisibility()
+    this.updateFormVisibility();
   }
 
   toggle() {
-    this.updateFormVisibility()
+    this.updateFormVisibility();
   }
 
   updateFormVisibility() {
-    const checkbox = this.hasToggleTarget ? this.toggleTarget : null
-    const isStealthMode = checkbox ? checkbox.checked : false
+    const checkbox = this.hasToggleTarget ? this.toggleTarget : null;
+    const isStealthMode = checkbox ? checkbox.checked : false;
 
-    const mainForm = document.getElementById('main-project-form')
-    const stealthSummary = document.getElementById('stealth-mode-summary')
+    const mainForm = document.getElementById('main-project-form');
+    const stealthSummary = document.getElementById('stealth-mode-summary');
 
     // Update customization section
     if (this.hasCustomizationTarget) {
       if (isStealthMode) {
-        this.customizationTarget.classList.remove('hidden')
+        this.customizationTarget.classList.remove('hidden');
       } else {
-        this.customizationTarget.classList.add('hidden')
+        this.customizationTarget.classList.add('hidden');
       }
     }
 
     // In edit mode, don't auto-hide the form on initialization if stealth mode is enabled
     // This allows users to see the form when editing stealth projects
-    const isEditMode = this.hasEditModeValue && this.editModeValue
-    const shouldShowForm = !isStealthMode || (isEditMode && this.isInitialLoad)
+    const isEditMode = this.hasEditModeValue && this.editModeValue;
+    const shouldShowForm = !isStealthMode || (isEditMode && this.isInitialLoad);
 
     // Track if this is the initial page load
     if (!Object.prototype.hasOwnProperty.call(this, 'isInitialLoad')) {
-      this.isInitialLoad = true
+      this.isInitialLoad = true;
     }
 
     // Update main form visibility
     if (mainForm) {
       if (shouldShowForm) {
-        mainForm.classList.remove('hidden')
+        mainForm.classList.remove('hidden');
       } else {
-        mainForm.classList.add('hidden')
+        mainForm.classList.add('hidden');
       }
     }
 
     // Update stealth summary visibility
     if (stealthSummary) {
       if (isStealthMode && !shouldShowForm) {
-        stealthSummary.classList.remove('hidden')
+        stealthSummary.classList.remove('hidden');
       } else {
-        stealthSummary.classList.add('hidden')
+        stealthSummary.classList.add('hidden');
       }
     }
 
     // After first update, mark as no longer initial load
     if (this.isInitialLoad) {
-      this.isInitialLoad = false
+      this.isInitialLoad = false;
     }
   }
 
   showFullForm(event) {
-    event.preventDefault()
+    event.preventDefault();
 
-    const mainForm = document.getElementById('main-project-form')
-    const stealthSummary = document.getElementById('stealth-mode-summary')
+    const mainForm = document.getElementById('main-project-form');
+    const stealthSummary = document.getElementById('stealth-mode-summary');
 
     if (mainForm) {
-      mainForm.classList.remove('hidden')
+      mainForm.classList.remove('hidden');
 
       if (stealthSummary) {
-        stealthSummary.classList.add('hidden')
+        stealthSummary.classList.add('hidden');
       }
 
       // Update button state
-      const button = event.target
-      button.textContent = 'Hide Full Form'
-      button.classList.add('bg-gray-600', 'hover:bg-gray-700')
-      button.classList.remove('bg-blue-600', 'hover:bg-blue-700')
+      const button = event.target;
+
+      button.textContent = 'Hide Full Form';
+      button.classList.add('bg-gray-600', 'hover:bg-gray-700');
+      button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
 
       // Change action to hide form
-      button.setAttribute('data-action', 'click->stealth-mode#hideFullForm')
+      button.setAttribute('data-action', 'click->stealth-mode#hideFullForm');
     }
   }
 
   hideFullForm(event) {
-    event.preventDefault()
+    event.preventDefault();
 
-    const mainForm = document.getElementById('main-project-form')
-    const stealthSummary = document.getElementById('stealth-mode-summary')
-    const isStealthMode = this.hasToggleTarget && this.toggleTarget.checked
+    const mainForm = document.getElementById('main-project-form');
+    const stealthSummary = document.getElementById('stealth-mode-summary');
+    const isStealthMode = this.hasToggleTarget && this.toggleTarget.checked;
 
     if (mainForm && isStealthMode) {
-      mainForm.classList.add('hidden')
+      mainForm.classList.add('hidden');
 
       if (stealthSummary) {
-        stealthSummary.classList.remove('hidden')
+        stealthSummary.classList.remove('hidden');
       }
 
       // Update button state
-      const button = event.target
-      button.textContent = 'Show Full Form'
-      button.classList.add('bg-blue-600', 'hover:bg-blue-700')
-      button.classList.remove('bg-gray-600', 'hover:bg-gray-700')
+      const button = event.target;
+
+      button.textContent = 'Show Full Form';
+      button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+      button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
 
       // Change action back to show form
-      button.setAttribute('data-action', 'click->stealth-mode#showFullForm')
+      button.setAttribute('data-action', 'click->stealth-mode#showFullForm');
     }
   }
 }

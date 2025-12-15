@@ -43,6 +43,7 @@ export default class extends Controller {
   clearFormInputs() {
     // Find the actual form element inside the target
     const formElement = this.formTarget.querySelector('form');
+
     if (formElement) {
       // Reset all form fields
       formElement.reset();
@@ -53,8 +54,10 @@ export default class extends Controller {
   updateProgress(event) {
     // This can be used for live progress bar updates
     const { detail } = event;
+
     if (detail.progressPercent) {
       const progressBars = document.querySelectorAll('[data-progress-bar]');
+
       progressBars.forEach(bar => {
         bar.style.width = `${detail.progressPercent}%`;
       });

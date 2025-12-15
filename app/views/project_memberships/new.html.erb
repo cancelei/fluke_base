@@ -1,0 +1,95 @@
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <%# Breadcrumb %>
+  <div class="text-sm breadcrumbs mb-4">
+    <ul>
+      <li><%= link_to "Projects", projects_path %></li>
+      <li><%= link_to @project.name, project_path(@project) %></li>
+      <li><%= link_to "Team", project_memberships_path(@project) %></li>
+      <li>Invite</li>
+    </ul>
+  </div>
+
+  <%# Page Header %>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold">Invite Team Member</h1>
+    <p class="text-base-content/60">Add someone to <%= @project.name %></p>
+  </div>
+
+  <%# Invite Form Card %>
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <%= form_with model: [ @project, @membership ], local: true, class: "space-y-6" do |f| %>
+        <%# User Selection %>
+        <div class="form-control">
+          <%= f.label :user_id, "Select User", class: "label" %>
+          <% if @available_users.any? %>
+            <%= f.select :user_id,
+                options_from_collection_for_select(@available_users, :id, :full_name),
+                { include_blank: "Choose a user..." },
+                class: "select select-bordered w-full" %>
+          <% else %>
+            <div class="alert alert-warning">
+              <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>All available users are already members of this project.</span>
+            </div>
+          <% end %>
+          <div class="label">
+            <span class="label-text-alt text-base-content/50">
+              Search by name to find users to invite
+            </span>
+          </div>
+        </div>
+
+        <%# Role Selection %>
+        <div class="form-control">
+          <%= f.label :role, "Role", class: "label" %>
+          <%= f.select :role,
+              ProjectMembership.role_options_for(@project.role_for(current_user) || "owner"),
+              { include_blank: false },
+              class: "select select-bordered w-full" %>
+          <div class="label">
+            <span class="label-text-alt text-base-content/50">
+              Choose the permission level for this team member
+            </span>
+          </div>
+        </div>
+
+        <%# Role Descriptions %>
+        <div class="bg-base-200 rounded-lg p-4">
+          <h3 class="text-sm font-semibold mb-3">Role Descriptions</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-start gap-2">
+              <%= render Ui::RoleBadgeComponent.new(role: :admin, size: :xs) %>
+              <div>
+                <span class="font-medium">Admin</span> -
+                <span class="text-base-content/70">Can manage team members, view all project data, and edit settings</span>
+              </div>
+            </div>
+            <div class="flex items-start gap-2">
+              <%= render Ui::RoleBadgeComponent.new(role: :member, size: :xs) %>
+              <div>
+                <span class="font-medium">Member</span> -
+                <span class="text-base-content/70">Can view project, create agreements, and track time on milestones</span>
+              </div>
+            </div>
+            <div class="flex items-start gap-2">
+              <%= render Ui::RoleBadgeComponent.new(role: :guest, size: :xs) %>
+              <div>
+                <span class="font-medium">Guest</span> -
+                <span class="text-base-content/70">Read-only access to public project information</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%# Form Actions %>
+        <div class="card-actions justify-end pt-4">
+          <%= link_to "Cancel", project_memberships_path(@project), class: "btn btn-ghost" %>
+          <%= f.submit "Send Invitation", class: "btn btn-primary", disabled: @available_users.empty? %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

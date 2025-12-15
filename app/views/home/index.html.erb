@@ -1,5 +1,5 @@
 <!-- FlukeBase Modern Landing Page -->
-<div class="bg-white overflow-x-hidden">
+<div class="bg-base-100 overflow-x-hidden">
   <!-- Hero Section with Enhanced Interactivity -->
   <div class="relative isolate overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-800 to-purple-900 min-h-screen flex items-center">
     <!-- Enhanced Background Animation -->
@@ -45,7 +45,7 @@
         </h1>
 
         <!-- Enhanced Value Proposition -->
-        <p class="mt-6 text-xl leading-8 text-gray-200 max-w-3xl mx-auto" data-hero-animation-target="subtitle">
+        <p class="mt-6 text-xl leading-8 text-base-content/50 max-w-3xl mx-auto" data-hero-animation-target="subtitle">
           The only platform that connects ambitious people through
           <span class="text-blue-300 font-semibold">structured agreements</span> and
           <span class="text-purple-300 font-semibold">proven tracking systems</span>.
@@ -55,26 +55,20 @@
         <!-- Enhanced CTA Buttons with Social Proof -->
         <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4" data-hero-animation-target="cta">
           <% if user_signed_in? %>
-            <%= link_to dashboard_path, class: "group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25" do %>
-              <span class="relative z-10 flex items-center">
-                Go to Dashboard
-                <svg class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </span>
-              <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+            <%= link_to dashboard_path, class: "btn btn-primary btn-lg gap-2" do %>
+              Go to Dashboard
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
             <% end %>
           <% else %>
-            <%= link_to new_user_registration_path, class: "group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25" do %>
-              <span class="relative z-10 flex items-center">
-                Start Building Today - Free
-                <svg class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </span>
-              <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+            <%= link_to new_user_registration_path, class: "btn btn-primary btn-lg gap-2" do %>
+              Start Building Today - Free
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
             <% end %>
-            <button type="button" class="inline-flex items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-white/20 hover:scale-105" data-action="click->modal#open" data-modal-target-param="demo-modal">
+            <button type="button" class="btn btn-outline btn-lg gap-2" data-action="click->modal#open" data-modal-target-param="demo-modal">
               <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M8 5v10l7-5-7-5z" />
               </svg>
@@ -85,7 +79,7 @@
 
         <!-- Trust Signals -->
         <div class="mt-12 flex flex-col items-center" data-hero-animation-target="trust">
-          <p class="text-sm text-gray-300 mb-6">Trusted by teams from</p>
+          <p class="text-sm text-base-content/60 mb-6">Trusted by teams from</p>
           <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-8 opacity-60 px-4">
             <div class="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2 sm:px-4">
               <div class="w-6 h-6 bg-white/30 rounded"></div>
@@ -105,15 +99,15 @@
           <div class="mt-8 grid grid-cols-3 gap-8 text-center">
             <div class="text-white">
               <div class="text-2xl font-bold"><%= @mentor_satisfaction_rate || 95 %>%</div>
-              <div class="text-sm text-gray-300">Success Rate</div>
+              <div class="text-sm text-base-content/60">Success Rate</div>
             </div>
             <div class="text-white">
               <div class="text-2xl font-bold"><%= @initiated_agreements_this_week > 0 ? "#{(@initiated_agreements_this_week * 7 / 7)}hrs" : "48hrs" %></div>
-              <div class="text-sm text-gray-300">Avg Match Time</div>
+              <div class="text-sm text-base-content/60">Avg Match Time</div>
             </div>
             <div class="text-white">
               <div class="text-2xl font-bold">$2.5M</div>
-              <div class="text-sm text-gray-300">Raised by Teams</div>
+              <div class="text-sm text-base-content/60">Raised by Teams</div>
             </div>
           </div>
         </div>
@@ -136,7 +130,7 @@
       <div class="mx-auto max-w-5xl">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Entrepreneurs Card -->
-          <div class="group relative bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-gray-100 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:bg-white" data-stats-counter-target="card">
+          <div class="group relative bg-base-100/95 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-base-300 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:bg-base-100" data-stats-counter-target="card">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-t-3xl"></div>
             <div class="absolute -top-3 right-8">
               <div class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
@@ -152,14 +146,14 @@
                 </div>
               </div>
               <div class="flex-1">
-                <dt class="text-sm font-semibold leading-6 text-gray-600">Active Creators</dt>
-                <dd class="text-4xl font-bold tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors">
+                <dt class="text-sm font-semibold leading-6 text-base-content/80">Active Creators</dt>
+                <dd class="text-4xl font-bold tracking-tight text-base-content group-hover:text-primary transition-colors">
                   <%= turbo_frame_tag "entrepreneur_count", src: home_stats_path, loading: "lazy" do %>
                     <span data-stats-counter-target="number" data-end-value="<%= @entrepreneur_count || 247 %>">0</span>+
                   <% end %>
                 </dd>
-                <dd class="text-sm text-gray-500 font-medium">Leading projects</dd>
-                <div class="mt-2 flex items-center text-green-600 text-xs">
+                <dd class="text-sm text-base-content/70 font-medium">Leading projects</dd>
+                <div class="mt-2 flex items-center text-success text-xs">
                   <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L9 3.414 2.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                   </svg>
@@ -170,7 +164,7 @@
           </div>
 
           <!-- Mentors Card -->
-          <div class="group relative bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-gray-100 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:bg-white" data-stats-counter-target="card">
+          <div class="group relative bg-base-100/95 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-base-300 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:bg-base-100" data-stats-counter-target="card">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-t-3xl"></div>
             <div class="absolute -top-3 right-8">
               <div class="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
@@ -186,14 +180,14 @@
                 </div>
               </div>
               <div class="flex-1">
-                <dt class="text-sm font-semibold leading-6 text-gray-600">Active Contributors</dt>
-                <dd class="text-4xl font-bold tracking-tight text-gray-900 group-hover:text-green-600 transition-colors">
+                <dt class="text-sm font-semibold leading-6 text-base-content/80">Active Contributors</dt>
+                <dd class="text-4xl font-bold tracking-tight text-base-content group-hover:text-success transition-colors">
                   <%= turbo_frame_tag "mentor_count", src: home_stats_path, loading: "lazy" do %>
                     <span data-stats-counter-target="number" data-end-value="<%= @mentor_count || 189 %>">0</span>+
                   <% end %>
                 </dd>
-                <dd class="text-sm text-gray-500 font-medium">Contributing skills</dd>
-                <div class="mt-2 flex items-center text-green-600 text-xs">
+                <dd class="text-sm text-base-content/70 font-medium">Contributing skills</dd>
+                <div class="mt-2 flex items-center text-success text-xs">
                   <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L9 3.414 2.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                   </svg>
@@ -204,7 +198,7 @@
           </div>
 
           <!-- Co-Founders Card -->
-          <div class="group relative bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-gray-100 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:bg-white" data-stats-counter-target="card">
+          <div class="group relative bg-base-100/95 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-base-300 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:bg-base-100" data-stats-counter-target="card">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-t-3xl"></div>
             <div class="absolute -top-3 right-8">
               <div class="bg-purple-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
@@ -220,14 +214,14 @@
                 </div>
               </div>
               <div class="flex-1">
-                <dt class="text-sm font-semibold leading-6 text-gray-600">Active Collaborators</dt>
-                <dd class="text-4xl font-bold tracking-tight text-gray-900 group-hover:text-purple-600 transition-colors">
+                <dt class="text-sm font-semibold leading-6 text-base-content/80">Active Collaborators</dt>
+                <dd class="text-4xl font-bold tracking-tight text-base-content group-hover:text-purple-600 transition-colors">
                   <%= turbo_frame_tag "cofounder_count", src: home_stats_path, loading: "lazy" do %>
                     <span data-stats-counter-target="number" data-end-value="<%= @cofounder_count || 73 %>">0</span>+
                   <% end %>
                 </dd>
-                <dd class="text-sm text-gray-500 font-medium">Building together</dd>
-                <div class="mt-2 flex items-center text-green-600 text-xs">
+                <dd class="text-sm text-base-content/70 font-medium">Building together</dd>
+                <div class="mt-2 flex items-center text-success text-xs">
                   <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L9 3.414 2.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                   </svg>
@@ -241,22 +235,22 @@
         <!-- Social Proof Bar -->
         <div class="mt-12 text-center px-4">
           <div class="inline-flex flex-wrap items-center justify-center gap-4 sm:gap-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl px-4 sm:px-8 py-4 border border-blue-100">
-            <div class="flex items-center space-x-2 text-sm text-gray-600 mb-2 sm:mb-0">
+            <div class="flex items-center space-x-2 text-sm text-base-content/80 mb-2 sm:mb-0">
               <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
               <strong><%= @initiated_agreements_this_week || 0 %></strong> agreements made this week
             </div>
-            <div class="hidden sm:block w-px h-4 bg-gray-300"></div>
-            <div class="flex items-center space-x-2 text-sm text-gray-600 mb-2 sm:mb-0">
+            <div class="hidden sm:block w-px h-4 bg-base-300"></div>
+            <div class="flex items-center space-x-2 text-sm text-base-content/80 mb-2 sm:mb-0">
               <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
               <strong><%= @mentor_satisfaction_rate || 89 %>%</strong> collaboration satisfaction
             </div>
-            <div class="hidden sm:block w-px h-4 bg-gray-300"></div>
-            <div class="flex items-center space-x-2 text-sm text-gray-600 mb-2 sm:mb-0">
+            <div class="hidden sm:block w-px h-4 bg-base-300"></div>
+            <div class="flex items-center space-x-2 text-sm text-base-content/80 mb-2 sm:mb-0">
               <span class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
               <strong><%= @projects_with_help_ratio || 3.2 %>x</strong> faster to market
             </div>
-            <div class="hidden sm:block w-px h-4 bg-gray-300"></div>
-            <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <div class="hidden sm:block w-px h-4 bg-base-300"></div>
+            <div class="flex items-center space-x-2 text-sm text-base-content/80">
               <span class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
               <strong><%= @total_agreements || 0 %></strong> total agreements
             </div>
@@ -270,10 +264,10 @@
   <div class="py-24 sm:py-32 bg-gradient-to-b from-gray-50 to-white" data-controller="scroll-reveal">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-3xl text-center mb-20" data-scroll-reveal-target="element">
-        <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
+        <h2 class="text-4xl font-bold tracking-tight text-base-content sm:text-5xl mb-6">
           Everything you need to build together
         </h2>
-        <p class="text-xl leading-8 text-gray-600 max-w-2xl mx-auto">
+        <p class="text-xl leading-8 text-base-content/80 max-w-2xl mx-auto">
           From finding the right people to tracking progress and managing agreements,
           FlukeBase provides the complete toolkit for meaningful collaboration and shared success.
         </p>
@@ -294,20 +288,20 @@
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 class="text-2xl font-semibold text-gray-900 mb-4">Smart Matching</h3>
-              <p class="text-gray-600 leading-relaxed mb-6">
+              <h3 class="text-2xl font-semibold text-base-content mb-4">Smart Matching</h3>
+              <p class="text-base-content/80 leading-relaxed mb-6">
                 Our advanced algorithm connects people based on complementary skills, shared interests,
                 working style compatibility, and mutual goals for meaningful collaboration.
               </p>
               <div class="space-y-3">
-                <div class="flex items-center text-sm text-gray-500">
-                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center text-sm text-base-content/70">
+                  <svg class="w-4 h-4 text-success mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   95% compatibility score accuracy
                 </div>
-                <div class="flex items-center text-sm text-gray-500">
-                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center text-sm text-base-content/70">
+                  <svg class="w-4 h-4 text-success mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   48hr average match time
@@ -331,26 +325,26 @@
                   <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h3 class="text-2xl font-semibold text-gray-900 mb-4">Structured Agreements</h3>
-              <p class="text-gray-600 leading-relaxed mb-6">
+              <h3 class="text-2xl font-semibold text-base-content mb-4">Structured Agreements</h3>
+              <p class="text-base-content/80 leading-relaxed mb-6">
                 Create clear, legally-informed agreements with built-in milestone tracking,
                 equity management, and performance metrics. No more handshake deals.
               </p>
               <div class="space-y-3">
-                <div class="flex items-center text-sm text-gray-500">
-                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center text-sm text-base-content/70">
+                  <svg class="w-4 h-4 text-success mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Lawyer-reviewed templates
                 </div>
-                <div class="flex items-center text-sm text-gray-500">
-                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center text-sm text-base-content/70">
+                  <svg class="w-4 h-4 text-success mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Digital signature integration
                 </div>
-                <div class="flex items-center text-sm text-gray-500">
-                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center text-sm text-base-content/70">
+                  <svg class="w-4 h-4 text-success mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Web3 Multi-Asset Escrow on Base
@@ -375,20 +369,20 @@
                   <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
                 </svg>
               </div>
-              <h3 class="text-2xl font-semibold text-gray-900 mb-4">Progress Tracking</h3>
-              <p class="text-gray-600 leading-relaxed mb-6">
+              <h3 class="text-2xl font-semibold text-base-content mb-4">Progress Tracking</h3>
+              <p class="text-base-content/80 leading-relaxed mb-6">
                 Monitor milestones, track time contributions, and visualize project progress
                 with integrated GitHub analytics, performance dashboards, and automated reporting.
               </p>
               <div class="space-y-3">
-                <div class="flex items-center text-sm text-gray-500">
-                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center text-sm text-base-content/70">
+                  <svg class="w-4 h-4 text-success mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   GitHub integration
                 </div>
-                <div class="flex items-center text-sm text-gray-500">
-                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center text-sm text-base-content/70">
+                  <svg class="w-4 h-4 text-success mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Automated progress reports
@@ -402,9 +396,9 @@
       <!-- Interactive Feature Demo -->
       <div class="mt-20 text-center" data-scroll-reveal-target="element">
         <div class="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl px-6 py-3 border border-blue-200">
-          <span class="text-gray-700 font-medium">Want to see it in action?</span>
-          <button class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:scale-105 transition-transform" data-action="click->modal#open" data-modal-target-param="demo-modal">
-            <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <span class="text-base-content/90 font-medium">Want to see it in action?</span>
+          <button class="btn btn-primary btn-sm gap-1" data-action="click->modal#open" data-modal-target-param="demo-modal">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M8 5v10l7-5-7-5z" />
             </svg>
             Watch 2-min Demo (Coming Soon)
@@ -422,52 +416,52 @@
     <div class="mx-auto max-w-7xl px-6 lg:px-8 relative">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         <div>
-          <div class="inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 mb-6">
+          <div class="inline-flex items-center rounded-full bg-primary/20 px-4 py-2 text-sm font-medium text-blue-700 mb-6">
             🚀 For Project Leaders
           </div>
-          <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
+          <h2 class="text-4xl font-bold tracking-tight text-base-content sm:text-5xl mb-6">
             Build faster with the
             <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">right team</span>
           </h2>
-          <p class="text-xl leading-8 text-gray-600 mb-8">
+          <p class="text-xl leading-8 text-base-content/80 mb-8">
             Build something meaningful with the right team. Connect with experienced advisors and dedicated collaborators
             who share your passion and can help you reach your goals faster.
           </p>
 
           <div class="space-y-6">
             <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <div class="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-900">Get to market faster</h3>
-                <p class="text-gray-600">Accelerate development with experienced advisors and dedicated collaborators.</p>
+                <h3 class="font-semibold text-base-content">Get to market faster</h3>
+                <p class="text-base-content/80">Accelerate development with experienced advisors and dedicated collaborators.</p>
               </div>
             </div>
 
             <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <div class="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-900">Find the right team members</h3>
-                <p class="text-gray-600">Test working relationships through structured collaborations before making long-term commitments.</p>
+                <h3 class="font-semibold text-base-content">Find the right team members</h3>
+                <p class="text-base-content/80">Test working relationships through structured collaborations before making long-term commitments.</p>
               </div>
             </div>
 
             <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <div class="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-900">Prevent burnout and isolation</h3>
-                <p class="text-gray-600">Distribute workload effectively with team members who share your passion and commitment.</p>
+                <h3 class="font-semibold text-base-content">Prevent burnout and isolation</h3>
+                <p class="text-base-content/80">Distribute workload effectively with team members who share your passion and commitment.</p>
               </div>
             </div>
           </div>
@@ -480,9 +474,9 @@
               <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 h-full">
                 <div class="flex items-center space-x-3 mb-6">
                   <div class="w-3 h-3 bg-red-400 rounded-full"></div>
-                  <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                  <div class="w-3 h-3 bg-warning rounded-full"></div>
                   <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                  <div class="ml-auto text-sm opacity-75">FlukeBase Dashboard</div>
+                  <div class="ml-auto text-sm text-base-content/75">FlukeBase Dashboard</div>
                 </div>
                 <div class="space-y-4">
                   <div class="h-4 bg-white/40 rounded w-3/4"></div>
@@ -538,52 +532,52 @@
         </div>
 
         <div class="order-1 lg:order-2">
-          <div class="inline-flex items-center rounded-full bg-green-100 px-4 py-2 text-sm font-medium text-green-700 mb-6">
+          <div class="inline-flex items-center rounded-full bg-success/20 px-4 py-2 text-sm font-medium text-success mb-6">
             🎓 For Advisors & Contributors
           </div>
-          <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
+          <h2 class="text-4xl font-bold tracking-tight text-base-content sm:text-5xl mb-6">
             Showcase your
             <span class="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">expertise</span>
           </h2>
-          <p class="text-xl leading-8 text-gray-600 mb-8">
+          <p class="text-xl leading-8 text-base-content/80 mb-8">
             Share your expertise and build meaningful relationships with ambitious people. Contribute your skills
             to projects you believe in and grow your network of collaborators.
           </p>
 
           <div class="space-y-6">
             <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <div class="flex-shrink-0 w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-900">Build a portfolio of success</h3>
-                <p class="text-gray-600">Showcase your collaborative achievements and attract ambitious project leaders.</p>
+                <h3 class="font-semibold text-base-content">Build a portfolio of success</h3>
+                <p class="text-base-content/80">Showcase your collaborative achievements and attract ambitious project leaders.</p>
               </div>
             </div>
 
             <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <div class="flex-shrink-0 w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-900">Find your next opportunity</h3>
-                <p class="text-gray-600">Discover promising ventures and test compatibility through structured collaboration.</p>
+                <h3 class="font-semibold text-base-content">Find your next opportunity</h3>
+                <p class="text-base-content/80">Discover promising ventures and test compatibility through structured collaboration.</p>
               </div>
             </div>
 
             <div class="flex items-start space-x-4">
-              <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <div class="flex-shrink-0 w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-900">Earn flexible income</h3>
-                <p class="text-gray-600">Set your rates and create tiered service packages based on your expertise.</p>
+                <h3 class="font-semibold text-base-content">Earn flexible income</h3>
+                <p class="text-base-content/80">Set your rates and create tiered service packages based on your expertise.</p>
               </div>
             </div>
           </div>
@@ -601,11 +595,11 @@
           <div class="inline-flex items-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 mb-6">
             🤝 For Team Members & Partners
           </div>
-          <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
+          <h2 class="text-4xl font-bold tracking-tight text-base-content sm:text-5xl mb-6">
             Formalize your
             <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">partnership</span>
           </h2>
-          <p class="text-xl leading-8 text-gray-600 mb-8">
+          <p class="text-xl leading-8 text-base-content/80 mb-8">
             Whether you're transitioning from advisor to partner or joining an existing team,
             create structured agreements with clear expectations and transparent progress tracking.
           </p>
@@ -618,8 +612,8 @@
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-900">Equitable agreements</h3>
-                <p class="text-gray-600">Create fair agreements with clear contribution expectations and role responsibilities.</p>
+                <h3 class="font-semibold text-base-content">Equitable agreements</h3>
+                <p class="text-base-content/80">Create fair agreements with clear contribution expectations and role responsibilities.</p>
               </div>
             </div>
 
@@ -630,8 +624,8 @@
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-900">Progress tracking</h3>
-                <p class="text-gray-600">Monitor milestones and ensure all team members contribute as agreed.</p>
+                <h3 class="font-semibold text-base-content">Progress tracking</h3>
+                <p class="text-base-content/80">Monitor milestones and ensure all team members contribute as agreed.</p>
               </div>
             </div>
 
@@ -642,8 +636,8 @@
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-900">Mediated relationships</h3>
-                <p class="text-gray-600">Let FlukeBase provide neutral third-party support to navigate challenges.</p>
+                <h3 class="font-semibold text-base-content">Mediated relationships</h3>
+                <p class="text-base-content/80">Let FlukeBase provide neutral third-party support to navigate challenges.</p>
               </div>
             </div>
           </div>
@@ -658,7 +652,7 @@
                   <div class="text-lg font-semibold">Agreement Dashboard</div>
                   <div class="flex space-x-2">
                     <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                    <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                    <div class="w-3 h-3 bg-warning rounded-full"></div>
                   </div>
                 </div>
                 <div class="space-y-4">
@@ -693,7 +687,7 @@
         <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl mb-6">
           How FlukeBase Works
         </h2>
-        <p class="text-xl leading-8 text-gray-300">
+        <p class="text-xl leading-8 text-base-content/60">
           From connection to collaboration in four simple steps
         </p>
       </div>
@@ -701,7 +695,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <!-- Step 1 -->
         <div class="relative group">
-          <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-white/20 hover:scale-105">
+          <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-base-100/20 hover:scale-105">
             <div class="absolute -top-4 left-8">
               <div class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white font-bold text-sm">
                 1
@@ -714,7 +708,7 @@
                 </svg>
               </div>
               <h3 class="text-xl font-semibold text-white mb-3">Create Your Profile</h3>
-              <p class="text-gray-300 leading-relaxed">
+              <p class="text-base-content/60 leading-relaxed">
                 Set up your profile and showcase your skills, experience, and interests to attract the right collaborators.
               </p>
             </div>
@@ -723,7 +717,7 @@
 
         <!-- Step 2 -->
         <div class="relative group">
-          <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-white/20 hover:scale-105">
+          <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-base-100/20 hover:scale-105">
             <div class="absolute -top-4 left-8">
               <div class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full text-white font-bold text-sm">
                 2
@@ -736,7 +730,7 @@
                 </svg>
               </div>
               <h3 class="text-xl font-semibold text-white mb-3">Get Matched</h3>
-              <p class="text-gray-300 leading-relaxed">
+              <p class="text-base-content/60 leading-relaxed">
                 Our smart algorithm connects you with compatible people based on complementary skills and shared interests.
               </p>
             </div>
@@ -745,7 +739,7 @@
 
         <!-- Step 3 -->
         <div class="relative group">
-          <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-white/20 hover:scale-105">
+          <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-base-100/20 hover:scale-105">
             <div class="absolute -top-4 left-8">
               <div class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-white font-bold text-sm">
                 3
@@ -758,7 +752,7 @@
                 </svg>
               </div>
               <h3 class="text-xl font-semibold text-white mb-3">Create Agreements</h3>
-              <p class="text-gray-300 leading-relaxed">
+              <p class="text-base-content/60 leading-relaxed">
                 Establish clear terms, milestones, and compensation structures for your collaboration.
               </p>
             </div>
@@ -767,7 +761,7 @@
 
         <!-- Step 4 -->
         <div class="relative group">
-          <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-white/20 hover:scale-105">
+          <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-base-100/20 hover:scale-105">
             <div class="absolute -top-4 left-8">
               <div class="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full text-white font-bold text-sm">
                 4
@@ -780,7 +774,7 @@
                 </svg>
               </div>
               <h3 class="text-xl font-semibold text-white mb-3">Build & Track</h3>
-              <p class="text-gray-300 leading-relaxed">
+              <p class="text-base-content/60 leading-relaxed">
                 Collaborate on your project with built-in progress tracking and milestone management.
               </p>
             </div>
@@ -794,10 +788,10 @@
   <div id="testimonials" class="bg-white py-24 sm:py-32" data-controller="testimonials">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-3xl text-center mb-20">
-        <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
+        <h2 class="text-4xl font-bold tracking-tight text-base-content sm:text-5xl mb-6">
           What our community says
         </h2>
-        <p class="text-xl leading-8 text-gray-600">
+        <p class="text-xl leading-8 text-base-content/80">
           Hear from people who've built successful collaborations and partnerships on FlukeBase.
         </p>
 
@@ -806,22 +800,22 @@
           <div class="text-center mb-4 sm:mb-0">
             <div class="flex justify-center space-x-1 mb-2">
               <% 5.times do %>
-                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-5 h-5 text-warning" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               <% end %>
             </div>
-            <p class="text-sm text-gray-600"><strong>4.9/5</strong> average rating</p>
+            <p class="text-sm text-base-content/80"><strong>4.9/5</strong> average rating</p>
           </div>
-          <div class="hidden sm:block w-px h-12 bg-gray-300"></div>
+          <div class="hidden sm:block w-px h-12 bg-base-300"></div>
           <div class="text-center mb-4 sm:mb-0">
-            <p class="text-2xl font-bold text-gray-900"><%= @completed_agreements || 1247 %></p>
-            <p class="text-sm text-gray-600">Success stories</p>
+            <p class="text-2xl font-bold text-base-content"><%= @completed_agreements || 1247 %></p>
+            <p class="text-sm text-base-content/80">Success stories</p>
           </div>
-          <div class="hidden sm:block w-px h-12 bg-gray-300"></div>
+          <div class="hidden sm:block w-px h-12 bg-base-300"></div>
           <div class="text-center">
-            <p class="text-2xl font-bold text-gray-900">94%</p>
-            <p class="text-sm text-gray-600">Would recommend</p>
+            <p class="text-2xl font-bold text-base-content">94%</p>
+            <p class="text-sm text-base-content/80">Would recommend</p>
           </div>
         </div>
       </div>
@@ -842,12 +836,12 @@
                 <div class="mb-6">
                   <div class="flex mb-4">
                     <% 5.times do %>
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     <% end %>
                   </div>
-                  <p class="text-gray-700 leading-relaxed italic">
+                  <p class="text-base-content/90 leading-relaxed italic">
                     "FlukeBase helped me find the perfect technical partner. The structured agreement process
                     ensured we were aligned from day one, and now we're building something amazing together."
                   </p>
@@ -857,12 +851,12 @@
                     S
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900">Sarah Chen</div>
-                    <div class="text-sm text-gray-600">CEO, TechFlow • $2.1M raised</div>
+                    <div class="font-semibold text-base-content">Sarah Chen</div>
+                    <div class="text-sm text-base-content/80">CEO, TechFlow • $2.1M raised</div>
                   </div>
                 </div>
-                <div class="mt-4 flex items-center text-xs text-gray-500">
-                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="mt-4 flex items-center text-xs text-base-content/70">
+                  <svg class="w-4 h-4 mr-1 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Verified Success Story • Found partner in 2 weeks
@@ -872,19 +866,19 @@
               <!-- Testimonial 2 -->
               <div class="group relative bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 border border-green-100 transition-all duration-300 hover:shadow-2xl hover:scale-105">
                 <div class="absolute top-6 right-6">
-                  <svg class="w-8 h-8 text-green-500 opacity-50" fill="currentColor" viewBox="0 0 32 32">
+                  <svg class="w-8 h-8 text-success opacity-50" fill="currentColor" viewBox="0 0 32 32">
                     <path d="M12.219 10.594c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1zm7.562 0c-1.305 0-2.156.969-2.156 2.375 0 1.406.851 2.375 2.156 2.375.563 0 1.063-.187 1.469-.531l-.563 3.063c-.312.031-.625.031-.906.031-2.5 0-4.219-1.5-4.219-3.938 0-2.906 2.125-5.281 5.125-5.281 1.094 0 2.094.375 2.875 1.031l-.781 1.875c-.625-.625-1.375-1-2.031-1z" />
                   </svg>
                 </div>
                 <div class="mb-6">
                   <div class="flex mb-4">
                     <% 5.times do %>
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     <% end %>
                   </div>
-                  <p class="text-gray-700 leading-relaxed italic">
+                  <p class="text-base-content/90 leading-relaxed italic">
                     "As an advisor, FlukeBase gives me a clear framework to help project leaders while building
                     meaningful relationships. I've transitioned from advisor to partner on two projects now."
                   </p>
@@ -894,12 +888,12 @@
                     M
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900">Michael Rodriguez</div>
-                    <div class="text-sm text-gray-600">Senior Advisor • 15+ successful collaborations</div>
+                    <div class="font-semibold text-base-content">Michael Rodriguez</div>
+                    <div class="text-sm text-base-content/80">Senior Advisor • 15+ successful collaborations</div>
                   </div>
                 </div>
-                <div class="mt-4 flex items-center text-xs text-gray-500">
-                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="mt-4 flex items-center text-xs text-base-content/70">
+                  <svg class="w-4 h-4 mr-1 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Top Mentor Badge • 4.9★ rating
@@ -916,12 +910,12 @@
                 <div class="mb-6">
                   <div class="flex mb-4">
                     <% 5.times do %>
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     <% end %>
                   </div>
-                  <p class="text-gray-700 leading-relaxed italic">
+                  <p class="text-base-content/90 leading-relaxed italic">
                     "The transparency and structure FlukeBase provides made me comfortable joining as a partner.
                     Clear terms and milestone tracking keep everyone accountable and motivated."
                   </p>
@@ -931,12 +925,12 @@
                     A
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900">Alex Kim</div>
-                    <div class="text-sm text-gray-600">Co-Founder, DataViz Pro • 10K+ users</div>
+                    <div class="font-semibold text-base-content">Alex Kim</div>
+                    <div class="text-sm text-base-content/80">Co-Founder, DataViz Pro • 10K+ users</div>
                   </div>
                 </div>
-                <div class="mt-4 flex items-center text-xs text-gray-500">
-                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="mt-4 flex items-center text-xs text-base-content/70">
+                  <svg class="w-4 h-4 mr-1 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Active Co-founder • Product launched successfully
@@ -958,12 +952,12 @@
                 <div class="mb-6">
                   <div class="flex mb-4">
                     <% 5.times do %>
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     <% end %>
                   </div>
-                  <p class="text-gray-700 leading-relaxed italic">
+                  <p class="text-base-content/90 leading-relaxed italic">
                     "FlukeBase's milestone tracking system keeps our team focused and accountable. We've hit every target since launching our partnership through the platform."
                   </p>
                 </div>
@@ -972,12 +966,12 @@
                     J
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900">Jessica Park</div>
-                    <div class="text-sm text-gray-600">Founder, EcoTech Solutions • $500K ARR</div>
+                    <div class="font-semibold text-base-content">Jessica Park</div>
+                    <div class="text-sm text-base-content/80">Founder, EcoTech Solutions • $500K ARR</div>
                   </div>
                 </div>
-                <div class="mt-4 flex items-center text-xs text-gray-500">
-                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="mt-4 flex items-center text-xs text-base-content/70">
+                  <svg class="w-4 h-4 mr-1 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Growing Startup • 100% milestone completion rate
@@ -994,12 +988,12 @@
                 <div class="mb-6">
                   <div class="flex mb-4">
                     <% 5.times do %>
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     <% end %>
                   </div>
-                  <p class="text-gray-700 leading-relaxed italic">
+                  <p class="text-base-content/90 leading-relaxed italic">
                     "The quality of advisors on FlukeBase is exceptional. My advisor helped me avoid costly mistakes and guided me to our first major client within 3 months."
                   </p>
                 </div>
@@ -1008,12 +1002,12 @@
                     D
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900">David Thompson</div>
-                    <div class="text-sm text-gray-600">CEO, FinanceFlow • Series A funded</div>
+                    <div class="font-semibold text-base-content">David Thompson</div>
+                    <div class="text-sm text-base-content/80">CEO, FinanceFlow • Series A funded</div>
                   </div>
                 </div>
-                <div class="mt-4 flex items-center text-xs text-gray-500">
-                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="mt-4 flex items-center text-xs text-base-content/70">
+                  <svg class="w-4 h-4 mr-1 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Funded Startup • Mentor match success story
@@ -1030,12 +1024,12 @@
                 <div class="mb-6">
                   <div class="flex mb-4">
                     <% 5.times do %>
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     <% end %>
                   </div>
-                  <p class="text-gray-700 leading-relaxed italic">
+                  <p class="text-base-content/90 leading-relaxed italic">
                     "I've been advising for 10 years, but FlukeBase's structured approach makes it so much more effective. Clear expectations and progress tracking benefit everyone."
                   </p>
                 </div>
@@ -1044,12 +1038,12 @@
                     L
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900">Lisa Wang</div>
-                    <div class="text-sm text-gray-600">VP Engineering, TechCorp • 20+ mentees</div>
+                    <div class="font-semibold text-base-content">Lisa Wang</div>
+                    <div class="text-sm text-base-content/80">VP Engineering, TechCorp • 20+ mentees</div>
                   </div>
                 </div>
-                <div class="mt-4 flex items-center text-xs text-gray-500">
-                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="mt-4 flex items-center text-xs text-base-content/70">
+                  <svg class="w-4 h-4 mr-1 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Elite Mentor • 5.0★ perfect rating
@@ -1071,12 +1065,12 @@
                 <div class="mb-6">
                   <div class="flex mb-4">
                     <% 5.times do %>
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     <% end %>
                   </div>
-                  <p class="text-gray-700 leading-relaxed italic">
+                  <p class="text-base-content/90 leading-relaxed italic">
                     "FlukeBase made it easy to find a partner who shares my vision and work ethic. The agreements are fair and transparent - no surprises or hidden terms."
                   </p>
                 </div>
@@ -1085,12 +1079,12 @@
                     R
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900">Rachel Martinez</div>
-                    <div class="text-sm text-gray-600">Co-Founder, HealthTech Innovations • $1.2M raised</div>
+                    <div class="font-semibold text-base-content">Rachel Martinez</div>
+                    <div class="text-sm text-base-content/80">Co-Founder, HealthTech Innovations • $1.2M raised</div>
                   </div>
                 </div>
-                <div class="mt-4 flex items-center text-xs text-gray-500">
-                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="mt-4 flex items-center text-xs text-base-content/70">
+                  <svg class="w-4 h-4 mr-1 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Successful Partnership • Seed funding secured
@@ -1107,12 +1101,12 @@
                 <div class="mb-6">
                   <div class="flex mb-4">
                     <% 5.times do %>
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     <% end %>
                   </div>
-                  <p class="text-gray-700 leading-relaxed italic">
+                  <p class="text-base-content/90 leading-relaxed italic">
                     "The platform's communication tools and progress tracking helped us stay aligned even while working remotely. We launched our MVP 2 months ahead of schedule."
                   </p>
                 </div>
@@ -1121,12 +1115,12 @@
                     T
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900">Tom Anderson</div>
-                    <div class="text-sm text-gray-600">CTO, RemoteWork Solutions • 50K+ users</div>
+                    <div class="font-semibold text-base-content">Tom Anderson</div>
+                    <div class="text-sm text-base-content/80">CTO, RemoteWork Solutions • 50K+ users</div>
                   </div>
                 </div>
-                <div class="mt-4 flex items-center text-xs text-gray-500">
-                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="mt-4 flex items-center text-xs text-base-content/70">
+                  <svg class="w-4 h-4 mr-1 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   Fast Growth • MVP launched early
@@ -1143,12 +1137,12 @@
                 <div class="mb-6">
                   <div class="flex mb-4">
                     <% 5.times do %>
-                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     <% end %>
                   </div>
-                  <p class="text-gray-700 leading-relaxed italic">
+                  <p class="text-base-content/90 leading-relaxed italic">
                     "FlukeBase's vetting process ensures you're working with serious, committed people. No time wasters - just dedicated professionals ready to build something great."
                   </p>
                 </div>
@@ -1157,12 +1151,12 @@
                     K
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900">Kevin Liu</div>
-                    <div class="text-sm text-gray-600">Founder, AI Analytics • YC Alumni</div>
+                    <div class="font-semibold text-base-content">Kevin Liu</div>
+                    <div class="text-sm text-base-content/80">Founder, AI Analytics • YC Alumni</div>
                   </div>
                 </div>
-                <div class="mt-4 flex items-center text-xs text-gray-500">
-                  <svg class="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="mt-4 flex items-center text-xs text-base-content/70">
+                  <svg class="w-4 h-4 mr-1 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                   YC Graduate • Quality network advocate
@@ -1174,22 +1168,22 @@
 
         <!-- Testimonial Navigation -->
         <div class="flex justify-center mt-12 space-x-4">
-          <button class="w-3 h-3 rounded-full bg-blue-500 transition-all duration-300" data-testimonials-target="dot" data-action="click->testimonials#showSlide" data-slide="0"></button>
-          <button class="w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300" data-testimonials-target="dot" data-action="click->testimonials#showSlide" data-slide="1"></button>
-          <button class="w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300" data-testimonials-target="dot" data-action="click->testimonials#showSlide" data-slide="2"></button>
+          <button class="w-3 h-3 rounded-full bg-primary transition-all duration-300" data-testimonials-target="dot" data-action="click->testimonials#showSlide" data-slide="0"></button>
+          <button class="w-3 h-3 rounded-full bg-base-300 hover:bg-base-content/40 transition-all duration-300" data-testimonials-target="dot" data-action="click->testimonials#showSlide" data-slide="1"></button>
+          <button class="w-3 h-3 rounded-full bg-base-300 hover:bg-base-content/40 transition-all duration-300" data-testimonials-target="dot" data-action="click->testimonials#showSlide" data-slide="2"></button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Comprehensive FAQ Section -->
-  <div class="bg-gradient-to-br from-gray-50 to-blue-50 py-24 sm:py-32" data-controller="faq">
+  <!-- Comprehensive FAQ Section - DaisyUI Collapse with Radio Buttons -->
+  <div class="bg-gradient-to-br from-gray-50 to-blue-50 py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-3xl text-center mb-16">
-        <h2 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-6">
+        <h2 class="text-4xl font-bold tracking-tight text-base-content sm:text-5xl mb-6">
           Frequently Asked Questions
         </h2>
-        <p class="text-xl leading-8 text-gray-600">
+        <p class="text-xl leading-8 text-base-content/80">
           Everything you need to know about building your dream team on FlukeBase.
         </p>
       </div>
@@ -1197,18 +1191,14 @@
       <div class="mx-auto max-w-4xl">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div class="space-y-6">
-            <!-- FAQ Item 1 -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100" data-faq-target="item">
-              <button class="flex w-full items-center justify-between text-left" data-action="click->faq#toggle" data-faq-target="trigger">
-                <h3 class="text-lg font-semibold text-gray-900">How does the matching algorithm work?</h3>
-                <div class="ml-6 flex-shrink-0">
-                  <svg class="h-6 w-6 transform transition-transform duration-200" data-faq-target="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
-              <div class="mt-4 hidden" data-faq-target="content">
-                <p class="text-gray-600 leading-relaxed">
+            <!-- FAQ Item 1 - DaisyUI Collapse with Radio Button -->
+            <div class="collapse collapse-arrow bg-white rounded-2xl shadow-lg border border-base-300">
+              <input type="radio" name="faq-accordion" id="faq-1">
+              <label for="faq-1" class="collapse-title text-lg font-semibold cursor-pointer">
+                How does the matching algorithm work?
+              </label>
+              <div class="collapse-content">
+                <p class="text-base-content/80 leading-relaxed">
                   Our AI-powered algorithm analyzes over 50 data points including expertise, industry experience, working style,
                   availability, and past collaboration success rates. We also factor in personality compatibility, communication
                   preferences, and project requirements to ensure the best possible matches.
@@ -1217,17 +1207,13 @@
             </div>
 
             <!-- FAQ Item 2 -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100" data-faq-target="item">
-              <button class="flex w-full items-center justify-between text-left" data-action="click->faq#toggle" data-faq-target="trigger">
-                <h3 class="text-lg font-semibold text-gray-900">What's included in the structured agreements?</h3>
-                <div class="ml-6 flex-shrink-0">
-                  <svg class="h-6 w-6 transform transition-transform duration-200" data-faq-target="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
-              <div class="mt-4 hidden" data-faq-target="content">
-                <p class="text-gray-600 leading-relaxed">
+            <div class="collapse collapse-arrow bg-white rounded-2xl shadow-lg border border-base-300">
+              <input type="radio" name="faq-accordion" id="faq-2">
+              <label for="faq-2" class="collapse-title text-lg font-semibold cursor-pointer">
+                What's included in the structured agreements?
+              </label>
+              <div class="collapse-content">
+                <p class="text-base-content/80 leading-relaxed">
                   All agreements include clear role definitions, milestone timelines, contribution expectations,
                   compensation terms, intellectual property clauses, exit provisions, and dispute resolution mechanisms.
                   Our legal team has reviewed all templates to ensure compliance.
@@ -1236,17 +1222,13 @@
             </div>
 
             <!-- FAQ Item 3 -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100" data-faq-target="item">
-              <button class="flex w-full items-center justify-between text-left" data-action="click->faq#toggle" data-faq-target="trigger">
-                <h3 class="text-lg font-semibold text-gray-900">How much does FlukeBase cost?</h3>
-                <div class="ml-6 flex-shrink-0">
-                  <svg class="h-6 w-6 transform transition-transform duration-200" data-faq-target="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
-              <div class="mt-4 hidden" data-faq-target="content">
-                <p class="text-gray-600 leading-relaxed">
+            <div class="collapse collapse-arrow bg-white rounded-2xl shadow-lg border border-base-300">
+              <input type="radio" name="faq-accordion" id="faq-3">
+              <label for="faq-3" class="collapse-title text-lg font-semibold cursor-pointer">
+                How much does FlukeBase cost?
+              </label>
+              <div class="collapse-content">
+                <p class="text-base-content/80 leading-relaxed">
                   FlukeBase is free to join and start building your profile. For advisory agreements, we charge a small
                   transaction fee (5%) only when payments are made. For partnership agreements, we retain a 2% equity stake
                   in exchange for ongoing mediation and tracking services.
@@ -1255,17 +1237,13 @@
             </div>
 
             <!-- FAQ Item 4 -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100" data-faq-target="item">
-              <button class="flex w-full items-center justify-between text-left" data-action="click->faq#toggle" data-faq-target="trigger">
-                <h3 class="text-lg font-semibold text-gray-900">Can I both lead projects and contribute to others?</h3>
-                <div class="ml-6 flex-shrink-0">
-                  <svg class="h-6 w-6 transform transition-transform duration-200" data-faq-target="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
-              <div class="mt-4 hidden" data-faq-target="content">
-                <p class="text-gray-600 leading-relaxed">
+            <div class="collapse collapse-arrow bg-white rounded-2xl shadow-lg border border-base-300">
+              <input type="radio" name="faq-accordion" id="faq-4">
+              <label for="faq-4" class="collapse-title text-lg font-semibold cursor-pointer">
+                Can I both lead projects and contribute to others?
+              </label>
+              <div class="collapse-content">
+                <p class="text-base-content/80 leading-relaxed">
                   Absolutely! Many of our most successful users engage in multiple ways. You might be advising other
                   project leaders while seeking a partner for your own venture. Our platform is designed to handle
                   multiple active relationships and collaboration types seamlessly.
@@ -1276,17 +1254,13 @@
 
           <div class="space-y-6">
             <!-- FAQ Item 5 -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100" data-faq-target="item">
-              <button class="flex w-full items-center justify-between text-left" data-action="click->faq#toggle" data-faq-target="trigger">
-                <h3 class="text-lg font-semibold text-gray-900">What happens if a partnership doesn't work out?</h3>
-                <div class="ml-6 flex-shrink-0">
-                  <svg class="h-6 w-6 transform transition-transform duration-200" data-faq-target="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
-              <div class="mt-4 hidden" data-faq-target="content">
-                <p class="text-gray-600 leading-relaxed">
+            <div class="collapse collapse-arrow bg-white rounded-2xl shadow-lg border border-base-300">
+              <input type="radio" name="faq-accordion" id="faq-5">
+              <label for="faq-5" class="collapse-title text-lg font-semibold cursor-pointer">
+                What happens if a partnership doesn't work out?
+              </label>
+              <div class="collapse-content">
+                <p class="text-base-content/80 leading-relaxed">
                   All agreements include clear exit clauses and dispute resolution mechanisms. Our mediation team provides
                   neutral third-party support to resolve issues. If partnerships end, intellectual property, equity vesting,
                   and compensation are handled according to pre-agreed terms.
@@ -1295,17 +1269,13 @@
             </div>
 
             <!-- FAQ Item 6 -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100" data-faq-target="item">
-              <button class="flex w-full items-center justify-between text-left" data-action="click->faq#toggle" data-faq-target="trigger">
-                <h3 class="text-lg font-semibold text-gray-900">How do you verify advisors and collaborators?</h3>
-                <div class="ml-6 flex-shrink-0">
-                  <svg class="h-6 w-6 transform transition-transform duration-200" data-faq-target="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
-              <div class="mt-4 hidden" data-faq-target="content">
-                <p class="text-gray-600 leading-relaxed">
+            <div class="collapse collapse-arrow bg-white rounded-2xl shadow-lg border border-base-300">
+              <input type="radio" name="faq-accordion" id="faq-6">
+              <label for="faq-6" class="collapse-title text-lg font-semibold cursor-pointer">
+                How do you verify advisors and collaborators?
+              </label>
+              <div class="collapse-content">
+                <p class="text-base-content/80 leading-relaxed">
                   We have a comprehensive verification process including LinkedIn integration, reference checks, portfolio
                   review, and past collaboration history. Verified users receive trust badges and higher visibility in
                   search results. All financial transactions are secured and insured.
@@ -1314,17 +1284,13 @@
             </div>
 
             <!-- FAQ Item 7 -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100" data-faq-target="item">
-              <button class="flex w-full items-center justify-between text-left" data-action="click->faq#toggle" data-faq-target="trigger">
-                <h3 class="text-lg font-semibold text-gray-900">Is my data and project information secure?</h3>
-                <div class="ml-6 flex-shrink-0">
-                  <svg class="h-6 w-6 transform transition-transform duration-200" data-faq-target="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
-              <div class="mt-4 hidden" data-faq-target="content">
-                <p class="text-gray-600 leading-relaxed">
+            <div class="collapse collapse-arrow bg-white rounded-2xl shadow-lg border border-base-300">
+              <input type="radio" name="faq-accordion" id="faq-7">
+              <label for="faq-7" class="collapse-title text-lg font-semibold cursor-pointer">
+                Is my data and project information secure?
+              </label>
+              <div class="collapse-content">
+                <p class="text-base-content/80 leading-relaxed">
                   Yes, we use enterprise-grade security including end-to-end encryption, SOC 2 compliance, and GDPR
                   protection. All sensitive project information is encrypted and only shared with authorized participants.
                   We never sell your data or share it with third parties.
@@ -1333,17 +1299,13 @@
             </div>
 
             <!-- FAQ Item 8 -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100" data-faq-target="item">
-              <button class="flex w-full items-center justify-between text-left" data-action="click->faq#toggle" data-faq-target="trigger">
-                <h3 class="text-lg font-semibold text-gray-900">Can I transition from advisor to partner?</h3>
-                <div class="ml-6 flex-shrink-0">
-                  <svg class="h-6 w-6 transform transition-transform duration-200" data-faq-target="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
-              <div class="mt-4 hidden" data-faq-target="content">
-                <p class="text-gray-600 leading-relaxed">
+            <div class="collapse collapse-arrow bg-white rounded-2xl shadow-lg border border-base-300">
+              <input type="radio" name="faq-accordion" id="faq-8">
+              <label for="faq-8" class="collapse-title text-lg font-semibold cursor-pointer">
+                Can I transition from advisor to partner?
+              </label>
+              <div class="collapse-content">
+                <p class="text-base-content/80 leading-relaxed">
                   This is one of our most popular features! About 35% of successful partnerships start as
                   advisory relationships. We provide guided transition workflows, updated agreement templates, and equity conversion
                   tools to make the process seamless and legally sound.
@@ -1356,15 +1318,15 @@
         <!-- Contact Support -->
         <div class="mt-16 text-center">
           <div class="inline-flex flex-col items-center space-y-4 bg-white rounded-2xl p-8 border border-blue-200">
-            <h3 class="text-xl font-semibold text-gray-900">Still have questions?</h3>
-            <p class="text-gray-600 text-center max-w-md">
+            <h3 class="text-xl font-semibold text-base-content">Still have questions?</h3>
+            <p class="text-base-content/80 text-center max-w-md">
               Our team is here to help you succeed. Get personalized answers to your questions.
             </p>
             <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-              <button class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+              <button class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary/90 transition-colors">
                 Chat with Support
               </button>
-              <button class="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+              <button class="inline-flex items-center px-6 py-3 border border-base-300 text-sm font-medium rounded-lg text-base-content/90 bg-base-100 hover:bg-base-200 transition-colors">
                 Schedule Call
               </button>
             </div>
@@ -1390,54 +1352,54 @@
           dream team?
         </span>
       </h2>
-      <p class="mx-auto mt-6 max-w-2xl text-xl leading-8 text-gray-200">
+      <p class="mx-auto mt-6 max-w-2xl text-xl leading-8 text-base-content/50">
         Join thousands of ambitious people who are building successful ventures together.
         Start your collaboration journey today.
       </p>
 
       <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6">
         <% if user_signed_in? %>
-          <%= link_to dashboard_path, class: "group relative inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-semibold text-gray-900 shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-white/25" do %>
+          <%= link_to dashboard_path, class: "group relative inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-semibold text-base-content shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-white/25" do %>
             <span class="relative z-10">Go to Dashboard</span>
             <svg class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
           <% end %>
         <% else %>
-          <%= link_to new_user_registration_path, class: "group relative inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-semibold text-gray-900 shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-white/25" do %>
+          <%= link_to new_user_registration_path, class: "group relative inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-semibold text-base-content shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-white/25" do %>
             <span class="relative z-10">Start Building Today</span>
             <svg class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
           <% end %>
-          <%= link_to "Sign In", new_user_session_path, class: "inline-flex items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-white/20 hover:scale-105" %>
+          <%= link_to "Sign In", new_user_session_path, class: "inline-flex items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-base-100/20 hover:scale-105" %>
         <% end %>
       </div>
 
       <!-- Trust Indicators -->
       <div class="mt-16 flex flex-col items-center px-4">
-        <div class="flex flex-wrap items-center justify-center space-x-4 sm:space-x-6 text-gray-300 text-sm mb-4">
+        <div class="flex flex-wrap items-center justify-center space-x-4 sm:space-x-6 text-base-content/60 text-sm mb-4">
           <div class="flex items-center space-x-2 mb-2 sm:mb-0">
-            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
             <span>Free to start</span>
           </div>
           <div class="flex items-center space-x-2 mb-2 sm:mb-0">
-            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
             <span>No credit card required</span>
           </div>
           <div class="flex items-center space-x-2">
-            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
             <span>Setup in 5 minutes</span>
           </div>
         </div>
 
-        <p class="text-sm text-gray-400">
+        <p class="text-sm text-base-content/60">
           Join 1000+ builders who trust FlukeBase for their collaborations
         </p>
       </div>
@@ -1448,7 +1410,7 @@
   <div id="demo-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm" data-controller="modal">
     <div class="relative w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl" data-modal-target="content">
       <!-- Modal Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <div class="flex items-center justify-between p-6 border-b border-base-300">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -1456,11 +1418,11 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-xl font-semibold text-gray-900">FlukeBase Demo</h3>
-            <p class="text-sm text-gray-500">See how our platform works</p>
+            <h3 class="text-xl font-semibold text-base-content">FlukeBase Demo</h3>
+            <p class="text-sm text-base-content/70">See how our platform works</p>
           </div>
         </div>
-        <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" data-action="click->modal#close">
+        <button type="button" class="text-base-content/60 hover:text-base-content/80 transition-colors" data-action="click->modal#close">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -1476,21 +1438,21 @@
                 <path d="M8 5v10l7-5-7-5z" />
               </svg>
             </div>
-            <h4 class="text-2xl font-bold text-gray-900 mb-2">Demo Coming Soon!</h4>
-            <p class="text-gray-600 max-w-md mx-auto">
+            <h4 class="text-2xl font-bold text-base-content mb-2">Demo Coming Soon!</h4>
+            <p class="text-base-content/80 max-w-md mx-auto">
               We're putting the finishing touches on our product demo video. It will be available very soon to show you exactly how FlukeBase can help you build your dream team.
             </p>
           </div>
         </div>
 
         <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-          <button type="button" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg hover:scale-105 transition-all duration-200" data-action="click->modal#close">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button type="button" class="btn btn-primary gap-2" data-action="click->modal#close">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12" />
             </svg>
             Get Started Instead
           </button>
-          <button type="button" class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200" data-action="click->modal#close">
+          <button type="button" class="btn btn-ghost gap-2" data-action="click->modal#close">
             Close
           </button>
         </div>
@@ -1646,7 +1608,7 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-white/20 hover:scale-105;
+    @apply inline-flex items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm px-6 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-base-100/20 hover:scale-105;
   }
 
   /* Loading states */

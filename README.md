@@ -1,14 +1,15 @@
 # FlukeBase
 
-FlukeBase is a Rails 8.0.2 collaborative platform connecting entrepreneurs, mentors, and co-founders through structured agreements, project management, and integrated time tracking.
+FlukeBase is a Rails 8.0.4 collaborative platform connecting entrepreneurs, mentors, and co-founders through structured agreements, project management, and integrated time tracking.
 
 ## 🚀 Quick Start
 
 ### Requirements
-- Ruby 3.2.1+
+- Ruby 3.4.4 (managed via asdf)
+- Node.js 24.8.0 (managed via asdf)
 - PostgreSQL 16+
-- Node.js 20+
 - Git
+- asdf (version manager)
 
 ### Development Setup
 
@@ -25,7 +26,7 @@ rails db:migrate
 rails db:seed
 
 # Start development server
-rails server
+bin/dev
 ```
 
 Visit `http://localhost:3000` to access the application.
@@ -69,7 +70,9 @@ npm run lint:fix
 ## 🏗️ Architecture
 
 ### Technology Stack
-- **Backend**: Rails 8.0.2 with multi-database architecture
+- **Backend**: Rails 8.0.4 with multi-database architecture
+- **Ruby**: 3.4.4 (managed via asdf)
+- **Node.js**: 24.8.0 (managed via asdf, required for Tailwind CSS)
 - **Frontend**: Turbo-Rails, Stimulus, TailwindCSS
 - **Database**: PostgreSQL (primary, cache, queue, cable)
 - **Authentication**: Devise
@@ -232,4 +235,4 @@ kamal app logs                  # View application logs
 
 ---
 
-**Version**: Rails 8.0.2 | **Ruby**: 3.2.1 | **Node**: 20+ | **Database**: PostgreSQL 16
+**Version**: Rails 8.0.4 | **Ruby**: 3.4.4 | **Node**: 24.8.0 | **Database**: PostgreSQL 16

@@ -23,5 +23,16 @@ module FlukeBase
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Security headers
+    config.action_dispatch.default_headers["Permissions-Policy"] = "interest-cohort=()"
+    config.action_dispatch.default_headers["X-Frame-Options"] = "DENY"
+
+    # Rate limiting and attack protection
+    config.middleware.use Rack::Attack
+
+    # ViewComponent configuration
+    config.view_component.generate.sidecar = false
+    config.view_component.generate.stimulus_controller = false
   end
 end

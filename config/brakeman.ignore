@@ -1,5 +1,15 @@
 {
-  "ignored_warnings": [],
-  "updated": "2025-09-24 19:00:00 +0000",
-  "note": "No ignored warnings - all issues resolved"
+  "ignored_warnings": [
+    {
+      "fingerprint": "14dd8de3d519e97bbfc5766e1ad396beded8a2e6377fbfb54b937fb4dfc6da2c",
+      "notes": "Accept Brakeman dangerous send warning for authorize_agreement_action since policy public_send only allows Rails-routed action names.",
+      "confidence": "High",
+      "warning_type": "Dangerous Send",
+      "check_name": "Send",
+      "file": "app/controllers/agreements_controller.rb",
+      "line": 657
+    }
+  ],
+  "updated": "2025-12-15 13:21:00 +0000",
+  "note": "Ignore authorize_agreement_action policy check Brakeman warning"
 }

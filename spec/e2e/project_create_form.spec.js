@@ -5,9 +5,10 @@ test('create project via form with required fields', async ({ page, login }) => 
 
   await page.goto('/projects/new');
   const name = `E2E Form Project ${Date.now()}`;
-  await page.getByLabel('Name').fill(name);
+  // Use specific ID selectors to avoid ambiguity with stealth fields
+  await page.locator('#project_name').fill(name);
   await page.locator('#project_stage').selectOption('idea');
-  await page.getByLabel('Description').fill('Project created by Playwright form test');
+  await page.locator('#project_description').fill('Project created by Playwright form test');
 
   await page.getByRole('button', { name: 'Create Project' }).click();
 

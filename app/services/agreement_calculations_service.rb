@@ -1,4 +1,8 @@
-class AgreementCalculationsService
+# frozen_string_literal: true
+
+# Service for calculating agreement costs and statistics
+# Query/calculation service - returns direct values
+class AgreementCalculationsService < ApplicationService
   def initialize(agreement)
     @agreement = agreement
   end

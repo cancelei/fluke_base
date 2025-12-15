@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nord">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page Not Found - FlukeBase</title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+</head>
+
+<body class="bg-base-200">
+  <div class="hero min-h-screen">
+    <div class="hero-content text-center">
+      <div class="max-w-2xl">
+        <div class="mockup-browser border bg-base-300 shadow-xl mb-8">
+          <div class="mockup-browser-toolbar">
+            <div class="input border border-base-content/20">https://flukebase.com/missing-page</div>
+          </div>
+          <div class="flex justify-center px-4 py-16 bg-base-200">
+            <h1 class="text-9xl font-bold text-primary">404</h1>
+          </div>
+        </div>
+
+        <h2 class="text-5xl font-bold mb-4">Page Not Found</h2>
+        <p class="text-lg text-base-content/70 mb-8">
+          Sorry, we couldn't find the page you're looking for. The link might be broken, or the page may have been removed.
+        </p>
+
+        <div class="flex gap-4 justify-center flex-wrap">
+          <a href="/" class="btn btn-primary min-h-[44px] sm:min-h-[48px]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Go Home
+          </a>
+          <button onclick="window.history.back()" class="btn btn-outline min-h-[44px] sm:min-h-[48px]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Go Back
+          </button>
+        </div>
+
+        <div class="divider my-8"></div>
+
+        <div class="text-sm text-base-content/60">
+          <p>If you believe this is an error, please contact support.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

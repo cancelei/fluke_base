@@ -1,25 +1,40 @@
-<h2>Change your password</h2>
-
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
-  <%= f.hidden_field :reset_password_token %>
-
-  <div class="field">
-    <%= f.label :password, "New password" %><br>
-    <% if @minimum_password_length %>
-      <em>(<%= @minimum_password_length %> characters minimum)</em><br>
-    <% end %>
-    <%= f.password_field :password, autofocus: true, autocomplete: "new-password" %>
+<div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h2 class="mt-6 text-center text-3xl font-bold tracking-tight">Change your password</h2>
+    <p class="mt-2 text-center text-sm text-base-content/70">
+      Enter your new password below.
+    </p>
   </div>
 
-  <div class="field">
-    <%= f.label :password_confirmation, "Confirm new password" %><br>
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-  </div>
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, class: "space-y-4" }) do |f| %>
+          <%= render "devise/shared/error_messages", resource: resource %>
+          <%= f.hidden_field :reset_password_token %>
 
-  <div class="actions">
-    <%= f.submit "Change my password" %>
-  </div>
-<% end %>
+          <fieldset class="fieldset">
+            <%= f.label :password, "New password", class: "fieldset-legend" %>
+            <%= f.password_field :password, autofocus: true, autocomplete: "new-password", class: "input w-full" %>
+            <% if @minimum_password_length %>
+              <p class="text-xs text-base-content/60 mt-1"><%= @minimum_password_length %> characters minimum</p>
+            <% end %>
+          </fieldset>
 
-<%= render "devise/shared/links" %>
+          <fieldset class="fieldset">
+            <%= f.label :password_confirmation, "Confirm new password", class: "fieldset-legend" %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "input w-full" %>
+          </fieldset>
+
+          <div class="mt-6">
+            <%= f.submit "Change my password", class: "btn btn-primary w-full" %>
+          </div>
+        <% end %>
+
+        <div class="divider my-4"></div>
+
+        <%= render "devise/shared/links" %>
+      </div>
+    </div>
+  </div>
+</div>

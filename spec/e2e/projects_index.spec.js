@@ -10,6 +10,7 @@ test('projects index shows newly created project', async ({ page, login }) => {
   // Visit projects index
   await page.goto('/projects');
   await expect(page.getByRole('heading', { name: 'My Projects' })).toBeVisible();
-  await expect(page.getByRole('link', { name })).toBeVisible();
+  // Use exact: true to match only the project title link, not the "View" button
+  await expect(page.getByRole('link', { name, exact: true })).toBeVisible();
 });
 

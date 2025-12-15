@@ -12,6 +12,9 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 require 'rspec/rails'
 require 'shoulda-matchers'
 require 'rails-controller-testing'
+require 'view_component/test_helpers'
+require 'capybara/rspec'
+require 'pundit/matchers'
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -116,6 +119,10 @@ RSpec.configure do |config|
 
   # Configure FactoryBot
   config.include FactoryBot::Syntax::Methods
+
+  # Configure ViewComponent test helpers
+  config.include ViewComponent::TestHelpers, type: :component
+  config.include Capybara::RSpecMatchers, type: :component
 
   # Configure Shoulda Matchers
   config.include Shoulda::Matchers::ActiveModel, type: :model

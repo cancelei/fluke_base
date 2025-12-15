@@ -9,15 +9,22 @@ class Logger {
     // Check environment from meta tag or fallback to hostname
     const envMeta = document.querySelector('meta[name="environment"]');
     const environment = envMeta ? envMeta.getAttribute('content') : null;
-    this.isProduction = environment === 'production' ||
-                      (environment === null && window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1'));
+
+    const isLocalHost =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname.includes('127.0.0.1');
+
+    this.isProduction =
+      environment === 'production' || (environment === null && !isLocalHost);
   }
 
   /**
    * Log controller lifecycle events
    */
   controllerLifecycle(controllerName, action, details = {}) {
-    if (this.isProduction) return;
+    if (this.isProduction) {
+      return;
+    }
 
     const message = `[${this.context}] ${controllerName} ${action}`;
     const data = { controller: controllerName, action, ...details };
@@ -29,7 +36,9 @@ class Logger {
    * Log WebSocket connection events
    */
   websocketEvent(channelName, event, details = {}) {
-    if (this.isProduction) return;
+    if (this.isProduction) {
+      return;
+    }
 
     const message = `[${this.context}] WebSocket ${channelName} ${event}`;
     const data = { channel: channelName, event, ...details };
@@ -41,7 +50,9 @@ class Logger {
    * Log audio/media events
    */
   mediaEvent(action, details = {}) {
-    if (this.isProduction) return;
+    if (this.isProduction) {
+      return;
+    }
 
     const message = `[${this.context}] Audio ${action}`;
     const data = { action, ...details };
@@ -53,7 +64,9 @@ class Logger {
    * Log form validation and submission events
    */
   formEvent(action, details = {}) {
-    if (this.isProduction) return;
+    if (this.isProduction) {
+      return;
+    }
 
     const message = `[${this.context}] Form ${action}`;
     const data = { action, ...details };
@@ -65,10 +78,17 @@ class Logger {
    * Log errors with context
    */
   error(context, error, details = {}) {
-    if (this.isProduction) return;
+    if (this.isProduction) {
+      return;
+    }
 
     const message = `[${this.context}] ERROR in ${context}`;
-    const data = { context, error: error.message || error, stack: error.stack, ...details };
+    const data = {
+      context,
+      error: error.message || error,
+      stack: error.stack,
+      ...details
+    };
 
     console.error(`%c${message}`, 'color: #EF4444; font-weight: bold;', data);
   }
@@ -77,7 +97,9 @@ class Logger {
    * Log warnings with context
    */
   warning(context, message, details = {}) {
-    if (this.isProduction) return;
+    if (this.isProduction) {
+      return;
+    }
 
     const logMessage = `[${this.context}] WARNING in ${context}: ${message}`;
     const data = { context, message, ...details };
@@ -89,7 +111,9 @@ class Logger {
    * Log performance metrics
    */
   performance(operation, duration, details = {}) {
-    if (this.isProduction) return;
+    if (this.isProduction) {
+      return;
+    }
 
     const message = `[${this.context}] Performance: ${operation} took ${duration}ms`;
     const data = { operation, duration, ...details };
@@ -101,7 +125,9 @@ class Logger {
    * Log user interactions
    */
   userInteraction(action, element, details = {}) {
-    if (this.isProduction) return;
+    if (this.isProduction) {
+      return;
+    }
 
     const message = `[${this.context}] User ${action}`;
     const data = { action, element: element?.tagName || element, ...details };

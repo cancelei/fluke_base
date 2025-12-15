@@ -1,39 +1,94 @@
-<div id="time_log_<%= time_log.id %>" class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors">
-  <div class="flex items-center justify-between">
-    <div class="flex-1">
-      <div class="flex items-center space-x-2">
-        <div class="text-sm font-medium text-gray-900">
-          <% if time_log.milestone %>
-            <%= time_log.milestone.title %>
-          <% else %>
-            Manual Entry
+<div id="time_log_<%= time_log.id %>" class="collapse collapse-arrow bg-base-100 border-b border-base-300">
+  <input type="checkbox">
+  <div class="collapse-title px-4 py-3">
+    <div class="flex items-center justify-between">
+      <div class="flex-1">
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Milestone Title with Icon -->
+          <div class="flex items-center gap-1">
+            <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <span class="text-sm font-medium text-base-content">
+              <% if time_log.milestone %>
+                <%= time_log.milestone.title %>
+              <% else %>
+                Manual Entry
+              <% end %>
+            </span>
+          </div>
+
+          <!-- Badges -->
+          <% if time_log.manual_entry %>
+            <%= render Ui::BadgeComponent.new(text: "Manual", variant: :success, size: :sm) %>
+          <% end %>
+          <%= render Ui::BadgeComponent.new(text: time_log.status.humanize, status: time_log.status, size: :sm) %>
+
+          <!-- Hours Badge with Tooltip -->
+          <% if time_log.hours_spent && time_log.hours_spent > 0 %>
+            <div class="tooltip" data-tip="Total time spent">
+              <div class="badge badge-primary gap-1">
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <%= time_log.hours_spent %>h
+              </div>
+            </div>
           <% end %>
         </div>
 
-        <% if time_log.manual_entry %>
-          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            Manual
-          </span>
-        <% end %>
+        <div class="mt-1 text-xs text-base-content/60">
+          <%= time_log.started_at&.strftime("%b %d, %Y %I:%M %p") || "-" %>
+          <% if time_log.ended_at %>
+            → <%= time_log.ended_at.strftime("%I:%M %p") %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= time_log.status == "completed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800" %>">
-          <%= time_log.status.humanize %>
-        </span>
+  <div class="collapse-content bg-base-200/50">
+    <div class="space-y-3 pt-2">
+      <!-- Time Details Stats -->
+      <div class="stats shadow w-full">
+        <div class="stat py-3 px-4">
+          <div class="stat-title text-xs">Started</div>
+          <div class="stat-value text-sm"><%= time_log.started_at&.strftime("%b %d, %I:%M %p") || "-" %></div>
+        </div>
+        <div class="stat py-3 px-4">
+          <div class="stat-title text-xs">Ended</div>
+          <div class="stat-value text-sm"><%= time_log.ended_at&.strftime("%b %d, %I:%M %p") || "-" %></div>
+        </div>
+        <div class="stat py-3 px-4">
+          <div class="stat-title text-xs">Duration</div>
+          <div class="stat-value text-sm text-primary"><%= time_log.hours_spent || 0 %>h</div>
+        </div>
       </div>
 
-      <div class="mt-1 text-xs text-gray-500 space-x-4">
-        <span>Started: <%= time_log.started_at&.strftime("%b %d, %Y %I:%M %p") || "-" %></span>
-        <% if time_log.ended_at %>
-          <span>Ended: <%= time_log.ended_at.strftime("%b %d, %Y %I:%M %p") %></span>
-        <% end %>
-        <% if time_log.hours_spent && time_log.hours_spent > 0 %>
-          <span><%= time_log.hours_spent %>h</span>
-        <% end %>
-      </div>
-
+      <!-- Description if present -->
       <% if time_log.description.present? %>
-        <div class="mt-2 text-sm text-gray-600">
-          <%= simple_format(time_log.description) %>
+        <div class="alert alert-info">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div class="text-sm">
+            <%= simple_format(time_log.description) %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Milestone Progress (if applicable) -->
+      <% if time_log.milestone %>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-medium">Milestone:</span>
+          <div class="flex-1">
+            <div class="flex justify-between text-xs mb-1">
+              <span><%= time_log.milestone.title %></span>
+              <span class="badge badge-sm <%= time_log.milestone.status == "completed" ? "badge-success" : "badge-warning" %>">
+                <%= time_log.milestone.status.humanize %>
+              </span>
+            </div>
+          </div>
         </div>
       <% end %>
     </div>

@@ -1,30 +1,59 @@
-class AgreementStatusService
+# frozen_string_literal: true
+
+# Service for managing agreement status transitions
+# Returns Result types for explicit success/failure handling
+class AgreementStatusService < ApplicationService
   def initialize(agreement)
     @agreement = agreement
   end
 
+  # @return [Dry::Monads::Result] Success(agreement) or Failure(error)
   def accept!
-    return false unless @agreement.pending?
-    @agreement.update(status: Agreement::ACCEPTED)
+    return failure_result(:invalid_state, "Agreement must be pending to accept") unless @agreement.pending?
+
+    if @agreement.update(status: Agreement::ACCEPTED)
+      Success(@agreement)
+    else
+      failure_result(:update_failed, @agreement.errors.full_messages.to_sentence, errors: @agreement.errors)
+    end
   end
 
+  # @return [Dry::Monads::Result] Success(agreement) or Failure(error)
   def reject!
-    return false unless @agreement.pending?
-    @agreement.update(status: Agreement::REJECTED)
+    return failure_result(:invalid_state, "Agreement must be pending to reject") unless @agreement.pending?
+
+    if @agreement.update(status: Agreement::REJECTED)
+      Success(@agreement)
+    else
+      failure_result(:update_failed, @agreement.errors.full_messages.to_sentence, errors: @agreement.errors)
+    end
   end
 
+  # @return [Dry::Monads::Result] Success(agreement) or Failure(error)
   def complete!
-    return false unless @agreement.active?
-    @agreement.update(status: Agreement::COMPLETED)
+    return failure_result(:invalid_state, "Agreement must be active to complete") unless @agreement.active?
+
+    if @agreement.update(status: Agreement::COMPLETED)
+      Success(@agreement)
+    else
+      failure_result(:update_failed, @agreement.errors.full_messages.to_sentence, errors: @agreement.errors)
+    end
   end
 
+  # @return [Dry::Monads::Result] Success(agreement) or Failure(error)
   def cancel!
-    return false unless @agreement.pending?
-    @agreement.update(status: Agreement::CANCELLED)
+    return failure_result(:invalid_state, "Agreement must be pending to cancel") unless @agreement.pending?
+
+    if @agreement.update(status: Agreement::CANCELLED)
+      Success(@agreement)
+    else
+      failure_result(:update_failed, @agreement.errors.full_messages.to_sentence, errors: @agreement.errors)
+    end
   end
 
+  # @return [Dry::Monads::Result] Success(counter_agreement) or Failure(error)
   def counter_offer!(counter_agreement)
-    return false unless @agreement.pending?
+    return failure_result(:invalid_state, "Agreement must be pending to counter") unless @agreement.pending?
 
     # Mark this agreement as countered
     @agreement.update(status: Agreement::COUNTERED)
@@ -36,7 +65,11 @@ class AgreementStatusService
     end
     counter_agreement.status = Agreement::PENDING
 
-    counter_agreement.save
+    if counter_agreement.save
+      Success(counter_agreement)
+    else
+      failure_result(:save_failed, counter_agreement.errors.full_messages.to_sentence, errors: counter_agreement.errors)
+    end
   end
 
   # Returns the latest counter offer for this agreement

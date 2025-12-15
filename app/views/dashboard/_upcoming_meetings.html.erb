@@ -1,33 +1,61 @@
 <% cache([ current_user, "upcoming_meetings", @upcoming_meetings.maximum(:updated_at) ]) do %>
-  <div class="bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-gray-200/50 border border-gray-100 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-    <div class="px-6 py-6 sm:px-8 bg-gradient-to-r from-blue-50/50 to-purple-50/50">
-      <h3 class="text-lg font-semibold text-gray-900">Upcoming Meetings</h3>
-    </div>
-    <div class="border-t border-gray-200">
-      <ul role="list" class="divide-y divide-gray-200">
-        <% if @upcoming_meetings.present? %>
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body p-0">
+      <!-- Header -->
+      <div class="p-4 pb-0">
+        <h3 class="card-title text-lg">Upcoming Meetings</h3>
+      </div>
+
+      <!-- Content -->
+      <div class="divider my-2"></div>
+
+      <% if @upcoming_meetings.present? %>
+        <ul class="menu p-0">
           <% @upcoming_meetings.each do |meeting| %>
             <% cache([ meeting, current_user ]) do %>
-              <li class="px-6 py-5 sm:px-8 hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-purple-50/30 transition-all duration-200">
-                <div class="flex items-center justify-between">
-                  <p class="truncate text-sm font-semibold text-blue-600"><%= meeting.title %></p>
-                </div>
-                <div class="mt-3">
-                  <p class="text-sm text-gray-600"><%= meeting.description %></p>
-                </div>
-                <div class="mt-3 flex justify-between text-sm text-gray-500">
-                  <p><%= meeting.start_time.strftime("%b %d, %Y at %l:%M %p") %></p>
-                  <p><%= meeting.duration_in_minutes %> minutes</p>
+              <li>
+                <div class="flex flex-col w-full p-4 hover:bg-base-200 rounded-lg">
+                  <!-- Title -->
+                  <span class="font-semibold text-primary mb-1"><%= meeting.title %></span>
+
+                  <!-- Description -->
+                  <% if meeting.description.present? %>
+                    <p class="text-sm text-base-content/70 mb-3 line-clamp-2"><%= meeting.description %></p>
+                  <% end %>
+
+                  <!-- Meeting details -->
+                  <div class="flex flex-wrap items-center gap-3 text-sm">
+                    <div class="flex items-center gap-1 text-base-content/60">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span><%= meeting.start_time.strftime("%b %d, %Y") %></span>
+                    </div>
+                    <div class="flex items-center gap-1 text-base-content/60">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span><%= meeting.start_time.strftime("%l:%M %p") %></span>
+                    </div>
+                    <span class="badge badge-ghost badge-sm"><%= meeting.duration_in_minutes %> min</span>
+                  </div>
                 </div>
               </li>
             <% end %>
           <% end %>
-        <% else %>
-          <li class="px-6 py-8 sm:px-8 text-center">
-            <p class="text-sm text-gray-500">No upcoming meetings.</p>
-          </li>
-        <% end %>
-      </ul>
+        </ul>
+      <% else %>
+        <div class="text-center p-6">
+          <div class="avatar placeholder mb-4">
+            <div class="bg-base-200 text-base-content/40 rounded-full w-12">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
+          <p class="text-sm text-base-content/70">No upcoming meetings.</p>
+        </div>
+      <% end %>
     </div>
   </div>
 <% end %>

@@ -1,4 +1,4 @@
-<li class="px-6 py-4 hover:bg-gray-50">
+<li class="px-6 py-4 hover:bg-base-200">
   <div class="flex items-start">
     <div class="flex-shrink-0 h-10 w-10">
       <%= image_tag log.user&.avatar_url.presence || "https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png",
@@ -7,20 +7,20 @@
     </div>
     <div class="ml-4 flex-1 min-w-0">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-900 truncate">
+        <p class="text-sm font-medium text-base-content truncate">
           <%= log.user&.full_name || "Unknown User" %>
         </p>
-        <p class="ml-2 flex-shrink-0 whitespace-nowrap text-xs text-gray-500">
+        <p class="ml-2 flex-shrink-0 whitespace-nowrap text-xs text-base-content/60">
           <%= log.commit_date.strftime("%b %d, %Y %I:%M%p") if log.commit_date %>
         </p>
       </div>
-      <div class="mt-1 flex items-center text-sm text-gray-500">
+      <div class="mt-1 flex items-center text-sm text-base-content/60">
         <span class="truncate"><%= log.commit_sha %></span>
       </div>
-      <div class="mt-1 text-xs text-gray-500">
-        <span>+<%= log.lines_added %> / -<%= log.lines_removed %></span>
+      <div class="mt-1 text-xs text-base-content/60">
+        <span class="text-success">+<%= log.lines_added %></span> / <span class="text-error">-<%= log.lines_removed %></span>
       </div>
-      <div class="mt-1 text-xs text-gray-700">
+      <div class="mt-1 text-xs text-base-content/70">
         <%= log.commit_message %>
       </div>
     </div>

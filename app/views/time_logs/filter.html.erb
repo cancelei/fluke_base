@@ -4,13 +4,13 @@
 <div class="flex space-x-4 mb-6">
   <%= form_with url: filter_time_logs_path, method: :get, data: { turbo: true }, class: "flex space-x-2" do %>
     <div>
-      <%= select_tag :project_id, options_from_collection_for_select(@projects, :id, :name, @selected_project&.id), include_blank: "All Projects", class: "rounded border-gray-300" %>
+      <%= select_tag :project_id, options_from_collection_for_select(@projects, :id, :name, @selected_project&.id), include_blank: "All Projects", class: "select select-bordered" %>
     </div>
     <div>
-      <%= select_tag :user_id, options_from_collection_for_select(@users, :id, :first_name, @selected_user&.id), include_blank: "All Users", class: "rounded border-gray-300" %>
+      <%= select_tag :user_id, options_from_collection_for_select(@users, :id, :first_name, @selected_user&.id), include_blank: "All Users", class: "select select-bordered" %>
     </div>
     <div>
-      <%= submit_tag "Filter", class: "bg-indigo-600 text-white px-4 py-2 rounded" %>
+      <%= submit_tag "Filter", class: "btn btn-primary" %>
     </div>
   <% end %>
 </div>

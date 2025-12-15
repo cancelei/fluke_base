@@ -11,7 +11,7 @@ class ProfileController < ApplicationController
     @user = current_user
 
     # Debug logging
-    Rails.logger.debug "Social media params: #{user_params.slice(:linkedin, :x, :youtube, :facebook, :tiktok).inspect}"
+    Rails.logger.debug "Social media params: #{user_params.slice(:linkedin, :x, :youtube, :facebook, :tiktok, :instagram).inspect}"
 
     # Explicitly assign social media attributes to ensure they're updated
     @user.linkedin = user_params[:linkedin]
@@ -19,6 +19,7 @@ class ProfileController < ApplicationController
     @user.youtube = user_params[:youtube]
     @user.facebook = user_params[:facebook]
     @user.tiktok = user_params[:tiktok]
+    @user.instagram = user_params[:instagram]
 
     if @user.update(user_params)
       redirect_to profile_show_path, notice: "Profile was successfully updated."
@@ -30,6 +31,6 @@ class ProfileController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email, :avatar, :bio, :industry, :github_username, :github_token, :show_project_context_nav, :multi_project_tracking, :linkedin, :x, :youtube, :facebook, :tiktok, expertise: [])
+    params.require(:user).permit(:first_name, :last_name, :email, :avatar, :bio, :industry, :github_username, :github_token, :multi_project_tracking, :linkedin, :x, :youtube, :facebook, :tiktok, :instagram, expertise: [])
   end
 end

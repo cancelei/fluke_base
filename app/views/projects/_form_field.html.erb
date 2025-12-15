@@ -16,33 +16,30 @@
   label_text = local_assigns[:label] || field_name.to_s.humanize
   field_options = local_assigns[:options] || {}
   help_text = local_assigns[:help_text]
-  base_classes = "block w-full rounded-lg border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 %>
 
-<div class="sm:col-span-<%= col_span %>">
-  <%= form.label field_name, label_text, class: "block text-sm font-semibold text-gray-700 mb-2" %>
-  <div class="mt-1 flex <%= field_type == :text_area ? "items-start" : "items-center" %>">
+<fieldset class="fieldset sm:col-span-<%= col_span %>">
+  <%= form.label field_name, label_text, class: "fieldset-legend" %>
+  <div class="flex <%= field_type == :text_area ? "items-start" : "items-center" %> gap-2">
     <% case field_type %>
     <% when :text_field %>
-      <%= form.text_field field_name, field_options.merge(class: base_classes) %>
+      <%= form.text_field field_name, field_options.merge(class: "input input-bordered w-full") %>
     <% when :text_area %>
-      <%= form.text_area field_name, field_options.merge(class: base_classes, rows: field_options[:rows] || 3) %>
+      <%= form.text_area field_name, field_options.merge(class: "textarea textarea-bordered w-full", rows: field_options[:rows] || 3) %>
     <% when :select %>
       <%= form.select field_name,
                      field_options[:choices],
                      field_options[:select_options] || {},
-                     field_options.merge(class: base_classes).except(:choices, :select_options) %>
+                     field_options.merge(class: "select select-bordered w-full").except(:choices, :select_options) %>
     <% when :url_field %>
-      <div class="flex rounded-lg shadow-sm w-full">
-        <span class="inline-flex items-center rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 px-3 text-gray-500 sm:text-sm">
-          <%= field_options[:prefix] || "https://" %>
-        </span>
-        <%= form.text_field field_name, field_options.merge(class: "#{base_classes} rounded-l-none").except(:prefix) %>
-      </div>
+      <label class="input input-bordered flex items-center gap-2 w-full">
+        <span class="text-base-content/60"><%= field_options[:prefix] || "https://" %></span>
+        <%= form.text_field field_name, field_options.merge(class: "grow border-0 focus:ring-0 bg-transparent").except(:prefix) %>
+      </label>
     <% end %>
     <%= render_public_field_checkbox(form, field_name, project) %>
   </div>
   <% if help_text %>
-    <p class="mt-1 text-sm text-gray-500"><%= help_text %></p>
+    <p class="text-xs text-base-content/60 mt-1"><%= help_text %></p>
   <% end %>
-</div>
+</fieldset>

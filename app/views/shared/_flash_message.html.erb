@@ -5,15 +5,7 @@
   h(message.to_s)
    end %>
 
-<div class="rounded-md <%= type == :notice ? "bg-green-50" : "bg-red-50" %> p-4 mb-6">
-  <div class="flex">
-    <div class="flex-shrink-0">
-      <%= render "shared/icons/#{icon_partial}" %>
-    </div>
-    <div class="ml-3">
-      <p class="text-sm font-medium <%= type == :notice ? "text-green-800" : "text-red-800" %>">
-        <%= safe_message %>
-      </p>
-    </div>
-  </div>
+<div class="alert <%= type == :notice ? "alert-success" : "alert-error" %> mb-6">
+  <%= render "shared/icons/#{icon_partial}" %>
+  <span><%= safe_message %></span>
 </div>

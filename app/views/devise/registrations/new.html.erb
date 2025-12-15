@@ -1,132 +1,117 @@
 <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
   <div class="sm:mx-auto sm:w-full sm:max-w-md">
-    <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">Sign up</h2>
-    <p class="mt-2 text-center text-sm text-gray-600">
+    <h2 class="mt-6 text-center text-3xl font-bold tracking-tight">Sign up</h2>
+    <p class="mt-2 text-center text-sm text-base-content/70">
       Or
-      <%= link_to "sign in if you already have an account", new_session_path(resource_name), class: "font-medium text-indigo-600 hover:text-indigo-500" %>
+      <%= link_to "sign in if you already have an account", new_session_path(resource_name), class: "link link-primary font-medium" %>
     </p>
   </div>
 
   <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-    <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
-      <%= form_for(resource, as: resource_name, url: registration_path(resource_name),
-                   html: {
-                     class: "space-y-6",
-                     data: {
-                       controller: "form-submission",
-                       action: "submit->form-submission#submit turbo:load->form-submission#turboLoadEnd"
-                     }
-                   }) do |f| %>
-        <%= render "devise/shared/error_messages", resource: resource %>
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <%= form_for(resource, as: resource_name, url: registration_path(resource_name),
+                     html: {
+                       class: "space-y-4",
+                       data: {
+                         controller: "form-submission",
+                         action: "submit->form-submission#submit turbo:load->form-submission#turboLoadEnd"
+                       }
+                     }) do |f| %>
+          <%= render "devise/shared/error_messages", resource: resource %>
 
-        <div class="space-y-6">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <%= f.label :first_name, class: "block text-sm font-medium leading-6 text-gray-900" %>
-              <div class="mt-2">
-                <%= f.text_field :first_name, autofocus: true, class: "block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
-              </div>
-            </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <fieldset class="fieldset">
+              <%= f.label :first_name, "First name", class: "fieldset-legend" %>
+              <%= f.text_field :first_name, autofocus: true, class: "input input-bordered w-full" %>
+            </fieldset>
 
-            <div>
-              <%= f.label :last_name, class: "block text-sm font-medium leading-6 text-gray-900" %>
-              <div class="mt-2">
-                <%= f.text_field :last_name, class: "block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
-              </div>
-            </div>
+            <fieldset class="fieldset">
+              <%= f.label :last_name, "Last name", class: "fieldset-legend" %>
+              <%= f.text_field :last_name, class: "input input-bordered w-full" %>
+            </fieldset>
           </div>
 
-          <div>
-            <%= f.label :email, class: "block text-sm font-medium leading-6 text-gray-900" %>
-            <div class="mt-2">
-              <%= f.email_field :email, autocomplete: "email", class: "block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
-            </div>
-          </div>
+          <fieldset class="fieldset">
+            <%= f.label :email, "Email", class: "fieldset-legend" %>
+            <%= f.email_field :email, autocomplete: "email", class: "input input-bordered w-full" %>
+          </fieldset>
 
-          <div>
-            <%= f.label :github_username, "GitHub Username", class: "block text-sm font-medium leading-6 text-gray-900" %>
-            <div class="mt-2">
-              <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                <span class="flex select-none items-center pl-3 text-gray-500 sm:text-sm">github.com/</span>
-                <%= f.text_field :github_username, autocomplete: "github-username", class: "block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" %>
-              </div>
-              <p class="mt-1 text-sm text-gray-500">Your GitHub username (optional)</p>
-            </div>
-          </div>
+          <fieldset class="fieldset">
+            <%= f.label :github_username, "GitHub Username", class: "fieldset-legend" %>
+            <label class="input input-bordered flex items-center gap-2">
+              <span class="text-base-content/60">github.com/</span>
+              <%= f.text_field :github_username, autocomplete: "github-username", class: "grow border-0 focus:ring-0 bg-transparent", placeholder: "username" %>
+            </label>
+            <p class="text-xs text-base-content/60 mt-1">Your GitHub username (optional)</p>
+          </fieldset>
 
-          <div>
-            <%= f.label :github_token, "GitHub Personal Access Token", class: "block text-sm font-medium leading-6 text-gray-900" %>
-            <div class="mt-2">
-              <%= f.text_field :github_token, autocomplete: "off", class: "block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
-              <p class="mt-1 text-sm text-gray-500">Required for private repositories. <a href="https://github.com/settings/tokens/new?scopes=repo&description=FlukeBase" target="_blank" class="text-indigo-600 hover:text-indigo-500">Generate token</a> (select 'repo' scope)</p>
-            </div>
-          </div>
+          <fieldset class="fieldset">
+            <%= f.label :github_token, "GitHub Personal Access Token", class: "fieldset-legend" %>
+            <%= f.text_field :github_token, autocomplete: "off", class: "input input-bordered w-full" %>
+            <p class="text-xs text-base-content/60 mt-1">Required for private repositories. <a href="https://github.com/settings/tokens/new?scopes=repo&description=FlukeBase" target="_blank" class="link link-primary">Generate token</a> (select 'repo' scope)</p>
+          </fieldset>
 
-          <div>
-            <%= f.label :password, class: "block text-sm font-medium leading-6 text-gray-900" %>
-            <div class="mt-2">
-              <%= f.password_field :password, autocomplete: "new-password", class: "block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
-              <% if @minimum_password_length %>
-                <p class="mt-1 text-sm text-gray-500">
-                  <em>(<%= @minimum_password_length %> characters minimum)</em>
-                </p>
-              <% end %>
-            </div>
-          </div>
+          <fieldset class="fieldset">
+            <%= f.label :password, "Password", class: "fieldset-legend" %>
+            <%= f.password_field :password, autocomplete: "new-password", class: "input input-bordered w-full" %>
+            <% if @minimum_password_length %>
+              <p class="text-xs text-base-content/60 mt-1"><%= @minimum_password_length %> characters minimum</p>
+            <% end %>
+          </fieldset>
 
-          <div>
-            <%= f.label :password_confirmation, class: "block text-sm font-medium leading-6 text-gray-900" %>
-            <div class="mt-2">
-              <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "block w-full rounded-md border-0 py-1.5 px-3 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
-            </div>
-          </div>
+          <fieldset class="fieldset">
+            <%= f.label :password_confirmation, "Confirm password", class: "fieldset-legend" %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "input input-bordered w-full" %>
+          </fieldset>
 
           <div>
             <%= render "devise/shared/turnstile_widget" %>
           </div>
 
-          <div>
+          <div class="mt-6">
             <%= f.submit "Sign up",
                          data: { "form-submission-target": "submit" },
-                         class: "flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+                         class: "btn btn-primary w-full" %>
           </div>
+        <% end %>
+
+        <div class="divider my-6"></div>
+
+        <div>
+          <h3 class="text-lg font-semibold mb-4">What's next after signing up?</h3>
+          <p class="text-sm text-base-content/70 mb-6">Once you complete your profile, here's how FlukeBase will guide your journey:</p>
+
+          <ul class="steps steps-vertical w-full">
+            <li class="step step-primary" data-content="1">
+              <div class="text-left">
+                <span class="font-medium">Build your profile</span>
+                <p class="text-xs text-base-content/60">Tell us about your background, skills, and what you're looking for.</p>
+              </div>
+            </li>
+            <li class="step" data-content="2">
+              <div class="text-left">
+                <span class="font-medium">Get matched intentionally</span>
+                <p class="text-xs text-base-content/60">Based on your goals, we recommend projects and collaborators.</p>
+              </div>
+            </li>
+            <li class="step" data-content="3">
+              <div class="text-left">
+                <span class="font-medium">Explore opportunities</span>
+                <p class="text-xs text-base-content/60">Discover projects, chat with users, and join milestone-driven cycles.</p>
+              </div>
+            </li>
+            <li class="step" data-content="4">
+              <div class="text-left">
+                <span class="font-medium">Start building — together</span>
+                <p class="text-xs text-base-content/60">Work through focused cycles with clear outcomes and aligned incentives.</p>
+              </div>
+            </li>
+          </ul>
         </div>
-      <% end %>
 
-      <div class="mt-8 border-t border-gray-200 pt-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">🔜 What's next after signing up?</h3>
-        <p class="text-sm text-gray-600 mb-6">Once you complete your profile, here's how FlukeBase will guide your journey:</p>
-
-        <div class="space-y-6">
-          <div>
-            <h4 class="text-base font-medium text-gray-900 mb-2">🧩 1. Build your profile</h4>
-            <p class="text-sm text-gray-600">Tell us about your background, skills, and what you're looking for. Your profile helps us connect you with the right people and opportunities.</p>
-          </div>
-
-          <div>
-            <h4 class="text-base font-medium text-gray-900 mb-2">🔍 2. Get matched intentionally</h4>
-            <p class="text-sm text-gray-600">We don't do random matchmaking. Based on your goals and role, we recommend projects (for mentors/co-founders) or collaborators (for entrepreneurs).</p>
-          </div>
-
-          <div>
-            <h4 class="text-base font-medium text-gray-900 mb-2">🗺️ 3. Explore opportunities</h4>
-            <p class="text-sm text-gray-600 mb-2">Access our builder dashboard where you can:</p>
-            <ul class="list-disc list-inside text-sm text-gray-600 space-y-1 ml-4">
-              <li>Post or discover early-stage projects</li>
-              <li>Chat with other users</li>
-              <li>Join a milestone-driven cycle</li>
-              <li>Get support from our community and guides</li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="text-base font-medium text-gray-900 mb-2">🚀 4. Start building — together</h4>
-            <p class="text-sm text-gray-600">Whether you're launching, mentoring, or collaborating, you'll work through focused cycles with clear outcomes, aligned incentives, and guidance when needed.</p>
-          </div>
-        </div>
+        <%= render "devise/shared/links" %>
       </div>
-
-      <%= render "devise/shared/links" %>
     </div>
   </div>
 </div>
