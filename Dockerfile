@@ -2,8 +2,8 @@
 # check=error=true
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t ride_share .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name ride_share ride_share
+# docker build -t fluke_base .
+# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name fluke_base fluke_base
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
@@ -71,10 +71,6 @@ FROM base
 # Copy built artifacts: gems, application
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
-
-# Copy start script
-COPY bin/start.sh /rails/bin/start.sh
-RUN chmod +x /rails/bin/start.sh
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
