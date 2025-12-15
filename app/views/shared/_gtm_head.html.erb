@@ -1,4 +1,4 @@
-<% gtm_id = ENV['GTM_ID'].to_s %>
+<% gtm_id = ENV['GTM_ID'].to_s.strip %>
 <% return if gtm_id.blank? %>
 
 <!-- Google Tag Manager -->
@@ -7,6 +7,6 @@
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer',<%= gtm_id.to_json %>);
+})(window,document,'script','dataLayer','<%= j gtm_id %>');
 </script>
 <!-- End Google Tag Manager -->

@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html data-theme="<%= current_theme %>">
   <head>
+    <%= render "shared/gtm_head" %>
     <%# FOWT Prevention: Set theme from localStorage before CSS loads %>
     <script nonce="<%= content_security_policy_nonce %>">
       (function() {
-        var theme = localStorage.getItem('theme') || <%= current_theme.to_json %>;
+        var theme = localStorage.getItem('theme') || '<%= j current_theme %>';
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
-    <%= render "shared/gtm_head" %>
     <title><%= content_for(:title) || "Fluke Base" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
