@@ -30,7 +30,7 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
-# Install build-time dependencies including Node.js 24.x and Yarn
+# Install build-time dependencies including Node.js 24.x and Corepack-managed Yarn
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # hadolint ignore=DL3008
 RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
@@ -38,8 +38,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
     echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | tee /etc/apt/sources.list.d/yarn.list && \
     apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-    build-essential git libpq-dev libyaml-dev pkg-config nodejs yarn && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+    build-essential git libpq-dev libyaml-dev pkg-config nodejs && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/* && \
+    corepack enable && \
+    corepack prepare yarn@11.6.0 --activate
 
 # Install Ruby gems
 COPY Gemfile Gemfile.lock ./
