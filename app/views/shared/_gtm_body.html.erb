@@ -1,6 +1,9 @@
-<% if ENV['GTM_ID'].present? %>
+<% gtm_id = ENV['GTM_ID'].to_s %>
+<% return if gtm_id.blank? %>
+
 <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<%= ERB::Util.url_encode(ENV["GTM_ID"].to_s) %>"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<noscript>
+  <iframe src="https://www.googletagmanager.com/ns.html?id=<%= ERB::Util.url_encode(gtm_id) %>"
+          height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
 <!-- End Google Tag Manager (noscript) -->
-<% end %>

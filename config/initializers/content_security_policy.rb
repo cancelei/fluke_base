@@ -8,19 +8,30 @@ Rails.application.configure do
   config.content_security_policy do |policy|
     policy.default_src :self, :https
     policy.font_src    :self, :https, :data
-    policy.img_src     :self, :https, :data  # Allow data: URIs for SVG images
+    policy.img_src     :self, :https, :data,
+                       "https://www.googletagmanager.com",
+                       "https://www.google-analytics.com",
+                       "https://googleads.g.doubleclick.net"
     policy.object_src  :none
+
+    # Google Tag Manager domains
+    gtm_domains = [
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com",
+      "https://tagmanager.google.com"
+    ]
 
     # Script policy with comprehensive inline support
     if Rails.env.development?
       # More permissive for development
-      policy.script_src :self, :https, "https://challenges.cloudflare.com", "'unsafe-inline'", "'unsafe-eval'"
+      policy.script_src :self, :https, "https://challenges.cloudflare.com", "'unsafe-inline'", "'unsafe-eval'", *gtm_domains
     else
       # Production policy with specific hashes and unsafe-hashes for Turbo
       policy.script_src :self, :https, "https://challenges.cloudflare.com",
                         "'unsafe-hashes'", "'unsafe-inline'",
                         "'sha256-rC8O/z7r/5hFyyAKirUgp0VYdiNfFcPXbRRyUMwtXbE='",
-                        "'sha256-ALaDkBo93Qax4JosMrWAFtKE7+rUENfP37WzspJnRXU='"
+                        "'sha256-ALaDkBo93Qax4JosMrWAFtKE7+rUENfP37WzspJnRXU='",
+                        *gtm_domains
     end
 
     # Style policy with unsafe-hashes for Turbo compatibility
@@ -32,8 +43,13 @@ Rails.application.configure do
                        "'sha256-IuYlf9OtyuVBrT3e+V0GJ9PQfQF97T7UBUwlHE5brNQ='"
     end
 
-    policy.frame_src   :self, "https://challenges.cloudflare.com"
-    policy.connect_src :self, :https, "https://challenges.cloudflare.com"
+    policy.frame_src   :self, "https://challenges.cloudflare.com",
+                       "https://www.googletagmanager.com"
+    policy.connect_src :self, :https, "https://challenges.cloudflare.com",
+                       "https://www.googletagmanager.com",
+                       "https://www.google-analytics.com",
+                       "https://analytics.google.com",
+                       "https://region1.google-analytics.com"
   end
 
   # Improved nonce generator for Turbo compatibility
