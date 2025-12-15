@@ -121,7 +121,7 @@ group :test do
   gem "rspec_junit_formatter"
 end
 
-gem "cssbundling-rails", "~> 1.4"
+# cssbundling-rails removed - tailwindcss-rails v4 handles CSS natively
 
 gem "kaminari", "~> 1.2"
 
