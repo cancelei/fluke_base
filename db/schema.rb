@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_13_205300) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_15_143041) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -278,7 +278,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_13_205300) do
     t.index ["project_id"], name: "index_project_memberships_on_project_id"
     t.index ["user_id", "role"], name: "index_project_memberships_on_user_id_and_role"
     t.index ["user_id"], name: "index_project_memberships_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'admin'::character varying::text, 'member'::character varying::text, 'guest'::character varying::text])", name: "project_memberships_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'admin'::character varying, 'member'::character varying, 'guest'::character varying]::text[])", name: "project_memberships_role_check"
   end
 
   create_table "projects", force: :cascade do |t|
