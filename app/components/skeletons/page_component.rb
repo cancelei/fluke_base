@@ -12,14 +12,14 @@ module Skeletons
   # @example Custom layout
   #   <%= render Skeletons::PageComponent.new do |page| %>
   #     <% page.with_header %>
-  #     <% page.with_content do %>
+  #     <% page.with_body do %>
   #       <%= render Skeletons::GridComponent.new(variant: :project_card, count: 6) %>
   #     <% end %>
   #   <% end %>
   #
   class PageComponent < ApplicationComponent
     renders_one :header, ->(**args) { Skeletons::PageHeaderComponent.new(**args) }
-    renders_one :content
+    renders_one :body
 
     LAYOUTS = {
       dashboard: { header: true, widgets: 3, list: 0 },
@@ -41,7 +41,7 @@ module Skeletons
 
     def call
       tag.div(class: class_names("space-y-6", @css_class)) do
-        if content? || header?
+        if body? || header?
           render_custom_content
         else
           render_layout
@@ -54,7 +54,7 @@ module Skeletons
     def render_custom_content
       safe_join([
         header,
-        content
+        body
       ].compact)
     end
 
