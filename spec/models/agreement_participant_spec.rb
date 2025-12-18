@@ -22,7 +22,9 @@ RSpec.describe AgreementParticipant, type: :model do
     it { should validate_presence_of(:user_id) }
     it { should validate_presence_of(:project_id) }
     it { should validate_presence_of(:user_role) }
-    it { should validate_inclusion_of(:is_initiator).in_array([ true, false ]) }
+    it { should allow_value(true).for(:is_initiator) }
+    it { should allow_value(false).for(:is_initiator) }
+    it { should_not allow_value(nil).for(:is_initiator) }
     it { should validate_uniqueness_of(:user_id).scoped_to(:agreement_id) }
   end
 

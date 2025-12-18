@@ -33,9 +33,18 @@ RSpec.describe TimeLogsQuery do
   describe '#time_logs_for_project' do
     it 'filters by selected date and orders desc' do
       m = create(:milestone, project: project)
+      started_at = 2.hours.ago
+      selected_date = started_at.to_date
       create(:time_log, project: project, milestone: m, user: owner, started_at: Time.zone.parse('2024-01-01 10:00'))
-      today_log = create(:time_log, project: project, milestone: m, user: owner, started_at: 2.hours.ago, ended_at: 1.hour.ago)
-      list = query_for_owner.time_logs_for_project(project, Date.current)
+      today_log = create(
+        :time_log,
+        project: project,
+        milestone: m,
+        user: owner,
+        started_at: started_at,
+        ended_at: started_at + 1.hour
+      )
+      list = query_for_owner.time_logs_for_project(project, selected_date)
       expect(list).to include(today_log)
       expect(list.first.started_at).to be >= list.last.started_at if list.size > 1
     end
@@ -44,11 +53,12 @@ RSpec.describe TimeLogsQuery do
   describe '#filtered_time_logs' do
     it 'applies user filter and date' do
       m = create(:milestone, project: project)
-      today = Date.current
-      a = create(:time_log, project: project, milestone: m, user: owner, started_at: 2.hours.ago, ended_at: 1.hour.ago)
-      b = create(:time_log, project: project, milestone: m, user: participant, started_at: 2.hours.ago, ended_at: 1.hour.ago)
+      started_at = 2.hours.ago
+      selected_date = started_at.to_date
+      a = create(:time_log, project: project, milestone: m, user: owner, started_at: started_at, ended_at: started_at + 1.hour)
+      b = create(:time_log, project: project, milestone: m, user: participant, started_at: started_at, ended_at: started_at + 1.hour)
 
-      list = query_for_owner.filtered_time_logs(project, owner, today, [ project ], [ m ])
+      list = query_for_owner.filtered_time_logs(project, owner, selected_date, [ project ], [ m ])
       expect(list).to include(a)
       expect(list).not_to include(b)
     end

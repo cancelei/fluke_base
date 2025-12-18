@@ -165,8 +165,8 @@ export default class extends Controller {
 
     // Update send button to indicate voice message will be sent
     this.sendBtnTarget.textContent = 'Send with Voice Message';
-    this.sendBtnTarget.classList.add('bg-purple-600', 'hover:bg-purple-500');
-    this.sendBtnTarget.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+    this.sendBtnTarget.classList.add('btn-secondary');
+    this.sendBtnTarget.classList.remove('btn-primary');
   }
 
   generateWaveform() {
@@ -184,7 +184,8 @@ export default class extends Controller {
       const bar = document.createElement('div');
       const height = Math.random() * 20 + 4; // Random height between 4-24px
 
-      bar.className = 'bg-indigo-300 rounded-full transition-all duration-200';
+      bar.className =
+        'bg-secondary/30 rounded-full transition-all duration-200';
       bar.style.width = '2px';
       bar.style.height = `${height}px`;
       this.waveformBars.push(bar);
@@ -245,12 +246,12 @@ export default class extends Controller {
 
       setTimeout(() => {
         if (this.isPlaying) {
-          bar.classList.add('bg-indigo-600');
-          bar.classList.remove('bg-indigo-300');
+          bar.classList.add('bg-secondary');
+          bar.classList.remove('bg-secondary/30');
           setTimeout(() => {
             if (bar) {
-              bar.classList.remove('bg-indigo-600');
-              bar.classList.add('bg-indigo-300');
+              bar.classList.remove('bg-secondary');
+              bar.classList.add('bg-secondary/30');
             }
           }, 200);
         }
@@ -280,8 +281,8 @@ export default class extends Controller {
 
     // Reset send button
     this.sendBtnTarget.textContent = 'Send';
-    this.sendBtnTarget.classList.remove('bg-purple-600', 'hover:bg-purple-500');
-    this.sendBtnTarget.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+    this.sendBtnTarget.classList.remove('btn-secondary');
+    this.sendBtnTarget.classList.add('btn-primary');
 
     // Reset playback state
     this.isPlaying = false;
@@ -299,19 +300,18 @@ export default class extends Controller {
     const micSvg = this.micIconTarget.querySelector('svg');
 
     if (isRecording) {
-      micSvg.setAttribute('fill', 'red');
+      micSvg.setAttribute('fill', 'currentColor');
+      micSvg.classList.add('text-error');
       this.recordingIndicatorTarget.classList.remove('hidden');
-      this.recordBtnTarget.classList.add('bg-red-100', 'hover:bg-red-200');
-      this.recordBtnTarget.classList.remove(
-        'bg-gray-200',
-        'hover:bg-indigo-100'
-      );
+      this.recordBtnTarget.classList.add('bg-error/20', 'hover:bg-error/30');
+      this.recordBtnTarget.classList.remove('bg-base-300', 'hover:bg-base-200');
       this.recordBtnTarget.title = 'Stop recording';
     } else {
-      micSvg.setAttribute('fill', '#000000');
+      micSvg.setAttribute('fill', 'currentColor');
+      micSvg.classList.remove('text-error');
       this.recordingIndicatorTarget.classList.add('hidden');
-      this.recordBtnTarget.classList.remove('bg-red-100', 'hover:bg-red-200');
-      this.recordBtnTarget.classList.add('bg-gray-200', 'hover:bg-indigo-100');
+      this.recordBtnTarget.classList.remove('bg-error/20', 'hover:bg-error/30');
+      this.recordBtnTarget.classList.add('bg-base-300', 'hover:bg-base-200');
       this.recordBtnTarget.title = 'Record voice message';
     }
   }
@@ -411,11 +411,8 @@ export default class extends Controller {
     // Reset send button
     if (this.hasSendBtnTarget) {
       this.sendBtnTarget.textContent = 'Send';
-      this.sendBtnTarget.classList.remove(
-        'bg-purple-600',
-        'hover:bg-purple-500'
-      );
-      this.sendBtnTarget.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+      this.sendBtnTarget.classList.remove('btn-secondary');
+      this.sendBtnTarget.classList.add('btn-primary');
     }
   }
 

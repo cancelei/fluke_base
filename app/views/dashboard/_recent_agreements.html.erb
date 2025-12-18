@@ -18,8 +18,8 @@
               <% is_initiator = agreement.initiator&.id == current_user.id %>
               <% needs_action = agreement.pending? && !is_initiator %>
 
-              <li class="<%= "border-l-4 border-warning" if needs_action %>">
-                <div class="flex flex-col w-full p-4 hover:bg-base-200 rounded-lg cursor-pointer"
+              <li class="group">
+                <div class="flex flex-col w-full p-4 mx-2 my-1 hover:bg-base-200 rounded-lg transition-colors cursor-pointer <%= "border-l-4 border-warning" if needs_action %>"
                      onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON' && !event.target.closest('a, button')) { Turbo.visit(<%= agreement_path(agreement).to_json %>); }">
 
                   <!-- Header -->
@@ -37,9 +37,17 @@
                     </div>
                   </div>
 
-                  <!-- Details -->
+                  <!-- Details with Other Party Avatar -->
                   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <span class="text-sm text-base-content/70"><%= agreement_presenter.parties_display %></span>
+                    <% the_other_party = is_initiator ? agreement.other_party : agreement.initiator %>
+                    <% if the_other_party %>
+                      <%= link_to person_path(the_other_party), onclick: "event.stopPropagation();", class: "flex items-center gap-2 hover:text-primary transition-colors" do %>
+                        <%= render Ui::AvatarComponent.new(user: the_other_party, size: :sm, placeholder: :initials) %>
+                        <span class="text-sm font-medium truncate max-w-[120px]"><%= the_other_party.full_name %></span>
+                      <% end %>
+                    <% else %>
+                      <span class="text-sm text-base-content/70"><%= agreement_presenter.parties_display %></span>
+                    <% end %>
                     <div class="flex items-center gap-3">
                       <span class="text-sm text-base-content/60"><%= agreement_presenter.time_remaining %></span>
                       <% if needs_action %>
@@ -55,17 +63,16 @@
           <% end %>
         </ul>
       <% else %>
-        <div class="text-center p-6">
-          <div class="avatar placeholder mb-4">
-            <div class="bg-base-200 text-base-content/40 rounded-full w-12">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-          </div>
-          <p class="text-sm text-base-content/70 mb-4">No agreements yet.</p>
-          <%= link_to "Create an agreement", new_agreement_path, class: "btn btn-primary btn-sm" %>
-        </div>
+        <%= render "shared/empty_state",
+            title: "No agreements yet",
+            description: "Start a collaboration with another user.",
+            action_text: "Create an agreement",
+            action_url: new_agreement_path,
+            options: {
+              container_class: "text-center p-6",
+              action_class: "btn btn-primary btn-sm",
+              icon: "document"
+            } %>
       <% end %>
     </div>
   </div>

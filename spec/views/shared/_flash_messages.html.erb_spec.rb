@@ -14,8 +14,7 @@ RSpec.describe "shared/_flash_messages", type: :view do
 
       it "renders flash_message partial with notice type" do
         expect(view).to render_template(partial: "shared/_flash_message")
-        expect(rendered).to have_css(".bg-green-50")
-        expect(rendered).to have_css(".text-green-800")
+        expect(rendered).to have_css(".alert.alert-success")
       end
     end
 
@@ -55,8 +54,7 @@ RSpec.describe "shared/_flash_messages", type: :view do
 
       it "renders flash_message partial with alert type" do
         expect(view).to render_template(partial: "shared/_flash_message")
-        expect(rendered).to have_css(".bg-red-50")
-        expect(rendered).to have_css(".text-red-800")
+        expect(rendered).to have_css(".alert.alert-error")
       end
     end
 
@@ -96,10 +94,8 @@ RSpec.describe "shared/_flash_messages", type: :view do
     end
 
     it "renders both with correct styling" do
-      expect(rendered).to have_css(".bg-green-50")
-      expect(rendered).to have_css(".bg-red-50")
-      expect(rendered).to have_css(".text-green-800")
-      expect(rendered).to have_css(".text-red-800")
+      expect(rendered).to have_css(".alert.alert-success")
+      expect(rendered).to have_css(".alert.alert-error")
     end
   end
 
@@ -141,11 +137,11 @@ RSpec.describe "shared/_flash_messages", type: :view do
     end
 
     it "includes proper semantic structure" do
-      expect(rendered).to have_css("p")
+      expect(rendered).to have_css("span")
     end
 
     it "includes descriptive text styling" do
-      expect(rendered).to have_css(".text-sm.font-medium")
+      expect(rendered).to have_css(".alert")
     end
 
     it "renders icons for visual distinction" do
@@ -161,13 +157,12 @@ RSpec.describe "shared/_flash_messages", type: :view do
     end
 
     it "includes responsive spacing" do
-      expect(rendered).to have_css(".p-4.mb-6")
+      expect(rendered).to have_css(".mb-6")
     end
 
     it "includes flexible layout classes" do
-      expect(rendered).to have_css(".flex")
-      expect(rendered).to have_css(".flex-shrink-0")
-      expect(rendered).to have_css(".ml-3")
+      expect(rendered).to have_css("svg")
+      expect(rendered).to have_css("span")
     end
   end
 
@@ -182,7 +177,7 @@ RSpec.describe "shared/_flash_messages", type: :view do
 
       it "displays long messages without breaking layout" do
         expect(rendered).to have_content(long_message)
-        expect(rendered).to have_css(".rounded-md")
+        expect(rendered).to have_css(".alert")
       end
     end
   end
@@ -211,15 +206,15 @@ RSpec.describe "shared/_flash_messages", type: :view do
 
     it "creates HTML compatible with Turbo Stream updates" do
       parsed_html = Nokogiri::HTML(rendered)
-      flash_div = parsed_html.css(".rounded-md").first
+      flash_div = parsed_html.css(".alert").first
 
       expect(flash_div).to be_present
-      expect(flash_div['class']).to include("bg-green-50")
+      expect(flash_div['class']).to include("alert-success")
     end
 
     it "maintains proper structure for dynamic updates" do
-      expect(rendered).to have_css(".rounded-md .flex .flex-shrink-0")
-      expect(rendered).to have_css(".rounded-md .flex .ml-3 p")
+      expect(rendered).to have_css(".alert svg")
+      expect(rendered).to have_css(".alert span")
     end
   end
 end

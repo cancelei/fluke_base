@@ -18,12 +18,13 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     end
 
     it 'shows appropriate empty state icon' do
-      expect(rendered).to have_css('svg.mx-auto.h-16.w-16.text-gray-400')
+      expect(rendered).to have_css('svg.mx-auto.h-16.w-16')
+      expect(rendered).to have_css('svg.text-base-content\/40')
     end
 
     it 'displays empty state heading and message' do
       expect(rendered).to have_content('No GitHub activity found')
-      expect(rendered).to have_css('h3.text-lg.font-medium.text-gray-900')
+      expect(rendered).to have_css('h3.text-lg.font-medium')
     end
   end
 
@@ -115,8 +116,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     end
 
     it 'maintains readable color contrast' do
-      expect(rendered).to include('text-gray-900') # High contrast for heading
-      expect(rendered).to include('text-gray-500') # Readable contrast for description
+      expect(rendered).to include('text-base-content')
     end
 
     it 'provides meaningful SVG for screen readers' do
@@ -151,7 +151,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     before { render 'github_logs/empty_state', project: project }
 
     it 'styles troubleshooting section appropriately' do
-      expect(rendered).to have_css('.text-sm.text-gray-500')
+      expect(rendered).to have_css('.text-sm.text-base-content\/60')
       expect(rendered).to have_css('.list-disc.text-left')
       expect(rendered).to have_css('.space-y-1')
     end

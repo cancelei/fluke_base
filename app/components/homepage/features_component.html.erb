@@ -1,0 +1,41 @@
+<section class="py-20 bg-base-100">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-base-content mb-4">Core Features</h2>
+      <p class="text-lg text-base-content/70 max-w-2xl mx-auto">
+        Tools designed for structured collaboration and transparent project management
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      <% features.each do |feature| %>
+        <div class="card bg-base-100 border border-base-300 hover:border-primary/50 hover:shadow-xl transition-all duration-300">
+          <div class="card-body p-8">
+            <%# Feature header %>
+            <div class="flex items-start gap-4 mb-6">
+              <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                <%= render Ui::IconComponent.new(name: feature[:icon], size: :lg, css_class: "text-primary-content") %>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-base-content mb-2"><%= feature[:title] %></h3>
+                <p class="text-base-content/70 text-sm"><%= feature[:description] %></p>
+              </div>
+            </div>
+
+            <%# Capabilities list %>
+            <ul class="space-y-3">
+              <% feature[:capabilities].each do |capability| %>
+                <li class="flex items-start gap-3">
+                  <span class="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+                    <%= render Ui::IconComponent.new(name: :check, size: :sm, css_class: "text-success") %>
+                  </span>
+                  <span class="text-sm text-base-content/80"><%= capability %></span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>

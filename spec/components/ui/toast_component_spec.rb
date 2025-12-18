@@ -18,10 +18,10 @@ RSpec.describe Ui::ToastComponent, type: :component do
   end
 
   describe "rendering" do
-    it "renders a div with toast-notification class" do
+    it "renders with DaisyUI toast positioning" do
       render_inline(described_class.new(type: :success, message: "Success!"))
 
-      expect(page).to have_css("div.toast-notification")
+      expect(page).to have_css("div.toast")
     end
 
     it "renders with alert role" do
@@ -30,16 +30,16 @@ RSpec.describe Ui::ToastComponent, type: :component do
       expect(page).to have_css("div[role='alert']")
     end
 
-    it "renders with aria-live polite" do
+    it "renders alert inside toast container" do
       render_inline(described_class.new(type: :success, message: "Success!"))
 
-      expect(page).to have_css("div[aria-live='polite']")
+      expect(page).to have_css("div.toast div.alert")
     end
 
-    it "renders with aria-atomic true" do
+    it "renders with success alert styling" do
       render_inline(described_class.new(type: :success, message: "Success!"))
 
-      expect(page).to have_css("div[aria-atomic='true']")
+      expect(page).to have_css("div.alert.alert-success")
     end
   end
 
@@ -48,18 +48,6 @@ RSpec.describe Ui::ToastComponent, type: :component do
       render_inline(described_class.new(type: :success, message: "Test"))
 
       expect(page).to have_css("div[data-controller='toast']")
-    end
-
-    it "includes type value" do
-      render_inline(described_class.new(type: :success, message: "Test"))
-
-      expect(page).to have_css("div[data-toast-type-value='success']")
-    end
-
-    it "includes message value" do
-      render_inline(described_class.new(type: :success, message: "Test message"))
-
-      expect(page).to have_css("div[data-toast-message-value='Test message']")
     end
 
     it "includes timeout value" do
@@ -73,88 +61,57 @@ RSpec.describe Ui::ToastComponent, type: :component do
 
       expect(page).to have_css("div[data-toast-timeout-value='5000']")
     end
-
-    it "includes close button value" do
-      render_inline(described_class.new(type: :success, message: "Test", close_button: false))
-
-      expect(page).to have_css("div[data-toast-close-button-value='false']")
-    end
-
-    it "includes progress bar value" do
-      render_inline(described_class.new(type: :success, message: "Test", progress_bar: false))
-
-      expect(page).to have_css("div[data-toast-progress-bar-value='false']")
-    end
-
-    it "includes position class value" do
-      render_inline(described_class.new(type: :success, message: "Test", position: "toast-bottom-left"))
-
-      expect(page).to have_css("div[data-toast-position-class-value='toast-bottom-left']")
-    end
-
-    it "includes title when provided" do
-      render_inline(described_class.new(type: :success, message: "Test", title: "Success Title"))
-
-      expect(page).to have_css("div[data-toast-title-value='Success Title']")
-    end
-
-    it "includes unique toast id" do
-      render_inline(described_class.new(type: :success, message: "Test"))
-
-      expect(page).to have_css("div[data-toast-id]")
-    end
   end
 
   describe "type normalization" do
     it "normalizes notice to success" do
       render_inline(described_class.new(type: :notice, message: "Test"))
 
-      expect(page).to have_css("div[data-toast-type-value='success']")
+      expect(page).to have_css("div.alert.alert-success")
     end
 
     it "normalizes alert to error" do
       render_inline(described_class.new(type: :alert, message: "Test"))
 
-      expect(page).to have_css("div[data-toast-type-value='error']")
+      expect(page).to have_css("div.alert.alert-error")
     end
 
     it "keeps success as success" do
       render_inline(described_class.new(type: :success, message: "Test"))
 
-      expect(page).to have_css("div[data-toast-type-value='success']")
+      expect(page).to have_css("div.alert.alert-success")
     end
 
     it "keeps error as error" do
       render_inline(described_class.new(type: :error, message: "Test"))
 
-      expect(page).to have_css("div[data-toast-type-value='error']")
+      expect(page).to have_css("div.alert.alert-error")
     end
 
     it "normalizes unknown types to info" do
       render_inline(described_class.new(type: :unknown, message: "Test"))
 
-      expect(page).to have_css("div[data-toast-type-value='info']")
+      expect(page).to have_css("div.alert.alert-info")
     end
 
     it "handles string types" do
       render_inline(described_class.new(type: "success", message: "Test"))
 
-      expect(page).to have_css("div[data-toast-type-value='success']")
+      expect(page).to have_css("div.alert.alert-success")
     end
   end
 
-  describe "actions" do
-    it "includes actions as JSON when provided" do
-      actions = [ { label: "View", url: "/test" } ]
-      result = render_inline(described_class.new(type: :success, message: "Test", actions: actions))
+  describe "close button" do
+    it "renders close button by default" do
+      render_inline(described_class.new(type: :success, message: "Test"))
 
-      expect(result.to_html).to include("data-toast-actions-value")
+      expect(page).to have_css("button[data-action='toast#dismiss']")
     end
 
-    it "does not include actions when empty" do
-      result = render_inline(described_class.new(type: :success, message: "Test"))
+    it "does not render close button when disabled" do
+      render_inline(described_class.new(type: :success, message: "Test", close_button: false))
 
-      expect(result.to_html).not_to include("data-toast-actions-value")
+      expect(page).not_to have_css("button[data-action='toast#dismiss']")
     end
   end
 end

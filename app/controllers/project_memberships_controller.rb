@@ -30,7 +30,6 @@ class ProjectMembershipsController < ApplicationController
     end
 
     if @membership.save
-      # TODO: Send invitation email to user
       redirect_to project_memberships_path(@project),
                   notice: "#{@membership.user.full_name} has been invited as #{@membership.role_label}."
     else

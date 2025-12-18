@@ -79,8 +79,8 @@ RSpec.describe ProjectCardComponent, type: :component do
     it "renders description section" do
       render_inline(described_class.new(project: project))
 
-      # Description is rendered (content depends on presenter logic)
-      expect(page).to have_css("p.text-sm.text-gray-600")
+      # Description is rendered with DaisyUI base-content styling
+      expect(page).to have_css("p.text-sm.line-clamp-2")
     end
 
     it "renders description with line clamp styling" do
@@ -106,7 +106,7 @@ RSpec.describe ProjectCardComponent, type: :component do
     it "displays agreements stat" do
       render_inline(described_class.new(project: project))
 
-      expect(page).to have_css("div[title='Project agreements']")
+      expect(page).to have_css("a[data-tip='View project agreements']")
     end
 
     it "pluralizes agreement count" do

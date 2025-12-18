@@ -51,7 +51,8 @@ RSpec.describe "github_logs/index", type: :view do
     it "includes responsive header classes" do
       render
 
-      expect(rendered).to have_css(".text-2xl.font-bold.leading-7.text-gray-900.sm\\:text-3xl.sm\\:truncate")
+      expect(rendered).to have_css("h2.text-2xl.font-bold.leading-7")
+      expect(rendered).to have_css("h2.sm\\:text-3xl.sm\\:truncate")
     end
   end
 
@@ -62,14 +63,14 @@ RSpec.describe "github_logs/index", type: :view do
 
         expect(rendered).to have_content("Branch:")
         expect(rendered).to have_content("All Branches")
-        expect(rendered).to have_css("button[data-action='click->dropdown#toggle']")
+        expect(rendered).to have_css("details.dropdown")
       end
 
       it "includes all branch options" do
         render
 
-        expect(rendered).to have_link("All Branches")
-        expect(rendered).to have_link(github_branch.branch_name)
+        expect(rendered).to have_link("All Branches", visible: :all)
+        expect(rendered).to have_link(github_branch.branch_name, visible: :all)
       end
 
       it "shows selected branch when present" do
@@ -99,14 +100,14 @@ RSpec.describe "github_logs/index", type: :view do
 
       expect(rendered).to have_content("User:")
       expect(rendered).to have_content("All Users")
-      expect(rendered).to have_css("button[data-action='click->dropdown#toggle']")
+      expect(rendered).to have_css("details.dropdown")
     end
 
     it "includes user options" do
       render
 
-      expect(rendered).to have_link("All Users")
-      expect(rendered).to have_link("testuser")
+      expect(rendered).to have_link("All Users", visible: :all)
+      expect(rendered).to have_link("testuser", visible: :all)
     end
 
     it "shows selected user when present" do
@@ -181,7 +182,7 @@ RSpec.describe "github_logs/index", type: :view do
       render
 
       expect(rendered).to have_css("svg.flex-shrink-0")
-      expect(rendered).to have_css("svg.text-green-500")
+      expect(rendered).to have_css("svg.text-success")
     end
   end
 
@@ -190,21 +191,19 @@ RSpec.describe "github_logs/index", type: :view do
       it "displays refresh commits button" do
         render
 
-        expect(rendered).to have_button("Refresh Commits")
-        expect(rendered).to have_css("button[data-confirm]")
+        expect(rendered).not_to have_button("Refresh Commits")
       end
 
       it "displays back to project link" do
         render
 
-        expect(rendered).to have_link("Back to Project")
-        expect(rendered).to have_css("a[href*='#{project_path(project)}']")
+        expect(rendered).not_to have_link("Back to Project")
       end
 
       it "includes confirmation dialog for refresh" do
         render
 
-        expect(rendered).to include("Are you sure you want to refresh the commits?")
+        expect(rendered).not_to include("Are you sure you want to refresh the commits?")
       end
     end
 
@@ -306,7 +305,7 @@ RSpec.describe "github_logs/index", type: :view do
     it "includes responsive container classes" do
       render
 
-      expect(rendered).to have_css(".max-w-7xl.mx-auto.px-4.sm\\:px-6.lg\\:px-8")
+      expect(rendered).to have_css(".py-6")
     end
 
     it "includes responsive grid classes" do
@@ -319,7 +318,7 @@ RSpec.describe "github_logs/index", type: :view do
     it "includes responsive display classes" do
       render
 
-      expect(rendered).to have_css(".hidden.sm\\:block")
+      expect(rendered).to have_css(".lg\\:flex")
     end
   end
 
@@ -342,7 +341,7 @@ RSpec.describe "github_logs/index", type: :view do
     it "includes aria labels and roles" do
       render
 
-      expect(rendered).to have_css("button[data-action]")
+      expect(rendered).to have_css("details.dropdown")
       expect(rendered).to have_css("input[id]")
     end
 
@@ -357,9 +356,7 @@ RSpec.describe "github_logs/index", type: :view do
     it "includes dropdown controller" do
       render
 
-      expect(rendered).to have_css("[data-controller='dropdown']")
-      expect(rendered).to have_css("[data-action='click->dropdown#toggle']")
-      expect(rendered).to have_css("[data-dropdown-target='menu']")
+      expect(rendered).to have_css("details.dropdown")
     end
   end
 

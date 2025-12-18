@@ -27,8 +27,7 @@
 
       <%= fluke_form_with(model: [ @agreement || meeting.agreement, meeting ], class: "space-y-6") do |form| %>
         <% if meeting.errors.any? %>
-          <div class="alert alert-error mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <%= ui_alert(variant: :error, css_class: "mb-6") do %>
             <div>
               <h3 class="font-bold">There <%= meeting.errors.count == 1 ? "is" : "are" %> <%= pluralize(meeting.errors.count, "error") %> with this meeting:</h3>
               <ul class="list-disc list-inside mt-2">
@@ -37,7 +36,7 @@
                 <% end %>
               </ul>
             </div>
-          </div>
+          <% end %>
         <% end %>
 
         <div class="space-y-6">
@@ -63,14 +62,13 @@
             </fieldset>
           </div>
 
-          <div class="alert alert-info">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <%= ui_alert(variant: :info) do %>
             <span>
               <strong>Note:</strong> This meeting will be scheduled between
               <% presenter = present(@agreement || meeting.agreement) %>
               <%= presenter.parties_display %>.
             </span>
-          </div>
+          <% end %>
 
           <div class="card-actions justify-end">
             <%= link_to "Cancel", agreement_path(@agreement || meeting.agreement),

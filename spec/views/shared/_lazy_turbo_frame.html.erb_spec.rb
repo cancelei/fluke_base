@@ -42,10 +42,10 @@ RSpec.describe "shared/_lazy_turbo_frame", type: :view do
     end
 
     it "shows loading indicator with accessibility features" do
-      expect(rendered).to have_css(".animate-spin")
       expect(rendered).to have_css("[role='status']")
-      expect(rendered).to have_css("[aria-label='loading']")
-      expect(rendered).to have_css(".sr-only", text: "Loading...")
+      expect(rendered).to have_css("[aria-label]")
+      expect(rendered).to have_css(".loading.loading-spinner")
+      expect(rendered).to have_css(".sr-only", text: "Loading content...")
     end
 
     it "includes loading message" do
@@ -55,9 +55,7 @@ RSpec.describe "shared/_lazy_turbo_frame", type: :view do
 
   describe "responsive design classes" do
     it "includes proper responsive classes" do
-      expect(rendered).to have_css(".sm\\:rounded-lg")
-      expect(rendered).to have_css(".sm\\:px-6")
-      expect(rendered).to have_css(".max-w-2xl")
+      expect(rendered).to have_css(".max-w-xs")
     end
   end
 
@@ -76,29 +74,24 @@ RSpec.describe "shared/_lazy_turbo_frame", type: :view do
 
   describe "styling structure" do
     it "includes proper container styling" do
-      expect(rendered).to have_css(".bg-white.shadow")
-      expect(rendered).to have_css(".border-t.border-gray-200")
+      expect(rendered).to have_css(".card.bg-base-100.shadow-xl")
     end
 
     it "includes proper text styling" do
-      expect(rendered).to have_css(".text-lg.leading-6.font-medium.text-gray-900")
-      expect(rendered).to have_css(".text-sm.text-gray-500")
+      expect(rendered).to have_css(".card-title")
+      expect(rendered).to have_css(".text-sm")
     end
 
     it "includes proper spacing classes" do
-      expect(rendered).to have_css(".px-4.py-5")
-      expect(rendered).to have_css(".px-4.py-8")
-      expect(rendered).to have_css(".mt-1")
-      expect(rendered).to have_css(".mt-2")
-      expect(rendered).to have_css(".mt-8")
+      expect(rendered).to have_css(".divider")
+      expect(rendered).to have_css(".py-6")
     end
   end
 
   describe "loading animation" do
     it "includes proper animation classes" do
-      expect(rendered).to have_css(".animate-spin")
-      expect(rendered).to have_css(".border-2.border-current.border-t-transparent")
-      expect(rendered).to have_css(".text-indigo-600.rounded-full")
+      expect(rendered).to have_css(".loading.loading-spinner")
+      expect(rendered).to have_css(".skeleton")
     end
   end
 
@@ -107,7 +100,7 @@ RSpec.describe "shared/_lazy_turbo_frame", type: :view do
       let(:title) { "" }
 
       it "handles empty title gracefully" do
-        expect(rendered).to have_css("h3")
+        expect(rendered).to have_css(".card")
         expect(rendered).not_to have_content("undefined")
       end
     end
@@ -116,7 +109,7 @@ RSpec.describe "shared/_lazy_turbo_frame", type: :view do
       let(:description) { "" }
 
       it "handles empty description gracefully" do
-        expect(rendered).to have_css("p")
+        expect(rendered).to have_css(".card")
         expect(rendered).not_to have_content("undefined")
       end
     end
@@ -128,7 +121,7 @@ RSpec.describe "shared/_lazy_turbo_frame", type: :view do
       it "handles long content properly" do
         expect(rendered).to have_content(title)
         expect(rendered).to have_content(description)
-        expect(rendered).to have_css(".max-w-2xl") # Ensures description is constrained
+        expect(rendered).to have_css(".max-w-xs")
       end
     end
 
@@ -158,7 +151,7 @@ RSpec.describe "shared/_lazy_turbo_frame", type: :view do
       parsed_html = Nokogiri::HTML(rendered)
       frame_content = parsed_html.css("turbo-frame##{frame_id}").inner_html
 
-      expect(frame_content).to include("<div class=\"mt-8 bg-white shadow")
+      expect(frame_content).to include("card bg-base-100")
       expect(frame_content).to include(title)
       expect(frame_content).to include("Loading content...")
     end

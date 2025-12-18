@@ -4,7 +4,7 @@ class AgreementsController < ApplicationController
 
   before_action :authenticate_user!
   before_action :set_agreement, only: %i[show edit update destroy accept reject complete cancel counter_offer meetings_section github_section time_logs_section counter_offers_section]
-  before_action :authorize_agreement, only: %i[show edit update destroy accept reject complete cancel meetings_section github_section time_logs_section counter_offers_section]
+  before_action :authorize_agreement, only: %i[show meetings_section github_section time_logs_section counter_offers_section]
   before_action :check_project_ownership, only: %i[new create]
   before_action :ensure_can_modify, only: %i[edit update destroy]
   before_action :authorize_agreement_action, only: %i[accept reject counter_offer cancel]
@@ -126,6 +126,8 @@ class AgreementsController < ApplicationController
 
     @other_party = User.find_by_id(params[:other_party_id])
     @milestone_ids = @agreement_form.milestone_ids_array
+  rescue Pundit::NotAuthorizedError
+    redirect_to agreements_path, alert: "You are not authorized to view this agreement."
   end
 
   def edit
@@ -236,122 +238,41 @@ class AgreementsController < ApplicationController
 
       render :edit, status: :unprocessable_content
     end
+  rescue Pundit::NotAuthorizedError
+    redirect_to agreements_path, alert: "You are not authorized to view this agreement."
   end
 
   def destroy
     authorize @agreement
     @agreement.destroy
     redirect_to agreements_url, notice: "Agreement was successfully destroyed."
+  rescue Pundit::NotAuthorizedError
+    redirect_to agreements_path, alert: "You are not authorized to view this agreement."
   end
 
+  # State transition actions - authorization handled by before_action or inline
+  # See before_action :authorize_agreement_action for accept, reject, cancel
   def accept
-    return unless authorize_agreement_action
-
-    result = @agreement.accept!
-
-    handle_result(result) do |type, value|
-      case type
-      when :success
-        notify_and_message_other_party(:accept)
-        respond_to do |format|
-          format.turbo_stream do
-            flash.now[:notice] = "Agreement was successfully accepted."
-            render :accept
-          end
-          format.html do
-            redirect_to @agreement, notice: "Agreement was successfully accepted."
-          end
-        end
-      when :failure
-        alert_message = error_message(value)
-        respond_to do |format|
-          format.turbo_stream { render_turbo_flash_error(alert_message) }
-          format.html { redirect_to @agreement, alert: alert_message }
-        end
-      end
-    end
+    transition_agreement_state(:accept, "Agreement was successfully accepted.")
   end
 
   def reject
-    return unless authorize_agreement_action
-
-    result = @agreement.reject!
-
-    handle_result(result) do |type, value|
-      case type
-      when :success
-        notify_and_message_other_party(:reject)
-        respond_to do |format|
-          format.turbo_stream do
-            flash.now[:notice] = "Agreement was successfully rejected."
-            render :reject
-          end
-          format.html do
-            redirect_to @agreement, notice: "Agreement was successfully rejected."
-          end
-        end
-      when :failure
-        alert_message = error_message(value)
-        respond_to do |format|
-          format.turbo_stream { render_turbo_flash_error(alert_message) }
-          format.html { redirect_to @agreement, alert: alert_message }
-        end
-      end
-    end
+    transition_agreement_state(:reject, "Agreement was successfully rejected.")
   end
 
   def complete
     authorize @agreement, :complete?
-
-    result = @agreement.complete!
-
-    handle_result(result) do |type, value|
-      case type
-      when :success
-        notify_and_message_other_party(:complete)
-        respond_to do |format|
-          format.turbo_stream do
-            flash.now[:notice] = "This agreement has been marked as completed."
-            render :complete
-          end
-          format.html do
-            redirect_to @agreement, notice: "This agreement has been marked as completed."
-          end
-        end
-      when :failure
-        alert_message = error_message(value)
-        respond_to do |format|
-          format.turbo_stream { render_turbo_flash_error(alert_message) }
-          format.html { redirect_to @agreement, alert: alert_message }
-        end
-      end
+    transition_agreement_state(:complete, "This agreement has been marked as completed.")
+  rescue Pundit::NotAuthorizedError
+    message = "Agreement cannot be marked as completed"
+    respond_to do |format|
+      format.turbo_stream { render_turbo_flash_error(message) }
+      format.html { redirect_to @agreement, alert: message }
     end
   end
 
   def cancel
-    return unless authorize_agreement_action
-
-    result = @agreement.cancel!
-
-    handle_result(result) do |type, value|
-      case type
-      when :success
-        notify_and_message_other_party(:cancel)
-        respond_to do |format|
-          format.turbo_stream do
-            flash.now[:notice] = "Agreement was successfully cancelled."
-            render :cancel
-          end
-          format.html { redirect_to @agreement, notice: "Agreement was successfully cancelled." }
-        end
-      when :failure
-        alert_message = error_message(value)
-        respond_to do |format|
-          format.turbo_stream { render_turbo_flash_error(alert_message) }
-          format.html { redirect_to @agreement, alert: alert_message }
-        end
-      end
-    end
+    transition_agreement_state(:cancel, "Agreement was successfully cancelled.")
   end
 
   def counter_offer
@@ -626,6 +547,11 @@ class AgreementsController < ApplicationController
     def ensure_can_modify
       # Only allow modification of pending agreements by the entrepreneur
       # or the mentor if they initiated the agreement
+      unless policy(@agreement).show?
+        redirect_to agreements_path, alert: "You are not authorized to view this agreement."
+        return
+      end
+
       if @agreement.countered?
         redirect_to @agreement, alert: "This agreement has been countered. Please create a new counter offer instead of editing."
         return
@@ -673,6 +599,33 @@ class AgreementsController < ApplicationController
     true
   end
 
+  # Consolidated state transition handler for accept, reject, complete, cancel actions
+  # Reduces ~90 lines of duplicate code to a single reusable method
+  # Note: Authorization is handled by before_action or called inline before this method
+  def transition_agreement_state(action, success_message)
+    result = @agreement.public_send("#{action}!")
+
+    handle_result(result) do |type, value|
+      case type
+      when :success
+        notify_and_message_other_party(action)
+        respond_to do |format|
+          format.turbo_stream do
+            flash.now[:notice] = success_message
+            render action
+          end
+          format.html { redirect_to @agreement, notice: success_message }
+        end
+      when :failure
+        alert_message = error_message(value)
+        respond_to do |format|
+          format.turbo_stream { render_turbo_flash_error(alert_message) }
+          format.html { redirect_to @agreement, alert: alert_message }
+        end
+      end
+    end
+  end
+
     def details_link
       <<~HTML
         <a href="#{agreement_path(@agreement)}" class="p-1 bg-white text-gray-500">View Details</a>
@@ -680,17 +633,7 @@ class AgreementsController < ApplicationController
     end
 
     def filter_params
-      params.permit(:status, :agreement_type, :start_date_from, :start_date_to, :end_date_from, :end_date_to, :search, :clear_filters, :page, :turbo_frame)
-    end
-
-    def build_agreement_chain(agreement)
-      agreement_chain = []
-      current = agreement
-      while current.counter_to.present?
-        agreement_chain << [ current, current.counter_to ]
-        current = current.counter_to
-      end
-      agreement_chain
+      params.permit(:project_id, :status, :agreement_type, :start_date_from, :start_date_to, :end_date_from, :end_date_to, :search, :clear_filters, :page, :turbo_frame)
     end
 
     def build_agreement_chain_optimized(agreement)

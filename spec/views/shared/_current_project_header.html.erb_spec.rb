@@ -20,7 +20,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
     end
 
     it "applies proper styling classes" do
-      expect(rendered).to have_css(".font-bold.text-lg.text-indigo-700")
+      expect(rendered).to have_css(".font-bold.text-lg.text-primary")
     end
 
     it "contains the project name in a div" do
@@ -39,7 +39,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
     end
 
     it "applies same styling to fallback message" do
-      expect(rendered).to have_css(".font-bold.text-lg.text-indigo-700")
+      expect(rendered).to have_css(".font-bold.text-lg.text-primary")
     end
 
     it "contains fallback message in a div" do
@@ -77,7 +77,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
     end
 
     it "maintains proper styling" do
-      expect(rendered).to have_css(".font-bold.text-lg.text-indigo-700")
+      expect(rendered).to have_css(".font-bold.text-lg.text-primary")
     end
   end
 
@@ -107,7 +107,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
 
       expect(classes).to include("font-bold")
       expect(classes).to include("text-lg")
-      expect(classes).to include("text-indigo-700")
+      expect(classes).to include("text-primary")
     end
   end
 
@@ -160,7 +160,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
 
       it "displays project name for navigation use" do
         expect(rendered).to have_content("Navigation Test")
-        expect(rendered).to have_css(".text-indigo-700")
+        expect(rendered).to have_css(".text-primary")
       end
     end
 

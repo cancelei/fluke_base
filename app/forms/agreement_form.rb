@@ -86,13 +86,13 @@ class AgreementForm < ApplicationForm
     @is_update = true
     assign_attributes_to_agreement
 
-    begin
-      @agreement.save!
+    if @agreement.save
+      create_agreement_participants
       Rails.logger.info "Agreement #{@agreement.id} successfully updated"
-    rescue => e
-      Rails.logger.error "Failed to update agreement #{@agreement.id}: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n")
-      raise e
+      true
+    else
+      errors.merge!(@agreement.errors)
+      false
     end
   end
 
@@ -108,6 +108,8 @@ class AgreementForm < ApplicationForm
     end
 
     @agreement.save!
+    create_agreement_participants
+    true
   end
 
   def assign_attributes_to_agreement
@@ -124,15 +126,6 @@ class AgreementForm < ApplicationForm
       milestone_ids: milestone_ids_array.presence || @agreement.milestone_ids,
       status: status || @agreement.status
     )
-
-    # Create or update agreement participants
-    # For new agreements, create participants after saving
-    # For updates, recreate participants to ensure consistency
-    if @is_update && @agreement.persisted?
-      create_agreement_participants
-    elsif !@is_update
-      create_agreement_participants if @agreement.persisted? || @agreement.save
-    end
   end
 
   def create_agreement_participants

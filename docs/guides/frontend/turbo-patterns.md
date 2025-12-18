@@ -1,6 +1,6 @@
 # Turbo Patterns
 
-**Last Updated**: 2025-12-13
+**Last Updated**: 2025-12-18
 **Document Type**: Guide
 **Audience**: Developers, AI Agents
 
@@ -57,10 +57,14 @@ What's the user interaction?
 ❌ DO NOT forget turbo_frame_request? check for hybrid endpoints
 ❌ DO NOT use vanilla flash (use toast notifications)
 ❌ DO NOT broadcast without channel names (causes cross-project pollution)
+❌ DO NOT render a partial containing `<div id="X">` into target "X" (causes nesting/duplication)
+❌ DO NOT use `data-params` JSON or `params[:id]` in TurboBoost Commands (use individual data attributes)
 ✅ DO use LazyTurboFrameComponent for heavy sections
 ✅ DO use Command pattern for complex Turbo Stream responses
 ✅ DO check turbo_frame_request? for endpoints serving both frame and full page
 ✅ DO use Flashable and MultiFrameUpdatable concerns
+✅ DO create separate "inner" partials for Turbo Stream updates (see Troubleshooting section)
+✅ DO use individual `data-*` attributes with `element_data()` or `element_id()` in TurboBoost Commands
 
 ---
 
@@ -885,6 +889,70 @@ production:
 
 ---
 
+### Issue: Nested content duplication (Turbo Stream target contains itself)
+
+**Symptoms**: Content repeats/nests inside itself after Turbo Stream update
+**Cause**: `turbo_stream.update("target_id")` renders a partial that contains `<div id="target_id">`
+
+**Example of the bug**:
+
+```erb
+<%# _context_milestones_dropdown.html.erb (outer partial) %>
+<details class="dropdown">
+  <summary>Milestones</summary>
+  <div id="context_milestones_list">  <%# <-- Target ID is HERE %>
+    <% milestones.each do |m| %>
+      <%= render "milestone_item", milestone: m %>
+    <% end %>
+  </div>
+</details>
+```
+
+```ruby
+# Controller (BUG: renders outer partial INTO the target div)
+turbo_stream.update("context_milestones_list",
+  partial: "shared/context_milestones_dropdown"  # Contains another context_milestones_list div!
+)
+```
+
+**Result**: The entire dropdown (with its own `context_milestones_list` div) gets nested inside the existing `context_milestones_list` div, causing repetition.
+
+**Solution**: Create a separate "inner" partial that contains ONLY the content inside the target div:
+
+```erb
+<%# _context_milestones_list.html.erb (inner partial - NO wrapper div) %>
+<% milestones.each do |m| %>
+  <%= render "milestone_item", milestone: m %>
+<% end %>
+```
+
+```erb
+<%# _context_milestones_dropdown.html.erb (outer partial - renders inner) %>
+<details class="dropdown">
+  <summary>Milestones</summary>
+  <div id="context_milestones_list">
+    <%= render "shared/context_milestones_list", milestones: milestones %>
+  </div>
+</details>
+```
+
+```ruby
+# Controller (FIXED: renders inner partial)
+turbo_stream.update("context_milestones_list",
+  partial: "shared/context_milestones_list",
+  locals: { milestones: milestones }
+)
+```
+
+**Key principle**: When using `turbo_stream.update("some_id")`, the partial you render should contain the **content** that goes inside `<div id="some_id">`, NOT the div itself.
+
+**Files affected by this fix**:
+- `/app/views/shared/_context_milestones_dropdown.html.erb` - Outer dropdown container
+- `/app/views/shared/_context_milestones_list.html.erb` - Inner list content (for Turbo updates)
+- `/app/controllers/time_logs_controller.rb` - Uses inner partial for updates
+
+---
+
 ### Issue: Toast notifications stack forever
 
 **Symptoms**: Old toasts never disappear
@@ -909,6 +977,66 @@ export default class extends Controller {
   }
 }
 ```
+
+---
+
+### Issue: TurboBoost Command params[:id] returns NULL
+
+**Symptoms**:
+- Error: `Couldn't find Agreement with 'id'=NULL`
+- SQL shows: `WHERE "agreements"."id" = NULL`
+- HTTP 500 errors on TurboBoost Command execution
+
+**Cause**: Using `data-params` JSON attribute and accessing via `params[:id]` in TurboBoost Commands. The `params` hash in TurboBoost Commands is NOT the same as controller params or the parsed `data-params` JSON.
+
+**Example of the bug**:
+
+```erb
+<%# View (BUG: data-params JSON not accessible via params[:id]) %>
+<button data-turbo-command="Agreements::AcceptCommand#execute"
+        data-params='<%= { id: @agreement.id }.to_json %>'>
+  Accept
+</button>
+```
+
+```ruby
+# Command (BUG: params[:id] will be nil)
+def find_agreement
+  Agreement.find(params[:id])  # Returns nil!
+end
+```
+
+**Solution**: Use individual `data-*` attributes with kebab-case naming, then access via `element_data()` or `element_id()` helper methods.
+
+```erb
+<%# View (FIXED: individual data attribute) %>
+<button data-turbo-command="Agreements::AcceptCommand#execute"
+        data-agreement-id="<%= @agreement.id %>">
+  Accept
+</button>
+```
+
+```ruby
+# Command (FIXED: use element_id helper)
+def find_agreement
+  Agreement.find(element_id(:agreementId))  # Works correctly!
+end
+```
+
+**Key principles**:
+1. Use individual `data-*` attributes: `data-agreement-id="123"`, `data-project-id="456"`
+2. Naming: HTML uses kebab-case (`data-agreement-id`), Ruby uses camelCase symbol (`:agreementId`)
+3. Access helpers: `element_data(:key)` for strings, `element_id(:key)` for integers
+4. NEVER use `data-params` JSON with `params[:key]` in TurboBoost Commands
+
+**Files affected by this pattern**:
+- `/app/commands/agreements/accept_command.rb`
+- `/app/commands/agreements/reject_command.rb`
+- `/app/commands/agreements/cancel_command.rb`
+- `/app/commands/agreements/complete_command.rb`
+- `/app/views/agreements/_agreement_show_actions.html.erb`
+
+**Reference**: See `element_data()` and `element_id()` helpers in `/app/commands/application_command.rb`
 
 ---
 

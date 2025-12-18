@@ -42,11 +42,18 @@ class AgreementsQuery
 
   # New filtering methods
   def apply_filters(relation)
+    relation = filter_by_project(relation)
     relation = filter_by_status_new(relation)
     relation = filter_by_agreement_type(relation)
     relation = filter_by_date_range(relation)
     relation = filter_by_search(relation)
     relation
+  end
+
+  def filter_by_project(relation)
+    return relation unless @params[:project_id].present?
+
+    relation.where(project_id: @params[:project_id])
   end
 
   def filter_by_status_new(relation)
@@ -151,6 +158,7 @@ class AgreementsQuery
   end
 
   def active_filters?
+    @params[:project_id].present? ||
     @params[:status].present? ||
     @params[:agreement_type].present? ||
     @params[:start_date_from].present? ||
@@ -162,12 +170,19 @@ class AgreementsQuery
 
   def active_filters_count
     count = 0
+    count += 1 if @params[:project_id].present?
     count += 1 if @params[:status].present?
     count += 1 if @params[:agreement_type].present?
     count += 1 if @params[:start_date_from].present? || @params[:start_date_to].present?
     count += 1 if @params[:end_date_from].present? || @params[:end_date_to].present?
     count += 1 if @params[:search].present?
     count
+  end
+
+  def project_filter_name
+    return nil unless @params[:project_id].present?
+
+    Project.find_by(id: @params[:project_id])&.name
   end
 
   def check_duplicate_agreement(other_party_id, project_id)

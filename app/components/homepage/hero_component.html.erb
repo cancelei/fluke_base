@@ -1,0 +1,51 @@
+<section class="relative min-h-[70vh] flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-secondary overflow-hidden">
+  <%# Background pattern - theme adaptive %>
+  <div class="absolute inset-0 opacity-10">
+    <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0); background-size: 40px 40px;"></div>
+  </div>
+
+  <%# Decorative elements %>
+  <div class="absolute top-20 left-10 w-72 h-72 bg-accent/20 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"></div>
+
+  <div class="relative z-10 max-w-5xl mx-auto px-6 py-20 text-center">
+    <%# Main headline %>
+    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-content mb-6 leading-tight">
+      Structured Collaboration<br class="hidden sm:block">
+      <span class="text-accent-content/90">for Project Teams</span>
+    </h1>
+
+    <%# Value proposition %>
+    <p class="text-lg md:text-xl text-primary-content/80 max-w-2xl mx-auto mb-8">
+      Project management with milestone tracking and formal collaboration agreements.
+      Define terms, track progress, and build together.
+    </p>
+
+    <%# Live stat badge %>
+    <div class="inline-flex items-center gap-2 bg-base-100/20 backdrop-blur-sm rounded-full px-4 py-2 mb-10">
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+      </span>
+      <span class="text-sm text-primary-content/90 font-medium"><%= stats_text %></span>
+    </div>
+
+    <%# CTA buttons %>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <% if signed_in? %>
+        <%= link_to "Go to Dashboard", dashboard_path, class: "btn btn-lg btn-accent gap-2" %>
+        <%= link_to "Browse Projects", projects_path, class: "btn btn-lg btn-ghost text-primary-content border-primary-content/30 hover:bg-primary-content/10" %>
+      <% else %>
+        <%= link_to "Get Started", new_user_registration_path, class: "btn btn-lg btn-accent gap-2" %>
+        <%= link_to "Sign In", new_user_session_path, class: "btn btn-lg btn-ghost text-primary-content border-primary-content/30 hover:bg-primary-content/10" %>
+      <% end %>
+    </div>
+
+    <%# Scroll indicator %>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <svg class="w-6 h-6 text-primary-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+      </svg>
+    </div>
+  </div>
+</section>

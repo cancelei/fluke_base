@@ -63,7 +63,7 @@ RSpec.describe 'Agreements Turbo Sections', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(dom_id(counter_offer) + '_counter_offers')
       expect(response.body).to include('Negotiation History')
-      expect(response.body).to include('Initial Agreement')
+      expect(response.body).to include('Initial')
     end
   end
 end

@@ -14,17 +14,17 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
 
     context "with turbo_stream format" do
       it "returns turbo stream content type" do
-        post accept_agreement_path(agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch accept_agreement_path(agreement), as: :turbo_stream
         expect(response.media_type).to eq("text/vnd.turbo-stream.html")
       end
 
       it "includes turbo-stream tag in response" do
-        post accept_agreement_path(agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch accept_agreement_path(agreement), as: :turbo_stream
         expect(response.body).to include("turbo-stream")
       end
 
       it "updates agreement status to accepted" do
-        post accept_agreement_path(agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch accept_agreement_path(agreement), as: :turbo_stream
         agreement.reload
         expect(agreement.status).to eq(Agreement::ACCEPTED)
       end
@@ -32,12 +32,12 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
 
     context "with HTML format" do
       it "redirects to agreement" do
-        post accept_agreement_path(agreement)
+        patch accept_agreement_path(agreement)
         expect(response).to redirect_to(agreement)
       end
 
       it "sets flash notice" do
-        post accept_agreement_path(agreement)
+        patch accept_agreement_path(agreement)
         expect(flash[:notice]).to include("accepted")
       end
     end
@@ -48,17 +48,17 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
 
     context "with turbo_stream format" do
       it "returns turbo stream content type" do
-        post reject_agreement_path(agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch reject_agreement_path(agreement), as: :turbo_stream
         expect(response.media_type).to eq("text/vnd.turbo-stream.html")
       end
 
       it "includes turbo-stream tag in response" do
-        post reject_agreement_path(agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch reject_agreement_path(agreement), as: :turbo_stream
         expect(response.body).to include("turbo-stream")
       end
 
       it "updates agreement status to rejected" do
-        post reject_agreement_path(agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch reject_agreement_path(agreement), as: :turbo_stream
         agreement.reload
         expect(agreement.status).to eq(Agreement::REJECTED)
       end
@@ -66,7 +66,7 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
 
     context "with HTML format" do
       it "redirects to agreement" do
-        post reject_agreement_path(agreement)
+        patch reject_agreement_path(agreement)
         expect(response).to redirect_to(agreement)
       end
     end
@@ -77,12 +77,12 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
 
     context "with turbo_stream format" do
       it "returns turbo stream content type" do
-        post complete_agreement_path(accepted_agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch complete_agreement_path(accepted_agreement), as: :turbo_stream
         expect(response.media_type).to eq("text/vnd.turbo-stream.html")
       end
 
       it "includes turbo-stream tag in response" do
-        post complete_agreement_path(accepted_agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch complete_agreement_path(accepted_agreement), as: :turbo_stream
         expect(response.body).to include("turbo-stream")
       end
     end
@@ -93,12 +93,12 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
 
     context "with turbo_stream format" do
       it "returns turbo stream content type" do
-        post cancel_agreement_path(agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch cancel_agreement_path(agreement), as: :turbo_stream
         expect(response.media_type).to eq("text/vnd.turbo-stream.html")
       end
 
       it "includes turbo-stream tag in response" do
-        post cancel_agreement_path(agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        patch cancel_agreement_path(agreement), as: :turbo_stream
         expect(response.body).to include("turbo-stream")
       end
     end

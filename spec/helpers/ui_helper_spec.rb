@@ -32,38 +32,6 @@ RSpec.describe UiHelper, type: :helper do
     end
   end
 
-  describe '#status_badge_class' do
-    it 'returns badge class string for accepted status' do
-      result = helper.status_badge_class('accepted')
-      expect(result).to include('badge')
-    end
-
-    it 'returns badge class for pending status' do
-      result = helper.status_badge_class('pending')
-      expect(result).to include('badge')
-    end
-
-    it 'returns badge class for rejected status' do
-      result = helper.status_badge_class('rejected')
-      expect(result).to include('badge')
-    end
-
-    it 'handles unknown status with default variant' do
-      result = helper.status_badge_class('unknown_status')
-      expect(result).to include('badge')
-    end
-
-    it 'handles symbol status values' do
-      result = helper.status_badge_class(:accepted)
-      expect(result).to include('badge')
-    end
-
-    it 'handles uppercase status values' do
-      result = helper.status_badge_class('ACCEPTED')
-      expect(result).to include('badge')
-    end
-  end
-
   describe '#kpi_badge_class' do
     it 'returns badge-success for excellent status' do
       expect(helper.kpi_badge_class(:excellent)).to eq('badge-success')

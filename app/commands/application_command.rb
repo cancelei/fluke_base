@@ -53,8 +53,10 @@ class ApplicationCommand < TurboBoost::Commands::Command
   end
 
   # Get data attribute from the triggering element
+  # TurboBoost converts data-foo-bar to foo_bar method on element.data
   def element_data(key)
-    element.dataset[key.to_s.camelize(:lower)]
+    method_name = key.to_s.underscore
+    element.data&.public_send(method_name)
   end
 
   # Get integer ID from element data attribute

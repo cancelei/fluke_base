@@ -232,7 +232,7 @@ RSpec.describe Agreement, type: :model do
     end
 
     it "finds most recent counter offer" do
-      first_counter = counter_agreement
+      counter_agreement
       second_counter = create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob).tap do |agreement|
         agreement.agreement_participants.update_all(counter_agreement_id: original_agreement.id)
         agreement.update!(created_at: 1.day.from_now)
@@ -257,7 +257,9 @@ RSpec.describe Agreement, type: :model do
       it "fails when not pending" do
         agreement.update!(status: Agreement::ACCEPTED)
         result = agreement.accept!
-        expect(result).to be_falsey
+        expect(result).to be_a(Dry::Monads::Result)
+        expect(result).to be_failure
+        expect(result.failure[:code]).to eq(:invalid_state)
       end
     end
 
@@ -280,7 +282,9 @@ RSpec.describe Agreement, type: :model do
       it "fails when not accepted" do
         expect(agreement.status).to eq(Agreement::PENDING)
         result = agreement.complete!
-        expect(result).to be_falsey
+        expect(result).to be_a(Dry::Monads::Result)
+        expect(result).to be_failure
+        expect(result.failure[:code]).to eq(:invalid_state)
         expect(agreement.reload.status).to eq(Agreement::PENDING)
       end
     end

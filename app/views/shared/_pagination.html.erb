@@ -9,7 +9,7 @@
 
 <% if records.respond_to?(:total_pages) && records.total_pages > 1 %>
   <div class="<%= local_assigns[:class_name] %>">
-    <div class="bg-base-100/95 backdrop-blur-md shadow-lg ring-1 ring-gray-200/50 border border-base-300 rounded-2xl px-6 py-4">
+    <div class="bg-base-100/95 backdrop-blur-md shadow-lg ring-1 ring-base-300/50 border border-base-300 rounded-2xl px-6 py-4">
       <%= paginate records, remote: local_assigns[:remote] || false %>
     </div>
   </div>

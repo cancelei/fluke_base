@@ -7,9 +7,9 @@ FlukeBase is a collaboration platform that facilitates professional relationship
 ## Core Architecture
 
 ### User Model
-- **Unified user system**: Single user entity can assume multiple roles dynamically
-- **Role fluidity**: Users transition between entrepreneur, mentor, co-founder, and developer roles based on context
+- **Unified user system**: Single user entity with equal access to all features
 - **No role restrictions**: Any user can initiate projects, propose agreements, or offer services
+- **Context-based access**: Users access projects through ownership or active agreements
 
 ### Data Model Hierarchy
 1. **Users** → Own/participate in →
@@ -134,7 +134,7 @@ FlukeBase is a collaboration platform that facilitates professional relationship
 - Total transaction value
 - Platform fee revenue
 - Agreement success rate (completed vs cancelled)
-- User role transition rate (entrepreneur to mentor)
+- User engagement diversity (projects created vs participated in)
 
 ### Platform Health
 - Response time to agreement proposals

@@ -22,13 +22,15 @@ Rails.application.configure do
     ]
 
     # Script policy with comprehensive inline support
+    # 'strict-dynamic' allows scripts created by nonce-trusted scripts to execute
+    # This is required for TurboBoost/Idiomorph which dynamically insert scripts
     if Rails.env.development?
       # More permissive for development
-      policy.script_src :self, :https, "https://challenges.cloudflare.com", "'unsafe-inline'", "'unsafe-eval'", *gtm_domains
+      policy.script_src :self, :https, "https://challenges.cloudflare.com", "'unsafe-inline'", "'unsafe-eval'", "'strict-dynamic'", *gtm_domains
     else
       # Production policy with specific hashes and unsafe-hashes for Turbo
       policy.script_src :self, :https, "https://challenges.cloudflare.com",
-                        "'unsafe-hashes'", "'unsafe-inline'",
+                        "'unsafe-hashes'", "'unsafe-inline'", "'strict-dynamic'",
                         "'sha256-rC8O/z7r/5hFyyAKirUgp0VYdiNfFcPXbRRyUMwtXbE='",
                         "'sha256-ALaDkBo93Qax4JosMrWAFtKE7+rUENfP37WzspJnRXU='",
                         *gtm_domains
@@ -62,5 +64,8 @@ Rails.application.configure do
     end
   end
 
-  config.content_security_policy_nonce_directives = %w[script-src style-src]
+  # Note: We only use nonces for script-src, not style-src
+  # When nonces are present, 'unsafe-inline' is ignored by browsers
+  # Since TurboBoost/Idiomorph apply inline styles dynamically, we rely on 'unsafe-inline' for styles
+  config.content_security_policy_nonce_directives = %w[script-src]
 end

@@ -6,30 +6,50 @@ module CommandHelpers
   extend ActiveSupport::Concern
 
   # Mock class for simulating TurboBoost command element
+  # Mimics TurboBoost::Commands::AttributeSet structure
   class MockElement
-    attr_reader :dataset
+    attr_reader :data
 
     def initialize(data = {})
-      @dataset = MockDataset.new(data)
+      @data = MockAttributeSet.new(data)
+    end
+
+    # Legacy alias for backwards compatibility
+    def dataset
+      @data
     end
   end
 
-  # Mock class for element.dataset access
-  class MockDataset
+  # Mock class for element.data access
+  # Mimics TurboBoost::Commands::AttributeSet behavior
+  # Stores data-foo-bar as foo_bar method
+  class MockAttributeSet
     def initialize(data = {})
-      @data = data.transform_keys { |k| k.to_s.camelize(:lower) }
+      @data = data.transform_keys { |k| k.to_s.underscore }
     end
 
+    # Hash-style access (for backwards compatibility with tests)
     def [](key)
-      @data[key.to_s]
+      @data[key.to_s.underscore]
     end
 
+    # Method-based access (matches actual TurboBoost gem)
     def method_missing(method_name, *args)
-      @data[method_name.to_s]
+      key = method_name.to_s.delete_suffix("?")
+      if method_name.to_s.end_with?("?")
+        @data[key].present?
+      else
+        @data[key]
+      end
     end
 
     def respond_to_missing?(method_name, include_private = false)
-      @data.key?(method_name.to_s) || super
+      key = method_name.to_s.delete_suffix("?")
+      @data.key?(key) || super
+    end
+
+    def public_send(method_name, *args)
+      method_missing(method_name, *args)
     end
   end
 

@@ -81,12 +81,6 @@ class User < ApplicationRecord
     super
   end
 
-  def show_project_context_nav?
-    # Project context navigation is now always shown for all users
-    # This method is kept for backwards compatibility but always returns true
-    true
-  end
-
   def accessible_projects
     # Return all projects the user has access to through ownership or active agreements
     owned_projects = projects

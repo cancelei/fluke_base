@@ -2,12 +2,13 @@
 <% presenter = local_assigns[:presenter] || present(project) %>
 
 <li class="group">
-  <div class="flex flex-col w-full p-4 mx-2 my-1 hover:bg-base-200 rounded-lg transition-colors">
+  <div class="flex flex-col w-full p-4 mx-2 my-1 hover:bg-base-200 rounded-lg transition-colors cursor-pointer"
+       onclick="if(event.target.tagName !== 'A' && !event.target.closest('a')) { Turbo.visit(<%= project_path(project).to_json %>); }">
     <!-- Header Section -->
     <div class="flex items-start justify-between gap-2 mb-2">
       <div class="flex-1 min-w-0">
         <h3 class="font-semibold truncate group-hover:text-primary transition-colors">
-          <%= link_to presenter.display_name(current_user), project_path(project), class: "hover:underline" %>
+          <%= presenter.display_name(current_user) %>
         </h3>
         <p class="text-xs text-base-content/60 flex items-center gap-1 mt-1">
           <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,21 +25,26 @@
       <%= presenter.display_description(current_user, truncate: true, length: 120) %>
     </p>
 
-    <!-- Stats Section -->
+    <!-- Stats Section with Owner Avatar -->
     <div class="flex items-center justify-between pt-2 border-t border-base-200">
       <div class="flex items-center gap-4 text-xs text-base-content/60">
+        <!-- Owner avatar + name -->
+        <%= link_to person_path(project.user), onclick: "event.stopPropagation();", class: "flex items-center gap-1.5 hover:text-primary transition-colors tooltip", data: { tip: "Project owner" } do %>
+          <%= render Ui::AvatarComponent.new(user: project.user, size: :xs, placeholder: :initials) %>
+          <span class="truncate max-w-[80px]"><%= project.user.full_name %></span>
+        <% end %>
         <div class="flex items-center gap-1 tooltip" data-tip="Milestones">
           <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
           <span><%= presenter.milestones_summary %></span>
         </div>
-        <div class="flex items-center gap-1 tooltip" data-tip="Agreements">
+        <%= link_to agreements_path(project_id: project.id), onclick: "event.stopPropagation();", class: "flex items-center gap-1 hover:text-primary transition-colors tooltip", data: { tip: "View project agreements" } do %>
           <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <span><%= pluralize(project.agreements.count, "agreement") %></span>
-        </div>
+        <% end %>
       </div>
 
       <svg class="h-4 w-4 text-base-content/0 group-hover:text-base-content/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

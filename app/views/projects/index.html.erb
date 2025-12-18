@@ -1,201 +1,133 @@
-<div class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
-  <div class="px-4 py-8 sm:px-0">
-    <%# Header Section with DaisyUI Card %>
-    <div class="card bg-base-100 shadow-xl mb-8">
-      <div class="card-body">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 class="card-title text-3xl font-bold">My Projects</h1>
-            <p class="mt-2 text-sm text-base-content/70">Manage and track all your projects in one place</p>
-          </div>
-          <div class="flex-shrink-0">
-            <%= link_to new_project_path, class: "btn btn-primary gap-2" do %>
-              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-              </svg>
-              New Project
-            <% end %>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <% if @projects.present? %>
-      <%= turbo_frame_tag "projects_index" do %>
-        <%# Responsive Project Cards Grid %>
-        <div class="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-          <% @projects.each do |project| %>
-            <% presenter = present(project) %>
-            <article class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 group"
-                     data-controller="project-card"
-                     data-project-id="<%= project.id %>"
-                     data-project-card-target="article">
-
-              <%# Status Indicator Bar %>
-              <div class="h-1 bg-gradient-to-r from-primary via-secondary to-primary rounded-t-2xl"></div>
-
-              <div class="card-body p-6">
-                <%# Project Icon and Title Section %>
-                <div class="flex items-start gap-4 mb-4">
-                  <div class="flex-shrink-0">
-                    <div class="avatar placeholder">
-                      <div class="bg-primary/10 text-primary rounded-xl w-14 h-14 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex-1 min-w-0">
-                    <h2 class="card-title text-lg group-hover:text-primary transition-colors">
-                      <%= link_to presenter.display_name(current_user), project_path(project),
-                          class: "hover:underline decoration-2 underline-offset-2 line-clamp-2",
-                          data: { turbo_frame: "_top" },
-                          title: presenter.display_name(current_user) %>
-                    </h2>
-
-                    <%# Badges %>
-                    <div class="flex flex-wrap items-center gap-2 mt-2">
-                      <%= presenter.stage_badge %>
-                      <% if project.category.present? && field_visible_to_user?(project, :category, current_user) %>
-                        <div class="badge badge-info badge-sm"><%= project.category %></div>
-                      <% end %>
-                    </div>
-
-                    <div class="flex items-center text-xs text-base-content/60 mt-2">
-                      <svg class="h-3 w-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>Updated <%= time_ago_in_words(project.updated_at) %> ago</span>
-                    </div>
-                  </div>
-                </div>
-
-                <%# Project Description %>
-                <% if project.description.present? && field_visible_to_user?(project, :description, current_user) %>
-                  <p class="text-sm text-base-content/70 line-clamp-2 mb-4" title="<%= strip_tags(presenter.display_description(current_user)) %>">
-                    <%= presenter.display_description(current_user, truncate: true, length: 100) %>
-                  </p>
-                <% end %>
-
-                <%# Project Link %>
-                <% if project.project_link.present? && field_visible_to_user?(project, :project_link, current_user) %>
-                  <div class="mb-4">
-                    <div class="flex items-center p-2.5 bg-base-200 rounded-lg">
-                      <svg class="h-3.5 w-3.5 text-primary mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
-                      <a href="<%= project.project_link.start_with?("http") ? project.project_link : "https://#{project.project_link}" %>"
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         class="text-sm link link-primary truncate"
-                         title="<%= project.project_link %>">
-                        <%= project.project_link.gsub(/^https?:\/\//, "") %>
-                      </a>
-                    </div>
-                  </div>
-                <% end %>
-
-                <%# Stats Section %>
-                <div class="stats stats-horizontal bg-base-200 shadow-sm w-full">
-                  <div class="stat py-2 px-3">
-                    <div class="stat-title text-xs">Milestones</div>
-                    <div class="stat-value text-sm"><%= presenter.milestones_summary %></div>
-                  </div>
-                  <div class="stat py-2 px-3">
-                    <div class="stat-title text-xs">Agreements</div>
-                    <div class="stat-value text-sm"><%= project.agreements.count %></div>
-                  </div>
-                </div>
-              </div>
-
-              <%# Card Actions %>
-              <div class="card-actions justify-between items-center p-4 pt-0">
-                <%= link_to project_path(project),
-                    class: "btn btn-primary btn-sm gap-2",
-                    data: { turbo_frame: "_top", action: "click->project-card#navigate" },
-                    "aria-label": "View #{presenter.display_name(current_user)} project" do %>
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                  View
-                <% end %>
-
-                <% if current_user.id == project.user_id %>
-                  <div class="flex items-center gap-2">
-                    <%= link_to edit_project_path(project),
-                        class: "btn btn-ghost btn-sm gap-1",
-                        data: { turbo_frame: "_top" },
-                        title: "Edit project" do %>
-                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                      </svg>
-                      <span class="hidden sm:inline">Edit</span>
-                    <% end %>
-
-                    <div class="dropdown dropdown-end">
-                      <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-square" title="More options">
-                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
-                        </svg>
-                      </div>
-                      <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-48 p-2 shadow-xl border border-base-300">
-                        <li>
-                          <button type="button" data-action="click->project-card#copyLink" class="gap-2">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                            Copy Link
-                          </button>
-                        </li>
-                        <li>
-                          <%= button_to project_path(project),
-                              method: :delete,
-                              data: { turbo_confirm: "Are you sure you want to delete this project? This action cannot be undone.", turbo_frame: "_top" },
-                              class: "text-error gap-2" do %>
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                            Delete
-                          <% end %>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            </article>
-          <% end %>
-        </div>
-
-        <%# Pagination %>
-        <div class="mt-8">
-          <%= render partial: "shared/pagination", locals: { records: @projects, class_name: "flex justify-center", remote: true } %>
-        </div>
-      <% end %>
-    <% else %>
-      <%# Empty State with DaisyUI Card %>
-      <div class="card bg-base-100 shadow-xl">
-        <div class="card-body items-center text-center py-16">
-          <div class="text-base-content/30 mb-6">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="h-24 w-24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"></path>
-            </svg>
-          </div>
-          <h3 class="card-title text-lg">No projects yet</h3>
-          <p class="text-sm text-base-content/70 max-w-md">Get started by creating your first project. You can track milestones, manage agreements, and collaborate with others.</p>
-          <div class="card-actions mt-6">
-            <%= link_to new_project_path, class: "btn btn-primary gap-2" do %>
-              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-              </svg>
-              Create Your First Project
-            <% end %>
-          </div>
-        </div>
-      </div>
+<div class="py-8">
+  <%# Header %>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <h1 class="text-2xl font-bold">My Projects</h1>
+    <%= link_to new_project_path, class: "btn btn-primary btn-sm gap-2" do %>
+      <%= render Ui::IconComponent.new(name: :plus, size: :sm) %>
+      New Project
     <% end %>
   </div>
+
+  <% if @projects.present? %>
+    <%= turbo_frame_tag "projects_index" do %>
+      <div class="card bg-base-100 shadow-xl">
+        <div class="overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Stage</th>
+                <th class="hidden md:table-cell">Milestones</th>
+                <th class="hidden md:table-cell">Agreements</th>
+                <th class="hidden sm:table-cell">Updated</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @projects.each do |project| %>
+                <% presenter = present(project) %>
+                <tr class="hover" data-controller="project-card" data-project-id="<%= project.id %>">
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="avatar placeholder">
+                        <div class="bg-primary/10 text-primary rounded-lg w-10 h-10 flex items-center justify-center">
+                          <%= render Ui::IconComponent.new(name: :folder, size: :md) %>
+                        </div>
+                      </div>
+                      <div>
+                        <%= link_to presenter.display_name(current_user), project_path(project),
+                            class: "font-medium link link-hover",
+                            data: { turbo_frame: "_top" } %>
+                        <% if project.description.present? && field_visible_to_user?(project, :description, current_user) %>
+                          <div class="text-xs text-base-content/60 line-clamp-1 max-w-xs">
+                            <%= truncate(strip_tags(presenter.display_description(current_user)), length: 50) %>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <%= presenter.stage_badge %>
+                    <% if project.category.present? && field_visible_to_user?(project, :category, current_user) %>
+                      <span class="badge badge-info badge-xs ml-1"><%= project.category %></span>
+                    <% end %>
+                  </td>
+                  <td class="hidden md:table-cell">
+                    <span class="font-medium"><%= presenter.milestones_summary %></span>
+                  </td>
+                  <td class="hidden md:table-cell">
+                    <%= project.agreements.count %>
+                  </td>
+                  <td class="hidden sm:table-cell text-base-content/60 text-sm">
+                    <%= time_ago_in_words(project.updated_at) %> ago
+                  </td>
+                  <td class="text-right">
+                    <div class="flex items-center justify-end gap-1">
+                      <%= link_to project_path(project),
+                          class: "btn btn-primary btn-xs gap-1",
+                          data: { turbo_frame: "_top" } do %>
+                        <%= render Ui::IconComponent.new(name: :eye, size: :xs) %>
+                        View
+                      <% end %>
+
+                      <% if current_user.id == project.user_id %>
+                        <%= link_to edit_project_path(project),
+                            class: "btn btn-ghost btn-xs",
+                            data: { turbo_frame: "_top" },
+                            title: "Edit" do %>
+                          <%= render Ui::IconComponent.new(name: :edit, size: :xs) %>
+                        <% end %>
+
+                        <div class="dropdown dropdown-end">
+                          <div tabindex="0" role="button" class="btn btn-ghost btn-xs btn-square" title="More">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                            </svg>
+                          </div>
+                          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-40 p-2 shadow-xl border border-base-300">
+                            <li>
+                              <button type="button" data-action="click->project-card#copyLink" class="gap-2 text-sm">
+                                <%= render Ui::IconComponent.new(name: :document, size: :sm) %>
+                                Copy Link
+                              </button>
+                            </li>
+                            <li>
+                              <%= button_to project_path(project),
+                                  method: :delete,
+                                  data: { turbo_confirm: "Delete this project?", turbo_frame: "_top" },
+                                  class: "text-error gap-2 text-sm" do %>
+                                <%= render Ui::IconComponent.new(name: :trash, size: :sm) %>
+                                Delete
+                              <% end %>
+                            </li>
+                          </ul>
+                        </div>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <%# Pagination %>
+      <div class="mt-6">
+        <%= render partial: "shared/pagination", locals: { records: @projects, class_name: "flex justify-center", remote: true } %>
+      </div>
+    <% end %>
+  <% else %>
+    <%# Compact Empty State %>
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body items-center text-center py-12">
+        <%= render Ui::IconComponent.new(name: :folder, size: :xl, css_class: "text-base-content/30 mb-4") %>
+        <p class="text-base-content/60">No projects yet.</p>
+        <%= link_to new_project_path, class: "btn btn-primary btn-sm gap-2 mt-4" do %>
+          <%= render Ui::IconComponent.new(name: :plus, size: :sm) %>
+          Create Project
+        <% end %>
+      </div>
+    </div>
+  <% end %>
 </div>

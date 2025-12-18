@@ -12,39 +12,24 @@
     <% if users.any? %>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         <% users.each do |user| %>
-          <%= render partial: "shared/unified_user_card", locals: {
+          <%= render UserCardComponent.new(
               user: user,
-              options: {
-                avatar_height: "h-48",
-                show_message_button: true,
-                propose_for_project: (defined?(propose_for_project) ? propose_for_project : nil)
-              }
-            } %>
+              current_user: current_user,
+              show_message_button: true,
+              propose_for_project: (defined?(propose_for_project) ? propose_for_project : nil)
+            ) %>
         <% end %>
       </div>
     <% else %>
-      <!-- Empty State -->
-      <div class="text-center py-16">
-        <div class="relative inline-block">
-          <div class="mx-auto h-24 w-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-            <svg class="h-12 w-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </div>
-        </div>
-
-        <h3 class="text-2xl font-bold mb-2">No People Found</h3>
-        <p class="text-base-content/70 text-lg mb-6 max-w-md mx-auto">
-          We couldn't find anyone matching your search. Try different keywords or browse all people.
-        </p>
-
-        <a href="<%= explore_people_path %>" class="btn btn-primary gap-2">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          Browse All People
-        </a>
-      </div>
+      <%= render "shared/empty_state",
+          title: "No People Found",
+          description: "We couldn't find anyone matching your search. Try different keywords or browse all people.",
+          action_text: "Browse All People",
+          action_url: explore_people_path,
+          options: {
+            container_class: "text-center py-16",
+            icon: "users"
+          } %>
     <% end %>
 
     <!-- Pagination -->

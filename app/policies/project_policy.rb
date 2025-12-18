@@ -2,10 +2,13 @@
 
 class ProjectPolicy < ApplicationPolicy
   def index?
-    true # All authenticated users can view their own projects list
+    signed_in?
   end
 
   def show?
+    # Allow viewing publicly discoverable (non-stealth) projects even when not signed in
+    return true if record.publicly_discoverable?
+
     return false unless user
 
     # Owner always has access
@@ -21,27 +24,42 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def create?
-    user.present?
+    signed_in?
+  end
+
+  def new?
+    create?
   end
 
   def update?
+    return true if admin?
     return false unless user
     record.user_is_admin?(user)
   end
 
+  def edit?
+    update?
+  end
+
   def destroy?
+    return true if admin?
     return false unless user
     record.user_is_owner?(user)
   end
 
   def explore?
-    true # All authenticated users can explore public projects
+    signed_in?
   end
 
   # Membership management permissions
   def manage_members?
+    return true if admin?
     return false unless user
     record.user_is_admin?(user)
+  end
+
+  def manage_team?
+    manage_members?
   end
 
   def invite_member?
@@ -67,22 +85,47 @@ class ProjectPolicy < ApplicationPolicy
     record.user_is_member?(user) || record.user_is_admin?(user)
   end
 
+  def manage_milestones?
+    return true if admin?
+    view_milestones?
+  end
+
   def view_github_logs?
+    return true if admin?
     return false unless user
     record.user_is_admin?(user)
   end
 
+  def access_repository?
+    view_github_logs?
+  end
+
+  def toggle_stealth_mode?
+    return true if admin?
+    return false unless user
+    record.user_is_owner?(user)
+  end
+
+  def view_sensitive_fields?
+    return true if admin?
+    return false unless user
+    record.user_is_owner?(user)
+  end
+
   def view_time_logs?
+    return true if admin?
     return false unless user
     record.user_is_member?(user) || record.user_is_admin?(user)
   end
 
   def view_team?
+    return true if admin?
     return false unless user
     record.user_is_member?(user) || record.user_is_admin?(user)
   end
 
   def edit_settings?
+    return true if admin?
     return false unless user
     record.user_is_admin?(user)
   end
@@ -103,6 +146,8 @@ class ProjectPolicy < ApplicationPolicy
       if user.nil?
         # Unauthenticated users can only see publicly visible projects
         scope.publicly_visible
+      elsif user.admin?
+        scope.all
       else
         # Authenticated users can see:
         # 1. Their own projects

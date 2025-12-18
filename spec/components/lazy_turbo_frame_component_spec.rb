@@ -77,7 +77,7 @@ RSpec.describe LazyTurboFrameComponent, type: :component do
       expect(page).to have_text("Custom description")
     end
 
-    it "renders loading spinner" do
+    it "renders DaisyUI loading spinner" do
       render_inline(described_class.new(
         frame_id: frame_id,
         src_path: src_path,
@@ -85,7 +85,7 @@ RSpec.describe LazyTurboFrameComponent, type: :component do
         description: description
       ))
 
-      expect(page).to have_css("div.animate-spin")
+      expect(page).to have_css("span.loading.loading-spinner")
     end
   end
 end

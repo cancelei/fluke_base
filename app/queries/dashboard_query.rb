@@ -3,8 +3,57 @@ class DashboardQuery
     @current_user = current_user
   end
 
+  # Returns user's owned projects ordered by creation date (original behavior)
   def recent_projects(limit = 5)
     @current_user.projects.order(created_at: :desc).limit(limit)
+  end
+
+  # Returns ALL accessible projects (owned + agreements) ordered by GitHub activity
+  # Projects with recent commits appear first, then by last update
+  def projects_by_activity(limit = 5)
+    accessible_project_ids = @current_user.accessible_projects.map(&:id)
+    return Project.none if accessible_project_ids.empty?
+
+    # Use a subquery to get last commit date for ordering
+    Project.where(id: accessible_project_ids)
+           .left_joins(:github_logs)
+           .select("projects.*, MAX(github_logs.commit_date) as last_commit_at")
+           .group("projects.id")
+           .order(Arel.sql("MAX(github_logs.commit_date) DESC NULLS LAST, projects.updated_at DESC"))
+           .limit(limit)
+  end
+
+  # Returns recent commits across ALL accessible projects
+  def recent_activity(limit = 10)
+    accessible_project_ids = @current_user.accessible_projects.map(&:id)
+    return GithubLog.none if accessible_project_ids.empty?
+
+    GithubLog.where(project_id: accessible_project_ids)
+             .includes(:project, :user)
+             .order(commit_date: :desc)
+             .limit(limit)
+  end
+
+  # Returns activity summary stats across all accessible projects
+  def activity_summary
+    projects = @current_user.accessible_projects
+    return empty_activity_summary if projects.empty?
+
+    project_ids = projects.map(&:id)
+
+    {
+      total_projects: projects.count,
+      projects_with_repos: projects.count { |p| p.github_connected? },
+      total_commits_this_week: GithubLog.where(project_id: project_ids)
+                                        .where("commit_date > ?", 7.days.ago)
+                                        .count,
+      total_commits_this_month: GithubLog.where(project_id: project_ids)
+                                         .where("commit_date > ?", 30.days.ago)
+                                         .count,
+      active_projects: projects.count { |p| p.activity_level == :active },
+      moderate_projects: projects.count { |p| p.activity_level == :moderate },
+      stale_projects: projects.count { |p| p.activity_level == :stale }
+    }
   end
 
   def recent_agreements(limit = 5)
@@ -63,6 +112,18 @@ class DashboardQuery
   end
 
   private
+
+  def empty_activity_summary
+    {
+      total_projects: 0,
+      projects_with_repos: 0,
+      total_commits_this_week: 0,
+      total_commits_this_month: 0,
+      active_projects: 0,
+      moderate_projects: 0,
+      stale_projects: 0
+    }
+  end
 
   def default_stats
     {

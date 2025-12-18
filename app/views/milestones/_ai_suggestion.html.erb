@@ -1,118 +1,156 @@
 <% if enhancement %>
   <div data-milestone-id="<%= milestone.id || "" %>"
-       class="alert mt-4 <%= enhancement.successful? ? "alert-success" : enhancement.failed? ? "alert-error" : "alert-info" %>">
-    <% if enhancement.successful? %>
-      <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-      </svg>
-    <% elsif enhancement.failed? %>
-      <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-      </svg>
-    <% elsif enhancement.processing? %>
-      <span class="loading loading-spinner loading-sm"></span>
-    <% else %>
-      <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-      </svg>
-    <% end %>
-    <div class="flex-1">
-      <h3 class="font-medium">
+       class="card mt-4 <%= enhancement.successful? ? "bg-success/10 border border-success/30" : enhancement.failed? ? "bg-error/10 border border-error/30" : "bg-info/10 border border-info/30" %>">
+    <div class="card-body p-4">
+      <div class="flex items-start gap-3">
         <% if enhancement.successful? %>
-          AI Enhancement Completed
+          <div class="text-success">
+            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          </div>
         <% elsif enhancement.failed? %>
-          AI Enhancement Failed
+          <div class="text-error">
+            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
         <% elsif enhancement.processing? %>
-          AI Enhancement in Progress...
+          <span class="loading loading-spinner loading-md text-info"></span>
         <% else %>
-          AI Enhancement Pending
+          <div class="text-info">
+            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+          </div>
         <% end %>
-      </h3>
 
-      <% if enhancement.successful? && enhancement.enhanced_description.present? %>
-        <div class="mt-2 text-sm">
-          <p class="font-medium">Enhanced Description:</p>
-          <div class="mt-1 enhanced-description-text"><%= simple_format(enhancement.enhanced_description) %></div>
-          <!-- Hidden original description for revert functionality -->
-          <div class="hidden original-description-text"><%= enhancement.original_description %></div>
-        </div>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <% if enhancement.respond_to?(:direct_enhancement) && enhancement.direct_enhancement %>
-            <!-- Direct enhancement buttons (no milestone created yet) - Using TurboBoost Commands -->
-            <button type="button"
-                    data-turbo-command="Milestones::ApplyDirectEnhancementCommand#execute"
-                    data-enhanced-description="<%= enhancement.enhanced_description %>"
-                    data-original-title="<%= enhancement.respond_to?(:original_title) ? enhancement.original_title : "" %>"
-                    data-original-description="<%= enhancement.original_description %>"
-                    class="btn btn-success btn-sm">
-              Apply to Form
-            </button>
-            <button type="button"
-                    data-turbo-command="Milestones::RevertDirectEnhancementCommand#execute"
-                    data-original-title="<%= enhancement.respond_to?(:original_title) ? enhancement.original_title : "" %>"
-                    data-original-description="<%= enhancement.original_description %>"
-                    class="btn btn-outline btn-success btn-sm">
-              Revert to Original
-            </button>
+        <div class="flex-1">
+          <h3 class="font-semibold text-base-content">
+            <% if enhancement.successful? %>
+              AI Enhancement Ready
+            <% elsif enhancement.failed? %>
+              AI Enhancement Failed
+            <% elsif enhancement.processing? %>
+              AI Enhancement in Progress...
+            <% else %>
+              AI Enhancement Pending
+            <% end %>
+          </h3>
+
+          <% if enhancement.successful? && enhancement.enhanced_description.present? %>
+            <div class="mt-3">
+              <p class="text-sm font-medium text-base-content/80 mb-2">Suggested Description:</p>
+              <div class="bg-base-100 rounded-lg p-3 border border-base-300">
+                <div class="prose prose-sm max-w-none enhanced-description-text">
+                  <%= simple_format(enhancement.enhanced_description) %>
+                </div>
+              </div>
+              <!-- Hidden original description for revert functionality -->
+              <div class="hidden original-description-text"><%= enhancement.original_description %></div>
+              <p class="text-xs text-base-content/60 mt-2 italic">
+                Review the suggestion above, then apply or discard it.
+              </p>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <% if enhancement.respond_to?(:direct_enhancement) && enhancement.direct_enhancement %>
+                <!-- Direct enhancement buttons (no milestone created yet) - Using Stimulus actions -->
+                <button type="button"
+                        data-action="click->milestone-ai#applyDirectEnhancement"
+                        data-enhanced-description="<%= enhancement.enhanced_description %>"
+                        data-original-title="<%= enhancement.respond_to?(:original_title) ? enhancement.original_title : "" %>"
+                        data-original-description="<%= enhancement.original_description %>"
+                        class="btn btn-primary btn-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Apply to Form
+                </button>
+                <button type="button"
+                        data-action="click->milestone-ai#revertDirectEnhancement"
+                        data-original-title="<%= enhancement.respond_to?(:original_title) ? enhancement.original_title : "" %>"
+                        data-original-description="<%= enhancement.original_description %>"
+                        class="btn btn-outline btn-neutral btn-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                  </svg>
+                  Revert
+                </button>
+              <% else %>
+                <!-- Regular enhancement buttons (existing milestone) - Using Stimulus actions -->
+                <button type="button"
+                        data-action="click->milestone-ai#apply"
+                        data-enhancement-id="<%= enhancement.id %>"
+                        class="btn btn-primary btn-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Apply Enhancement
+                </button>
+                <button type="button"
+                        data-action="click->milestone-ai#revert"
+                        data-enhancement-id="<%= enhancement.id %>"
+                        class="btn btn-outline btn-neutral btn-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                  </svg>
+                  Revert
+                </button>
+              <% end %>
+              <!-- Discard button -->
+              <button type="button"
+                      data-action="click->milestone-ai#discard"
+                      class="btn btn-ghost btn-sm text-base-content/70 hover:text-error">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Discard
+              </button>
+            </div>
+          <% elsif enhancement.failed? %>
+            <div class="mt-2 text-sm text-base-content/80">
+              <p>Enhancement failed. Please try again.</p>
+              <% if enhancement.context_data&.dig('error_message') %>
+                <p class="text-xs mt-1 text-error/80">Error: <%= enhancement.context_data["error_message"] %></p>
+              <% end %>
+            </div>
+            <div class="mt-3">
+              <button type="button"
+                      data-action="click->milestone-ai#discard"
+                      class="btn btn-outline btn-error btn-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Dismiss
+              </button>
+            </div>
+          <% elsif enhancement.processing? %>
+            <div class="mt-2 text-sm text-base-content/80">
+              <p>AI is enhancing your milestone description...</p>
+              <% if enhancement.processing_time_seconds %>
+                <p class="text-xs mt-1 text-base-content/60">Processing time: <%= enhancement.processing_time_seconds %>s</p>
+              <% end %>
+            </div>
           <% else %>
-            <!-- Regular enhancement buttons (existing milestone) - Using TurboBoost Commands -->
-            <button type="button"
-                    data-turbo-command="Milestones::ApplyEnhancementCommand#execute"
-                    data-enhancement-id="<%= enhancement.id %>"
-                    class="btn btn-success btn-sm">
-              Apply Enhancement
-            </button>
-            <button type="button"
-                    data-turbo-command="Milestones::RevertEnhancementCommand#execute"
-                    data-enhancement-id="<%= enhancement.id %>"
-                    class="btn btn-outline btn-success btn-sm">
-              Revert to Original
-            </button>
+            <div class="mt-2 text-sm text-base-content/80">
+              <p>Enhancement request has been queued for processing.</p>
+            </div>
           <% end %>
-          <!-- Discard button - Using TurboBoost Command for both cases -->
-          <button type="button"
-                  data-turbo-command="Milestones::DiscardEnhancementCommand#execute"
-                  class="btn btn-ghost btn-sm">
-            Discard
-          </button>
-        </div>
-      <% elsif enhancement.failed? %>
-        <div class="mt-2 text-sm">
-          <p>Enhancement failed. Please try again.</p>
-          <% if enhancement.context_data&.dig('error_message') %>
-            <p class="text-xs mt-1 text-base-content/70">Error: <%= enhancement.context_data["error_message"] %></p>
-          <% end %>
-        </div>
-        <div class="mt-3">
-          <button type="button"
-                  data-turbo-command="Milestones::DiscardEnhancementCommand#execute"
-                  class="btn btn-outline btn-error btn-sm">
-            Dismiss
-          </button>
-        </div>
-      <% elsif enhancement.processing? %>
-        <div class="mt-2 text-sm">
-          <p>AI is enhancing your milestone description...</p>
-          <% if enhancement.processing_time_seconds %>
-            <p class="text-xs mt-1 text-base-content/70">Processing time: <%= enhancement.processing_time_seconds %>s</p>
-          <% end %>
-        </div>
-      <% else %>
-        <div class="mt-2 text-sm">
-          <p>Enhancement request has been queued for processing.</p>
-        </div>
-      <% end %>
 
-      <div class="mt-2 text-xs text-base-content/70">
-        <span class="badge badge-ghost badge-sm"><%= enhancement.enhancement_style.humanize %></span>
-        <% if enhancement.respond_to?(:created_at) && enhancement.created_at %>
-          • Created <%= time_ago_in_words(enhancement.created_at) %> ago
-        <% else %>
-          • Created just now
-        <% end %>
-        <% if enhancement.respond_to?(:user) && enhancement.user %>
-          by <%= enhancement.user.first_name %>
-        <% end %>
+          <div class="mt-3 flex items-center gap-2 text-xs text-base-content/60">
+            <span class="badge badge-ghost badge-sm"><%= enhancement.enhancement_style.humanize %></span>
+            <span>•</span>
+            <% if enhancement.respond_to?(:created_at) && enhancement.created_at %>
+              <span>Created <%= time_ago_in_words(enhancement.created_at) %> ago</span>
+            <% else %>
+              <span>Created just now</span>
+            <% end %>
+            <% if enhancement.respond_to?(:user) && enhancement.user %>
+              <span>by <%= enhancement.user.first_name %></span>
+            <% end %>
+          </div>
+        </div>
       </div>
     </div>
   </div>

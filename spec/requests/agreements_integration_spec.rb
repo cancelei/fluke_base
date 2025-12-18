@@ -25,8 +25,8 @@ RSpec.describe 'Agreements Integration', type: :request do
         }
       }
 
-      expect(response).to redirect_to('/agreements')
       agreement = Agreement.order(:created_at).last
+      expect(response).to redirect_to(agreement)
       expect(agreement.status).to eq(Agreement::PENDING)
 
       sign_in bob
@@ -54,8 +54,8 @@ RSpec.describe 'Agreements Integration', type: :request do
         }
       }
 
-      expect(response).to redirect_to('/agreements')
       created = Agreement.order(:created_at).last
+      expect(response).to redirect_to(created)
       expect(created.agreement_type).to eq(Agreement::CO_FOUNDER)
       expect(created.payment_type).to eq(Agreement::EQUITY)
       expect(created.equity_percentage).to eq(25.0)
@@ -82,9 +82,9 @@ RSpec.describe 'Agreements Integration', type: :request do
         }
       }
 
-      expect(response).to redirect_to('/agreements')
       expect(original.reload.status).to eq(Agreement::COUNTERED)
       counter_offer = Agreement.order(:created_at).last
+      expect(response).to redirect_to(counter_offer)
       expect(counter_offer.counter_to).to eq(original)
       expect(counter_offer.equity_percentage).to eq(20.0)
     end

@@ -193,6 +193,57 @@ class Project < ApplicationRecord
                .limit(limit)
   end
 
+  # GitHub Activity Helper Methods for Dashboard/Cards
+
+  # Returns the most recent commit date for this project
+  # @return [DateTime, nil] The most recent commit date or nil if no commits
+  def last_commit_date
+    github_logs.maximum(:commit_date)
+  end
+
+  # Returns the activity level based on last commit date
+  # @return [Symbol] :active (7 days), :moderate (30 days), or :stale (older/no commits)
+  def activity_level
+    return :none unless github_connected?
+
+    last_date = last_commit_date
+    return :stale unless last_date
+
+    days_since_last = (Time.current - last_date).to_i / 1.day
+
+    if days_since_last <= 7
+      :active
+    elsif days_since_last <= 30
+      :moderate
+    else
+      :stale
+    end
+  end
+
+  # Returns the count of commits in the last N days
+  # @param days [Integer] Number of days to look back (default: 7)
+  # @return [Integer] Count of commits
+  def commits_since(days: 7)
+    github_logs.where("commit_date > ?", days.days.ago).count
+  end
+
+  # Returns a hash with GitHub activity summary stats
+  # @return [Hash] Activity stats including commit count, lines changed, last commit, etc.
+  def github_activity_stats
+    return {} unless github_connected?
+
+    {
+      total_commits: github_logs.count,
+      commits_this_week: commits_since(days: 7),
+      commits_this_month: commits_since(days: 30),
+      total_lines_added: github_logs.sum(:lines_added) || 0,
+      total_lines_removed: github_logs.sum(:lines_removed) || 0,
+      last_commit_date: last_commit_date,
+      activity_level: activity_level,
+      contributor_count: github_logs.select(:user_id).distinct.count
+    }
+  end
+
   def contributions_summary
     github_service.contributions_summary_basic
   end

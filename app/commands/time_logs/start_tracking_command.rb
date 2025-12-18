@@ -52,7 +52,7 @@ module TimeLogs
 
         # Update milestone bar and navbar
         update_frame("milestone_bar_container", partial: "shared/milestone_bar", locals: {})
-        update_frame("navbar_milestones_list", partial: "shared/navbar_milestones_list", locals: {})
+        update_frame("context_milestones_list", partial: "shared/context_milestones_dropdown", locals: {})
 
         # Update remaining time progress
         update_frame(

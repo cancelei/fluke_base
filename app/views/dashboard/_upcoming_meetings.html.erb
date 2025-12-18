@@ -2,8 +2,9 @@
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body p-0">
       <!-- Header -->
-      <div class="p-4 pb-0">
+      <div class="flex items-center justify-between p-4 pb-0">
         <h3 class="card-title text-lg">Upcoming Meetings</h3>
+        <%= link_to "View all", agreements_path, class: "btn btn-ghost btn-sm" %>
       </div>
 
       <!-- Content -->
@@ -13,10 +14,16 @@
         <ul class="menu p-0">
           <% @upcoming_meetings.each do |meeting| %>
             <% cache([ meeting, current_user ]) do %>
-              <li>
-                <div class="flex flex-col w-full p-4 hover:bg-base-200 rounded-lg">
-                  <!-- Title -->
-                  <span class="font-semibold text-primary mb-1"><%= meeting.title %></span>
+              <li class="group">
+                <div class="flex flex-col w-full p-4 mx-2 my-1 hover:bg-base-200 rounded-lg transition-colors cursor-pointer"
+                     onclick="if(event.target.tagName !== 'A' && !event.target.closest('a')) { Turbo.visit(<%= agreement_meeting_path(meeting.agreement, meeting).to_json %>); }">
+                  <!-- Header with title and chevron -->
+                  <div class="flex items-start justify-between mb-1">
+                    <span class="font-semibold text-primary group-hover:text-primary/80 transition-colors"><%= meeting.title %></span>
+                    <svg class="h-4 w-4 text-base-content/0 group-hover:text-base-content/60 transition-colors flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
 
                   <!-- Description -->
                   <% if meeting.description.present? %>
@@ -45,16 +52,13 @@
           <% end %>
         </ul>
       <% else %>
-        <div class="text-center p-6">
-          <div class="avatar placeholder mb-4">
-            <div class="bg-base-200 text-base-content/40 rounded-full w-12">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-          </div>
-          <p class="text-sm text-base-content/70">No upcoming meetings.</p>
-        </div>
+        <%= render "shared/empty_state",
+            title: "No upcoming meetings",
+            description: "Schedule meetings from your agreements.",
+            options: {
+              container_class: "text-center p-6",
+              icon: "calendar"
+            } %>
       <% end %>
     </div>
   </div>

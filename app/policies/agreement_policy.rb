@@ -70,6 +70,10 @@ class AgreementPolicy < ApplicationPolicy
     record.user_can_make_counter_offer?(user)
   end
 
+  def counter_offer?
+    counter?
+  end
+
   def cancel?
     return true if admin?
     return false unless signed_in?
@@ -132,6 +136,10 @@ class AgreementPolicy < ApplicationPolicy
 
   def github_section?
     view_github_logs?
+  end
+
+  def time_logs_section?
+    view_time_logs?
   end
 
   def counter_offers_section?

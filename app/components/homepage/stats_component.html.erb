@@ -1,0 +1,35 @@
+<section class="py-16 bg-base-200">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-2xl md:text-3xl font-bold text-base-content mb-3">Platform Statistics</h2>
+      <p class="text-base-content/70">Real-time data from the platform</p>
+    </div>
+
+    <% if has_data? %>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <% stats_items.each do |item| %>
+          <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+            <div class="card-body items-center text-center p-6">
+              <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                <%= render Ui::IconComponent.new(name: item[:icon], size: :lg, css_class: "text-primary") %>
+              </div>
+              <div class="text-3xl md:text-4xl font-bold text-base-content" data-controller="stats-counter" data-stats-counter-target="value" data-stats-counter-end-value="<%= item[:value] %>">
+                <%= item[:value] %>
+              </div>
+              <div class="text-sm font-medium text-base-content/80"><%= item[:label] %></div>
+              <div class="text-xs text-base-content/60"><%= item[:description] %></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <%= render Ui::IconComponent.new(name: :plus, size: :xl, css_class: "text-primary") %>
+        </div>
+        <p class="text-lg text-base-content/70 mb-4">Be the first to start a project</p>
+        <%= link_to "Create Your First Project", new_project_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</section>

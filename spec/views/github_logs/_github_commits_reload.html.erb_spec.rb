@@ -8,16 +8,15 @@ RSpec.describe 'github_logs/_github_commits_reload.html.erb', type: :view do
   describe 'success notification structure' do
     it 'displays success notification with proper styling' do
       expect(rendered).to have_css('.text-center.py-4')
-      expect(rendered).to have_css('.inline-flex.items-center')
+      expect(rendered).to have_css('.alert.alert-success')
     end
 
     it 'uses success color scheme' do
-      expect(rendered).to have_css('.text-green-600.bg-green-100')
-      expect(rendered).to have_css('.border.border-transparent')
+      expect(rendered).to have_css('.alert.alert-success')
     end
 
     it 'has proper button-like styling' do
-      expect(rendered).to have_css('.px-4.py-2.text-sm.font-medium.rounded-md')
+      expect(rendered).to have_css('.alert')
     end
   end
 
@@ -27,7 +26,7 @@ RSpec.describe 'github_logs/_github_commits_reload.html.erb', type: :view do
     end
 
     it 'includes success icon' do
-      expect(rendered).to have_css('svg.mr-2.h-5.w-5')
+      expect(rendered).to have_css('svg.h-5.w-5')
       expect(rendered).to have_css('svg path[fill-rule="evenodd"]')
     end
 
@@ -38,15 +37,14 @@ RSpec.describe 'github_logs/_github_commits_reload.html.erb', type: :view do
 
   describe 'icon and visual elements' do
     it 'displays checkmark success icon' do
-      expect(rendered).to have_css('svg.mr-2.h-5.w-5')
+      expect(rendered).to have_css('svg.h-5.w-5')
       # Should contain checkmark path
       expect(rendered).to include('fill-rule="evenodd"')
       expect(rendered).to include('clip-rule="evenodd"')
     end
 
     it 'positions icon correctly with text' do
-      expect(rendered).to have_css('.mr-2') # Icon margin
-      expect(rendered).to have_css('.items-center') # Vertical alignment
+      expect(rendered).to have_css('.inline-flex')
     end
   end
 
@@ -63,8 +61,7 @@ RSpec.describe 'github_logs/_github_commits_reload.html.erb', type: :view do
     end
 
     it 'uses non-intrusive success styling' do
-      expect(rendered).to have_css('.bg-green-100') # Subtle background
-      expect(rendered).to have_css('.text-green-600') # Readable text
+      expect(rendered).to have_css('.alert.alert-success')
     end
   end
 
@@ -74,7 +71,7 @@ RSpec.describe 'github_logs/_github_commits_reload.html.erb', type: :view do
     end
 
     it 'uses appropriate color contrast' do
-      expect(rendered).to include('text-green-600') # Should have good contrast on green-100 background
+      expect(rendered).to include('alert-success')
     end
 
     it 'includes meaningful icon for visual users' do
@@ -89,24 +86,22 @@ RSpec.describe 'github_logs/_github_commits_reload.html.erb', type: :view do
     end
 
     it 'uses appropriate text sizing' do
-      expect(rendered).to include('text-sm') # Readable but not dominant text size
+      expect(rendered).to have_css('span')
     end
 
     it 'has proper spacing for mobile and desktop' do
       expect(rendered).to include('py-4') # Vertical padding
-      expect(rendered).to include('px-4') # Horizontal padding
     end
   end
 
   describe 'user experience considerations' do
     it 'provides immediate positive feedback' do
       expect(rendered).to have_content('successfully!')
-      expect(rendered).to have_css('.text-green-600') # Positive color
+      expect(rendered).to have_css('.alert.alert-success')
     end
 
     it 'uses appropriate visual weight for notification' do
-      expect(rendered).to have_css('.font-medium') # Medium weight, not overwhelming
-      expect(rendered).to have_css('.text-sm') # Appropriately sized
+      expect(rendered).to have_css('span')
     end
 
     it 'centers notification for prominence' do
@@ -126,7 +121,7 @@ RSpec.describe 'github_logs/_github_commits_reload.html.erb', type: :view do
     end
 
     it 'uses appropriate styling for success state' do
-      expect(rendered).to have_css('.bg-green-100.text-green-600')
+      expect(rendered).to have_css('.alert.alert-success')
     end
   end
 
@@ -152,19 +147,15 @@ RSpec.describe 'github_logs/_github_commits_reload.html.erb', type: :view do
 
   describe 'visual consistency' do
     it 'follows design system patterns' do
-      expect(rendered).to include('rounded-md') # Consistent border radius
-      expect(rendered).to include('border-transparent') # Design system border
+      expect(rendered).to include('alert')
     end
 
     it 'uses consistent spacing units' do
       expect(rendered).to include('py-4') # Vertical padding
-      expect(rendered).to include('px-4') # Horizontal padding
-      expect(rendered).to include('mr-2') # Icon spacing
     end
 
     it 'maintains color consistency' do
-      expect(rendered).to include('text-green-600') # Text color
-      expect(rendered).to include('bg-green-100') # Background color
+      expect(rendered).to include('alert-success')
     end
   end
 end

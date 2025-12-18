@@ -26,7 +26,7 @@
           </div>
           <div class="mt-2 flex items-center text-sm text-base-content/60 sm:mt-0">
             <div class="flex space-x-2">
-              <%= link_to "View", notification_path(notification), class: "link link-primary" %>
+              <%= link_to "View", notification_path(notification), class: "link link-primary", data: { turbo_frame: "_top" } %>
 
               <% unless notification.read? %>
                 <%= button_to "Mark as read", mark_as_read_notification_path(notification), method: :post, class: "link" %>

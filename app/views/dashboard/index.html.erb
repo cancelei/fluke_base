@@ -1,96 +1,64 @@
-<!-- Dashboard Header -->
-<div class="card bg-base-100 shadow-xl mb-8">
-  <div class="card-body">
-    <h1 class="card-title text-2xl md:text-3xl">Dashboard</h1>
-    <p class="text-base-content/70">Your overview of projects, agreements, and upcoming meetings.</p>
-  </div>
+<%# Dashboard Header %>
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold">Dashboard</h1>
+  <span class="text-sm text-base-content/60"><%= Date.current.strftime("%B %d, %Y") %></span>
 </div>
 
-<!-- Dashboard Grid -->
-<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-  <!-- Projects section -->
+<%# Activity Overview Section %>
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+  <%# My Projects (ordered by activity) %>
   <%= render "recent_projects" %>
 
-  <!-- Agreements section -->
-  <%= render "recent_agreements" %>
+  <%# Recent Activity Feed %>
+  <%= render "recent_activity" %>
+</div>
 
-  <!-- Upcoming Meetings section -->
+<%# Agreements and Meetings Grid %>
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+  <%= render "recent_agreements" %>
   <%= render "upcoming_meetings" %>
 </div>
 
-<!-- Explorable Projects Section -->
-<div class="mt-10">
-  <div class="card bg-base-100 shadow-xl">
-    <div class="card-body">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h2 class="card-title text-xl">Projects Looking for Mentors</h2>
-          <p class="text-sm text-base-content/70 mt-1">These projects are seeking mentorship or co-founders.</p>
+<%# Explorable Projects Section %>
+<% if @explorable_projects.present? %>
+  <div class="mt-8">
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="card-title text-lg">Projects Seeking Collaboration</h2>
+          <%= link_to explore_projects_path, class: "btn btn-ghost btn-sm gap-1" do %>
+            See all
+            <%= render Ui::IconComponent.new(name: :chevron_right, size: :xs) %>
+          <% end %>
         </div>
-        <%= link_to explore_projects_path, class: "btn btn-ghost btn-sm gap-1" do %>
-          See all
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        <% end %>
-      </div>
 
-      <% if @explorable_projects.present? %>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <% @explorable_projects.each do |project| %>
-            <div class="card card-compact bg-base-200 hover:shadow-lg transition-shadow">
+            <div class="card card-compact bg-base-200 hover:shadow-md transition-shadow">
               <div class="card-body">
-                <!-- Header -->
                 <div class="flex items-start justify-between gap-2">
-                  <h3 class="card-title text-sm font-semibold truncate">
+                  <h3 class="font-medium text-sm truncate">
                     <%= display_project_name(project, current_user) %>
                   </h3>
                   <%= display_project_stage_badge(project, current_user) %>
                 </div>
 
-                <!-- Description -->
-                <div class="min-h-[2.5rem]">
-                  <%= display_project_description(project, current_user, truncate: true, class: "text-sm text-base-content/70 line-clamp-2") %>
-                </div>
+                <p class="text-xs text-base-content/60 line-clamp-2">
+                  <%= display_project_description(project, current_user, truncate: true) %>
+                </p>
 
-                <!-- Footer -->
-                <div class="card-actions justify-between items-center mt-2 pt-2 border-t border-base-300">
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-base-300">
                   <div class="flex items-center gap-2">
-                    <div class="avatar placeholder">
-                      <div class="bg-neutral text-neutral-content rounded-full w-6">
-                        <span class="text-xs"><%= project.user.initials %></span>
-                      </div>
-                    </div>
-                    <span class="text-xs text-base-content/70"><%= project.user.full_name %></span>
+                    <%= render Ui::AvatarComponent.new(user: project.user, size: :xs, placeholder: :initials) %>
+                    <span class="text-xs text-base-content/60"><%= project.user.first_name %></span>
                   </div>
                   <%= link_to "View", project_path(project), class: "btn btn-primary btn-xs" %>
                 </div>
-
-                <!-- Collaboration badges -->
-                <%= display_collaboration_badges(project, current_user) %>
               </div>
             </div>
           <% end %>
         </div>
-      <% else %>
-        <!-- Empty State -->
-        <div class="text-center py-8">
-          <div class="avatar placeholder mb-4">
-            <div class="bg-base-200 text-base-content/40 rounded-full w-16">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-          </div>
-          <p class="text-sm text-base-content/70 mb-4">No projects found. Check back later or explore all available projects.</p>
-          <%= link_to explore_projects_path, class: "btn btn-primary gap-2" do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            Explore All Projects
-          <% end %>
-        </div>
-      <% end %>
+      </div>
     </div>
   </div>
-</div>
+<% end %>

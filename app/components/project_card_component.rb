@@ -13,7 +13,7 @@ class ProjectCardComponent < ApplicationComponent
 
   def call
     tag.li(class: "group") do
-      tag.div(class: card_classes) do
+      tag.div(class: card_classes, onclick: card_onclick, data: { turbo_frame: "_top" }) do
         safe_join([
           render_header,
           render_description,
@@ -23,6 +23,10 @@ class ProjectCardComponent < ApplicationComponent
     end
   end
 
+  def card_onclick
+    "if(event.target.tagName !== 'A' && !event.target.closest('a')) { Turbo.visit('#{helpers.project_path(@project)}'); }"
+  end
+
   private
 
   def presenter
@@ -30,7 +34,7 @@ class ProjectCardComponent < ApplicationComponent
   end
 
   def card_classes
-    "mx-4 my-3 p-4 rounded-xl bg-gradient-to-r from-base-100/80 to-base-200/30 hover:from-primary/10 hover:to-secondary/10 border border-base-300/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.01] interactive-card"
+    "mx-4 my-3 p-4 rounded-xl bg-gradient-to-r from-base-100/80 to-base-200/30 hover:from-primary/10 hover:to-secondary/10 border border-base-300/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.01] interactive-card cursor-pointer"
   end
 
   def render_header
@@ -46,7 +50,7 @@ class ProjectCardComponent < ApplicationComponent
     tag.div(class: "flex-1 min-w-0") do
       safe_join([
         tag.h3(class: "truncate text-base font-semibold text-base-content group-hover:text-primary transition-colors duration-200") do
-          link_to(display_name, helpers.project_path(@project), class: "hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded")
+          helpers.link_to(display_name, helpers.project_path(@project), onclick: "event.stopPropagation();")
         end,
         render_updated_time
       ])
@@ -58,11 +62,72 @@ class ProjectCardComponent < ApplicationComponent
   end
 
   def render_updated_time
-    tag.p(class: "mt-1 text-xs text-base-content/60 flex items-center") do
+    tag.p(class: "mt-1 text-xs text-base-content/60 flex items-center flex-wrap gap-x-3") do
       safe_join([
-        render_clock_icon,
-        "Updated #{helpers.time_ago_in_words(@project.updated_at)} ago"
+        tag.span(class: "flex items-center") do
+          safe_join([
+            render_clock_icon,
+            "Updated #{helpers.time_ago_in_words(@project.updated_at)} ago"
+          ])
+        end,
+        render_github_activity_indicator
+      ].compact)
+    end
+  end
+
+  def render_github_activity_indicator
+    return nil unless @project.github_connected?
+
+    activity = @project.activity_level
+    return nil if activity == :none
+
+    last_commit = @project.last_commit_date
+    commits_week = @project.commits_since(days: 7)
+
+    tag.span(class: "flex items-center gap-1.5") do
+      safe_join([
+        render_activity_dot(activity),
+        render_activity_text(activity, last_commit, commits_week)
       ])
+    end
+  end
+
+  def render_activity_dot(activity)
+    dot_color = case activity
+    when :active then "bg-success"
+    when :moderate then "bg-warning"
+    else "bg-base-content/30"
+    end
+
+    pulse_class = activity == :active ? "animate-pulse" : ""
+
+    tag.span(class: "relative flex h-2 w-2") do
+      if activity == :active
+        safe_join([
+          tag.span(class: "animate-ping absolute inline-flex h-full w-full rounded-full #{dot_color} opacity-75"),
+          tag.span(class: "relative inline-flex rounded-full h-2 w-2 #{dot_color}")
+        ])
+      else
+        tag.span(class: "relative inline-flex rounded-full h-2 w-2 #{dot_color}")
+      end
+    end
+  end
+
+  def render_activity_text(activity, last_commit, commits_week)
+    if activity == :active && commits_week > 0
+      tag.span("#{commits_week} #{'commit'.pluralize(commits_week)} this week", class: "text-success")
+    elsif last_commit
+      tag.span("Last commit #{helpers.time_ago_in_words(last_commit)} ago", class: activity_text_class(activity))
+    else
+      tag.span("No commits yet", class: "text-base-content/40")
+    end
+  end
+
+  def activity_text_class(activity)
+    case activity
+    when :active then "text-success"
+    when :moderate then "text-warning"
+    else "text-base-content/40"
     end
   end
 
@@ -113,8 +178,23 @@ class ProjectCardComponent < ApplicationComponent
   def render_stats_left
     tag.div(class: "flex items-center space-x-4 text-xs text-base-content/60") do
       safe_join([
+        render_owner_avatar,
         render_milestones_stat,
         render_agreements_stat
+      ])
+    end
+  end
+
+  def render_owner_avatar
+    helpers.link_to(
+      helpers.person_path(@project.user),
+      onclick: "event.stopPropagation();",
+      class: "flex items-center gap-1.5 hover:text-primary transition-colors tooltip",
+      data: { tip: "Project owner" }
+    ) do
+      safe_join([
+        render(Ui::AvatarComponent.new(user: @project.user, size: :xs, placeholder: :initials)),
+        tag.span(@project.user.full_name, class: "truncate max-w-[80px]")
       ])
     end
   end
@@ -144,7 +224,12 @@ class ProjectCardComponent < ApplicationComponent
   end
 
   def render_agreements_stat
-    tag.div(class: "flex items-center", title: "Project agreements") do
+    helpers.link_to(
+      helpers.agreements_path(project_id: @project.id),
+      onclick: "event.stopPropagation();",
+      class: "flex items-center hover:text-primary transition-colors tooltip",
+      data: { tip: "View project agreements" }
+    ) do
       safe_join([
         render_agreements_icon,
         tag.span(helpers.pluralize(@project.agreements.count, "agreement"))

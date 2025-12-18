@@ -32,6 +32,9 @@ class ProjectMembershipPolicy < ApplicationPolicy
     return true if admin?
     return false unless signed_in?
 
+    # Project owner can manage memberships without needing an explicit membership row
+    return !record.owner? if record.project.user_id == user.id
+
     # Only project admins can update memberships
     # They can only modify roles lower than their own
     return false unless project_admin?
@@ -54,6 +57,9 @@ class ProjectMembershipPolicy < ApplicationPolicy
     # Users can remove themselves (leave project)
     return true if record.user_id == user.id && !record.owner?
 
+    # Project owner can remove non-owner memberships
+    return !record.owner? if record.project.user_id == user.id
+
     # Project admins can remove members with lower roles
     return false unless project_admin?
 
@@ -67,6 +73,7 @@ class ProjectMembershipPolicy < ApplicationPolicy
   # Additional permission methods
 
   def accept?
+    return true if admin?
     return false unless signed_in?
 
     # Only the invited user can accept their membership

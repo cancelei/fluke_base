@@ -46,7 +46,7 @@
       <div class="stat">
         <div class="stat-title">Total Hours Logged</div>
         <div class="stat-value text-success"><%= total_hours.round(1) %></div>
-        <div class="stat-desc">of <%= expected_total_hours %> contracted hours</div>
+        <div class="stat-desc">of <%= expected_total_hours %> committed hours</div>
         <div class="stat-figure">
           <span class="badge <%= efficiency >= 90 ? "badge-success" : efficiency >= 70 ? "badge-warning" : "badge-error" %>">
             <%= efficiency %>% efficiency
@@ -156,11 +156,11 @@
         <h5 class="font-medium mb-2">Key Insights</h5>
         <ul class="text-sm space-y-1">
           <% if efficiency >= 90 %>
-            <li>Excellent time utilization - work was completed efficiently within the contracted hours</li>
+            <li>Excellent time utilization - work was completed efficiently within the committed hours</li>
           <% elsif efficiency >= 70 %>
-            <li>Good time utilization - minor variance from contracted hours</li>
+            <li>Good time utilization - minor variance from committed hours</li>
           <% else %>
-            <li>Time variance detected - actual hours significantly different from contract</li>
+            <li>Time variance detected - actual hours significantly different from agreement</li>
           <% end %>
 
           <% if actual_duration_days <= planned_duration_days %>

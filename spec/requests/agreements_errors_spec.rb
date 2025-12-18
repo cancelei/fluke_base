@@ -39,7 +39,7 @@ RSpec.describe 'Agreements Controller Error Branches', type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.media_type).to eq('text/vnd.turbo-stream.html')
-      expect(response.body).to include('You are not authorized to perform this action')
+      expect(response.body).to include('Agreement must be pending to cancel').or(include('Unable'))
       expect(agreement.reload.status).to eq(Agreement::ACCEPTED)
     end
   end

@@ -28,7 +28,8 @@ RSpec.describe GithubService do
     it 'returns [] when repository_url is blank' do
       project.update!(repository_url: '')
       service = described_class.new(project)
-      expect(service.fetch_branches_with_owner).to eq([])
+      result = service.fetch_branches_with_owner
+      expect(result).to be_failure
     end
 
     it 'fetches branches and upserts owners; defaults to project owner when user not found' do
@@ -45,12 +46,15 @@ RSpec.describe GithubService do
       allow(service).to receive(:first_commit_on_branch).with('testuser/testrepo', 'feature/x').and_return({ email: owner.email })
 
       result = service.fetch_branches_with_owner
-      expect(result).to be_an(Array)
-      expect(result.size).to eq(2)
+      expect(result).to be_success
+
+      branch_owners = result.value!
+      expect(branch_owners).to be_an(Array)
+      expect(branch_owners.size).to eq(2)
       # Ensure structure contains expected keys
-      expect(result.first).to include(:project_id, :user_id, :branch_name)
+      expect(branch_owners.first).to include(:project_id, :user_id, :branch_name)
       # One branch should default to project owner (unknown email)
-      expect(result.map { |h| h[:user_id] }).to include(owner.id)
+      expect(branch_owners.map { |h| h[:user_id] }).to include(owner.id)
     end
   end
 
@@ -83,13 +87,16 @@ RSpec.describe GithubService do
       allow(client).to receive(:commit).with('testuser/testrepo', 'b2').and_return(full2)
 
       result = service.fetch_commits
-      expect(result).to be_a(Hash)
-      expect(result[:commits].size).to eq(2)
-      expect(result[:all_shas]).to contain_exactly('a1', 'b2')
-      expect(result[:commits].all? { |h| h[:project_id] == project.id }).to be true
-      expect(result[:commits].all? { |h| h[:commit_sha].present? }).to be true
-      expect(result[:commits].map { |h| h[:agreement_id] }.uniq).to include(agreement.id)
-      expect(result[:commits].map { |h| h[:user_id] }.uniq).to include(mentor.id)
+      expect(result).to be_success
+
+      payload = result.value!
+      expect(payload).to be_a(Hash)
+      expect(payload[:commits].size).to eq(2)
+      expect(payload[:all_shas]).to contain_exactly('a1', 'b2')
+      expect(payload[:commits].all? { |h| h[:project_id] == project.id }).to be true
+      expect(payload[:commits].all? { |h| h[:commit_sha].present? }).to be true
+      expect(payload[:commits].map { |h| h[:agreement_id] }.uniq).to include(agreement.id)
+      expect(payload[:commits].map { |h| h[:user_id] }.uniq).to include(mentor.id)
     end
 
     it 'skips commits that already exist in the database' do
@@ -117,9 +124,11 @@ RSpec.describe GithubService do
       allow(client).to receive(:commit).with('testuser/testrepo', 'c3').and_return(full3)
 
       result = service.fetch_commits
+      expect(result).to be_success
+      payload = result.value!
       # Only one new commit should be processed (c3), but all three SHAs should be returned
-      expect(result[:commits].size).to eq(1)
-      expect(result[:all_shas]).to contain_exactly('a1', 'b2', 'c3')
+      expect(payload[:commits].size).to eq(1)
+      expect(payload[:all_shas]).to contain_exactly('a1', 'b2', 'c3')
     end
 
     it 'fetches all commits without using since parameter to ensure complete history' do
@@ -143,9 +152,11 @@ RSpec.describe GithubService do
       allow(client).to receive(:commit).with('testuser/testrepo', 'a1').and_return(full1)
 
       result = service.fetch_commits
+      expect(result).to be_success
 
-      expect(result[:commits].size).to eq(1)
-      expect(result[:commits].first[:commit_sha]).to eq('a1')
+      payload = result.value!
+      expect(payload[:commits].size).to eq(1)
+      expect(payload[:commits].first[:commit_sha]).to eq('a1')
     end
 
     it 'returns [] when DB branch missing' do
@@ -155,7 +166,7 @@ RSpec.describe GithubService do
       allow(service).to receive(:github_client).and_return(client)
 
       result = service.fetch_commits
-      expect(result).to eq({ commits: [], all_shas: [] })
+      expect(result).to be_failure
     end
   end
 end

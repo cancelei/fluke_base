@@ -5,16 +5,13 @@ class ProjectMembership < ApplicationRecord
   ROLES = %w[owner admin member guest].freeze
   ROLE_HIERARCHY = { "owner" => 4, "admin" => 3, "member" => 2, "guest" => 1 }.freeze
 
-  # Associations
   belongs_to :project
   belongs_to :user
   belongs_to :invited_by, class_name: "User", optional: true
 
-  # Validations
   validates :role, presence: true, inclusion: { in: ROLES }
   validates :user_id, uniqueness: { scope: :project_id, message: "already has a membership for this project" }
 
-  # Scopes
   scope :owners, -> { where(role: "owner") }
   scope :admins, -> { where(role: %w[owner admin]) }
   scope :members, -> { where(role: %w[owner admin member]) }
@@ -22,7 +19,6 @@ class ProjectMembership < ApplicationRecord
   scope :active, -> { where.not(accepted_at: nil) }
   scope :pending, -> { where(accepted_at: nil) }
 
-  # Role check methods
   def owner?
     role == "owner"
   end
@@ -39,7 +35,6 @@ class ProjectMembership < ApplicationRecord
     role == "guest"
   end
 
-  # Role hierarchy methods
   def role_level
     ROLE_HIERARCHY[role] || 0
   end
@@ -53,7 +48,6 @@ class ProjectMembership < ApplicationRecord
     role_level > other_membership.role_level
   end
 
-  # Status methods
   def accepted?
     accepted_at.present?
   end
@@ -66,7 +60,6 @@ class ProjectMembership < ApplicationRecord
     update!(accepted_at: Time.current)
   end
 
-  # Class methods for role labels
   def self.role_options
     ROLES.map { |role| [ role.titleize, role ] }
   end

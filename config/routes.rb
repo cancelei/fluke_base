@@ -18,7 +18,6 @@ Rails.application.routes.draw do
   # Root and main pages
   root "home#index"
   get "dashboard" => "dashboard#index", as: :dashboard
-  get "home/stats", to: "home#stats", as: :home_stats
 
 
   # User profile and settings
@@ -54,9 +53,7 @@ Rails.application.routes.draw do
       get :enhancement_display, on: :member
     end
 
-    resources :github_logs, only: [ :index ] do
-      post :refresh, on: :collection
-    end
+    resources :github_logs, only: [ :index ]
 
     # Project team membership management
     resources :memberships, controller: "project_memberships", except: [ :show ] do

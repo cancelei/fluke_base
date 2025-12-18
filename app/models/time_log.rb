@@ -1,20 +1,15 @@
 class TimeLog < ApplicationRecord
-  # Relationships
   belongs_to :project
   belongs_to :user
   belongs_to :milestone, optional: true
 
-
-  # Validations
   validates :started_at, presence: true
   validate :ended_at_after_started_at
   validates :hours_spent, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :status, inclusion: { in: %w[in_progress completed] }
   validates :description, presence: true, if: -> { milestone_id.nil? }
-  # Validate that start time is not in the future
   validate :start_time_not_in_future
 
-  # Status scopes
   scope :not_manual, -> { where(manual_entry: false) }
   scope :manual, -> { where(manual_entry: true) }
   scope :in_progress, -> { where(status: "in_progress") }
@@ -23,21 +18,17 @@ class TimeLog < ApplicationRecord
   scope :for_milestone, ->(milestone_id) { where(milestone_id: milestone_id) }
   scope :manual, -> { where(milestone_id: nil) }
 
-  # Callbacks
   before_save :calculate_hours_spent
   after_update_commit :broadcast_time_log
 
-  # Check if time log is completed
   def completed?
     status == "completed"
   end
 
-  # Mark as completed
   def complete!(end_time = Time.current)
     update(ended_at: end_time, status: "completed")
   end
 
-  # Calculate total hours spent on this time log
   def calculate_hours_spent
     return unless ended_at.present? && started_at.present?
     return if hours_spent.present?
@@ -73,7 +64,6 @@ class TimeLog < ApplicationRecord
   def broadcast_time_log
     return unless saved_change_to_status? && status == "completed"
 
-    # <%= turbo_stream_from "milestone_#{milestone_id}_time_logs_started" %> add the same with id in the broadcast
     broadcast_replace_later_to(
       "milestone_#{milestone_id}_time_logs_started",
       target: "time_log_#{id}",

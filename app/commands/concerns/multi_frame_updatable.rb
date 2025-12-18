@@ -40,8 +40,8 @@ module MultiFrameUpdatable
     )
 
     turbo_streams << turbo_stream.update(
-      "navbar_milestones_list",
-      partial: "shared/navbar_milestones_list"
+      "context_milestones_list",
+      partial: "shared/context_milestones_dropdown"
     )
   end
 

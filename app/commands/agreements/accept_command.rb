@@ -27,7 +27,7 @@ module Agreements
       Agreement.includes(
         project: :user,
         agreement_participants: :user
-      ).find(params[:id])
+      ).find(element_id(:agreementId))
     end
 
     def authorize_action(agreement)

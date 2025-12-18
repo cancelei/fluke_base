@@ -81,8 +81,8 @@ export default class extends Controller {
       const button = event.target;
 
       button.textContent = 'Hide Full Form';
-      button.classList.add('bg-gray-600', 'hover:bg-gray-700');
-      button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+      button.classList.add('btn-ghost');
+      button.classList.remove('btn-info');
 
       // Change action to hide form
       button.setAttribute('data-action', 'click->stealth-mode#hideFullForm');
@@ -107,8 +107,8 @@ export default class extends Controller {
       const button = event.target;
 
       button.textContent = 'Show Full Form';
-      button.classList.add('bg-blue-600', 'hover:bg-blue-700');
-      button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+      button.classList.add('btn-info');
+      button.classList.remove('btn-ghost');
 
       // Change action back to show form
       button.setAttribute('data-action', 'click->stealth-mode#showFullForm');

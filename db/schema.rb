@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_15_144144) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_18_042119) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -278,7 +278,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_15_144144) do
     t.index ["project_id"], name: "index_project_memberships_on_project_id"
     t.index ["user_id", "role"], name: "index_project_memberships_on_user_id_and_role"
     t.index ["user_id"], name: "index_project_memberships_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'admin'::character varying, 'member'::character varying, 'guest'::character varying]::text[])", name: "project_memberships_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'admin'::character varying::text, 'member'::character varying::text, 'guest'::character varying::text])", name: "project_memberships_role_check"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -301,8 +301,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_15_144144) do
     t.string "stealth_name"
     t.text "stealth_description"
     t.string "stealth_category"
+    t.datetime "github_last_polled_at"
     t.index ["collaboration_type"], name: "index_projects_on_collaboration_type", comment: "Improves filtering by seeking mentor/co-founder"
     t.index ["created_at"], name: "index_projects_on_created_at", comment: "Improves ordering by project creation"
+    t.index ["github_last_polled_at"], name: "index_projects_on_github_last_polled_at"
     t.index ["stage"], name: "index_projects_on_stage", comment: "Improves filtering by project stage"
     t.index ["stealth_mode"], name: "index_projects_on_stealth_mode", comment: "Improves filtering of stealth vs public projects"
     t.index ["user_id"], name: "index_projects_on_user_id"
@@ -483,7 +485,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_15_144144) do
     t.string "last_name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "onboarded", default: false
     t.text "bio"
     t.string "avatar"
     t.bigint "selected_project_id"

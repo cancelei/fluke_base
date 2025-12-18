@@ -12,8 +12,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     end
 
     it 'renders with success styling' do
-      expect(rendered).to have_css('.bg-green-50') # Success background
-      expect(rendered).to have_css('.text-green-800') # Success text color
+      expect(rendered).to have_css('.alert.alert-success')
     end
 
     it 'displays the message content' do
@@ -25,10 +24,9 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     end
 
     it 'has proper structure and accessibility' do
-      expect(rendered).to have_css('.rounded-md') # Proper styling
-      expect(rendered).to have_css('.p-4') # Adequate padding
-      expect(rendered).to have_css('.mb-6') # Proper spacing
-      expect(rendered).to have_css('.flex') # Flexible layout
+      expect(rendered).to have_css('.alert.mb-6')
+      expect(rendered).to have_css('svg')
+      expect(rendered).to have_css('span')
     end
   end
 
@@ -41,8 +39,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     end
 
     it 'renders with error styling' do
-      expect(rendered).to have_css('.bg-red-50') # Error background
-      expect(rendered).to have_css('.text-red-800') # Error text color
+      expect(rendered).to have_css('.alert.alert-error')
     end
 
     it 'displays the message content' do
@@ -54,10 +51,9 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     end
 
     it 'has proper structure and accessibility' do
-      expect(rendered).to have_css('.rounded-md')
-      expect(rendered).to have_css('.p-4')
-      expect(rendered).to have_css('.mb-6')
-      expect(rendered).to have_css('.flex')
+      expect(rendered).to have_css('.alert.mb-6')
+      expect(rendered).to have_css('svg')
+      expect(rendered).to have_css('span')
     end
   end
 
@@ -73,7 +69,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
 
       it 'renders plain text safely' do
         expect(rendered).to have_content('Simple success message')
-        expect(rendered).to have_css('p.text-sm.font-medium')
+        expect(rendered).to have_css('span')
       end
     end
 
@@ -99,7 +95,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
 
       it 'handles long messages gracefully' do
         expect(rendered).to have_content('This is a very long message')
-        expect(rendered).to have_css('p') # Should be wrapped in paragraph
+        expect(rendered).to have_css('span')
         # Should not have fixed width that breaks responsive design
         expect(rendered).not_to match(/style=".*width:\s*\d+px.*"/)
       end
@@ -136,8 +132,8 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       end
 
       it 'positions icon correctly' do
-        expect(rendered).to have_css('.flex-shrink-0') # Icon container
-        expect(rendered).to have_css('.ml-3') # Text positioned correctly
+        expect(rendered).to have_css('svg')
+        expect(rendered).to have_css('span')
       end
     end
 
@@ -165,9 +161,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       end
 
       it 'uses consistent success styling' do
-        expect(rendered).to include('bg-green-50') # Background
-        expect(rendered).to include('text-green-800') # Text color
-        expect(rendered).to include('text-sm font-medium') # Typography
+        expect(rendered).to include('alert-success')
       end
     end
 
@@ -179,9 +173,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       end
 
       it 'uses consistent error styling' do
-        expect(rendered).to include('bg-red-50') # Background
-        expect(rendered).to include('text-red-800') # Text color
-        expect(rendered).to include('text-sm font-medium') # Typography
+        expect(rendered).to include('alert-error')
       end
     end
   end
@@ -195,22 +187,17 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     end
 
     it 'has proper container structure' do
-      expect(rendered).to have_css('div.rounded-md') # Main container
-      expect(rendered).to have_css('.p-4') # Inner padding
-      expect(rendered).to have_css('.mb-6') # Bottom margin
+      expect(rendered).to have_css('div.alert.mb-6')
     end
 
     it 'uses flexbox layout correctly' do
-      expect(rendered).to have_css('.flex') # Main flex container
-      expect(rendered).to have_css('.flex-shrink-0') # Icon container
-      expect(rendered).to have_css('.ml-3') # Text container margin
+      expect(rendered).to have_css('svg')
+      expect(rendered).to have_css('span')
     end
 
     it 'maintains consistent spacing' do
       # Check that spacing classes are applied correctly
-      expect(rendered).to match(/class="[^"]*p-4[^"]*"/) # Padding
-      expect(rendered).to match(/class="[^"]*mb-6[^"]*"/) # Margin bottom
-      expect(rendered).to match(/class="[^"]*ml-3[^"]*"/) # Text margin left
+      expect(rendered).to match(/class="[^"]*mb-6[^"]*"/)
     end
   end
 
@@ -223,14 +210,11 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     end
 
     it 'provides semantic content structure' do
-      expect(rendered).to have_css('p') # Message in paragraph tag
-      expect(rendered).to have_css('.font-medium') # Proper text weight for readability
+      expect(rendered).to have_css('span')
     end
 
     it 'uses appropriate color contrast' do
-      # Green-800 on green-50 and red-800 on red-50 should have good contrast
-      expect(rendered).to match(/text-(green|red)-800/)
-      expect(rendered).to match(/bg-(green|red)-50/)
+      expect(rendered).to match(/alert-(success|error)/)
     end
 
     it 'supports screen reader navigation' do
@@ -260,8 +244,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       end
 
       it 'defaults to alert styling for unknown types' do
-        expect(rendered).to include('bg-red-50') # Should default to alert styling
-        expect(rendered).to include('text-red-800')
+        expect(rendered).to include('alert-error')
       end
     end
   end

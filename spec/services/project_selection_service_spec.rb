@@ -11,7 +11,8 @@ RSpec.describe ProjectSelectionService do
       it 'updates the user selection and persists the session' do
         service = described_class.new(user, session, project.id)
 
-        expect(service.call).to be true
+        result = service.call
+        expect(result).to be_success
         expect(user.reload.selected_project_id).to eq(project.id)
         expect(session[:selected_project_id]).to eq(project.id)
       end
@@ -21,7 +22,8 @@ RSpec.describe ProjectSelectionService do
       it 'returns false without mutating the session or user' do
         service = described_class.new(user, session, -1)
 
-        expect(service.call).to be false
+        result = service.call
+        expect(result).to be_failure
         expect(session).not_to include(:selected_project_id)
         expect(user.reload.selected_project_id).to be_nil
       end

@@ -175,14 +175,14 @@ RSpec.describe AgreementsController, type: :controller do
         expect(other_party_participant.user).to eq(other_user)
       end
 
-      it 'redirects to agreements_path' do
+      it 'redirects to agreement' do
         post :create, params: valid_params
-        expect(response).to redirect_to(agreements_path)
+        expect(response).to redirect_to(Agreement.last)
       end
 
       it 'sets success notice' do
         post :create, params: valid_params
-        expect(flash[:notice]).to include('successfully created')
+        expect(flash[:notice]).to include('Agreement proposal sent')
       end
     end
 
@@ -194,13 +194,21 @@ RSpec.describe AgreementsController, type: :controller do
           agreement: { counter_agreement_id: original_agreement.id }
         )
         post :create, params: counter_params
-        expect(response).to redirect_to(agreements_path)
-        expect(flash[:notice]).to include('Counter offer')
+        expect(response).to redirect_to(Agreement.last)
+        expect(flash[:notice]).to include('Counter offer was successfully created')
       end
     end
 
     context 'with invalid params' do
-      let(:invalid_params) { { agreement: { project_id: project.id, milestone_ids: [] } } }
+      let(:invalid_params) do
+        {
+          agreement: {
+            project_id: project.id,
+            other_party_user_id: other_user.id,
+            milestone_ids: []
+          }
+        }
+      end
 
       it 'does not create Agreement' do
         expect {
@@ -367,9 +375,9 @@ RSpec.describe AgreementsController, type: :controller do
         expect(assigns(:meetings)).to be_present.or eq([])
       end
 
-      it 'assigns empty meetings for pending agreement' do
+      it 'redirects for pending agreement' do
         get :meetings_section, params: { id: agreement.id }
-        expect(assigns(:meetings)).to eq([])
+        expect(response).to redirect_to(agreements_path)
       end
     end
 

@@ -1,27 +1,18 @@
 class Agreement < ApplicationRecord
-  # Constants
   MENTORSHIP = "Mentorship"
   CO_FOUNDER = "Co-Founder"
 
-  # Agreement statuses
   PENDING = "Pending"
   ACCEPTED = "Accepted"
   COMPLETED = "Completed"
   REJECTED = "Rejected"
   CANCELLED = "Cancelled"
-  COUNTERED = "Countered"  # New status for counter offers
+  COUNTERED = "Countered"
 
-  # Payment types
   HOURLY = "Hourly"
   EQUITY = "Equity"
   HYBRID = "Hybrid"
-  # enum :status, { pending: "Pending",
-  #   accepted: "Accepted",
-  #   completed: "Completed",
-  #   rejected: "Rejected",
-  #   cancelled: "Cancelled",
-  #   countered: "Countered" }
-  # Relationships
+
   belongs_to :project
   has_many :agreement_participants, dependent: :destroy
   has_many :users, through: :agreement_participants
@@ -32,8 +23,6 @@ class Agreement < ApplicationRecord
 
   before_validation :init_status, :init_agreement_type
 
-
-  # Validations
   validates :project_id, presence: true
   validates :status, presence: true, inclusion: { in: [ PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED, COUNTERED ] }
   validates :agreement_type, presence: true, inclusion: { in: [ MENTORSHIP, CO_FOUNDER ] }
@@ -49,7 +38,6 @@ class Agreement < ApplicationRecord
   validate :valid_payment_terms
   validate :different_entrepreneur_and_mentor
 
-  # Scopes
   scope :mentorships, -> { where(agreement_type: MENTORSHIP) }
   scope :co_founding, -> { where(agreement_type: CO_FOUNDER) }
   scope :pending, -> { where(status: PENDING) }
@@ -59,7 +47,6 @@ class Agreement < ApplicationRecord
   scope :cancelled, -> { where(status: CANCELLED) }
   scope :countered, -> { where(status: COUNTERED) }
 
-  # Performance-optimized scopes with includes
   scope :with_project_and_users, -> { includes(:project, agreement_participants: :user) }
   scope :with_meetings, -> { includes(:meetings) }
   scope :recent_first, -> { order(created_at: :desc) }
@@ -74,9 +61,6 @@ class Agreement < ApplicationRecord
     self.agreement_type = self.weekly_hours.present? ? MENTORSHIP : CO_FOUNDER
   end
 
-
-
-  # Milestone methods
   def milestone_ids
     read_attribute(:milestone_ids) || []
   end
@@ -89,7 +73,6 @@ class Agreement < ApplicationRecord
     project.milestones.where(id: milestone_ids)
   end
 
-  # Time tracking methods - delegated to calculations service
   def total_hours_logged(context_user = nil)
     calculations_service.total_hours_logged(context_user)
   end
@@ -100,7 +83,6 @@ class Agreement < ApplicationRecord
 
   scope :not_rejected_or_cancelled, -> { where.not(status: [ REJECTED, CANCELLED ]) }
 
-  # Custom validation: ensure end date is after start date
   def end_date_after_start_date
     return if end_date.blank? || start_date.blank?
 
@@ -109,7 +91,6 @@ class Agreement < ApplicationRecord
     end
   end
 
-  # Helper methods for compatibility with existing code
   def initiator
     agreement_participants.find_by(is_initiator: true)&.user
   end
@@ -139,9 +120,7 @@ class Agreement < ApplicationRecord
     participant&.accept_or_counter_turn_id == user.id
   end
 
-  # Turn-based system methods
   def whose_turn?
-    # Find the participant whose turn it is to act
     turn_user_id = agreement_participants.first&.accept_or_counter_turn_id
     User.find_by(id: turn_user_id) if turn_user_id
   end
@@ -170,7 +149,6 @@ class Agreement < ApplicationRecord
     pass_turn_to_user(other_participant.user) if other_participant
   end
 
-  # Custom validation: ensure entrepreneur and mentor are different users
   def different_entrepreneur_and_mentor
     participant_users = agreement_participants.map(&:user_id)
     if participant_users.uniq.length != participant_users.length
@@ -187,7 +165,6 @@ class Agreement < ApplicationRecord
     end
   end
 
-  # Status check methods
   def active?
     status == ACCEPTED
   end
@@ -212,12 +189,6 @@ class Agreement < ApplicationRecord
     status == COUNTERED
   end
 
-  # Returns the latest counter offer for this agreement
-  def latest_counter_offer
-    status_service.latest_counter_offer
-  end
-
-  # Status update methods - delegated to status service
   def accept!
     status_service.accept!
   end
@@ -256,32 +227,20 @@ class Agreement < ApplicationRecord
     calculations_service.duration_in_weeks
   end
 
-  def has_counter_offers?
-    status_service.has_counter_offers?
-  end
-
-  def most_recent_counter_offer
-    status_service.most_recent_counter_offer
-  end
-
   def is_counter_offer?
-    # Check if this agreement is a counter offer by looking at agreement_participants
     agreement_participants.any?(&:counter_agreement_id)
   end
 
   def counter_to_id
-    # Get the ID of the original agreement this is a counter offer to
     agreement_participants.first&.counter_agreement_id
   end
 
   def counter_to
-    # Get the original agreement this is a counter offer to
     counter_agreement_id = counter_to_id
     Agreement.find_by(id: counter_agreement_id) if counter_agreement_id
   end
 
   def counter_offers
-    # Get all agreements that are counter offers to this one
     Agreement.joins(:agreement_participants)
             .where(agreement_participants: { counter_agreement_id: id })
             .distinct

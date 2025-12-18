@@ -5,7 +5,6 @@ FactoryBot.define do
     password_confirmation { "password123" }
     first_name { "John" }
     last_name { "Doe" }
-    onboarded { true }
 
     trait :alice do
       first_name { "Alice" }

@@ -42,10 +42,6 @@ class MeetingsController < ApplicationController
 
     respond_to do |format|
       if @meeting.save
-        # In a production app, this is where we'd create a Google Calendar event
-        # google_calendar_event = create_google_calendar_event(@meeting)
-        # @meeting.update(google_calendar_event_id: google_calendar_event.id) if google_calendar_event
-
         @meetings = @agreement.meetings.includes(:agreement).order(start_time: :asc)
 
         format.html { redirect_to agreement_path(@agreement), notice: "Meeting was successfully scheduled." }
@@ -78,9 +74,6 @@ class MeetingsController < ApplicationController
   def update
     respond_to do |format|
       if @meeting.update(meeting_params)
-        # In a production app, this is where we'd update the Google Calendar event
-        # update_google_calendar_event(@meeting) if @meeting.google_calendar_event_id.present?
-
         @meetings = @agreement.meetings.includes(:agreement).order(start_time: :asc)
 
         format.html { redirect_to agreement_path(@agreement), notice: "Meeting was successfully updated." }
@@ -99,9 +92,6 @@ class MeetingsController < ApplicationController
   end
 
   def destroy
-    # In a production app, this is where we'd delete the Google Calendar event
-    # delete_google_calendar_event(@meeting) if @meeting.google_calendar_event_id.present?
-
     @meeting.destroy
     @meetings = @agreement.meetings.order(start_time: :asc)
 

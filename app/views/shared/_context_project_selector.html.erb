@@ -1,0 +1,83 @@
+<%# Context Navigation Project Selector Dropdown %>
+<%# Displays project selection dropdown in the context navigation bar %>
+
+<% selected_project_id = current_user.selected_project_id || session[:selected_project_id] %>
+<% selected_project ||= Project.find_by(id: selected_project_id) if selected_project_id.present? %>
+<% available_projects = current_user.accessible_projects %>
+<% if selected_project.present? && !available_projects.include?(selected_project) %>
+  <% available_projects = available_projects.unshift(selected_project) %>
+<% end %>
+
+<details class="dropdown" data-context-nav-target="projectDropdown">
+  <summary class="btn btn-ghost btn-sm gap-2">
+    <svg class="w-4 h-4 text-base-content/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+    </svg>
+    <% if selected_project %>
+      <span class="badge badge-ghost badge-sm text-xs">Active</span>
+      <span class="font-medium truncate max-w-[150px]"><%= present(selected_project).display_name(current_user) %></span>
+    <% else %>
+      <span class="text-base-content/60">Select Project</span>
+    <% end %>
+    <svg class="w-4 h-4 text-base-content/60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+    </svg>
+  </summary>
+
+  <ul class="dropdown-content z-[60] menu p-2 shadow-xl bg-base-100 rounded-box w-72 border border-base-200">
+    <li class="menu-title">
+      <span>Switch Project Context</span>
+    </li>
+    <li class="text-xs text-base-content/50 px-3 py-1 -mt-1">
+      Select a project to filter your view
+    </li>
+
+    <% if available_projects.any? %>
+      <% available_projects.each do |project| %>
+        <li>
+          <% if request.path.match?(/projects\/\d+/) %>
+            <%# On project-specific pages, navigate directly %>
+            <%= link_to present(project).display_name(current_user),
+                request.path.gsub(/projects\/\d+/, "projects/#{project.id}"),
+                data: { turbo: false },
+                class: "#{'active' if selected_project&.id == project.id}" %>
+          <% else %>
+            <%# On other pages, use Turbo form submission with context %>
+            <%= form_with(url: update_selected_project_path(project_id: project.id),
+                        method: :patch,
+                        data: {
+                          turbo: true,
+                          action: "submit->context-nav#selectProject"
+                        }) do |f| %>
+              <%= hidden_field_tag :context_page, controller_name %>
+              <button type="submit" class="w-full text-left <%= "active" if selected_project&.id == project.id %>">
+                <span class="flex items-center gap-2">
+                  <% if selected_project&.id == project.id %>
+                    <svg class="w-3 h-3 text-success" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  <% end %>
+                  <%= present(project).display_name(current_user) %>
+                </span>
+              </button>
+            <% end %>
+          <% end %>
+        </li>
+      <% end %>
+    <% else %>
+      <li class="disabled">
+        <span class="text-center">
+          No projects available
+        </span>
+      </li>
+      <li>
+        <%= link_to new_project_path, class: "text-primary justify-center", data: { turbo_frame: "_top" } do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Create your first project
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</details>

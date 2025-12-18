@@ -4,10 +4,14 @@
   <%= turbo_stream_from "project_#{@project.id}_milestone_enhancement" %>
 <% end %>
 
-<%= fluke_form_with(model: [ @project, milestone ], class: "mx-auto mt-4", id: "milestone-form") do |form| %>
+<%= fluke_form_with(model: [ @project, milestone ], class: "mx-auto mt-4", id: "milestone-form",
+    data: {
+      controller: "milestone-ai",
+      milestone_ai_project_id_value: @project.id,
+      milestone_ai_milestone_id_value: milestone.persisted? ? milestone.id : 0
+    }) do |form| %>
   <% if milestone.errors.any? %>
-    <div class="alert alert-error mb-6">
-      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <%= ui_alert(variant: :error, css_class: "mb-6") do %>
       <div>
         <h3 class="font-bold">There <%= milestone.errors.count == 1 ? "is" : "are" %> <%= pluralize(milestone.errors.count, "error") %> with this milestone:</h3>
         <ul class="list-disc list-inside mt-2">
@@ -16,20 +20,20 @@
           <% end %>
         </ul>
       </div>
-    </div>
+    <% end %>
   <% end %>
 
   <div class="space-y-6">
     <fieldset class="fieldset">
       <%= form.label :title, class: "fieldset-legend" %>
-      <%= form.text_field :title, class: "input input-bordered w-full", id: "milestone_title" %>
+      <%= form.text_field :title, class: "input input-bordered w-full", id: "milestone_title", data: { milestone_ai_target: "title" } %>
     </fieldset>
 
     <fieldset class="fieldset">
       <%= form.label :description, class: "fieldset-legend" %>
-      <%= form.text_area :description, rows: 3, class: "textarea textarea-bordered w-full", id: "milestone_description" %>
+      <%= form.text_area :description, rows: 3, class: "textarea textarea-bordered w-full", id: "milestone_description", data: { milestone_ai_target: "description" } %>
       <div class="mt-2 flex flex-wrap items-center gap-3">
-        <select id="enhancement_style" name="enhancement_style" class="select select-sm">
+        <select id="enhancement_style" name="enhancement_style" class="select select-sm" data-milestone-ai-target="styleSelect">
           <option value="professional">Professional</option>
           <option value="technical">Technical</option>
           <option value="creative">Creative</option>
@@ -38,10 +42,8 @@
         </select>
         <button type="button"
                 id="enhance-btn"
-                data-turbo-command="Milestones::AiEnhanceCommand#execute"
-                data-turbo-command-form="#milestone-form"
-                data-project-id="<%= @project.id %>"
-                data-milestone-id="<%= milestone.persisted? ? milestone.id : "" %>"
+                data-milestone-ai-target="enhanceButton"
+                data-action="click->milestone-ai#enhance"
                 class="btn btn-outline btn-primary btn-sm gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>

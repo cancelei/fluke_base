@@ -1,27 +1,6 @@
 # frozen_string_literal: true
 
-# Helper methods for rendering skeleton loading states throughout the application.
-#
-# This helper provides convenient methods for using DaisyUI skeleton components
-# to improve UX during content loading. It wraps the Ui::SkeletonComponent and
-# Skeletons::* components for easier usage in views.
-#
-# @example Basic usage
-#   <%= skeleton(:text) %>
-#   <%= skeleton(:avatar, size: :lg) %>
-#   <%= skeleton(:project_card) %>
-#
-# @example Grid of skeleton cards
-#   <%= skeleton_grid(:project_card, count: 6) %>
-#
-# @example Table skeleton
-#   <%= skeleton_table(rows: 5, columns: 4) %>
-#
-# @example With content loading container (uses Stimulus controller)
-#   <%= skeleton_loader(variant: :project_card, count: 3) do %>
-#     <%= render @projects %>
-#   <% end %>
-#
+# Skeleton loading state helpers wrapping DaisyUI skeleton components.
 module SkeletonHelper
   # Render a single skeleton element
   #

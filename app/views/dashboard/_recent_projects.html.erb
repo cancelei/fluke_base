@@ -1,11 +1,13 @@
-<% cache([ current_user, "recent_projects", @projects.maximum(:updated_at) ]) do %>
-  <div class="card bg-base-100 shadow-xl">
-    <div class="card-body p-0">
-      <!-- Header -->
-      <div class="flex items-center justify-between p-4 pb-0">
-        <h3 class="card-title text-lg">Recent Projects</h3>
-        <%= link_to "View all", projects_path, class: "btn btn-ghost btn-sm" %>
+<div class="card bg-base-100 shadow-xl">
+  <div class="card-body p-0">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 pb-0">
+      <div class="flex items-center gap-2">
+        <h3 class="card-title text-lg">My Projects</h3>
+        <span class="badge badge-ghost badge-sm text-base-content/50">by activity</span>
       </div>
+      <%= link_to "View all", projects_path, class: "btn btn-ghost btn-sm" %>
+    </div>
 
       <!-- Content -->
       <div class="divider my-2"></div>
@@ -19,31 +21,18 @@
           <% end %>
         </ul>
       <% else %>
-        <div class="text-center p-6">
-          <div class="avatar placeholder mb-4">
-            <div class="bg-base-200 text-base-content/40 rounded-full w-12">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-          </div>
-          <p class="text-sm text-base-content/70 mb-4">No projects yet.</p>
-          <%= link_to "Create a project", new_project_path, class: "btn btn-primary btn-sm" %>
-        </div>
+        <%= render "shared/empty_state",
+            title: "No projects yet",
+            description: "Create your first project to get started.",
+            action_text: "Create a project",
+            action_url: new_project_path,
+            options: {
+              container_class: "text-center p-6",
+              action_class: "btn btn-primary btn-sm",
+              icon: "folder"
+            } %>
       <% end %>
 
-      <!-- Mentor CTA -->
-      <div class="bg-primary/10 border-t border-primary/20 p-4 rounded-b-2xl">
-        <div class="text-center">
-          <p class="text-sm font-medium text-primary mb-3">Looking to mentor or collaborate on projects?</p>
-          <%= link_to explore_projects_path, class: "btn btn-primary btn-sm w-full gap-2" do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            Explore Available Projects
-          <% end %>
-        </div>
-      </div>
     </div>
   </div>
-<% end %>
+

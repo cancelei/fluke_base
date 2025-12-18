@@ -20,17 +20,21 @@ class TimeLogsQuery
   end
 
   def time_logs_for_project(project, selected_date = Date.current)
+    date_range = selected_date.beginning_of_day..selected_date.end_of_day
+
     project.time_logs
            .includes(:milestone)
-           .where("DATE(started_at) = ?", selected_date)
+           .where(started_at: date_range)
            .order(started_at: :desc)
   end
 
   def filtered_time_logs(selected_project, selected_user, selected_date, projects, milestones)
+    date_range = selected_date.beginning_of_day..selected_date.end_of_day
+
     logs = TimeLog.where(milestone: milestones)
     logs = logs.where(user_id: selected_user.id) if selected_user.present?
     logs = logs.includes(:milestone, :user)
-               .where("DATE(started_at) = ?", selected_date)
+               .where(started_at: date_range)
                .order(started_at: :desc)
     logs
   end
@@ -41,9 +45,11 @@ class TimeLogsQuery
   end
 
   def time_logs_completed(milestones, selected_date = Date.current)
+    date_range = selected_date.beginning_of_day..selected_date.end_of_day
+
     milestones.includes(:time_logs)
               .where(status: Milestone::COMPLETED, time_logs: { status: "completed" })
-              .where("DATE(time_logs.started_at) = ?", selected_date)
+              .where(time_logs: { started_at: date_range })
   end
 
   def projects_for_filter

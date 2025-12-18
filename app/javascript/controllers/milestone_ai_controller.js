@@ -30,7 +30,11 @@ export default class MilestoneAiController extends Controller {
 
     // Show processing status
     this.enhanceButtonTarget.disabled = true;
-    this.enhanceButtonTarget.textContent = 'Processing...';
+    this.originalButtonHTML = this.enhanceButtonTarget.innerHTML;
+    this.enhanceButtonTarget.innerHTML = `
+      <span class="loading loading-spinner loading-sm"></span>
+      Processing...
+    `;
 
     // Call the backend using Turbo's fetch
     const url = `/projects/${this.projectIdValue}/milestones/ai_enhance`;
@@ -93,13 +97,16 @@ export default class MilestoneAiController extends Controller {
       );
     } finally {
       this.enhanceButtonTarget.disabled = false;
-      this.enhanceButtonTarget.textContent = 'Enhance';
+      if (this.originalButtonHTML) {
+        this.enhanceButtonTarget.innerHTML = this.originalButtonHTML;
+      }
     }
   }
 
   async apply(event) {
     event.preventDefault();
-    const enhancementId = event.target.dataset.enhancementId;
+    // Use currentTarget to get the button, not the clicked child (like SVG)
+    const enhancementId = event.currentTarget.dataset.enhancementId;
 
     if (!enhancementId) {
       this.showError('Enhancement ID not found.');
@@ -134,7 +141,8 @@ export default class MilestoneAiController extends Controller {
 
   async revert(event) {
     event.preventDefault();
-    const enhancementId = event.target.dataset.enhancementId;
+    // Use currentTarget to get the button, not the clicked child (like SVG)
+    const enhancementId = event.currentTarget.dataset.enhancementId;
 
     if (!enhancementId) {
       this.showError('Enhancement ID not found.');
@@ -183,7 +191,9 @@ export default class MilestoneAiController extends Controller {
   // New methods for direct enhancement (without creating milestone first)
   applyDirectEnhancement(event) {
     event.preventDefault();
-    const enhancedDescription = event.target.dataset.enhancedDescription;
+    // Use currentTarget to get the button, not the clicked child (like SVG)
+    const button = event.currentTarget;
+    const enhancedDescription = button.dataset.enhancedDescription;
 
     if (enhancedDescription && this.hasDescriptionTarget) {
       // Parse the enhanced output to extract title and description
@@ -197,7 +207,7 @@ export default class MilestoneAiController extends Controller {
       // Update description field
       this.descriptionTarget.value = parsed.description;
 
-      this.showSuccess('Enhanced title and description applied to form!');
+      this.showSuccess('Enhanced description applied to form!');
       this.discardDirectEnhancement();
     } else {
       this.showError('Failed to apply enhancement.');
@@ -206,8 +216,10 @@ export default class MilestoneAiController extends Controller {
 
   revertDirectEnhancement(event) {
     event.preventDefault();
-    const originalTitle = event.target.dataset.originalTitle;
-    const originalDescription = event.target.dataset.originalDescription;
+    // Use currentTarget to get the button, not the clicked child (like SVG)
+    const button = event.currentTarget;
+    const originalTitle = button.dataset.originalTitle;
+    const originalDescription = button.dataset.originalDescription;
 
     // Revert title if we have original title and title target
     if (originalTitle && this.hasTitleTarget) {
@@ -301,7 +313,7 @@ export default class MilestoneAiController extends Controller {
 
     if (flashContainer) {
       flashContainer.innerHTML = `
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-4">
+        <div class="alert alert-error mb-4">
           <span class="block sm:inline">${message}</span>
         </div>
       `;
@@ -319,7 +331,7 @@ export default class MilestoneAiController extends Controller {
 
     if (flashContainer) {
       flashContainer.innerHTML = `
-        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded relative mb-4">
+        <div class="alert alert-success mb-4">
           <span class="block sm:inline">${message}</span>
         </div>
       `;

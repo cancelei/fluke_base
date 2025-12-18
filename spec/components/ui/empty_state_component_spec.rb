@@ -126,7 +126,7 @@ RSpec.describe Ui::EmptyStateComponent, type: :component do
         action_variant: :secondary
       ))
 
-      expect(page).to have_css("a.btn-secondary")
+      expect(page).to have_css("a.btn.btn-ghost")
     end
 
     it "wraps action button in div with margin" do

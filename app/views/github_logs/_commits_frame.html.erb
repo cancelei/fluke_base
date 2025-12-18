@@ -1,0 +1,10 @@
+<%# GitHub Commits Frame - wrapper for Turbo Stream updates %>
+<%= turbo_frame_tag "github_commits" do %>
+  <div id="github_logs">
+    <% if recent_commits&.any? %>
+      <%= render "github_logs/commits_list", recent_commits: recent_commits, project: project %>
+    <% else %>
+      <%= render "github_logs/empty_state", project: project %>
+    <% end %>
+  </div>
+<% end %>

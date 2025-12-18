@@ -25,7 +25,7 @@ RSpec.describe 'GithubService multi-branch optimization' do
     it 'checks for existing commits globally across all branches' do
       # Create commits in database for one branch
       GithubBranch.create!(project: project, user: owner, branch_name: 'main')
-      dev_branch = GithubBranch.create!(project: project, user: owner, branch_name: 'develop')
+      GithubBranch.create!(project: project, user: owner, branch_name: 'develop')
 
       # Create some commits
       commits = [
@@ -69,8 +69,8 @@ RSpec.describe 'GithubService multi-branch optimization' do
 
     it 'returns all commit SHAs including existing ones for branch associations' do
       # Setup: main branch already has commits A and B
-      main_branch = GithubBranch.create!(project: project, user: owner, branch_name: 'main')
-      dev_branch = GithubBranch.create!(project: project, user: owner, branch_name: 'develop')
+      GithubBranch.create!(project: project, user: owner, branch_name: 'main')
+      GithubBranch.create!(project: project, user: owner, branch_name: 'develop')
 
       # Store commits A and B (from main branch)
       existing_commits = [
@@ -120,14 +120,17 @@ RSpec.describe 'GithubService multi-branch optimization' do
       result = service.fetch_commits
 
       # Verify the result
-      expect(result).to be_a(Hash)
-      expect(result[:commits].size).to eq(1) # Only new commit C
-      expect(result[:commits].first[:commit_sha]).to eq('commit_c')
-      expect(result[:all_shas]).to contain_exactly('commit_a', 'commit_b', 'commit_c') # All commits in branch
+      expect(result).to be_a(Dry::Monads::Result)
+      expect(result).to be_success
+
+      payload = result.value!
+      expect(payload[:commits].size).to eq(1) # Only new commit C
+      expect(payload[:commits].first[:commit_sha]).to eq('commit_c')
+      expect(payload[:all_shas]).to contain_exactly('commit_a', 'commit_b', 'commit_c') # All commits in branch
 
       puts "\n✓ Service correctly returns:"
-      puts "  - New commits for storage: #{result[:commits].map { |c| c[:commit_sha] }.join(', ')}"
-      puts "  - All SHAs for branch associations: #{result[:all_shas].join(', ')}"
+      puts "  - New commits for storage: #{payload[:commits].map { |c| c[:commit_sha] }.join(', ')}"
+      puts "  - All SHAs for branch associations: #{payload[:all_shas].join(', ')}"
       puts "  This allows job to associate ALL commits with the branch, not just new ones"
     end
   end

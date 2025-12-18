@@ -5,13 +5,13 @@
   - project: project form object
 %>
 
-<div class="bg-gradient-to-r from-indigo-50/80 to-purple-50/80 backdrop-blur-sm border border-indigo-200/50 rounded-2xl p-6 mb-6 shadow-lg"
+<div class="bg-primary/5 backdrop-blur-sm border border-primary/20 rounded-2xl p-6 mb-6 shadow-lg"
      id="stealth-mode-section"
      data-stealth-mode-target="section">
   <div class="flex items-start">
     <div class="flex-shrink-0">
-      <div class="h-10 w-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-        <svg class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+      <div class="h-10 w-10 bg-primary rounded-full flex items-center justify-center">
+        <svg class="h-5 w-5 text-primary-content" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
           <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
         </svg>
@@ -19,12 +19,12 @@
     </div>
     <div class="ml-4 flex-1">
       <!-- Clickable Toggle Area -->
-      <label for="stealth_mode_toggle" class="flex items-center justify-between cursor-pointer hover:bg-white/30 hover:backdrop-blur-sm rounded-lg px-3 py-2 -mx-3 -my-2 transition-all duration-200 group">
-        <h3 class="text-lg font-bold bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent group-hover:from-indigo-800 group-hover:to-purple-800 transition-all duration-200">Stealth Mode</h3>
+      <label for="stealth_mode_toggle" class="flex items-center justify-between cursor-pointer hover:bg-base-100/30 hover:backdrop-blur-sm rounded-lg px-3 py-2 -mx-3 -my-2 transition-all duration-200 group">
+        <h3 class="text-lg font-bold text-primary group-hover:text-primary/80 transition-all duration-200">Stealth Mode</h3>
         <div class="flex items-center">
           <%= form.check_box :stealth_mode,
                             id: "stealth_mode_toggle",
-                            class: "h-5 w-5 rounded border-indigo-300 text-primary focus:ring-indigo-500 transition-all duration-200",
+                            class: "h-5 w-5 rounded border-primary/30 text-primary focus:ring-primary transition-all duration-200",
                             data: {
                               action: "change->stealth-mode#toggle",
                               stealth_mode_target: "toggle"
@@ -50,7 +50,7 @@
 
       <!-- Stealth mode customization fields (hidden by default) -->
       <div id="stealth-customization" class="mt-4 space-y-4 <%= "hidden" unless project.stealth_mode? %>" data-stealth-mode-target="customization">
-        <div class="bg-white/70 rounded-lg p-4 border border-indigo-200/50">
+        <div class="bg-base-100/70 rounded-lg p-4 border border-primary/20">
           <h4 class="text-sm font-semibold text-primary mb-3">Stealth Mode Customization (Optional)</h4>
           <p class="text-xs text-primary mb-3">These fields help pre-fill your project details when in stealth mode. You can change the main project fields anytime.</p>
 
@@ -59,7 +59,7 @@
             <div>
               <%= form.label :stealth_name, "Stealth Display Name", class: "block text-xs font-medium text-primary mb-1" %>
               <%= form.text_field :stealth_name,
-                                class: "block w-full rounded-md border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm",
+                                class: "block w-full rounded-md border-base-300 shadow-sm focus:border-primary focus:ring-primary text-sm",
                                 placeholder: "Secret Project Alpha" %>
               <p class="text-xs text-primary mt-1">How your project appears to unauthorized users</p>
             </div>
@@ -76,7 +76,7 @@
                               [ "Other", "Other" ]
                             ],
                             { include_blank: "Select category" },
-                            { class: "block w-full rounded-md border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" } %>
+                            { class: "block w-full rounded-md border-base-300 shadow-sm focus:border-primary focus:ring-primary text-sm" } %>
             </div>
           </div>
 
@@ -85,7 +85,7 @@
             <%= form.label :stealth_description, "Stealth Description", class: "block text-xs font-medium text-primary mb-1" %>
             <%= form.text_area :stealth_description,
                               rows: 3,
-                              class: "block w-full rounded-md border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm",
+                              class: "block w-full rounded-md border-base-300 shadow-sm focus:border-primary focus:ring-primary text-sm",
                               placeholder: "Early-stage venture in development. Details available after connection." %>
             <p class="text-xs text-primary mt-1">Generic description shown to unauthorized users</p>
           </div>

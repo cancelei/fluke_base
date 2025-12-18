@@ -1,4 +1,9 @@
 production:
+  github_commit_polling:
+    class: GithubPollingJob
+    queue: default
+    schedule: every 60 seconds
+
   # clear_solid_queue_finished_jobs:
   #   class: SolidQueue::Jobs::ClearFinishedJobsJob
   #   queue: default
@@ -14,3 +19,9 @@ production:
   #   command: "SoftDeletedRecord.due.delete_all"
   #   priority: 2
   #   schedule: at 5am every day
+
+development:
+  github_commit_polling:
+    class: GithubPollingJob
+    queue: default
+    schedule: every 60 seconds

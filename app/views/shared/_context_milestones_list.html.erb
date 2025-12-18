@@ -1,0 +1,74 @@
+<%# Context Navigation Milestones List (inner partial) %>
+<%# This partial renders ONLY the milestone list items for Turbo Stream updates %>
+<%# Used by: _context_milestones_dropdown.html.erb (initial render) %>
+<%# Used by: TimeLogsController#create and #stop_tracking (Turbo Stream updates) %>
+
+<% return unless selected_project.present? %>
+
+<% milestones = selected_project.milestones %>
+<% active_milestones = milestones.reject(&:completed?) %>
+
+<% if active_milestones.any? %>
+  <% active_milestones.each do |milestone| %>
+    <% active_log = selected_project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id) %>
+    <div class="flex items-center justify-between px-4 py-3 hover:bg-base-200/50 transition-colors duration-150 border-b border-base-200/50 last:border-b-0">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
+        <div class="w-2 h-2 rounded-full flex-shrink-0 <%= active_log ? "bg-success animate-pulse" : "bg-primary" %>"></div>
+        <div class="min-w-0">
+          <span class="text-sm font-medium text-base-content block truncate"><%= milestone.title %></span>
+          <% if active_log %>
+            <span class="text-xs text-success">Currently tracking</span>
+          <% elsif milestone.due_date.present? %>
+            <span class="text-xs text-base-content/50">Due: <%= milestone.due_date.strftime("%b %d") %></span>
+          <% end %>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+        <% if active_log %>
+          <%= button_to stop_tracking_time_logs_path(selected_project, milestone_id: milestone.id),
+              method: :post,
+              class: "btn btn-error btn-xs btn-square",
+              title: "Stop tracking",
+              form: { data: { turbo: true, turbo_frame: "_top" } } do %>
+            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="6" width="12" height="12" rx="2" />
+            </svg>
+          <% end %>
+        <% else %>
+          <%= button_to time_logs_path(selected_project, milestone_id: milestone.id),
+              method: :post,
+              class: "btn btn-success btn-xs btn-square",
+              title: "Start tracking",
+              form: { data: { turbo: true, turbo_frame: "_top" } } do %>
+            <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <polygon points="5,3 19,12 5,21" />
+            </svg>
+          <% end %>
+        <% end %>
+        <%= link_to project_milestone_path(selected_project, milestone),
+            class: "btn btn-ghost btn-xs btn-square",
+            title: "View milestone",
+            data: { turbo_frame: "_top" } do %>
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% else %>
+  <div class="px-4 py-6 text-center">
+    <svg class="w-8 h-8 mx-auto text-base-content/30 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+    </svg>
+    <p class="text-sm text-base-content/60">No active milestones</p>
+    <%= link_to new_project_milestone_path(selected_project),
+        class: "btn btn-primary btn-xs mt-3",
+        data: { turbo_frame: "_top" } do %>
+      <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Create Milestone
+    <% end %>
+  </div>
+<% end %>

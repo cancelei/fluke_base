@@ -6,7 +6,7 @@
   class="h-screen md:flex md:justify-center md:items-center">
   <div class="w-full max-w-lg">
     <!-- Status Messages -->
-    <p data-payment-intent-target="error" class="hidden items-center mb-4 bg-error/20 border border-red-200 px-5 py-2 rounded-lg text-error">
+    <p data-payment-intent-target="error" class="hidden items-center mb-4 bg-error/20 border border-error/30 px-5 py-2 rounded-lg text-error">
       <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0 text-error h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
       </svg>
@@ -40,15 +40,15 @@
           <div data-payment-intent-target="cardFields" class="hidden">
             <!-- Name -->
             <label for="cardholder-name" class="inline-block text-sm text-base-content/90 font-semibold mb-2"><%= t "pay.requires_action.full_name" %></label>
-            <input data-payment-intent-target="name" id="cardholder-name" type="text" placeholder="Jane Doe" required autofocus autocomplete="name" class="mt-1 mb-6 block w-full px-3 py-2 rounded-md border border-base-300 shadow-sm focus:outline-none focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-text-base-content/50">
+            <input data-payment-intent-target="name" id="cardholder-name" type="text" placeholder="Jane Doe" required autofocus autocomplete="name" class="mt-1 mb-6 block w-full px-3 py-2 rounded-md border border-base-300 shadow-sm focus:outline-none focus:border-info focus:ring focus:ring-info/30 focus:ring-text-base-content/50">
 
             <!-- Card -->
             <label for="card-element" class="inline-block text-sm text-base-content/90 font-semibold mb-2"><%= t "pay.requires_action.card" %></label>
-            <div data-payment-intent-target="card" id="card-element" class="mt-1 mb-6 block w-full px-3 py-4 rounded-md border border-base-300 shadow-sm focus:outline-none focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-text-base-content/50"></div>
+            <div data-payment-intent-target="card" id="card-element" class="mt-1 mb-6 block w-full px-3 py-4 rounded-md border border-base-300 shadow-sm focus:outline-none focus:border-info focus:ring focus:ring-info/30 focus:ring-text-base-content/50"></div>
           </div>
 
           <!-- Pay Button -->
-          <button data-payment-intent-target="button" data-action="click->payment-intent#confirmPayment" class="inline-block w-full px-4 py-3 mb-4 text-white rounded-lg bg-info hover:bg-info">
+          <button data-payment-intent-target="button" data-action="click->payment-intent#confirmPayment" class="inline-block w-full px-4 py-3 mb-4 text-info-content rounded-lg bg-info hover:bg-info/80">
             <%= t "pay.requires_action.button", amount: @payment.amount_with_currency %>
           </button>
         </div>

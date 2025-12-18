@@ -570,7 +570,7 @@ module Ui
     def render_milestone_item
       tag.div(class: "flex items-start gap-3 p-4 #{@css_class}", role: "status", "aria-label": "Loading milestone") do
         safe_join([
-          tag.div(class: "skeleton h-5 w-5 rounded shrink-0 mt-0.5 #{animation_class}"),
+          tag.div(class: "skeleton h-5 w-5 rounded shrink-0 #{animation_class}"),
           tag.div(class: "flex-1") do
             safe_join([
               tag.div(class: "skeleton h-5 w-3/4 mb-2 #{animation_class}"),

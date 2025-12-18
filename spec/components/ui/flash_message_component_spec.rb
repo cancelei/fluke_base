@@ -30,16 +30,17 @@ RSpec.describe Ui::FlashMessageComponent, type: :component do
       expect(page).to have_text("Operation successful")
     end
 
-    it "renders container with rounded corners" do
+    it "renders alert container with DaisyUI classes" do
       render_inline(described_class.new(type: :notice, message: "Test"))
 
-      expect(page).to have_css("div.rounded-md")
+      expect(page).to have_css("div.alert")
+      expect(page).to have_css("div[role='alert']")
     end
 
-    it "renders with padding" do
+    it "renders with bottom margin" do
       render_inline(described_class.new(type: :notice, message: "Test"))
 
-      expect(page).to have_css("div.p-4.mb-6")
+      expect(page).to have_css("div.mb-6")
     end
 
     it "renders icon" do
@@ -50,80 +51,76 @@ RSpec.describe Ui::FlashMessageComponent, type: :component do
   end
 
   describe "notice type" do
-    it "renders with green background" do
+    it "renders with success alert styling" do
       render_inline(described_class.new(type: :notice, message: "Success"))
 
-      expect(page).to have_css("div.bg-green-50")
+      expect(page).to have_css("div.alert.alert-success")
     end
 
-    it "renders with green text" do
+    it "renders with stroke-current icon" do
       render_inline(described_class.new(type: :notice, message: "Success"))
 
-      expect(page).to have_css("p.text-green-800")
+      expect(page).to have_css("svg.stroke-current")
     end
 
-    it "renders check icon" do
+    it "renders check icon path" do
       render_inline(described_class.new(type: :notice, message: "Success"))
 
-      expect(page).to have_css("svg.text-green-400")
+      expect(page).to have_css("svg path[d*='M9 12l2 2 4-4']")
     end
   end
 
   describe "alert type" do
-    it "renders with red background" do
+    it "renders with error alert styling" do
       render_inline(described_class.new(type: :alert, message: "Error"))
 
-      expect(page).to have_css("div.bg-red-50")
+      expect(page).to have_css("div.alert.alert-error")
     end
 
-    it "renders with red text" do
+    it "renders with stroke-current icon" do
       render_inline(described_class.new(type: :alert, message: "Error"))
 
-      expect(page).to have_css("p.text-red-800")
+      expect(page).to have_css("svg.stroke-current")
     end
 
-    it "renders with red icon" do
+    it "renders error icon path" do
       render_inline(described_class.new(type: :alert, message: "Error"))
 
-      expect(page).to have_css("svg.text-red-400")
+      expect(page).to have_css("svg path")
     end
   end
 
   describe "success type" do
-    it "renders with green styling" do
+    it "renders with success alert styling" do
       render_inline(described_class.new(type: :success, message: "Success"))
 
-      expect(page).to have_css("div.bg-green-50")
-      expect(page).to have_css("p.text-green-800")
+      expect(page).to have_css("div.alert.alert-success")
     end
   end
 
   describe "error type" do
-    it "renders with red styling" do
+    it "renders with error alert styling" do
       render_inline(described_class.new(type: :error, message: "Error"))
 
-      expect(page).to have_css("div.bg-red-50")
-      expect(page).to have_css("p.text-red-800")
+      expect(page).to have_css("div.alert.alert-error")
     end
   end
 
   describe "warning type" do
-    it "renders with yellow styling" do
+    it "renders with warning alert styling" do
       render_inline(described_class.new(type: :warning, message: "Warning"))
 
-      expect(page).to have_css("div.bg-yellow-50")
-      expect(page).to have_css("p.text-yellow-800")
-      expect(page).to have_css("svg.text-yellow-400")
+      expect(page).to have_css("div.alert.alert-warning")
+      expect(page).to have_css("svg.stroke-current")
     end
   end
 
   describe "info type" do
-    it "renders with blue styling" do
+    it "renders with info alert styling" do
       render_inline(described_class.new(type: :info, message: "Info"))
 
-      expect(page).to have_css("div.bg-blue-50")
-      expect(page).to have_css("p.text-blue-800")
-      expect(page).to have_css("svg.text-blue-400")
+      expect(page).to have_css("div.alert.alert-info")
+      expect(page).to have_css("svg.stroke-current")
     end
   end
 
@@ -131,7 +128,7 @@ RSpec.describe Ui::FlashMessageComponent, type: :component do
     it "defaults to info styling" do
       render_inline(described_class.new(type: :unknown, message: "Unknown"))
 
-      expect(page).to have_css("div.bg-blue-50")
+      expect(page).to have_css("div.alert.alert-info")
     end
   end
 
@@ -159,28 +156,28 @@ RSpec.describe Ui::FlashMessageComponent, type: :component do
   end
 
   describe "layout" do
-    it "uses flex layout" do
+    it "uses DaisyUI alert layout" do
       render_inline(described_class.new(type: :notice, message: "Test"))
 
-      expect(page).to have_css("div.flex")
+      expect(page).to have_css("div.alert")
     end
 
-    it "icon container does not shrink" do
+    it "icon does not shrink" do
       render_inline(described_class.new(type: :notice, message: "Test"))
 
-      expect(page).to have_css("div.flex-shrink-0")
+      expect(page).to have_css("svg.shrink-0")
     end
 
-    it "message has left margin" do
+    it "renders message in span" do
       render_inline(described_class.new(type: :notice, message: "Test"))
 
-      expect(page).to have_css("div.ml-3")
+      expect(page).to have_css("span", text: "Test")
     end
 
-    it "message text has correct styling" do
+    it "icon has correct SVG attributes" do
       render_inline(described_class.new(type: :notice, message: "Test"))
 
-      expect(page).to have_css("p.text-sm.font-medium")
+      expect(page).to have_css("svg.h-6.w-6")
     end
   end
 
@@ -188,13 +185,13 @@ RSpec.describe Ui::FlashMessageComponent, type: :component do
     it "handles string type notice" do
       render_inline(described_class.new(type: "notice", message: "Test"))
 
-      expect(page).to have_css("div.bg-green-50")
+      expect(page).to have_css("div.alert.alert-success")
     end
 
     it "handles string type alert" do
       render_inline(described_class.new(type: "alert", message: "Test"))
 
-      expect(page).to have_css("div.bg-red-50")
+      expect(page).to have_css("div.alert.alert-error")
     end
   end
 end

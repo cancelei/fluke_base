@@ -42,24 +42,24 @@ The application heavily uses service objects for business logic encapsulation:
 - `AgreementCalculationsService`: Handles time tracking, cost calculations, payment details
 - `ProjectGithubService`: GitHub API integration, commit tracking, repository management
 - `ProjectVisibilityService`: Field-level privacy controls for project data
-- `UserOnboardingService`: Role-based user onboarding workflows
 - `NotificationService`: System-wide notification management
+- `AvatarService`: User avatar URL and initials management
 
 **AI Agent Analysis Pattern**: When encountering business logic in models, look for delegated service methods (e.g., `Agreement:92-94` delegates to `calculations_service`).
 
 ## Core Domain Models
 
 ### User Model (`app/models/user.rb`)
-**Central Entity**: Manages authentication, roles, and relationships
+**Central Entity**: Manages authentication and relationships
 
 **Key Associations**:
 - `belongs_to :selected_project` - Current project context
-- `belongs_to :current_role` - Active role (entrepreneur/mentor/co-founder)
-- `has_many :user_roles, :roles` - Multi-role system
 - `has_many :agreement_participants` - Agreement participation tracking
 - `has_many :initiated_agreements, :received_agreements` - Directional agreement access
+- `has_many :projects` - Owned projects
+- `has_many :project_memberships, :member_projects` - Tiered project access control
 
-**AI Agent Note**: The `User:79-84` `selected_project` method is overridden to return nil - actual project selection is session-managed by `ApplicationController`.
+**AI Agent Note**: FlukeBase operates with a unified user experience without role-based restrictions. All authenticated users have equal access to all platform features.
 
 ### Project Model (`app/models/project.rb`)
 **Core Business Entity**: Represents entrepreneurial projects seeking collaboration
@@ -95,7 +95,7 @@ The application heavily uses service objects for business logic encapsulation:
 **Key Methods for AI Agents**:
 - Project selection and context switching logic
 - Devise authentication integration
-- Role-based authorization setup
+- Session-based project context management
 
 ### Primary Controllers
 - **ProjectsController**: CRUD operations, GitHub integration, milestone management

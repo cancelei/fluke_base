@@ -23,23 +23,16 @@
     </div>
   </td>
   <td class="px-2 py-3 whitespace-nowrap truncate max-w-xs">
-    <div class="flex items-center gap-2">
-      <div class="avatar placeholder">
-        <div class="bg-neutral text-neutral-content rounded-full w-6">
-          <span class="text-xs">
-            <% other_party = agreement.initiator&.id == current_user.id ? agreement.other_party : agreement.project.user %>
-            <%= other_party&.initials %>
-          </span>
-        </div>
-      </div>
-      <span class="text-sm">
-        <% if agreement.initiator&.id == current_user.id %>
-          <%= agreement.other_party&.full_name %>
-        <% else %>
-          <%= agreement.project.user.full_name %>
-        <% end %>
-      </span>
-    </div>
+    <% is_initiator = agreement.initiator&.id == current_user.id %>
+    <% the_other_party = is_initiator ? agreement.other_party : agreement.initiator %>
+    <% if the_other_party %>
+      <%= link_to person_path(the_other_party), onclick: "event.stopPropagation();", class: "flex items-center gap-2 hover:text-primary transition-colors" do %>
+        <%= render Ui::AvatarComponent.new(user: the_other_party, size: :xs, placeholder: :initials) %>
+        <span class="text-sm font-medium truncate max-w-[100px]"><%= the_other_party.full_name %></span>
+      <% end %>
+    <% else %>
+      <span class="text-sm text-base-content/60">No other party</span>
+    <% end %>
   </td>
   <td class="px-2 py-3 whitespace-nowrap">
     <%= render "agreement_status", agreement: agreement %>

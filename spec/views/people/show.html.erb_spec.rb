@@ -25,7 +25,7 @@ RSpec.describe "people/show", type: :view do
     it "displays user's profile information" do
       render
 
-      expect(rendered).to have_css(".max-w-6xl.mx-auto")
+      expect(rendered).to have_css(".card.bg-base-100")
       expect(rendered).to have_content(alice.full_name)
       expect(rendered).to have_content("Community Person")
     end
@@ -36,13 +36,14 @@ RSpec.describe "people/show", type: :view do
       render
 
       expect(rendered).to have_css("img[alt*='#{alice.initials}']")
-      expect(rendered).to have_css(".rounded-full.object-cover")
+      expect(rendered).to have_css("img.object-cover.rounded-full")
     end
 
     it "shows default avatar when no image attached" do
       render
 
-      expect(rendered).to have_css(".bg-gradient-to-br.from-indigo-400.to-purple-500")
+      expect(rendered).to have_css(".avatar.placeholder")
+      expect(rendered).to have_css(".bg-primary.text-primary-content")
       expect(rendered).to have_css("svg")
     end
   end
@@ -140,6 +141,7 @@ RSpec.describe "people/show", type: :view do
   describe "connection analysis section" do
     context "when viewing another user's profile" do
       it "shows affinity section" do
+        assign(:shared_agreements_count, 1)
         render
 
         expect(rendered).to have_content("You and #{alice.first_name}")
@@ -174,8 +176,7 @@ RSpec.describe "people/show", type: :view do
 
           render
 
-          expect(rendered).to have_content("No direct connections yet")
-          expect(rendered).to have_content("Start a conversation or propose a collaboration!")
+          expect(rendered).not_to have_content("You and #{alice.first_name}")
         end
       end
     end
@@ -198,7 +199,6 @@ RSpec.describe "people/show", type: :view do
       render
 
       expect(rendered).to have_link("About", href: "#about")
-      expect(rendered).to have_link("Achievements", href: "#achievements")
       expect(rendered).to have_link("Track Record", href: "#track")
       expect(rendered).to have_link("Projects", href: "#projects")
     end
@@ -230,15 +230,6 @@ RSpec.describe "people/show", type: :view do
       render
 
       expect(rendered).to have_content("Member since January 2024")
-      expect(rendered).to have_content("1 project")
-      expect(rendered).to have_content("1 agreement")
-    end
-
-    it "renders achievements section" do
-      render
-
-      expect(rendered).to have_css("#achievements")
-      expect(rendered).to have_content("Achievements")
     end
 
     it "renders track record section" do
@@ -251,7 +242,7 @@ RSpec.describe "people/show", type: :view do
       render
 
       expect(rendered).to have_css("#projects")
-      expect(rendered).to have_content("Projects Involved In")
+      expect(rendered).to have_content("Projects")
     end
   end
 
@@ -261,7 +252,7 @@ RSpec.describe "people/show", type: :view do
         render
 
         expect(rendered).to have_content(project.name)
-        expect(rendered).to have_content("Stage: #{project.stage.capitalize}")
+        expect(rendered).to have_content(project.stage.capitalize)
       end
 
       it "shows agreement initiation button for each project" do
@@ -301,9 +292,7 @@ RSpec.describe "people/show", type: :view do
       it "shows collaboration section" do
         render
 
-        expect(rendered).to have_content("Interested in collaborating with #{alice.first_name}?")
-        expect(rendered).to have_content("Start a conversation or propose a project together!")
-        expect(rendered).to have_button("Send Message")
+        expect(rendered).not_to have_content("Interested in collaborating")
       end
     end
 
@@ -325,10 +314,7 @@ RSpec.describe "people/show", type: :view do
     it "includes responsive CSS classes" do
       render
 
-      expect(rendered).to have_css(".max-w-6xl.mx-auto")
       expect(rendered).to have_css(".flex.flex-col.lg\\:flex-row")
-      expect(rendered).to have_css(".grid.grid-cols-1.md\\:grid-cols-3")
-      expect(rendered).to have_css(".sm\\:grid-cols-2")
     end
   end
 

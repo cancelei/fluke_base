@@ -101,14 +101,8 @@ export default class extends Controller {
       return;
     }
 
-    // Add subtle glow effect
-    card.style.setProperty(
-      '--tw-ring-shadow',
-      '0 0 0 1px rgb(59 130 246 / 0.3)'
-    );
-    card.style.setProperty('--tw-ring-offset-shadow', '0 0 0 0 transparent');
-    card.style.boxShadow =
-      'var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)';
+    // Add subtle glow effect using CSS class instead of hardcoded color
+    card.classList.add('ring-1', 'ring-primary/30');
   }
 
   removeHoverState() {
@@ -119,9 +113,7 @@ export default class extends Controller {
     }
 
     // Remove glow effect
-    card.style.removeProperty('--tw-ring-shadow');
-    card.style.removeProperty('--tw-ring-offset-shadow');
-    card.style.removeProperty('box-shadow');
+    card.classList.remove('ring-1', 'ring-primary/30');
   }
 
   // Copy project link to clipboard

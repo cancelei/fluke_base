@@ -183,8 +183,9 @@ class TimeLogsController < ApplicationController
             turbo_stream.update("milestone_bar_container",
               partial: "shared/milestone_bar"
             ),
-            turbo_stream.update("navbar_milestones_list",
-              partial: "shared/navbar_milestones_list"
+            turbo_stream.update("context_milestones_list",
+              partial: "shared/context_milestones_list",
+              locals: { selected_project: @project, current_user: current_user }
             ),
             turbo_stream.update("remaining_time_progress",
               partial: "remaining_time_progress",
@@ -235,8 +236,9 @@ class TimeLogsController < ApplicationController
             turbo_stream.update("milestone_bar_container",
               partial: "shared/milestone_bar"
             ),
-            turbo_stream.update("navbar_milestones_list",
-              partial: "shared/navbar_milestones_list"
+            turbo_stream.update("context_milestones_list",
+              partial: "shared/context_milestones_list",
+              locals: { selected_project: @project, current_user: current_user }
             ),
             turbo_stream.update("pending_confirmation_section",
               partial: "time_logs/pending_confirmation_section",

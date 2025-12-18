@@ -20,65 +20,69 @@ RSpec.describe Ui::CardComponent, type: :component do
   end
 
   describe "variants" do
-    it "renders default variant with glassmorphism styling" do
+    it "renders default variant with DaisyUI card styling" do
       render_inline(described_class.new) { "Content" }
 
-      expect(page).to have_css("div.bg-white\\/95")
-      expect(page).to have_css("div.backdrop-blur-md")
+      expect(page).to have_css("div.card")
+      expect(page).to have_css("div.bg-base-100")
       expect(page).to have_css("div.shadow-xl")
-      expect(page).to have_css("div.rounded-2xl")
     end
 
     it "renders simple variant" do
       render_inline(described_class.new(variant: :simple)) { "Content" }
 
-      expect(page).to have_css("div.bg-white")
+      expect(page).to have_css("div.card")
+      expect(page).to have_css("div.bg-base-100")
       expect(page).to have_css("div.shadow-lg")
-      expect(page).to have_css("div.rounded-xl")
     end
 
     it "renders minimal variant" do
       render_inline(described_class.new(variant: :minimal)) { "Content" }
 
+      expect(page).to have_css("div.card")
       expect(page).to have_css("div.shadow-md")
     end
 
-    it "renders gradient variant" do
+    it "renders gradient variant with DaisyUI styling" do
       render_inline(described_class.new(variant: :gradient)) { "Content" }
 
-      expect(page).to have_css("div.bg-gradient-to-br")
+      expect(page).to have_css("div.card")
+      expect(page).to have_css("div.shadow-xl")
     end
 
     it "renders elevated variant" do
       render_inline(described_class.new(variant: :elevated)) { "Content" }
 
+      expect(page).to have_css("div.card")
       expect(page).to have_css("div.shadow-2xl")
     end
 
     it "renders interactive variant" do
       render_inline(described_class.new(variant: :interactive)) { "Content" }
 
+      expect(page).to have_css("div.card")
       expect(page).to have_css("div.cursor-pointer")
     end
 
     it "renders flat variant" do
       render_inline(described_class.new(variant: :flat)) { "Content" }
 
-      expect(page).to have_css("div.border-gray-200")
+      expect(page).to have_css("div.card")
+      expect(page).to have_css("div.border.border-base-300")
     end
   end
 
   describe "padding" do
-    it "applies padding by default" do
+    it "applies DaisyUI card-body padding by default" do
       render_inline(described_class.new) { "Content" }
 
-      expect(page).to have_css("div div.px-6.py-6")
+      expect(page).to have_css("div.card div.card-body")
     end
 
     it "removes padding when disabled" do
       render_inline(described_class.new(padding: false)) { "Content" }
 
-      expect(page).not_to have_css("div.px-6")
+      expect(page).not_to have_css("div.card-body")
     end
   end
 
@@ -90,7 +94,7 @@ RSpec.describe Ui::CardComponent, type: :component do
       end
 
       expect(page).to have_text("Card Title")
-      expect(page).to have_css("h3.text-lg.font-medium")
+      expect(page).to have_css("h3.card-title")
     end
 
     it "renders header with subtitle" do
@@ -112,13 +116,13 @@ RSpec.describe Ui::CardComponent, type: :component do
       expect(page).to have_text("Custom header content")
     end
 
-    it "applies header styling" do
+    it "applies DaisyUI header styling" do
       render_inline(described_class.new) do |card|
         card.with_header(title: "Title")
         "Content"
       end
 
-      expect(page).to have_css("div.border-b.border-gray-100\\/50")
+      expect(page).to have_css("div.border-b.border-base-200")
     end
   end
 
@@ -132,13 +136,14 @@ RSpec.describe Ui::CardComponent, type: :component do
       expect(page).to have_text("Footer content")
     end
 
-    it "applies footer styling" do
+    it "applies DaisyUI footer styling" do
       render_inline(described_class.new) do |card|
         card.with_footer { "Footer" }
         "Content"
       end
 
-      expect(page).to have_css("div.border-t.border-gray-100\\/50")
+      expect(page).to have_css("div.card-actions")
+      expect(page).to have_css("div.border-t.border-base-200")
     end
 
     it "applies custom css class to footer" do
@@ -173,13 +178,13 @@ RSpec.describe Ui::CardComponent, type: :component do
       expect(page).to have_css("h4.text-sm.font-medium")
     end
 
-    it "applies section styling" do
+    it "applies DaisyUI section styling" do
       render_inline(described_class.new) do |card|
         card.with_section { "Section" }
         "Content"
       end
 
-      expect(page).to have_css("div.border-t.border-gray-100")
+      expect(page).to have_css("div.border-t.border-base-200")
     end
   end
 

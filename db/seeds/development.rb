@@ -219,7 +219,7 @@ if Rails.env.development? || Rails.env.staging?
           title: milestone_templates.sample,
           description: Faker::Lorem.paragraph(sentence_count: 2),
           due_date: rand(1..120).days.from_now,
-          status: [ Milestone::NOT_STARTED, Milestone::IN_PROGRESS, Milestone::COMPLETED ].sample,
+          status: [ Milestone::PENDING, Milestone::IN_PROGRESS, Milestone::COMPLETED ].sample,
           project: project
         )
       end
