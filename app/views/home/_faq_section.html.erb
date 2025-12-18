@@ -1,113 +1,156 @@
-<section class="py-20 bg-base-200">
-  <div class="max-w-6xl mx-auto px-6">
-    <div class="text-center mb-12">
-      <h2 class="text-3xl md:text-4xl font-bold text-base-content mb-4">Frequently Asked Questions</h2>
-      <p class="text-lg text-base-content/70">Common questions about using FlukeBase</p>
-    </div>
-
-    <div class="max-w-3xl mx-auto space-y-4">
-      <%# FAQ 1: What is FlukeBase? %>
-      <div class="collapse collapse-arrow bg-base-100 rounded-xl border border-base-300">
-        <input type="radio" name="faq-accordion" id="faq-1">
-        <label for="faq-1" class="collapse-title text-lg font-semibold cursor-pointer">
-          What is FlukeBase?
-        </label>
-        <div class="collapse-content">
-          <p class="text-base-content/80 leading-relaxed pt-2">
-            FlukeBase is a platform for structured collaboration on projects. It provides tools for project management
-            with milestone tracking, collaboration agreements, and time logging. Users can create projects,
-            set up agreements with collaborators, and track progress together.
+<%# FAQ Section - Theme-adaptive accordion %>
+<section class="py-24 bg-base-100">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="grid lg:grid-cols-12 gap-12 lg:gap-16">
+      <%# Left column - Header %>
+      <div class="lg:col-span-4">
+        <div class="lg:sticky lg:top-24">
+          <div class="inline-flex items-center gap-3 text-primary text-sm font-medium tracking-wide uppercase mb-4">
+            <span class="w-8 h-px bg-primary"></span>
+            FAQ
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold text-base-content mb-4">Common questions</h2>
+          <p class="text-base-content/60 leading-relaxed">
+            Everything you need to know about FlukeBase and how it works.
           </p>
         </div>
       </div>
 
-      <%# FAQ 2: Agreement Types %>
-      <div class="collapse collapse-arrow bg-base-100 rounded-xl border border-base-300">
-        <input type="radio" name="faq-accordion" id="faq-2">
-        <label for="faq-2" class="collapse-title text-lg font-semibold cursor-pointer">
-          What types of agreements are available?
-        </label>
-        <div class="collapse-content">
-          <p class="text-base-content/80 leading-relaxed pt-2">
-            FlukeBase supports two agreement types: <strong>Mentorship</strong> for advisory relationships and
-            <strong>Co-founder</strong> for partnership arrangements. Each agreement can specify compensation expectations
-            including hourly rates, equity percentages, or hybrid combinations. Agreements go through a negotiation
-            process where parties can accept, reject, or counter-offer terms.
-          </p>
-        </div>
-      </div>
+      <%# Right column - Accordion %>
+      <div class="lg:col-span-8">
+        <div class="divide-y divide-base-content/10">
+          <%# FAQ 1 %>
+          <details class="group py-6 first:pt-0">
+            <summary class="flex items-center justify-between cursor-pointer list-none">
+              <h3 class="text-lg font-semibold text-base-content pr-8 group-hover:text-primary transition-colors">What is FlukeBase?</h3>
+              <span class="flex-shrink-0 w-8 h-8 rounded-full bg-base-content/5 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-base-content/60 group-open:rotate-45 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                </svg>
+              </span>
+            </summary>
+            <div class="pt-4 pr-12">
+              <p class="text-base-content/70 leading-relaxed">
+                FlukeBase is a platform for structured collaboration on projects. It provides tools for project management
+                with milestone tracking, collaboration agreements, and time logging. Users can create projects,
+                set up agreements with collaborators, and track progress together.
+              </p>
+            </div>
+          </details>
 
-      <%# FAQ 2b: Are agreements legally binding? %>
-      <div class="collapse collapse-arrow bg-base-100 rounded-xl border border-base-300">
-        <input type="radio" name="faq-accordion" id="faq-2b">
-        <label for="faq-2b" class="collapse-title text-lg font-semibold cursor-pointer">
-          Are agreements on FlukeBase legally binding?
-        </label>
-        <div class="collapse-content">
-          <p class="text-base-content/80 leading-relaxed pt-2">
-            <strong>No.</strong> Agreements on FlukeBase are organizational tools for tracking collaboration terms,
-            compensation expectations, and progress. They are <strong>not legally binding contracts</strong> and
-            should not be treated as such. If you need legally enforceable agreements, please consult with a
-            qualified attorney to draft appropriate legal documents.
-          </p>
-        </div>
-      </div>
+          <%# FAQ 2 %>
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none">
+              <h3 class="text-lg font-semibold text-base-content pr-8 group-hover:text-primary transition-colors">What types of agreements are available?</h3>
+              <span class="flex-shrink-0 w-8 h-8 rounded-full bg-base-content/5 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-base-content/60 group-open:rotate-45 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                </svg>
+              </span>
+            </summary>
+            <div class="pt-4 pr-12">
+              <p class="text-base-content/70 leading-relaxed">
+                FlukeBase supports two agreement types: <strong class="text-base-content">Mentorship</strong> for advisory relationships and
+                <strong class="text-base-content">Co-founder</strong> for partnership arrangements. Each agreement can specify compensation expectations
+                including hourly rates, equity percentages, or hybrid combinations. Agreements go through a negotiation
+                process where parties can accept, reject, or counter-offer terms.
+              </p>
+            </div>
+          </details>
 
-      <%# FAQ 3: Pricing %>
-      <div class="collapse collapse-arrow bg-base-100 rounded-xl border border-base-300">
-        <input type="radio" name="faq-accordion" id="faq-3">
-        <label for="faq-3" class="collapse-title text-lg font-semibold cursor-pointer">
-          How much does FlukeBase cost?
-        </label>
-        <div class="collapse-content">
-          <p class="text-base-content/80 leading-relaxed pt-2">
-            FlukeBase is currently free to use during our development phase. Future pricing models will be
-            communicated transparently as the platform evolves.
-          </p>
-        </div>
-      </div>
+          <%# FAQ 3 %>
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none">
+              <h3 class="text-lg font-semibold text-base-content pr-8 group-hover:text-primary transition-colors">Are agreements legally binding?</h3>
+              <span class="flex-shrink-0 w-8 h-8 rounded-full bg-base-content/5 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-base-content/60 group-open:rotate-45 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                </svg>
+              </span>
+            </summary>
+            <div class="pt-4 pr-12">
+              <p class="text-base-content/70 leading-relaxed">
+                <strong class="text-base-content">No.</strong> Agreements on FlukeBase are organizational tools for tracking collaboration terms,
+                compensation expectations, and progress. They are not legally binding contracts and
+                should not be treated as such. If you need legally enforceable agreements, please consult with a
+                qualified attorney to draft appropriate legal documents.
+              </p>
+            </div>
+          </details>
 
-      <%# FAQ 4: Multiple Roles %>
-      <div class="collapse collapse-arrow bg-base-100 rounded-xl border border-base-300">
-        <input type="radio" name="faq-accordion" id="faq-4">
-        <label for="faq-4" class="collapse-title text-lg font-semibold cursor-pointer">
-          Can I both lead projects and contribute to others?
-        </label>
-        <div class="collapse-content">
-          <p class="text-base-content/80 leading-relaxed pt-2">
-            Yes. FlukeBase has no role restrictions - all users can create their own projects while also
-            participating in agreements on other projects. You can be a project owner and a collaborator
-            simultaneously across different projects.
-          </p>
-        </div>
-      </div>
+          <%# FAQ 4 %>
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none">
+              <h3 class="text-lg font-semibold text-base-content pr-8 group-hover:text-primary transition-colors">How much does FlukeBase cost?</h3>
+              <span class="flex-shrink-0 w-8 h-8 rounded-full bg-base-content/5 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-base-content/60 group-open:rotate-45 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                </svg>
+              </span>
+            </summary>
+            <div class="pt-4 pr-12">
+              <p class="text-base-content/70 leading-relaxed">
+                FlukeBase is currently free to use during our development phase. Future pricing models will be
+                communicated transparently as the platform evolves.
+              </p>
+            </div>
+          </details>
 
-      <%# FAQ 5: Time Tracking %>
-      <div class="collapse collapse-arrow bg-base-100 rounded-xl border border-base-300">
-        <input type="radio" name="faq-accordion" id="faq-5">
-        <label for="faq-5" class="collapse-title text-lg font-semibold cursor-pointer">
-          How does time tracking work?
-        </label>
-        <div class="collapse-content">
-          <p class="text-base-content/80 leading-relaxed pt-2">
-            Time tracking is tied to project milestones. You can start a timer while working on a specific milestone,
-            and the logged time is recorded against that milestone. The interface updates in real-time without page
-            reloads. You can also manually add time entries if needed.
-          </p>
-        </div>
-      </div>
+          <%# FAQ 5 %>
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none">
+              <h3 class="text-lg font-semibold text-base-content pr-8 group-hover:text-primary transition-colors">Can I lead projects and contribute to others?</h3>
+              <span class="flex-shrink-0 w-8 h-8 rounded-full bg-base-content/5 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-base-content/60 group-open:rotate-45 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                </svg>
+              </span>
+            </summary>
+            <div class="pt-4 pr-12">
+              <p class="text-base-content/70 leading-relaxed">
+                Yes. FlukeBase has no role restrictions - all users can create their own projects while also
+                participating in agreements on other projects. You can be a project owner and a collaborator
+                simultaneously across different projects.
+              </p>
+            </div>
+          </details>
 
-      <%# FAQ 6: GitHub Integration %>
-      <div class="collapse collapse-arrow bg-base-100 rounded-xl border border-base-300">
-        <input type="radio" name="faq-accordion" id="faq-6">
-        <label for="faq-6" class="collapse-title text-lg font-semibold cursor-pointer">
-          What GitHub features are available?
-        </label>
-        <div class="collapse-content">
-          <p class="text-base-content/80 leading-relaxed pt-2">
-            Projects can be linked to GitHub repositories to track commits and contributions. This provides
-            visibility into development activity and helps correlate code progress with project milestones.
-          </p>
+          <%# FAQ 6 %>
+          <details class="group py-6">
+            <summary class="flex items-center justify-between cursor-pointer list-none">
+              <h3 class="text-lg font-semibold text-base-content pr-8 group-hover:text-primary transition-colors">How does time tracking work?</h3>
+              <span class="flex-shrink-0 w-8 h-8 rounded-full bg-base-content/5 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-base-content/60 group-open:rotate-45 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                </svg>
+              </span>
+            </summary>
+            <div class="pt-4 pr-12">
+              <p class="text-base-content/70 leading-relaxed">
+                Time tracking is tied to project milestones. You can start a timer while working on a specific milestone,
+                and the logged time is recorded against that milestone. The interface updates in real-time without page
+                reloads. You can also manually add time entries if needed.
+              </p>
+            </div>
+          </details>
+
+          <%# FAQ 7 %>
+          <details class="group py-6 last:pb-0">
+            <summary class="flex items-center justify-between cursor-pointer list-none">
+              <h3 class="text-lg font-semibold text-base-content pr-8 group-hover:text-primary transition-colors">What GitHub features are available?</h3>
+              <span class="flex-shrink-0 w-8 h-8 rounded-full bg-base-content/5 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-base-content/60 group-open:rotate-45 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                </svg>
+              </span>
+            </summary>
+            <div class="pt-4 pr-12">
+              <p class="text-base-content/70 leading-relaxed">
+                Projects can be linked to GitHub repositories to track commits and contributions. This provides
+                visibility into development activity and helps correlate code progress with project milestones.
+              </p>
+            </div>
+          </details>
         </div>
       </div>
     </div>

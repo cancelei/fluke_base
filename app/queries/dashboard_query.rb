@@ -15,11 +15,14 @@ class DashboardQuery
     return Project.none if accessible_project_ids.empty?
 
     # Use a subquery to get last commit date for ordering
+    # We need to use a subquery approach to avoid issues with count
+    last_commits = GithubLog.select("project_id, MAX(commit_date) as last_commit_at")
+                            .where(project_id: accessible_project_ids)
+                            .group(:project_id)
+
     Project.where(id: accessible_project_ids)
-           .left_joins(:github_logs)
-           .select("projects.*, MAX(github_logs.commit_date) as last_commit_at")
-           .group("projects.id")
-           .order(Arel.sql("MAX(github_logs.commit_date) DESC NULLS LAST, projects.updated_at DESC"))
+           .joins("LEFT JOIN (#{last_commits.to_sql}) AS lc ON lc.project_id = projects.id")
+           .order(Arel.sql("lc.last_commit_at DESC NULLS LAST, projects.updated_at DESC"))
            .limit(limit)
   end
 

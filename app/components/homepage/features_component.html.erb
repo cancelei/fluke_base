@@ -1,24 +1,48 @@
-<section class="py-20 bg-base-100">
-  <div class="max-w-6xl mx-auto px-6">
-    <div class="text-center mb-16">
-      <h2 class="text-3xl md:text-4xl font-bold text-base-content mb-4">Core Features</h2>
-      <p class="text-lg text-base-content/70 max-w-2xl mx-auto">
-        Tools designed for structured collaboration and transparent project management
+<%# Features Section - Theme-adaptive editorial layout %>
+<section class="py-24 bg-neutral">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <%# Section header - left aligned %>
+    <div class="max-w-2xl mb-16">
+      <div class="inline-flex items-center gap-3 text-primary text-sm font-medium tracking-wide uppercase mb-4">
+        <span class="w-8 h-px bg-primary"></span>
+        Capabilities
+      </div>
+      <h2 class="text-3xl md:text-4xl font-bold text-neutral-content mb-4">Everything you need to collaborate</h2>
+      <p class="text-lg text-neutral-content/60">
+        Tools designed for structured collaboration and transparent project management.
       </p>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-8">
-      <% features.each do |feature| %>
-        <div class="card bg-base-100 border border-base-300 hover:border-primary/50 hover:shadow-xl transition-all duration-300">
-          <div class="card-body p-8">
+    <div class="grid lg:grid-cols-2 gap-6">
+      <% features.each_with_index do |feature, index| %>
+        <div class="group relative">
+          <%# Hover border effect %>
+          <div class="absolute -inset-px rounded-2xl bg-gradient-to-br from-primary/0 via-secondary/0 to-accent/0 group-hover:from-primary/30 group-hover:via-secondary/20 group-hover:to-accent/10 transition-all duration-500"></div>
+
+          <div class="relative bg-base-100 rounded-2xl p-8 lg:p-10 border border-base-content/10 h-full">
             <%# Feature header %>
-            <div class="flex items-start gap-4 mb-6">
-              <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
-                <%= render Ui::IconComponent.new(name: feature[:icon], size: :lg, css_class: "text-primary-content") %>
+            <div class="flex items-start gap-5 mb-8">
+              <%# Icon with number %>
+              <div class="relative">
+                <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <% if feature[:icon] == "folder" %>
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                    </svg>
+                  <% else %>
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                  <% end %>
+                </div>
+                <div class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-neutral border border-base-content/20 flex items-center justify-center">
+                  <span class="text-xs font-bold text-primary"><%= index + 1 %></span>
+                </div>
               </div>
-              <div>
+
+              <div class="flex-1">
                 <h3 class="text-xl font-bold text-base-content mb-2"><%= feature[:title] %></h3>
-                <p class="text-base-content/70 text-sm"><%= feature[:description] %></p>
+                <p class="text-base-content/60 text-sm leading-relaxed"><%= feature[:description] %></p>
               </div>
             </div>
 
@@ -26,10 +50,8 @@
             <ul class="space-y-3">
               <% feature[:capabilities].each do |capability| %>
                 <li class="flex items-start gap-3">
-                  <span class="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
-                    <%= render Ui::IconComponent.new(name: :check, size: :sm, css_class: "text-success") %>
-                  </span>
-                  <span class="text-sm text-base-content/80"><%= capability %></span>
+                  <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></span>
+                  <span class="text-sm text-base-content/70"><%= capability %></span>
                 </li>
               <% end %>
             </ul>
