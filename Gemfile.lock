@@ -357,8 +357,8 @@ GEM
     parser (3.3.10.0)
       ast (~> 2.4.1)
       racc
-    pay (6.8.1)
-      rails (>= 6.0.0)
+    pay (11.4.1)
+      rails (>= 7.0.0)
     pg (1.6.2)
     pg (1.6.2-aarch64-linux)
     pg (1.6.2-aarch64-linux-musl)
@@ -369,7 +369,7 @@ GEM
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
-    prism (1.6.0)
+    prism (1.7.0)
     propshaft (1.3.1)
       actionpack (>= 7.0.0)
       activesupport (>= 7.0.0)
@@ -444,7 +444,7 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.3.1)
-    rdoc (7.0.0)
+    rdoc (7.0.1)
       erb
       psych (>= 4.0.0)
       tsort
@@ -678,7 +678,7 @@ DEPENDENCIES
   kaminari (~> 1.2)
   letter_avatar
   octokit (~> 6.1)
-  pay (~> 6.8)
+  pay (~> 11.4)
   pg (~> 1.1)
   propshaft
   pry-byebug
