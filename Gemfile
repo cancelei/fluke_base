@@ -22,7 +22,7 @@ gem "jbuilder"
 gem "tailwindcss-rails", "~> 4.0"
 
 # ViewComponent for encapsulated, testable view components
-gem "view_component", "~> 3.20"
+gem "view_component", "~> 4.1"
 
 # Authentication
 gem "devise"
