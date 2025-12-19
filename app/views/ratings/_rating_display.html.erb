@@ -1,0 +1,87 @@
+<%# Rating display partial for Turbo Stream updates %>
+<%# locals: user, current_user, show_controls (optional) %>
+
+<%
+  rating_value = user.average_rating
+  review_count = user.rating_count
+  user_rating = current_user ? user.rating_from(current_user)&.value : nil
+  can_rate = current_user && current_user != user
+  show_controls = local_assigns.fetch(:show_controls, false)
+%>
+
+<div id="user_<%= user.id %>_rating"
+     class="star-rating-container relative inline-flex items-center gap-3"
+     data-controller="star-rating"
+     data-star-rating-rating-value="<%= rating_value %>"
+     data-star-rating-user-rating-value="<%= user_rating || 0 %>"
+     data-star-rating-max-rating-value="5"
+     data-star-rating-readonly-value="<%= !can_rate %>"
+     data-star-rating-animated-value="true"
+     data-star-rating-user-id-value="<%= user.id %>">
+
+  <%# Stars wrapper %>
+  <div class="flex items-center gap-0.5"
+       data-action="mouseenter->star-rating#mouseEnter mouseleave->star-rating#mouseLeave">
+    <% 5.times do |i| %>
+      <div class="star-wrapper relative cursor-<%= can_rate ? "pointer" : "default" %> transition-transform duration-200"
+           data-star-rating-target="star"
+           data-star-index="<%= i + 1 %>"
+           <% if can_rate %>
+             data-action="mouseenter->star-rating#starMouseEnter mouseleave->star-rating#starMouseLeave click->star-rating#selectRating"
+             data-turbo-command="Ratings::SubmitCommand#execute"
+             data-user-id="<%= user.id %>"
+             data-rating-value="<%= i + 1 %>"
+             data-previous-value="<%= user_rating || 0 %>"
+           <% end %>>
+        <%# Empty star (background) %>
+        <svg class="w-6 h-6 text-base-content/20" viewBox="0 0 24 24" fill="currentColor" data-star-empty="true">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+        <%# Filled star (overlay with clip-path) %>
+        <svg class="w-6 h-6 text-warning absolute inset-0 transition-all duration-300"
+             viewBox="0 0 24 24"
+             fill="currentColor"
+             style="clip-path: inset(0 0% 0 0);"
+             data-star-filled="true">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Rating value badge %>
+  <div class="flex items-center gap-1.5">
+    <span class="text-2xl font-bold text-warning" data-star-rating-target="value">
+      <%= rating_value > 0 ? rating_value : "-" %>
+    </span>
+    <span class="text-sm text-base-content/50">/5</span>
+  </div>
+
+  <%# Tooltip %>
+  <div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-neutral text-neutral-content px-3 py-2 rounded-lg shadow-lg opacity-0 invisible transition-all duration-200 whitespace-nowrap z-50"
+       data-star-rating-target="tooltip">
+    <div class="flex items-center gap-2 text-sm">
+      <span class="font-medium"><%= rating_value > 0 ? "#{rating_value} out of 5" : "No ratings yet" %></span>
+      <% if review_count > 0 %>
+        <span class="text-neutral-content/50">&bull;</span>
+        <span class="text-neutral-content/70"><%= pluralize(review_count, "review") %></span>
+      <% end %>
+    </div>
+    <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-neutral rotate-45"></div>
+  </div>
+
+  <%# User's own rating indicator %>
+  <% if user_rating %>
+    <div class="badge badge-sm badge-warning gap-1" data-star-rating-target="userRating">
+      Your rating: <%= user_rating %>
+    </div>
+  <% end %>
+
+  <%# Loading indicator (hidden by default) %>
+  <div class="hidden" data-star-rating-target="loading">
+    <span class="loading loading-spinner loading-xs text-warning"></span>
+  </div>
+
+  <%# Error state (hidden by default) %>
+  <div class="hidden text-error text-xs" data-star-rating-target="error"></div>
+</div>

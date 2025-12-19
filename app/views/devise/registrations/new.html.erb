@@ -11,13 +11,7 @@
     <div class="card bg-base-100 shadow-xl">
       <div class="card-body">
         <%= form_for(resource, as: resource_name, url: registration_path(resource_name),
-                     html: {
-                       class: "space-y-4",
-                       data: {
-                         controller: "form-submission",
-                         action: "submit->form-submission#submit turbo:load->form-submission#turboLoadEnd"
-                       }
-                     }) do |f| %>
+                     html: { class: "space-y-4", data: { turbo: false } }) do |f| %>
           <%= render "devise/shared/error_messages", resource: resource %>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -47,9 +41,9 @@
           </fieldset>
 
           <fieldset class="fieldset">
-            <%= f.label :github_token, "GitHub Personal Access Token", class: "fieldset-legend" %>
-            <%= f.text_field :github_token, autocomplete: "off", class: "input input-bordered w-full" %>
-            <p class="text-xs text-base-content/60 mt-1">Required for private repositories. <a href="https://github.com/settings/tokens/new?scopes=repo&description=FlukeBase" target="_blank" class="link link-primary">Generate token</a> (select 'repo' scope)</p>
+            <%= f.label :github_token, "GitHub Personal Access Token (optional)", class: "fieldset-legend" %>
+            <%= f.text_field :github_token, autocomplete: "off", class: "input input-bordered w-full", placeholder: "ghp_..." %>
+            <p class="text-xs text-base-content/60 mt-1">Optional. Only needed for private repositories. <a href="https://github.com/settings/tokens/new?scopes=repo&description=FlukeBase" target="_blank" class="link link-primary">Generate token</a> (select 'repo' scope)</p>
           </fieldset>
 
           <fieldset class="fieldset">
@@ -70,9 +64,7 @@
           </div>
 
           <div class="mt-6">
-            <%= f.submit "Sign up",
-                         data: { "form-submission-target": "submit" },
-                         class: "btn btn-primary w-full" %>
+            <%= f.submit "Sign up", class: "btn btn-primary w-full" %>
           </div>
         <% end %>
 

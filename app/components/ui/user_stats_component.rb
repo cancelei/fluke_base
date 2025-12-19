@@ -22,12 +22,14 @@ module Ui
       rating: "text-warning"
     }.freeze
 
-    def initialize(user:, variant: :horizontal, show_icons: true, show_rating: false, presenter: nil)
+    def initialize(user:, variant: :horizontal, show_icons: true, show_rating: false, presenter: nil, current_user: nil, interactive_rating: false)
       @user = user
       @variant = variant.to_sym
       @show_icons = show_icons
       @show_rating = show_rating
       @presenter = presenter
+      @current_user = current_user
+      @interactive_rating = interactive_rating
     end
 
     def call
@@ -146,27 +148,163 @@ module Ui
         safe_join([
           render_stat_figure(:rating),
           tag.div("Community Rating", class: "stat-title"),
-          tag.div(class: "stat-value flex items-center gap-2") do
-            render_rating_stars
+          tag.div(class: "stat-value") do
+            render_star_rating_display
           end,
-          tag.div("4.0 out of 5.0", class: "stat-desc")
+          render_rating_breakdown
         ])
       end
     end
 
-    def render_rating_stars
-      tag.div(class: "rating rating-md rating-half") do
+    def render_star_rating_display
+      # Use interactive partial if enabled and current_user is available
+      if @interactive_rating && @current_user
+        render("ratings/rating_display", user: @user, current_user: @current_user, show_controls: true)
+      else
+        render_readonly_star_display
+      end
+    end
+
+    def render_readonly_star_display
+      rating_value = user_rating
+      review_count = user_review_count
+
+      tag.div(
+        id: "user_#{@user.id}_rating",
+        class: "star-rating-container relative inline-flex items-center gap-3",
+        data: {
+          controller: "star-rating",
+          star_rating_rating_value: rating_value,
+          star_rating_max_rating_value: 5,
+          star_rating_readonly_value: true,
+          star_rating_animated_value: true
+        }
+      ) do
         safe_join([
-          tag.input(type: "radio", name: "rating-display", class: "rating-hidden"),
-          *8.times.map { |i| rating_star_input(i) }
+          render_stars_wrapper,
+          render_rating_value_badge(rating_value),
+          render_rating_tooltip(rating_value, review_count)
         ])
       end
     end
 
-    def rating_star_input(index)
-      half = index.even? ? "mask-half-1" : "mask-half-2"
-      checked = index == 7 ? { checked: true } : {}
-      tag.input(type: "radio", name: "rating-display", class: "mask mask-star-2 #{half} bg-warning", **checked)
+    def render_stars_wrapper
+      tag.div(
+        class: "flex items-center gap-0.5",
+        data: { action: "mouseenter->star-rating#mouseEnter mouseleave->star-rating#mouseLeave" }
+      ) do
+        safe_join(5.times.map { |i| render_single_star(i + 1) })
+      end
+    end
+
+    def render_single_star(position)
+      tag.div(
+        class: "star-wrapper relative cursor-default transition-transform duration-200",
+        data: {
+          star_rating_target: "star",
+          star_index: position,
+          action: "mouseenter->star-rating#starMouseEnter mouseleave->star-rating#starMouseLeave"
+        }
+      ) do
+        safe_join([
+          render_empty_star,
+          render_filled_star
+        ])
+      end
+    end
+
+    def render_empty_star
+      tag.svg(
+        class: "w-6 h-6 text-base-content/20",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        data: { star_empty: true }
+      ) do
+        tag.path(d: star_svg_path)
+      end
+    end
+
+    def render_filled_star
+      tag.svg(
+        class: "w-6 h-6 text-warning absolute inset-0 transition-all duration-300",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        style: "clip-path: inset(0 0% 0 0);",
+        data: { star_filled: true }
+      ) do
+        tag.path(d: star_svg_path)
+      end
+    end
+
+    def star_svg_path
+      "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+    end
+
+    def render_rating_value_badge(rating_value)
+      display_value = rating_value.positive? ? rating_value.to_s : "-"
+
+      tag.div(class: "flex items-center gap-1.5") do
+        safe_join([
+          tag.span(
+            display_value,
+            class: "text-2xl font-bold text-warning",
+            data: { star_rating_target: "value" }
+          ),
+          tag.span("/5", class: "text-sm text-base-content/50")
+        ])
+      end
+    end
+
+    def render_rating_tooltip(rating_value, review_count)
+      tooltip_text = if review_count.positive?
+                       "#{rating_value} out of 5"
+      else
+                       "No ratings yet"
+      end
+
+      tag.div(
+        class: "absolute -top-12 left-1/2 -translate-x-1/2 bg-neutral text-neutral-content " \
+               "px-3 py-2 rounded-lg shadow-lg opacity-0 invisible transition-all duration-200 " \
+               "whitespace-nowrap z-50",
+        data: { star_rating_target: "tooltip" }
+      ) do
+        safe_join([
+          tag.div(class: "flex items-center gap-2 text-sm") do
+            if review_count.positive?
+              safe_join([
+                tag.span(tooltip_text, class: "font-medium"),
+                tag.span("\u2022", class: "text-neutral-content/50"),
+                tag.span(helpers.pluralize(review_count, "review"), class: "text-neutral-content/70")
+              ])
+            else
+              tag.span(tooltip_text, class: "font-medium")
+            end
+          end,
+          tag.div(class: "absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-neutral rotate-45")
+        ])
+      end
+    end
+
+    def render_rating_breakdown
+      review_count = user_review_count
+
+      tag.div(class: "stat-desc flex items-center gap-2 mt-1") do
+        if review_count.positive?
+          safe_join([
+            tag.span(helpers.pluralize(review_count, "review"), class: "text-base-content/60")
+          ])
+        else
+          tag.span("Be the first to rate!", class: "text-base-content/60 italic")
+        end
+      end
+    end
+
+    def user_rating
+      @user.average_rating
+    end
+
+    def user_review_count
+      @user.rating_count
     end
 
     def stat_value_size

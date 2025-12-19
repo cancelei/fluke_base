@@ -57,9 +57,17 @@ class GithubCommitRefreshJob < ApplicationJob
     service = GithubService.new(@project, access_token, branch: branch)
     result = service.fetch_commits
 
-    # Service now returns a hash with :commits (new commits to store) and :all_shas (all commits in branch)
-    commits_data = result[:commits] || []
-    all_commit_shas = result[:all_shas] || []
+    # Handle Dry::Monads Result - check for failure first
+    if result.failure?
+      error_info = result.failure
+      Rails.logger.error "[Job:#{job_id_short}] Failed to fetch commits: #{error_info[:message]}"
+      return 0
+    end
+
+    # Unwrap the Success monad to get the hash with :commits and :all_shas
+    data = result.value!
+    commits_data = data[:commits] || []
+    all_commit_shas = data[:all_shas] || []
 
     if all_commit_shas.blank?
       Rails.logger.info "No commits found in branch #{branch}"

@@ -71,6 +71,81 @@ These endpoints work without authentication and confirm all Turbo implementation
 - Controller responses include proper frame awareness
 - JavaScript moved to Stimulus controllers
 
+## Devise Authentication (No Turbo)
+
+**Important**: All Devise views use `data: { turbo: false }` to disable Turbo Drive.
+
+### Rationale
+- Authentication flows (sign up, sign in, password reset) use traditional full-page requests
+- Simplifies error handling and redirects for authentication
+- Avoids complexity with Turbo Stream responses for auth failures
+- Cloudflare Turnstile widget works reliably with standard form submissions
+
+### Affected Views
+All forms in `app/views/devise/` have `data: { turbo: false }`:
+- `registrations/new.html.erb` - Sign up
+- `registrations/edit.html.erb` - Edit account
+- `sessions/_form.html.erb` - Sign in
+- `passwords/new.html.erb` - Forgot password
+- `passwords/edit.html.erb` - Reset password
+- `confirmations/new.html.erb` - Resend confirmation
+- `unlocks/new.html.erb` - Unlock account
+
+### Custom Devise Controllers
+Located in `app/controllers/users/`:
+- `registrations_controller.rb` - Handles sign up with Turnstile validation
+- `sessions_controller.rb` - Handles sign in with Turnstile validation
+- `passwords_controller.rb` - Handles password reset
+
+All controllers include `skip_before_action :authenticate_user!` for public actions.
+
+## Unified Notification System
+
+The application uses a DRY notification system with two types of feedback:
+- **Toasts**: Floating notifications that auto-dismiss (for Turbo Stream responses)
+- **Flash Messages**: Inline alerts within page content (for non-Turbo pages)
+
+### ViewComponents
+Both types use centralized ViewComponents with shared configuration:
+- `Ui::ToastComponent` - Floating toast notifications with auto-dismiss
+- `Ui::FlashMessageComponent` - Inline alert banners
+- `Ui::SharedConstants` - Shared type mappings, colors, and position classes
+
+### Partials (DRY Usage)
+```erb
+<%# Toast notification (typically via Turbo Stream) %>
+<%= render "shared/toast_notification", type: :success, message: "Saved!" %>
+
+<%# Inline flash message %>
+<%= render "shared/flash_message", type: :notice, message: "Welcome!" %>
+
+<%# Turbo Stream toast (for turbo_stream.append) %>
+<%= render "shared/toast_turbo_stream", type: :error, message: "Failed" %>
+```
+
+### Controller Helpers
+```ruby
+# In ApplicationController - stream toast notifications
+stream_toast_success("Operation completed!")
+stream_toast_error("Something went wrong")
+stream_toast_info("FYI...")
+stream_toast_warning("Be careful!")
+```
+
+### Z-Index Layering
+Toasts use `z-[10000]` to appear above all UI elements:
+- Drawer/Sidebar: `z-[9999]`
+- Toast notifications: `z-[10000]`
+- Configured in `Ui::SharedConstants::TOAST_POSITIONS` and `application.css`
+
+### Toast Options
+- `type`: `:success`, `:error`, `:warning`, `:info`, `:notice`, `:alert`
+- `message`: Notification text (required)
+- `title`: Optional title
+- `timeout`: Auto-dismiss time in ms (default: 5000)
+- `close_button`: Show close button (default: true)
+- `position`: Toast position (default: "toast-top-right")
+
 ## User System Architecture
 
 ### Philosophy

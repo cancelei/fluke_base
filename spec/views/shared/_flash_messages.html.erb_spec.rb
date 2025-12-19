@@ -145,8 +145,8 @@ RSpec.describe "shared/_flash_messages", type: :view do
     end
 
     it "renders icons for visual distinction" do
-      expect(view).to render_template(partial: "shared/icons/_notice")
-      expect(view).to render_template(partial: "shared/icons/_alert")
+      # Icons are rendered inline via Ui::FlashMessageComponent
+      expect(rendered).to have_css("svg")
     end
   end
 

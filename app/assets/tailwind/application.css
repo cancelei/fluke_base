@@ -400,6 +400,31 @@ html {
   border: 0;
 }
 
+/* ================================
+   Toast Notification System
+   ================================ */
+
+/* Toast z-index ensures toasts appear above all other elements */
+.toast {
+  z-index: 10000 !important;
+}
+
+/* Toast container for Turbo Stream appended toasts */
+#toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+#toast-container > * {
+  pointer-events: auto;
+}
+
 /* Toast animations */
 @keyframes fadeInUp {
   from {
@@ -429,6 +454,22 @@ html {
 
 .animate-fade-out-down {
   animation: fadeOutDown 0.3s ease-in forwards;
+}
+
+/* Toast slide-in from right animation */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast .alert {
+  animation: slideInRight 0.3s ease-out forwards;
 }
 
 /* DaisyUI Drawer fix for proper mobile navigation */
@@ -643,4 +684,164 @@ turbo-frame[complete] [data-skeleton-loader-target="skeleton"] {
 
 turbo-frame[complete] [data-skeleton-loader-target="content"] {
   display: block;
+}
+
+/* ================================
+   Star Rating Component Animations
+   ================================ */
+
+/* Star wrapper styling */
+.star-wrapper {
+  display: inline-flex;
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.star-wrapper:hover {
+  transform: scale(1.1);
+}
+
+/* Star glow effect on hover */
+.star-rating-container:hover .star-wrapper svg {
+  filter: drop-shadow(0 0 4px var(--color-aurora-yellow));
+}
+
+/* Filled star pulsing animation */
+@keyframes star-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 6px var(--color-aurora-yellow));
+  }
+}
+
+.star-filled svg[data-star-filled] {
+  animation: star-pulse 2s ease-in-out infinite;
+  animation-delay: calc(var(--star-index, 0) * 0.1s);
+}
+
+/* Star rating shimmer effect */
+@keyframes star-shimmer {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+.star-rating-container .star-wrapper:nth-child(1) { --star-index: 0; }
+.star-rating-container .star-wrapper:nth-child(2) { --star-index: 1; }
+.star-rating-container .star-wrapper:nth-child(3) { --star-index: 2; }
+.star-rating-container .star-wrapper:nth-child(4) { --star-index: 3; }
+.star-rating-container .star-wrapper:nth-child(5) { --star-index: 4; }
+
+/* Rating value badge animation */
+.star-rating-container [data-star-rating-target="value"] {
+  animation: star-shimmer 3s ease-in-out infinite;
+}
+
+/* Star fill transition */
+.star-wrapper svg[data-star-filled] {
+  transition: clip-path 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.2s ease;
+}
+
+/* Tooltip arrow animation */
+.star-rating-container [data-star-rating-target="tooltip"] {
+  transform-origin: center bottom;
+}
+
+.star-rating-container:hover [data-star-rating-target="tooltip"] {
+  animation: tooltip-bounce 0.3s ease-out;
+}
+
+@keyframes tooltip-bounce {
+  0% {
+    transform: translateX(-50%) translateY(5px) scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(-50%) translateY(-2px) scale(1.02);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Trend indicator animation */
+@keyframes trend-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.star-rating-container .text-success {
+  animation: trend-bounce 2s ease-in-out infinite;
+}
+
+/* Interactive star effects for non-readonly mode */
+.star-wrapper.star-interactive:hover {
+  cursor: pointer;
+  transform: scale(1.2);
+}
+
+.star-wrapper.star-interactive:active {
+  transform: scale(0.95);
+}
+
+/* Star selection ripple effect */
+@keyframes star-select-ripple {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(235, 203, 139, 0.7);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(235, 203, 139, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(235, 203, 139, 0);
+  }
+}
+
+.star-wrapper.star-selected {
+  animation: star-select-ripple 0.5s ease-out;
+}
+
+/* Revert animation when rating submission fails */
+@keyframes star-revert-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.star-wrapper.star-revert {
+  animation: star-revert-shake 0.3s ease-in-out;
+}
+
+/* Disabled state for circuit breaker */
+.star-rating-container[data-star-rating-readonly-value="true"] .star-wrapper {
+  cursor: default;
+}
+
+.star-rating-container.opacity-75 .star-wrapper {
+  filter: grayscale(50%);
 }

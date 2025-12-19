@@ -9,7 +9,8 @@
   <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
     <div class="card bg-base-100 shadow-xl">
       <div class="card-body">
-        <%= form_for(resource, as: resource_name, url: unlock_path(resource_name), html: { method: :post, class: "space-y-4" }) do |f| %>
+        <%= form_for(resource, as: resource_name, url: unlock_path(resource_name),
+                     html: { method: :post, class: "space-y-4", data: { turbo: false } }) do |f| %>
           <%= render "devise/shared/error_messages", resource: resource %>
 
           <fieldset class="fieldset">

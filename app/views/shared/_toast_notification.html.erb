@@ -1,49 +1,30 @@
-<%# Reusable toast notification partial
-     Usage: render "shared/toast_notification", type: :success, message: "Success!", title: "Great!"
-     Types: :success, :error, :info, :warning, :notice, :alert
+<%# Unified toast notification partial
+     Renders a toast using the ToastComponent
+
+     Usage: render "shared/toast_notification", type: :success, message: "Done!"
+     Types: :success, :error, :warning, :info, :notice, :alert
      Options:
      - type: notification type (required)
      - message: notification message (required)
      - title: optional title
      - timeout: dismiss timeout in ms (default: 5000)
      - close_button: show close button (default: true)
-     - progress_bar: show progress bar (default: true)
      - position: toast position (default: "toast-top-right") %>
-
 <%
   type = local_assigns[:type] || :info
   message = local_assigns[:message]
-  title = local_assigns[:title] || ""
+  title = local_assigns[:title]
   timeout = local_assigns[:timeout] || 5000
   close_button = local_assigns.fetch(:close_button, true)
-  progress_bar = local_assigns.fetch(:progress_bar, true)
   position = local_assigns[:position] || "toast-top-right"
-  actions = local_assigns[:actions] || []
-  custom_class = local_assigns[:custom_class]
-  max_toasts = local_assigns.fetch(:max_toasts, 5)
-  queue = local_assigns.fetch(:queue, true)
-  announce_to_screen_reader = local_assigns.fetch(:announce_to_screen_reader, true)
 %>
-
 <% if message.present? %>
-  <div data-controller="toast"
-       data-toast-type-value="<%= type %>"
-       data-toast-message-value="<%= html_escape(message) %>"
-       data-toast-title-value="<%= html_escape(title) %>"
-       data-toast-timeout-value="<%= timeout %>"
-       data-toast-close-button-value="<%= close_button %>"
-       data-toast-progress-bar-value="<%= progress_bar %>"
-       data-toast-position-class-value="<%= position %>"
-       data-toast-max-toasts-value="<%= max_toasts %>"
-       data-toast-queue-value="<%= queue %>"
-       data-toast-announce-to-screen-reader-value="<%= announce_to_screen_reader %>"
-       data-toast-actions-value="<%= actions.to_json if actions.any? %>"
-       data-toast-custom-class-value="<%= custom_class if custom_class.present? %>"
-       role="alert"
-       aria-live="polite"
-       aria-atomic="true"
-       tabindex="-1"
-       class="toast-notification <%= custom_class if custom_class.present? %>"
-       data-toast-id="<%= SecureRandom.hex(8) %>">
-  </div>
+  <%= render(Ui::ToastComponent.new(
+    type: type,
+    message: message,
+    title: title,
+    timeout: timeout,
+    close_button: close_button,
+    position: position
+  )) %>
 <% end %>

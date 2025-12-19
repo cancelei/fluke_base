@@ -1,11 +1,6 @@
-<% icon_partial = (type.to_s == "notice" ? "notice" : (type.to_s == "alert" ? "alert" : "alert")) %>
-<% safe_message = if message.to_s.include?("<a ")
-  sanitize(message.to_s, tags: %w[a], attributes: %w[href title target rel class])
-   else
-  h(message.to_s)
-   end %>
+<%# Unified flash message component
+     Renders an inline alert using the FlashMessageComponent
 
-<div class="alert <%= type == :notice ? "alert-success" : "alert-error" %> mb-6">
-  <%= render "shared/icons/#{icon_partial}" %>
-  <span><%= safe_message %></span>
-</div>
+     Usage: render "shared/flash_message", type: :notice, message: "Success!"
+     Types: :notice, :alert, :success, :error, :warning, :info %>
+<%= render(Ui::FlashMessageComponent.new(type: type, message: message)) %>

@@ -12,8 +12,8 @@ class ProjectCardComponent < ApplicationComponent
   end
 
   def call
-    tag.li(class: "group") do
-      tag.div(class: card_classes, onclick: card_onclick, data: { turbo_frame: "_top" }) do
+    tag.li(class: "group", data: { controller: "project-card", project_card_url_value: helpers.project_path(@project) }) do
+      tag.div(class: card_classes, data: { action: "click->project-card#navigate", turbo_frame: "_top" }) do
         safe_join([
           render_header,
           render_description,
@@ -21,10 +21,6 @@ class ProjectCardComponent < ApplicationComponent
         ])
       end
     end
-  end
-
-  def card_onclick
-    "if(event.target.tagName !== 'A' && !event.target.closest('a')) { Turbo.visit('#{helpers.project_path(@project)}'); }"
   end
 
   private

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_18_042119) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_18_140154) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -311,6 +311,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_18_042119) do
     t.check_constraint "stage::text = ANY (ARRAY['idea'::character varying::text, 'prototype'::character varying::text, 'launched'::character varying::text, 'scaling'::character varying::text])", name: "projects_stage_check"
   end
 
+  create_table "ratings", force: :cascade do |t|
+    t.bigint "rater_id", null: false
+    t.string "rateable_type", null: false
+    t.bigint "rateable_id", null: false
+    t.integer "value", null: false
+    t.text "review"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["rateable_type", "rateable_id"], name: "index_ratings_on_rateable"
+    t.index ["rater_id", "rateable_type", "rateable_id"], name: "index_ratings_uniqueness", unique: true
+    t.index ["rater_id"], name: "index_ratings_on_rater_id"
+    t.check_constraint "value >= 1 AND value <= 5", name: "ratings_value_range"
+  end
+
   create_table "solid_cable_messages", force: :cascade do |t|
     t.binary "channel", null: false
     t.binary "payload", null: false
@@ -556,6 +570,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_18_042119) do
   add_foreign_key "project_memberships", "users"
   add_foreign_key "project_memberships", "users", column: "invited_by_id"
   add_foreign_key "projects", "users"
+  add_foreign_key "ratings", "users", column: "rater_id"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_processes", column: "process_id", on_delete: :cascade

@@ -24,13 +24,14 @@ module Ui
     }.freeze
 
     # DaisyUI toast position classes
+    # z-[10000] ensures toasts appear above modals (z-50), drawers (z-[9999]), and other overlays
     TOAST_POSITIONS = {
-      "toast-top-right" => "toast toast-top toast-end",
-      "toast-top-left" => "toast toast-top toast-start",
-      "toast-top-center" => "toast toast-top toast-center",
-      "toast-bottom-right" => "toast toast-bottom toast-end",
-      "toast-bottom-left" => "toast toast-bottom toast-start",
-      "toast-bottom-center" => "toast toast-bottom toast-center"
+      "toast-top-right" => "toast toast-top toast-end z-[10000]",
+      "toast-top-left" => "toast toast-top toast-start z-[10000]",
+      "toast-top-center" => "toast toast-top toast-center z-[10000]",
+      "toast-bottom-right" => "toast toast-bottom toast-end z-[10000]",
+      "toast-bottom-left" => "toast toast-bottom toast-start z-[10000]",
+      "toast-bottom-center" => "toast toast-bottom toast-center z-[10000]"
     }.freeze
 
     # KPI/Status badge class mapping for performance indicators

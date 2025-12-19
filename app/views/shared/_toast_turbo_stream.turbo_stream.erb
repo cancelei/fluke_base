@@ -1,29 +1,35 @@
-<%# Turbo Stream template for adding toast notifications
+<%# Turbo Stream template for toast notifications
      Usage in controllers:
 
      respond_to do |format|
        format.turbo_stream {
-         render turbo_stream: turbo_stream.after("toast-container",
+         render turbo_stream: turbo_stream.append("toast-container",
            render("shared/toast_turbo_stream", type: :success, message: "Success!")
          )
        }
-     end %>
+     end
+
+     Or use the toast helper methods in ApplicationController:
+     - stream_toast_success("Message")
+     - stream_toast_error("Message")
+     - stream_toast_info("Message")
+     - stream_toast_warning("Message")
+%>
 <%
   type = local_assigns[:type] || :info
   message = local_assigns[:message]
-  title = local_assigns[:title] || ""
+  title = local_assigns[:title]
   timeout = local_assigns[:timeout] || 5000
   close_button = local_assigns.fetch(:close_button, true)
-  progress_bar = local_assigns.fetch(:progress_bar, true)
   position = local_assigns[:position] || "toast-top-right"
 %>
 <% if message.present? %>
-  <%= render "shared/toast_notification",
-             type: type,
-             message: message,
-             title: title,
-             timeout: timeout,
-             close_button: close_button,
-             progress_bar: progress_bar,
-             position: position %>
+  <%= render(Ui::ToastComponent.new(
+    type: type,
+    message: message,
+    title: title,
+    timeout: timeout,
+    close_button: close_button,
+    position: position
+  )) %>
 <% end %>

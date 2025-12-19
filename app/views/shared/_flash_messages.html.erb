@@ -1,7 +1,9 @@
+<%# Flash messages container - renders inline alerts for non-Turbo pages
+     For toast notifications, use flash_to_toasts helper in layout %>
 <% if notice.present? %>
-  <%= render "shared/flash_message", type: :notice, message: h(notice) %>
+  <%= render "shared/flash_message", type: :notice, message: notice %>
 <% end %>
 
 <% if alert.present? %>
-  <%= render "shared/flash_message", type: :alert, message: h(alert) %>
+  <%= render "shared/flash_message", type: :alert, message: alert %>
 <% end %>

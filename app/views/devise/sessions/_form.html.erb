@@ -1,12 +1,5 @@
 <%= form_for(resource, as: resource_name, url: session_path(resource_name),
-             html: {
-               id: "new_user",
-               class: "space-y-6",
-               data: {
-                 controller: "form-submission",
-                 action: "submit->form-submission#submit turbo:load->form-submission#turboLoadEnd"
-               }
-             }) do |f| %>
+             html: { id: "new_user", class: "space-y-6", data: { turbo: false } }) do |f| %>
   <fieldset class="fieldset">
     <%= f.label :email, class: "fieldset-legend" %>
     <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input input-bordered w-full" %>
@@ -31,9 +24,7 @@
   </div>
 
   <div>
-    <%= f.submit "Sign in",
-                 data: { "form-submission-target": "submit" },
-                 class: "btn btn-primary w-full" %>
+    <%= f.submit "Sign in", class: "btn btn-primary w-full" %>
   </div>
 <% end %>
 

@@ -49,6 +49,10 @@ class User < ApplicationRecord
   # Avatar
   has_one_attached :avatar
 
+  # Ratings - as rateable (receiving ratings) and rater (giving ratings)
+  has_many :received_ratings, class_name: "Rating", as: :rateable, dependent: :destroy
+  has_many :given_ratings, class_name: "Rating", foreign_key: :rater_id, dependent: :destroy, inverse_of: :rater
+
   # Class methods
   def self.find_by_github_identifier(identifier)
     return nil if identifier.blank?
@@ -113,5 +117,39 @@ class User < ApplicationRecord
 
   def admin_projects
     project_memberships.admins.includes(:project).map(&:project)
+  end
+
+  # Rating helper methods
+  def average_rating
+    received_ratings.average_rating
+  end
+
+  def rating_count
+    received_ratings.count
+  end
+
+  def rating_breakdown
+    received_ratings.rating_breakdown
+  end
+
+  def rating_from(user)
+    received_ratings.find_by(rater: user)
+  end
+
+  def rated_by?(user)
+    received_ratings.exists?(rater: user)
+  end
+
+  def rate!(rater:, value:, review: nil)
+    rating = received_ratings.find_or_initialize_by(rater: rater)
+    rating.update!(value: value, review: review)
+    rating
+  end
+
+  def update_rating_cache!
+    # Optional: If you want to cache the average rating on the user record
+    # This would require adding cached_average_rating column
+    # update_column(:cached_average_rating, average_rating)
+    true
   end
 end

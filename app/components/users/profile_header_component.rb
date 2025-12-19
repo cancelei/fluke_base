@@ -156,7 +156,9 @@ module Users
           user: @person,
           variant: :horizontal,
           show_rating: true,
-          presenter: presenter
+          presenter: presenter,
+          current_user: @current_user,
+          interactive_rating: !viewing_own_profile?
         ))
       end
     end

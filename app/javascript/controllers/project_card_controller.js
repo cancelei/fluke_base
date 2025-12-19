@@ -4,10 +4,31 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
   static targets = ['card', 'loadingIndicator'];
   static classes = ['loading'];
+  static values = {
+    url: String
+  };
 
   connect() {
     this.setupHoverEffects();
     this.setupKeyboardNavigation();
+  }
+
+  // Navigate to project page when card is clicked
+  // Ignores clicks on links or buttons
+  navigate(event) {
+    // Skip if clicking on a link, button, or their children
+    if (
+      event.target.tagName === 'A' ||
+      event.target.tagName === 'BUTTON' ||
+      event.target.closest('a') ||
+      event.target.closest('button')
+    ) {
+      return;
+    }
+
+    if (this.hasUrlValue && window.Turbo) {
+      window.Turbo.visit(this.urlValue);
+    }
   }
 
   // Enhanced hover effects with subtle animations
@@ -29,9 +50,7 @@ export default class extends Controller {
 
   // Keyboard navigation support
   setupKeyboardNavigation() {
-    const primaryLink = this.element.querySelector('[aria-label*="View"]');
-
-    if (!primaryLink) {
+    if (!this.hasUrlValue) {
       return;
     }
 
@@ -40,23 +59,16 @@ export default class extends Controller {
 
     if (card) {
       card.setAttribute('tabindex', '0');
-      card.setAttribute('role', 'button');
-      card.setAttribute('aria-label', primaryLink.getAttribute('aria-label'));
+      card.setAttribute('role', 'link');
+      card.setAttribute('aria-label', 'View project');
 
       card.addEventListener('keydown', event => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          primaryLink.click();
+          Turbo.visit(this.urlValue);
         }
       });
     }
-  }
-
-  // Add loading state when navigating
-  navigate(event) {
-    const target = event.currentTarget;
-
-    this.showLoadingState(target);
   }
 
   // Enhanced loading state with visual feedback
