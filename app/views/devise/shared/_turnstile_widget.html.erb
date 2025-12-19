@@ -86,6 +86,30 @@
           submitButton.classList.add('opacity-50', 'cursor-not-allowed');
         }
       }
+
+      // Fallback: If Turnstile doesn't initialize within 5 seconds, enable the button anyway
+      // This prevents users from being locked out if Turnstile fails to load
+      setTimeout(function() {
+        const responseInput = document.getElementById('cf-turnstile-response');
+        const turnstileContainer = document.querySelector('.cf-turnstile');
+        // Only enable if Turnstile hasn't already succeeded
+        if (!responseInput || !responseInput.value) {
+          const fallbackForm = findTurnstileForm();
+          if (fallbackForm) {
+            const btn = fallbackForm.querySelector('input[type="submit"]');
+            if (btn && btn.disabled) {
+              console.warn('Turnstile failed to initialize. Enabling form submission as fallback.');
+              btn.disabled = false;
+              btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+              // Show a message to the user
+              if (turnstileContainer) {
+                turnstileContainer.innerHTML = '<div class="text-sm text-warning bg-warning/10 p-3 rounded-md">Security check unavailable. You can still submit the form.</div>';
+              }
+            }
+          }
+        }
+      }, 5000);
     });
   </script>
 <% elsif Rails.env.development? %>

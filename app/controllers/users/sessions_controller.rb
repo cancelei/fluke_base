@@ -2,9 +2,28 @@
 
 class Users::SessionsController < Devise::SessionsController
   skip_before_action :authenticate_user!, only: [ :new, :create ]
-  before_action :validate_cloudflare_turnstile, only: [ :create ], if: -> { Rails.env.production? && RailsCloudflareTurnstile.configuration.enabled }
+  before_action :validate_cloudflare_turnstile, only: [ :create ], if: -> { should_validate_turnstile? }
 
   private
+
+  # Only validate Turnstile if:
+  # 1. We're in production
+  # 2. Turnstile is enabled in the gem config
+  # 3. A Turnstile response token was actually submitted (meaning the widget loaded)
+  def should_validate_turnstile?
+    return false unless Rails.env.production?
+    return false unless RailsCloudflareTurnstile.configuration.enabled
+
+    # If no token was submitted, Turnstile likely failed to load on the client
+    # Allow form submission in this case (graceful degradation)
+    turnstile_response = params["cf-turnstile-response"]
+    if turnstile_response.blank?
+      Rails.logger.warn "Turnstile token missing - widget may have failed to load for user"
+      return false
+    end
+
+    true
+  end
 
   # Handle Turnstile validation failure
   def handle_turnstile_failure
