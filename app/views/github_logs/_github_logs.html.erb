@@ -7,7 +7,7 @@
 
       <% if @available_branches&.any? %>
         <%= turbo_frame_tag "github_filters" do %>
-          <%= render "github_logs/filters_section", 
+          <%= render "github_logs/filters_section",
               available_branches: @available_branches,
               available_users: @available_users,
               project: @project,
@@ -48,14 +48,16 @@
   </div>
 
   <!-- GitHub Statistics Section -->
-  <div id="github_stats">
-    <%= render "github_logs/stats_section",
-        total_commits: @total_commits,
-        total_additions: @total_additions,
-        total_deletions: @total_deletions,
-        last_updated: @last_updated,
-        project: @project %>
-  </div>
+  <%= turbo_frame_tag "github_stats" do %>
+    <div id="github_stats">
+      <%= render "github_logs/stats_section",
+          total_commits: @total_commits,
+          total_additions: @total_additions,
+          total_deletions: @total_deletions,
+          last_updated: @last_updated,
+          project: @project %>
+    </div>
+  <% end %>
 
   <!-- Contributions Summary -->
   <div class="card bg-base-100 shadow-xl mb-8 overflow-hidden">
@@ -76,10 +78,12 @@
     </div>
 
     <div id="contributions_summary">
-      <%= render "github_logs/contributions_section",
-          contributions: @contributions,
-          last_updated: @last_updated,
-          project: @project %>
+      <%= turbo_frame_tag "github_contributions" do %>
+        <%= render "github_logs/contributions_section",
+            contributions: @contributions,
+            last_updated: @last_updated,
+            project: @project %>
+      <% end %>
     </div>
   </div>
 

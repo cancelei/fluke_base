@@ -16,11 +16,11 @@
             </svg>
           </summary>
           <div class="dropdown-content absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-base-100 py-1 shadow-lg ring-1 ring-base-content ring-opacity-5">
-            <%= link_to "All Branches", Rails.application.routes.url_helpers.project_github_logs_path(project, branch: nil, user_name: user_name,
-              agreement_only: agreement_only), class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200" %>
+            <%= link_to "All Branches", Rails.application.routes.url_helpers.project_github_logs_path(project, branch: nil, user_name:,
+              agreement_only:), class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200" %>
               <% available_branches.each do |id, branch| %>
                 <%= link_to (branch.presence || "main"), Rails.application.routes.url_helpers.project_github_logs_path(project, branch: id,
-                  user_name: user_name, agreement_only: agreement_only),
+                  user_name:, agreement_only:),
                   class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200" %>
                   <% end %>
           </div>
@@ -29,8 +29,8 @@
     </div>
 
     <div class="flex items-center mb-2 lg:mb-0">
-      <a href="<%= Rails.application.routes.url_helpers.project_github_logs_path(project, branch: selected_branch, user_name: user_name, agreement_only: agreement_only ? nil : true) %>"
-        class="flex items-center">
+      <a href="<%= Rails.application.routes.url_helpers.project_github_logs_path(project, branch: selected_branch, user_name:, agreement_only: agreement_only ? nil : true) %>"
+        class="flex items-center" data-turbo-frame="_top">
         <div class="flex items-center justify-center w-full">
 
           <label for="toggleB" class="flex items-center cursor-pointer">
@@ -69,12 +69,14 @@
           </summary>
           <div class="dropdown-content absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-base-100 py-1 shadow-lg ring-1 ring-base-content ring-opacity-5">
             <%= link_to "All Users", Rails.application.routes.url_helpers.project_github_logs_path(project, branch: selected_branch, user_name: nil,
-              agreement_only: agreement_only),
-              class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200 truncate" %>
+              agreement_only:),
+              class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200 truncate",
+              data: { turbo_frame: "_top" } %>
               <% available_users.each do |name| %>
                 <%= link_to name, Rails.application.routes.url_helpers.project_github_logs_path(project, branch: selected_branch, user_name: name,
-                  agreement_only: agreement_only),
-                  class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200 truncate" %>
+                  agreement_only:),
+                  class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200 truncate",
+                  data: { turbo_frame: "_top" } %>
                   <% end %>
           </div>
         </details>
@@ -84,7 +86,8 @@
     <div class="flex items-end mb-2 lg:mb-0">
       <% if selected_branch || agreement_only || user_name %>
         <%= link_to "Clear Filters", Rails.application.routes.url_helpers.project_github_logs_path(project),
-          class: "ml-2 btn btn-outline btn-sm" %>
+          class: "ml-2 btn btn-outline btn-sm",
+          data: { turbo_frame: "_top" } %>
           <% end %>
     </div>
   </div>
