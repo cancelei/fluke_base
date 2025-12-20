@@ -31,6 +31,7 @@ module Github
       broadcast_stats
       broadcast_contributions
       broadcast_commits
+      broadcast_filters
     end
 
     # Broadcast stats section update
@@ -71,6 +72,23 @@ module Github
       })
     end
 
+    # Broadcast filters section update (branches and users dropdowns)
+    def broadcast_filters
+      # Get available branches and users using the same logic as the controller
+      logs_query = Github::LogsQuery.new(project:, params: {})
+      available_branches = logs_query.available_branches
+      available_users = logs_query.available_users
+
+      broadcast_update("github_filters", "github_logs/filters_section", {
+        available_branches:,
+        available_users:,
+        project:,
+        selected_branch: nil,
+        agreement_only: false,
+        user_name: nil
+      })
+    end
+
     # Broadcast loading state
     def broadcast_loading_state
       broadcast_replace("github_logs", "github_logs/loading_state", {})
@@ -100,6 +118,15 @@ module Github
 
     def broadcast_replace(target, partial, locals)
       Turbo::StreamsChannel.broadcast_replace_to(
+        stream_name,
+        target:,
+        partial:,
+        locals:
+      )
+    end
+
+    def broadcast_update(target, partial, locals)
+      Turbo::StreamsChannel.broadcast_update_to(
         stream_name,
         target:,
         partial:,
