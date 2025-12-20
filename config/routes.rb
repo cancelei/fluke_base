@@ -37,7 +37,7 @@ Rails.application.routes.draw do
   get "people/:id", to: "people#show", as: :person
 
   # Notifications
-  resources :notifications, only: [ :index, :show ] do
+  resources :notifications, only: [:index, :show] do
     post :mark_as_read, on: :member
     post :mark_all_as_read, on: :collection
   end
@@ -54,10 +54,10 @@ Rails.application.routes.draw do
       get :enhancement_display, on: :member
     end
 
-    resources :github_logs, only: [ :index ]
+    resources :github_logs, only: [:index]
 
     # Project team membership management
-    resources :memberships, controller: "project_memberships", except: [ :show ] do
+    resources :memberships, controller: "project_memberships", except: [:show] do
       member do
         post :accept
         post :reject
@@ -69,7 +69,7 @@ Rails.application.routes.draw do
     end
 
     member do
-      resources :time_logs, only: [ :index, :create ] do
+      resources :time_logs, only: [:index, :create] do
         collection do
           post :stop_tracking
           post :create_manual, action: :create_manual
@@ -99,8 +99,8 @@ Rails.application.routes.draw do
   end
 
   # Communication
-  resources :conversations, only: [ :index, :show, :create ] do
-    resources :messages, only: [ :create ]
+  resources :conversations, only: [:index, :show, :create] do
+    resources :messages, only: [:create]
 
     member do
       post :mark_as_read
@@ -109,7 +109,7 @@ Rails.application.routes.draw do
 
   # Admin panel
   namespace :admin do
-    resources :solid_queue_jobs, only: [ :index, :destroy, :show ] do
+    resources :solid_queue_jobs, only: [:index, :destroy, :show] do
       member do
         post :retry
       end
@@ -122,11 +122,11 @@ Rails.application.routes.draw do
       # Programmatic login endpoint for E2E to establish a session quickly
       # Accepts query or form params: email, password
       # GET supported for convenience in headless flows
-      match "login", to: "sessions#create", via: [ :get, :post ]
+      match "login", to: "sessions#create", via: [:get, :post]
       # Minimal data seeding helpers
-      match "create_project", to: "data#create_project", via: [ :get, :post ]
-      match "create_agreement", to: "data#create_agreement", via: [ :get, :post ]
-      match "create_conversation", to: "data#create_conversation", via: [ :get, :post ]
+      match "create_project", to: "data#create_project", via: [:get, :post]
+      match "create_agreement", to: "data#create_agreement", via: [:get, :post]
+      match "create_conversation", to: "data#create_conversation", via: [:get, :post]
     end
   end
 

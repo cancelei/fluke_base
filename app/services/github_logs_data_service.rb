@@ -41,7 +41,7 @@ class GithubLogsDataService < ApplicationService
       contributions: @project.github_contributions(
         branch: selected_branch,
         agreement_only: agreement_only?,
-        agreement_user_ids: agreement_user_ids
+        agreement_user_ids:
       ),
       last_updated: recent_commits.first&.commit_date || Time.current,
       project: @project
@@ -50,7 +50,7 @@ class GithubLogsDataService < ApplicationService
 
   def commits_data
     {
-      recent_commits: recent_commits,
+      recent_commits:,
       project: @project
     }
   end
@@ -59,7 +59,7 @@ class GithubLogsDataService < ApplicationService
     {
       project: @project,
       available_branches: @project.available_branches,
-      selected_branch: selected_branch,
+      selected_branch:,
       agreement_only: agreement_only?
     }
   end

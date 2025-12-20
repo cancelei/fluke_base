@@ -13,8 +13,8 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         <% users.each do |user| %>
           <%= render UserCardComponent.new(
-              user: user,
-              current_user: current_user,
+              user:,
+              current_user:,
               show_message_button: true,
               propose_for_project: (defined?(propose_for_project) ? propose_for_project : nil)
             ) %>

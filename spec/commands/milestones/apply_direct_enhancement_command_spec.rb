@@ -7,7 +7,7 @@ RSpec.describe Milestones::ApplyDirectEnhancementCommand, type: :command do
   it_behaves_like "a milestone command"
 
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
+  let(:project) { create(:project, user:) }
 
   describe "#execute" do
     context "with valid enhanced description" do
@@ -18,11 +18,11 @@ RSpec.describe Milestones::ApplyDirectEnhancementCommand, type: :command do
       let(:command) do
         build_command(
           described_class,
-          user: user,
+          user:,
           element_data: {
-            enhanced_description: enhanced_description,
-            original_title: original_title,
-            original_description: original_description
+            enhanced_description:,
+            original_title:,
+            original_description:
           }
         )
       end
@@ -58,9 +58,9 @@ RSpec.describe Milestones::ApplyDirectEnhancementCommand, type: :command do
       let(:command) do
         build_command(
           described_class,
-          user: user,
+          user:,
           element_data: {
-            enhanced_description: enhanced_description,
+            enhanced_description:,
             original_description: "Original"
           }
         )
@@ -81,7 +81,7 @@ RSpec.describe Milestones::ApplyDirectEnhancementCommand, type: :command do
       let(:command) do
         build_command(
           described_class,
-          user: user,
+          user:,
           element_data: {
             enhanced_description: "",
             original_description: "Original"
@@ -106,7 +106,7 @@ RSpec.describe Milestones::ApplyDirectEnhancementCommand, type: :command do
       let(:command) do
         build_command(
           described_class,
-          user: user,
+          user:,
           element_data: {
             original_description: "Original"
           }
@@ -124,9 +124,9 @@ RSpec.describe Milestones::ApplyDirectEnhancementCommand, type: :command do
     let(:command) do
       build_command(
         described_class,
-        user: user,
+        user:,
         element_data: {
-          enhanced_description: enhanced_description,
+          enhanced_description:,
           original_description: "Original"
         }
       )

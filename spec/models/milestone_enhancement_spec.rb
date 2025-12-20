@@ -10,7 +10,7 @@ RSpec.describe MilestoneEnhancement, type: :model do
   end
 
   describe 'validations' do
-    subject { build(:milestone_enhancement, milestone: milestone, user: user) }
+    subject { build(:milestone_enhancement, milestone:, user:) }
 
     it { should validate_presence_of(:original_description) }
     it { should validate_presence_of(:enhanced_description) }
@@ -21,10 +21,10 @@ RSpec.describe MilestoneEnhancement, type: :model do
   end
 
   describe 'scopes' do
-    let!(:recent_enhancement) { create(:milestone_enhancement, milestone: milestone, user: user, created_at: 1.hour.ago) }
-    let!(:older_enhancement) { create(:milestone_enhancement, milestone: milestone, user: user, created_at: 1.day.ago) }
-    let!(:successful_enhancement) { create(:milestone_enhancement, milestone: milestone, user: user, status: 'completed') }
-    let!(:failed_enhancement) { create(:milestone_enhancement, :failed, milestone: milestone, user: user) }
+    let!(:recent_enhancement) { create(:milestone_enhancement, milestone:, user:, created_at: 1.hour.ago) }
+    let!(:older_enhancement) { create(:milestone_enhancement, milestone:, user:, created_at: 1.day.ago) }
+    let!(:successful_enhancement) { create(:milestone_enhancement, milestone:, user:, status: 'completed') }
+    let!(:failed_enhancement) { create(:milestone_enhancement, :failed, milestone:, user:) }
 
     describe '.recent' do
       it 'orders by created_at desc' do
@@ -37,14 +37,14 @@ RSpec.describe MilestoneEnhancement, type: :model do
     describe '.successful' do
       it 'returns only completed enhancements' do
         successful_enhancements = MilestoneEnhancement.successful
-        expect(successful_enhancements.pluck(:status).uniq).to eq([ 'completed' ])
+        expect(successful_enhancements.pluck(:status).uniq).to eq(['completed'])
         expect(successful_enhancements.count).to be >= 1
       end
     end
 
     describe '.for_milestone' do
       let(:other_milestone) { create(:milestone) }
-      let!(:other_enhancement) { create(:milestone_enhancement, milestone: other_milestone, user: user) }
+      let!(:other_enhancement) { create(:milestone_enhancement, milestone: other_milestone, user:) }
 
       it 'returns enhancements for specific milestone' do
         expect(MilestoneEnhancement.for_milestone(milestone)).to contain_exactly(
@@ -96,25 +96,25 @@ RSpec.describe MilestoneEnhancement, type: :model do
 
   describe 'defaults' do
     it 'sets default status to pending when not provided' do
-      enhancement = MilestoneEnhancement.new(milestone: milestone, user: user, original_description: 'test')
+      enhancement = MilestoneEnhancement.new(milestone:, user:, original_description: 'test')
       expect(enhancement.status).to eq('pending')
     end
 
     it 'sets default context_data to empty hash when not provided' do
-      enhancement = MilestoneEnhancement.new(milestone: milestone, user: user, original_description: 'test')
+      enhancement = MilestoneEnhancement.new(milestone:, user:, original_description: 'test')
       expect(enhancement.context_data).to eq({})
     end
   end
 
   describe 'factory validation' do
     it 'creates valid enhancement with factory' do
-      enhancement = build(:milestone_enhancement, milestone: milestone, user: user)
+      enhancement = build(:milestone_enhancement, milestone:, user:)
       expect(enhancement).to be_valid
     end
 
     it 'creates valid enhancement with traits' do
       %i[pending processing failed technical_style creative_style detailed_style concise_style].each do |trait|
-        enhancement = build(:milestone_enhancement, trait, milestone: milestone, user: user)
+        enhancement = build(:milestone_enhancement, trait, milestone:, user:)
         expect(enhancement).to be_valid, "Enhancement with #{trait} trait should be valid"
       end
     end

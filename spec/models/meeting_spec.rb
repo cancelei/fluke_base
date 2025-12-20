@@ -7,8 +7,8 @@ RSpec.describe Meeting, type: :model do
   let(:alice) { create(:user, :alice) }
   let(:bob) { create(:user, :bob) }
   let(:project) { create(:project, user: alice) }
-  let(:agreement) { create(:agreement, :with_participants, :accepted, project: project, initiator: alice, other_party: bob) }
-  let(:meeting) { create(:meeting, agreement: agreement) }
+  let(:agreement) { create(:agreement, :with_participants, :accepted, project:, initiator: alice, other_party: bob) }
+  let(:meeting) { create(:meeting, agreement:) }
 
   # Association Testing - Line 49-58 in test_spec
   describe "associations" do
@@ -28,7 +28,7 @@ RSpec.describe Meeting, type: :model do
     context "end time validation" do
       it "validates end time is after start time" do
         start_time = 1.hour.from_now
-        meeting = build(:meeting, start_time: start_time, end_time: start_time - 30.minutes)
+        meeting = build(:meeting, start_time:, end_time: start_time - 30.minutes)
         expect(meeting).not_to be_valid
         expect(meeting.errors[:end_time]).to include("must be after the start time")
       end
@@ -41,7 +41,7 @@ RSpec.describe Meeting, type: :model do
       it "returns duration in minutes" do
         start_time = 1.hour.from_now
         end_time = start_time + 90.minutes
-        meeting = build(:meeting, start_time: start_time, end_time: end_time)
+        meeting = build(:meeting, start_time:, end_time:)
 
         expect(meeting.duration_in_minutes).to eq(90)
       end
@@ -55,7 +55,7 @@ RSpec.describe Meeting, type: :model do
 
     describe ".upcoming" do
       it "returns future meetings" do
-        upcoming_meetings = Meeting.upcoming.where(id: [ upcoming_meeting.id, past_meeting.id ])
+        upcoming_meetings = Meeting.upcoming.where(id: [upcoming_meeting.id, past_meeting.id])
         expect(upcoming_meetings).to include(upcoming_meeting)
         expect(upcoming_meetings).not_to include(past_meeting)
       end
@@ -63,7 +63,7 @@ RSpec.describe Meeting, type: :model do
 
     describe ".past" do
       it "returns past meetings" do
-        past_meetings = Meeting.past.where(id: [ upcoming_meeting.id, past_meeting.id ])
+        past_meetings = Meeting.past.where(id: [upcoming_meeting.id, past_meeting.id])
         expect(past_meetings).to include(past_meeting)
         expect(past_meetings).not_to include(upcoming_meeting)
       end

@@ -18,7 +18,7 @@
   <%# Invite Form Card %>
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-      <%= form_with model: [ @project, @membership ], local: true, class: "space-y-6" do |f| %>
+      <%= form_with model: [@project, @membership], local: true, class: "space-y-6" do |f| %>
         <%# User Selection %>
         <div class="form-control">
           <%= f.label :user_id, "Select User", class: "label" %>

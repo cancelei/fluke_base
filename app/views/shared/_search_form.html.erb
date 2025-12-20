@@ -7,7 +7,7 @@
   filters = local_assigns[:filters] || []
 %>
 
-<%= form_with url: url, method: :get, class: form_class, **form_options do |f| %>
+<%= form_with url:, method: :get, class: form_class, **form_options do |f| %>
   <!-- Search Input -->
   <%= f.text_field :search,
       value: params[:search],

@@ -1,0 +1,66 @@
+<div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+  <!-- Branch Filter -->
+  <div class="flex items-center mb-2 lg:mb-0">
+    <label for="branch" class="mr-2 text-sm font-medium text-base-content/70">Branch:</label>
+    <div class="relative">
+      <details class="dropdown">
+        <summary class="flex items-center w-full rounded-md bg-base-100 border border-base-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer list-none">
+          <span class="mr-2"><%= selected_branch_name %></span>
+          <svg class="h-5 w-5 text-base-content/50" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </summary>
+        <div class="dropdown-content absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-base-100 py-1 shadow-lg ring-1 ring-base-content ring-opacity-5">
+          <%= link_to "All Branches", branch_filter_path(nil), class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200" %>
+          <% @available_branches.each do |id, branch| %>
+            <%= link_to (branch.presence || "main"), branch_filter_path(id), class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200" %>
+          <% end %>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- Agreement Toggle -->
+  <div class="flex items-center mb-2 lg:mb-0">
+    <a href="<%= agreement_toggle_path %>" class="flex items-center">
+      <div class="flex items-center justify-center w-full">
+        <label for="toggleB" class="flex items-center cursor-pointer">
+          <div class="relative">
+            <input type="checkbox" id="toggleB" class="sr-only" <%= "checked" if @agreement_only %> disabled>
+            <div class="block bg-base-content/60 w-14 h-8 rounded-full"></div>
+            <div class="dot absolute left-1 top-1 bg-base-100 w-6 h-6 rounded-full transition"></div>
+          </div>
+          <div class="ml-3 text-base-content/70 font-medium">Agreement Only</div>
+        </label>
+      </div>
+    </a>
+  </div>
+
+  <!-- User Filter -->
+  <div class="flex items-center mb-2 lg:mb-0">
+    <label for="user_filter" class="mr-2 text-sm font-medium text-base-content/70">User:</label>
+    <div class="relative">
+      <details class="dropdown">
+        <summary class="flex items-center w-full rounded-md bg-base-100 border border-base-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer list-none">
+          <span class="mr-2 truncate"><%= selected_user_name %></span>
+          <svg class="h-5 w-5 text-base-content/50" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </summary>
+        <div class="dropdown-content absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-base-100 py-1 shadow-lg ring-1 ring-base-content ring-opacity-5">
+          <%= link_to "All Users", user_filter_path(nil), class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200 truncate" %>
+          <% @available_users.each do |name| %>
+            <%= link_to name, user_filter_path(name), class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200 truncate" %>
+          <% end %>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- Clear Filters Button -->
+  <div class="flex items-end mb-2 lg:mb-0">
+    <% if has_filters? %>
+      <%= link_to "Clear Filters", clear_filters_path, class: "ml-2 btn btn-outline btn-sm" %>
+    <% end %>
+  </div>
+</div>

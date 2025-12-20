@@ -12,7 +12,7 @@
   <div class="mb-6">
     <%= render Users::ProfileHeaderComponent.new(
       person: @person,
-      current_user: current_user,
+      current_user:,
       shared_agreements_count: @shared_agreements_count || 0
     ) %>
   </div>

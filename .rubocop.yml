@@ -3,14 +3,48 @@ inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
 # Exclude third-party gems and local gem development
 AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
   Exclude:
     - 'pay/**/*'
     - 'vendor/**/*'
     - 'tmp/**/*'
     - 'log/**/*'
 
-# Overwrite or add rules to create your own house style
-#
-# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
-# Layout/SpaceInsideArrayLiteralBrackets:
-#   Enabled: false
+# === Ruby 3.4+ Syntax Enforcement ===
+
+# Enforce hash shorthand: {user:} instead of {user: user}
+Style/HashSyntax:
+  EnforcedShorthandSyntax: always
+
+# Allow endless methods: def foo? = bar
+Style/EndlessMethod:
+  Enabled: true
+  EnforcedStyle: allow_single_line
+
+# Use ... for argument forwarding
+Style/ArgumentsForwarding:
+  Enabled: true
+  UseAnonymousForwarding: true
+
+# Use & for anonymous block forwarding
+Naming/BlockForwarding:
+  Enabled: true
+  EnforcedStyle: anonymous
+
+# Prefer &:method over { |x| x.method }
+Style/SymbolProc:
+  Enabled: true
+
+# Warn on OpenStruct usage (allowed in specs for mocking)
+Style/OpenStructUse:
+  Enabled: true
+  Severity: warning
+  Exclude:
+    - 'spec/**/*'
+
+# === Layout Preferences ===
+
+# Consistent array bracket spacing
+Layout/SpaceInsideArrayLiteralBrackets:
+  EnforcedStyle: no_space

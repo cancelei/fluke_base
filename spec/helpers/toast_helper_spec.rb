@@ -218,7 +218,7 @@ RSpec.describe ToastHelper, type: :helper do
     end
 
     it 'preserves existing toasts when adding new ones' do
-      flash[:toast] = [ { type: :info, message: "Existing" } ]
+      flash[:toast] = [{ type: :info, message: "Existing" }]
       helper.toast_flash(:success, "New")
       expect(flash[:toast].length).to eq(2)
       expect(flash[:toast].first[:message]).to eq("Existing")
@@ -285,7 +285,7 @@ RSpec.describe ToastHelper, type: :helper do
 
     context 'with single toast' do
       before do
-        flash[:toast] = [ { type: :info, message: "Single toast" } ]
+        flash[:toast] = [{ type: :info, message: "Single toast" }]
       end
 
       it 'renders single toast correctly' do

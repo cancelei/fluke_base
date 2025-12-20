@@ -7,7 +7,7 @@ RSpec.describe Milestones::DiscardEnhancementCommand, type: :command do
 
   describe "#execute" do
     let(:user) { create(:user) }
-    let(:command) { build_command(described_class, user: user, element_data: {}) }
+    let(:command) { build_command(described_class, user:, element_data: {}) }
 
     it "clears the ai-suggestion-container frame" do
       command.execute

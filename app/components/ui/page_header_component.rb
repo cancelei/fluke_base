@@ -26,7 +26,7 @@ module Ui
       tag.div(class: container_classes) do
         tag.div(class: inner_classes) do
           tag.div(class: "flex items-center justify-between mb-6") do
-            safe_join([ render_title_section, render_actions ].compact)
+            safe_join([render_title_section, render_actions].compact)
           end
         end
       end
@@ -44,7 +44,7 @@ module Ui
 
     def render_title_section
       tag.div(class: title_section_classes) do
-        safe_join([ render_title, render_subtitle ].compact)
+        safe_join([render_title, render_subtitle].compact)
       end
     end
 

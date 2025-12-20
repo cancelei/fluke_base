@@ -77,7 +77,7 @@ FactoryBot.define do
       after(:build) do |agreement, evaluator|
         if agreement.project.present? && agreement.milestone_ids.empty?
           milestone = create(:milestone, project: agreement.project)
-          agreement.milestone_ids = [ milestone.id ]
+          agreement.milestone_ids = [milestone.id]
         end
       end
     end

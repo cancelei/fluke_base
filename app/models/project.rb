@@ -1,4 +1,4 @@
-require "ostruct"
+# frozen_string_literal: true
 
 class Project < ApplicationRecord
   # Relationships
@@ -18,7 +18,7 @@ class Project < ApplicationRecord
   validates :name, presence: true
   validates :description, presence: true
   validates :stage, presence: true
-  validates :collaboration_type, inclusion: { in: [ "mentor", "co_founder", "both", nil ] }
+  validates :collaboration_type, inclusion: { in: ["mentor", "co_founder", "both", nil] }
   validates :repository_url, format: {
     with: %r{\A(\z|https?://github\.com/[^/]+/[^/]+|[^/\s]+/[^/\s]+)\z},
     message: "must be a valid GitHub repository URL or in the format username/repository"
@@ -66,115 +66,18 @@ class Project < ApplicationRecord
 
   # Get summary of GitHub contributions by user
   # @param branch [String] Optional branch name to filter by
+  # @param agreement_only [Boolean] Filter by agreement participants only
+  # @param agreement_user_ids [Array<Integer>] User IDs from agreements
+  # @param user_name [String] Filter by specific user name
   # @return [Array<Hash>] Array of contribution hashes with user details and stats
   def github_contributions(branch: nil, agreement_only: false, agreement_user_ids: nil, user_name: nil)
-    return [] unless github_logs.exists?
-
-    # Start with base github_logs query
-    logs_query = github_logs
-
-    # Apply branch filter if specified - join only when needed
-    if branch.present? && branch.to_i != 0
-      logs_query = logs_query.joins(:github_branch_logs)
-                             .where(github_branch_logs: { github_branch_id: branch })
-    end
-
-    # Apply agreement filter if needed
-    if agreement_only && agreement_user_ids.present?
-      logs_query = logs_query.where(user_id: agreement_user_ids)
-    end
-
-    # Apply user_name filter if needed
-    if user_name.present?
-      logs_query = logs_query.where(unregistered_user_name: user_name)
-    end
-
-    # Get unique logs to avoid double-counting commits that appear in multiple branches
-    unique_logs = logs_query.distinct
-
-    # Separate registered and unregistered users
-    registered_logs = unique_logs.joins(:user).where.not(users: { id: nil })
-    unregistered_logs = unique_logs.where(user_id: nil).where.not(unregistered_user_name: [ nil, "" ])
-
-    # Calculate registered users' contributions
-    registered_contributions = registered_logs
-      .group("users.id", "users.first_name", "users.last_name", "users.email", "users.avatar", "users.github_username")
-      .select(
-        "users.id as user_id",
-        "users.first_name",
-        "users.last_name",
-        "users.email",
-        "users.avatar",
-        "users.github_username",
-        "NULL as unregistered_user_name",
-        "COUNT(github_logs.id) as commit_count",
-        "SUM(github_logs.lines_added) as total_added",
-        "SUM(github_logs.lines_removed) as total_removed",
-        "MIN(github_logs.commit_date) as first_commit_date",
-        "MAX(github_logs.commit_date) as last_commit_date"
-      )
-
-    # Calculate unregistered users' contributions
-    unregistered_contributions = unregistered_logs
-      .group("github_logs.unregistered_user_name")
-      .select(
-        "NULL as user_id",
-        "NULL as first_name",
-        "NULL as last_name",
-        "NULL as email",
-        "NULL as avatar",
-        "NULL as github_username",
-        "github_logs.unregistered_user_name",
-        "COUNT(github_logs.id) as commit_count",
-        "SUM(github_logs.lines_added) as total_added",
-        "SUM(github_logs.lines_removed) as total_removed",
-        "MIN(github_logs.commit_date) as first_commit_date",
-        "MAX(github_logs.commit_date) as last_commit_date"
-      )
-
-    # Combine and sort all contributions by commit count
-    all_contributions = (registered_contributions.to_a + unregistered_contributions.to_a)
-      .sort_by { |c| -c.commit_count.to_i }
-
-    # Convert to array of hashes with proper types
-    all_contributions.map do |c|
-      user = if c.user_id.present?
-        User.find(c.user_id)
-      else
-        # Create a simple object that responds to the methods the view expects
-        unregistered_user = OpenStruct.new(
-          id: nil,
-          name: c.unregistered_user_name,
-          github_username: c.unregistered_user_name,
-          unregistered: true
-        )
-
-        # Define methods needed by the view
-        def unregistered_user.avatar_url
-          nil
-        end
-
-        def unregistered_user.full_name
-          name
-        end
-
-        def unregistered_user.owner?(project)
-          false
-        end
-
-        unregistered_user
-      end
-
-      {
-        user: user,
-        commit_count: c.commit_count.to_i,
-        total_added: c.total_added.to_i,
-        total_removed: c.total_removed.to_i,
-        net_changes: c.total_added.to_i - c.total_removed.to_i,
-        first_commit_date: c.first_commit_date,
-        last_commit_date: c.last_commit_date
-      }
-    end
+    Github::ContributionsSummary.new(
+      project: self,
+      branch:,
+      agreement_only:,
+      agreement_user_ids:,
+      user_name:
+    ).call
   end
 
   # Check if a user can view GitHub logs for this project
@@ -205,43 +108,21 @@ class Project < ApplicationRecord
   # @return [Symbol] :active (7 days), :moderate (30 days), or :stale (older/no commits)
   def activity_level
     return :none unless github_connected?
-
-    last_date = last_commit_date
-    return :stale unless last_date
-
-    days_since_last = (Time.current - last_date).to_i / 1.day
-
-    if days_since_last <= 7
-      :active
-    elsif days_since_last <= 30
-      :moderate
-    else
-      :stale
-    end
+    github_statistics_calculator.activity_level
   end
 
   # Returns the count of commits in the last N days
   # @param days [Integer] Number of days to look back (default: 7)
   # @return [Integer] Count of commits
   def commits_since(days: 7)
-    github_logs.where("commit_date > ?", days.days.ago).count
+    github_statistics_calculator.commits_since(days:)
   end
 
   # Returns a hash with GitHub activity summary stats
   # @return [Hash] Activity stats including commit count, lines changed, last commit, etc.
   def github_activity_stats
     return {} unless github_connected?
-
-    {
-      total_commits: github_logs.count,
-      commits_this_week: commits_since(days: 7),
-      commits_this_month: commits_since(days: 30),
-      total_lines_added: github_logs.sum(:lines_added) || 0,
-      total_lines_removed: github_logs.sum(:lines_removed) || 0,
-      last_commit_date: last_commit_date,
-      activity_level: activity_level,
-      contributor_count: github_logs.select(:user_id).distinct.count
-    }
+    github_statistics_calculator.to_h
   end
 
   def contributions_summary
@@ -266,26 +147,13 @@ class Project < ApplicationRecord
   scope :stealth_projects, -> { where(stealth_mode: true) }
 
   # Helper methods for checking collaboration type
-  def seeking_mentor?
-    collaboration_type == SEEKING_MENTOR || collaboration_type == SEEKING_BOTH
-  end
-
-  def seeking_cofounder?
-    collaboration_type == SEEKING_COFOUNDER || collaboration_type == SEEKING_BOTH
-  end
+  def seeking_mentor? = collaboration_type == SEEKING_MENTOR || collaboration_type == SEEKING_BOTH
+  def seeking_cofounder? = collaboration_type == SEEKING_COFOUNDER || collaboration_type == SEEKING_BOTH
 
   # Public field methods - delegated to visibility service
-  def field_public?(field_name)
-    visibility_service.field_public?(field_name)
-  end
-
-  def visible_to_user?(field_name, user)
-    visibility_service.field_visible_to_user?(field_name, user)
-  end
-
-  def get_field_value(field_name, user)
-    visibility_service.get_field_value(field_name, user)
-  end
+  def field_public?(field_name) = visibility_service.field_public?(field_name)
+  def visible_to_user?(field_name, user) = visibility_service.field_visible_to_user?(field_name, user)
+  def get_field_value(field_name, user) = visibility_service.get_field_value(field_name, user)
 
   # Methods
   def progress_percentage
@@ -295,53 +163,25 @@ class Project < ApplicationRecord
     (completed_count.to_f / milestones_count * 100).round
   end
 
-  def milestones_count
-    @milestones_count ||= milestones.count
-  end
+  def milestones_count = @milestones_count ||= milestones.count
 
   # Methods to check current stage
-  def idea?
-    stage == IDEA
-  end
-
-  def prototype?
-    stage == PROTOTYPE
-  end
-
-  def launched?
-    stage == LAUNCHED
-  end
-
-  def scaling?
-    stage == SCALING
-  end
+  def idea? = stage == IDEA
+  def prototype? = stage == PROTOTYPE
+  def launched? = stage == LAUNCHED
+  def scaling? = stage == SCALING
 
   # Stealth mode methods
-  def stealth?
-    stealth_mode?
-  end
+  def stealth? = stealth_mode?
 
-  def publicly_discoverable?
-    !stealth_mode?
-  end
-
-  def exit_stealth_mode!
-    update!(stealth_mode: false)
-  end
-
-  def stealth_display_name
-    stealth_name.presence || "Stealth Project ##{id}"
-  end
-
-  def stealth_display_description
-    stealth_description.presence || "Early-stage venture in development. Details available after connection."
-  end
+  def publicly_discoverable? = !stealth_mode?
+  def exit_stealth_mode! = update!(stealth_mode: false)
+  def stealth_display_name = stealth_name.presence || "Stealth Project ##{id}"
+  def stealth_display_description = stealth_description.presence || "Early-stage venture in development. Details available after connection."
 
   # Check if project is connected to GitHub
   # @return [Boolean] True if the project has a repository URL set
-  def github_connected?
-    github_service.connected?
-  end
+  def github_connected? = github_service.connected?
 
   # ============================================================================
   # Membership-based Access Control Methods
@@ -358,9 +198,7 @@ class Project < ApplicationRecord
   # Get the role for a specific user
   # @param user [User] The user to get role for
   # @return [String, nil] The role name or nil if no membership
-  def role_for(user)
-    membership_for(user)&.role
-  end
+  def role_for(user) = membership_for(user)&.role
 
   # Check if user is the project owner (original owner or owner role)
   # @param user [User] The user to check
@@ -463,6 +301,10 @@ class Project < ApplicationRecord
 
   def github_service
     @github_service ||= ProjectGithubService.new(self)
+  end
+
+  def github_statistics_calculator
+    @github_statistics_calculator ||= Github::StatisticsCalculator.new(project: self)
   end
 
   def visibility_service

@@ -1,4 +1,4 @@
-<% cache([ current_user, "recent_agreements", @agreements.maximum(:updated_at) ]) do %>
+<% cache([current_user, "recent_agreements", @agreements.maximum(:updated_at)]) do %>
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body p-0">
       <!-- Header -->
@@ -13,7 +13,7 @@
       <% if @agreements.present? %>
         <ul class="menu p-0">
           <% @agreements.each do |agreement| %>
-            <% cache([ agreement, current_user ]) do %>
+            <% cache([agreement, current_user]) do %>
               <% agreement_presenter = present(agreement) %>
               <% is_initiator = agreement.initiator&.id == current_user.id %>
               <% needs_action = agreement.pending? && !is_initiator %>

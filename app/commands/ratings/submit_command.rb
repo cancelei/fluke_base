@@ -71,8 +71,8 @@ module Ratings
         "user_#{user.id}_rating",
         partial: "ratings/rating_display",
         locals: {
-          user: user,
-          current_user: current_user,
+          user:,
+          current_user:,
           show_controls: true
         }
       )

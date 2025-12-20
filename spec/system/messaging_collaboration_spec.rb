@@ -5,7 +5,7 @@ RSpec.describe "Messaging and Collaboration", type: :system, js: true do
   let(:bob) { create(:user, :bob) }
   let(:project) { create(:project, user: alice) }
   let!(:agreement) { create(:agreement, :with_participants, :accepted, :mentorship,
-                           project: project, initiator: alice, other_party: bob) }
+                           project:, initiator: alice, other_party: bob) }
 
   describe "Conversation Management" do
     it "creates and manages conversations between collaborators" do
@@ -35,7 +35,7 @@ RSpec.describe "Messaging and Collaboration", type: :system, js: true do
 
     it "displays conversation history and allows replies" do
       conversation = create(:conversation, :between_users, user1: alice, user2: bob)
-      original_message = create(:message, conversation: conversation, user: alice,
+      original_message = create(:message, conversation:, user: alice,
                                body: "What's the status on the API endpoints?")
 
       sign_in bob
@@ -74,7 +74,7 @@ RSpec.describe "Messaging and Collaboration", type: :system, js: true do
     end
 
     it "displays meeting calendar and allows management" do
-      meeting = create(:meeting, agreement: agreement, user: alice,
+      meeting = create(:meeting, agreement:, user: alice,
                       title: "Project Review", scheduled_at: 1.week.from_now)
 
       sign_in alice
@@ -85,7 +85,7 @@ RSpec.describe "Messaging and Collaboration", type: :system, js: true do
     end
 
     it "handles meeting notifications and reminders" do
-      meeting = create(:meeting, agreement: agreement, user: alice,
+      meeting = create(:meeting, agreement:, user: alice,
                       scheduled_at: 1.hour.from_now)
 
       sign_in alice
@@ -138,9 +138,9 @@ RSpec.describe "Messaging and Collaboration", type: :system, js: true do
 
     it "displays file attachments with proper preview" do
       conversation = create(:conversation, :between_users, user1: alice, user2: bob)
-      message = create(:message, conversation: conversation, user: alice,
+      message = create(:message, conversation:, user: alice,
                       body: "Check this out",
-                      attachments: [ fixture_file_upload("spec/fixtures/sample.txt") ])
+                      attachments: [fixture_file_upload("spec/fixtures/sample.txt")])
 
       sign_in bob
       visit conversation_path(conversation)
@@ -153,9 +153,9 @@ RSpec.describe "Messaging and Collaboration", type: :system, js: true do
   describe "Conversation Search and Organization" do
     it "searches through conversation content" do
       conversation = create(:conversation, :between_users, user1: alice, user2: bob)
-      create(:message, conversation: conversation, user: alice,
+      create(:message, conversation:, user: alice,
              body: "API documentation is ready")
-      create(:message, conversation: conversation, user: bob,
+      create(:message, conversation:, user: bob,
              body: "Database schema needs updating")
 
       sign_in alice
@@ -185,7 +185,7 @@ RSpec.describe "Messaging and Collaboration", type: :system, js: true do
 
     it "marks conversations as read/unread" do
       conversation = create(:conversation, :between_users, user1: alice, user2: bob)
-      create(:message, conversation: conversation, user: bob,
+      create(:message, conversation:, user: bob,
              body: "New message for you")
 
       sign_in alice
@@ -209,8 +209,8 @@ RSpec.describe "Messaging and Collaboration", type: :system, js: true do
 
       # Create many messages
       100.times do |i|
-        create(:message, conversation: conversation,
-               user: [ alice, bob ].sample,
+        create(:message, conversation:,
+               user: [alice, bob].sample,
                body: "Message #{i}")
       end
 

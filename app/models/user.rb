@@ -101,7 +101,7 @@ class User < ApplicationRecord
   # Membership helper methods
   def projects_with_role(role = nil)
     if role
-      project_memberships.where(role: role).includes(:project).map(&:project)
+      project_memberships.where(role:).includes(:project).map(&:project)
     else
       project_memberships.includes(:project).map(&:project)
     end
@@ -141,8 +141,8 @@ class User < ApplicationRecord
   end
 
   def rate!(rater:, value:, review: nil)
-    rating = received_ratings.find_or_initialize_by(rater: rater)
-    rating.update!(value: value, review: review)
+    rating = received_ratings.find_or_initialize_by(rater:)
+    rating.update!(value:, review:)
     rating
   end
 

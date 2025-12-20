@@ -46,7 +46,7 @@ class DashboardQuery
 
     {
       total_projects: projects.count,
-      projects_with_repos: projects.count { |p| p.github_connected? },
+      projects_with_repos: projects.count(&:github_connected?),
       total_commits_this_week: GithubLog.where(project_id: project_ids)
                                         .where("commit_date > ?", 7.days.ago)
                                         .count,

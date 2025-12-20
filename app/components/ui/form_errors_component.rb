@@ -13,7 +13,7 @@ module Ui
     def call
       tag.div(class: container_classes) do
         tag.div(class: "flex") do
-          safe_join([ render_icon, render_content ])
+          safe_join([render_icon, render_content])
         end
       end
     end
@@ -36,7 +36,7 @@ module Ui
 
     def render_content
       tag.div(class: "ml-3") do
-        safe_join([ render_header, render_errors ])
+        safe_join([render_header, render_errors])
       end
     end
 

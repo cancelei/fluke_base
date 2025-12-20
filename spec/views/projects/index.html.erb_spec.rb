@@ -2,11 +2,11 @@ require 'rails_helper'
 
 RSpec.describe "projects/index.html.erb", type: :view do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user, name: 'Alpha') }
+  let(:project) { create(:project, user:, name: 'Alpha') }
 
   before do
     allow(view).to receive(:current_user).and_return(user)
-    assign(:projects, Kaminari.paginate_array([ project ]).page(1))
+    assign(:projects, Kaminari.paginate_array([project]).page(1))
     allow(view).to receive(:present) do |object|
       instance_double('ProjectPresenter',
         display_name: object.name,

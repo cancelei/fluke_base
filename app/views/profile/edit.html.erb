@@ -88,7 +88,7 @@
       <fieldset class="fieldset">
         <%= form.label :skills, "Expertise", class: "fieldset-legend" %>
         <div class="flex flex-wrap items-center gap-4 mt-2">
-          <% skills = [ "Ruby", "Rails", "JavaScript", "React", "DevOps", "UI/UX", "Product Management", "Testing", "Other" ] %>
+          <% skills = ["Ruby", "Rails", "JavaScript", "React", "DevOps", "UI/UX", "Product Management", "Testing", "Other"] %>
           <% skills.each do |exp| %>
             <label class="flex items-center gap-2 cursor-pointer">
               <%= check_box_tag "user[skills][]", exp, (@user.respond_to?(:skills) && @user.skills&.include?(exp)), id: "user_skills_#{exp.parameterize}", multiple: true, class: "checkbox checkbox-primary checkbox-sm" %>

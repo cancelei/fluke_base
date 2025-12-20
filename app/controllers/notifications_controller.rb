@@ -1,6 +1,6 @@
 class NotificationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_notification, only: [ :show, :mark_as_read ]
+  before_action :set_notification, only: [:show, :mark_as_read]
 
   def index
     @notifications = current_user.notifications.order(created_at: :desc).page(params[:page]).per(20)
@@ -35,7 +35,6 @@ class NotificationsController < ApplicationController
   end
 
   private
-    def set_notification
-      @notification = current_user.notifications.find(params[:id])
-    end
+
+  def set_notification = @notification = current_user.notifications.find(params[:id])
 end

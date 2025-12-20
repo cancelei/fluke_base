@@ -1,23 +1,40 @@
+# frozen_string_literal: true
+
+# Background job for discovering and processing repository branches
+#
+# Uses Github::BranchesFetcher for branch discovery and Github::BroadcastService
+# for Turbo Stream updates. Processes branches sequentially starting with
+# the largest to maximize SHA deduplication efficiency.
+#
 class GithubFetchBranchesJob < ApplicationJob
   def perform(project_id, access_token)
     @project = Project.find(project_id)
     @access_token = access_token
-    service = GithubService.new(@project, access_token)
-    branches = service.fetch_branches_with_owner
+    @broadcaster = Github::BroadcastService.new(@project)
+
+    # Use BranchesFetcher for branch discovery and storage
+    result = Github::BranchesFetcher.new(
+      project: @project,
+      access_token:
+    ).call
+
+    if result.failure?
+      Rails.logger.error "Failed to fetch branches: #{result.failure[:message]}"
+      @broadcaster.broadcast_empty_state
+      return
+    end
+
+    branches = result.value!
 
     if branches.empty?
       Rails.logger.warn "No branches found for project #{project_id}"
-      broadcast_empty_state
+      @broadcaster.broadcast_empty_state
       return
     end
 
     # Check if this is the first time gathering data for this repository
     is_first_time = @project.github_branches.empty?
-
-    if is_first_time
-      # Broadcast initial template for smooth updates
-      broadcast_initial_template
-    end
+    broadcast_initial_state if is_first_time
 
     # Process branches sequentially, starting with the biggest (most commits) first
     # This maximizes SHA deduplication - smaller branches will share commits with the big one
@@ -32,17 +49,15 @@ class GithubFetchBranchesJob < ApplicationJob
   private
 
   def process_branches_sequentially(branches, project_id)
-    # Sort branches by commit count (descending) - biggest first for optimal deduplication
     Rails.logger.info "Analyzing branch sizes for project #{project_id}..."
 
     sorted_branches = sort_branches_by_size(branches)
 
     Rails.logger.info "Branch processing order (largest first for optimal deduplication):"
     sorted_branches.each_with_index do |item, i|
-      Rails.logger.info "  #{i+1}. #{item[:branch][:branch_name]} (~#{item[:size]} commits)"
+      Rails.logger.info "  #{i + 1}. #{item[:branch][:branch_name]} (~#{item[:size]} commits)"
     end
 
-    # Process branches sequentially to maximize SHA deduplication
     sorted_branches.each_with_index do |item, index|
       branch = item[:branch]
       next if branch[:branch_name].blank?
@@ -51,63 +66,55 @@ class GithubFetchBranchesJob < ApplicationJob
     end
   end
 
-  # Sort branches by size (largest first) to maximize deduplication efficiency
   def sort_branches_by_size(branches)
     branch_sizes = branches.map do |branch|
       size = estimate_branch_size(branch[:branch_name])
-      { branch: branch, size: size }
+      { branch:, size: }
     end
 
     branch_sizes.sort_by { |b| -b[:size] }
   end
 
-  # Estimate branch size using GitHub API pagination headers
   def estimate_branch_size(branch_name)
-    client = Octokit::Client.new(access_token: @access_token)
+    # Use Github::Client for API calls
+    client = Github::Client.new(access_token: @access_token)
     repo_path = extract_repo_path(@project.repository_url)
-    commits = client.commits(repo_path, sha: branch_name, per_page: 1, page: 1)
+
+    result = client.commits(repo_path, sha: branch_name, per_page: 1, page: 1)
+    return 0 unless result.success?
+
+    commits = result.value!
+    return 0 if commits.empty?
 
     last_response = client.last_response
     if last_response.rels[:last]
-      # Extract page number from last page URL
       last_response.rels[:last].href.match(/page=(\d+)/)[1].to_i
     else
-      commits.empty? ? 0 : 1
+      1
     end
   rescue => e
     Rails.logger.warn "Could not determine size for branch #{branch_name}: #{e.message}"
     0
   end
 
-  # Process a single branch synchronously
   def process_single_branch(branch, index, total, project_id)
     Rails.logger.info "[#{index + 1}/#{total}] Processing branch: #{branch[:branch_name]}"
 
     job = GithubCommitRefreshJob.new
     commits_processed = job.perform(project_id, @access_token, branch[:branch_name])
 
-    Rails.logger.info "✓ Branch #{branch[:branch_name]} complete: #{commits_processed} commits processed"
+    Rails.logger.info "Branch #{branch[:branch_name]} complete: #{commits_processed} commits processed"
   rescue => e
-    Rails.logger.error "✗ Failed to process branch #{branch[:branch_name]}: #{e.message}"
+    Rails.logger.error "Failed to process branch #{branch[:branch_name]}: #{e.message}"
     # Continue with next branch even if one fails
   end
 
   def extract_repo_path(url)
-    if url.include?("github.com/")
-      url.split("github.com/").last.gsub(/\.git$/, "")
-    else
-      url.gsub(/\.git$/, "")
-    end
+    Github::Base.new.send(:extract_repo_path, url)
   end
 
-  def broadcast_initial_template
-    # Broadcast loading state for new repositories
-    Turbo::StreamsChannel.broadcast_replace_to(
-      "project_#{@project.id}_github_commits",
-      target: "github_logs",
-      partial: "github_logs/loading_state",
-      locals: { project: @project }
-    )
+  def broadcast_initial_state
+    @broadcaster.broadcast_loading_state
 
     # Initialize empty stats that will be updated as data arrives
     Turbo::StreamsChannel.broadcast_replace_to(
@@ -121,16 +128,6 @@ class GithubFetchBranchesJob < ApplicationJob
         last_updated: Time.current,
         project: @project
       }
-    )
-  end
-
-  def broadcast_empty_state
-    # Broadcast empty state when no branches are found
-    Turbo::StreamsChannel.broadcast_replace_to(
-      "project_#{@project.id}_github_commits",
-      target: "github_logs",
-      partial: "github_logs/empty_state",
-      locals: { project: @project, job_context: true }
     )
   end
 end

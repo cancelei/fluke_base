@@ -6,7 +6,7 @@ RSpec.describe ProjectSelectionService do
 
   describe '#call' do
     context 'when the project exists' do
-      let(:project) { create(:project, user: user) }
+      let(:project) { create(:project, user:) }
 
       it 'updates the user selection and persists the session' do
         service = described_class.new(user, session, project.id)
@@ -32,7 +32,7 @@ RSpec.describe ProjectSelectionService do
 
   describe '#project' do
     it 'memoizes the project lookup' do
-      project = create(:project, user: user)
+      project = create(:project, user:)
       service = described_class.new(user, session, project.id)
 
       expect(Project).to receive(:find_by).once.and_call_original

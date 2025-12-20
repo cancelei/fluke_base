@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Users::SessionsController < Devise::SessionsController
-  skip_before_action :authenticate_user!, only: [ :new, :create ]
-  before_action :validate_cloudflare_turnstile, only: [ :create ], if: -> { should_validate_turnstile? }
+  skip_before_action :authenticate_user!, only: [:new, :create]
+  before_action :validate_cloudflare_turnstile, only: [:create], if: -> { should_validate_turnstile? }
 
   private
 
@@ -33,7 +33,7 @@ class Users::SessionsController < Devise::SessionsController
     respond_to do |format|
       format.html { render :new, status: :unprocessable_content }
       format.turbo_stream {
-        render turbo_stream: turbo_stream.replace("new_user", partial: "devise/sessions/form", locals: { resource: resource })
+        render turbo_stream: turbo_stream.replace("new_user", partial: "devise/sessions/form", locals: { resource: })
       }
     end
   end

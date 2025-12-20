@@ -9,11 +9,11 @@ class TestOnly::SessionsController < ApplicationController
     email = (params[:email] || "e2e@example.com").to_s.downcase
     password = (params[:password] || default_password)
 
-    user = User.find_by(email: email)
+    user = User.find_by(email:)
     unless user
       user = User.new(
-        email: email,
-        password: password,
+        email:,
+        password:,
         password_confirmation: password,
         first_name: "E2E",
         last_name: "User"

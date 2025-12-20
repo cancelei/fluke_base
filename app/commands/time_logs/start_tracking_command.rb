@@ -26,7 +26,7 @@ module TimeLogs
       end
 
       time_log = project.time_logs.new(
-        milestone: milestone,
+        milestone:,
         started_at: Time.current,
         status: "in_progress",
         user: current_user
@@ -41,13 +41,13 @@ module TimeLogs
         owner = current_user.id == project.user_id
 
         # Update milestone row
-        update_milestone_row(milestone: milestone, project: project, active_log: time_log)
+        update_milestone_row(milestone:, project:, active_log: time_log)
 
         # Update current tracking container
         update_frame(
           "current_tracking_container",
           partial: "time_logs/current_tracking",
-          locals: { current_log: time_log, project: project }
+          locals: { current_log: time_log, project: }
         )
 
         # Update milestone bar and navbar
@@ -58,7 +58,7 @@ module TimeLogs
         update_frame(
           "remaining_time_progress",
           partial: "remaining_time_progress",
-          locals: { project: project, current_log: time_log, owner: owner }
+          locals: { project:, current_log: time_log, owner: }
         )
 
         flash_notice("Started tracking time for this milestone.")

@@ -13,7 +13,7 @@ RSpec.describe Messages::MarkAsReadCommand, type: :command do
       let(:conversation) { create(:conversation, sender: user, recipient: other_user) }
 
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: conversation.id.to_s
         })
       end
@@ -58,7 +58,7 @@ RSpec.describe Messages::MarkAsReadCommand, type: :command do
 
     context "without conversation ID" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {})
+        build_command(described_class, user:, element_data: {})
       end
 
       it "returns silently without error" do
@@ -73,7 +73,7 @@ RSpec.describe Messages::MarkAsReadCommand, type: :command do
 
     context "with non-existent conversation" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: "999999"
         })
       end
@@ -101,7 +101,7 @@ RSpec.describe Messages::MarkAsReadCommand, type: :command do
       let(:conversation) { create(:conversation, sender: other_user, recipient: create(:user)) }
 
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: conversation.id.to_s
         })
       end

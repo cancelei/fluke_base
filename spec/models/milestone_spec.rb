@@ -5,8 +5,8 @@ require 'rails_helper'
 
 RSpec.describe Milestone, type: :model do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
-  let(:milestone) { create(:milestone, project: project) }
+  let(:project) { create(:project, user:) }
+  let(:milestone) { create(:milestone, project:) }
 
   # Association Testing - Line 49-58 in test_spec
   describe "associations" do
@@ -65,15 +65,15 @@ RSpec.describe Milestone, type: :model do
 
   describe "actual_status and time-log aware states" do
     let(:owner) { user }
-    let(:milestone_for_status) { create(:milestone, project: project, status: Milestone::PENDING) }
+    let(:milestone_for_status) { create(:milestone, project:, status: Milestone::PENDING) }
 
     it "returns completed when explicitly completed" do
-      ms = create(:milestone, project: project, status: Milestone::COMPLETED)
+      ms = create(:milestone, project:, status: Milestone::COMPLETED)
       expect(ms.actual_status).to eq(Milestone::COMPLETED)
     end
 
     it "respects explicit in_progress without time logs" do
-      ms = create(:milestone, project: project, status: Milestone::IN_PROGRESS)
+      ms = create(:milestone, project:, status: Milestone::IN_PROGRESS)
       expect(ms.actual_status).to eq(Milestone::IN_PROGRESS)
     end
 
@@ -82,13 +82,13 @@ RSpec.describe Milestone, type: :model do
     end
 
     it "becomes in_progress when owner logs time" do
-      tl = create(:time_log, project: project, milestone: milestone_for_status, user: owner, hours_spent: 1.5, status: "completed")
+      tl = create(:time_log, project:, milestone: milestone_for_status, user: owner, hours_spent: 1.5, status: "completed")
       expect(milestone_for_status.reload.actual_status).to eq(Milestone::IN_PROGRESS)
     end
 
     it "remains pending when only unauthorized user logs time" do
       outsider = create(:user)
-      create(:time_log, project: project, milestone: milestone_for_status, user: outsider, hours_spent: 1.0, status: "completed")
+      create(:time_log, project:, milestone: milestone_for_status, user: outsider, hours_spent: 1.0, status: "completed")
       # No agreements yet, outsider is not authorized
       expect(milestone_for_status.reload.actual_status).to eq(Milestone::PENDING)
     end
@@ -96,22 +96,22 @@ RSpec.describe Milestone, type: :model do
     it "becomes in_progress when active agreement participant logs time" do
       mentor = create(:user)
       # Create accepted agreement so mentor is an authorized participant
-      create(:agreement, :with_participants, :mentorship, project: project, initiator: owner, other_party: mentor, status: Agreement::ACCEPTED)
-      create(:time_log, project: project, milestone: milestone_for_status, user: mentor, hours_spent: 2.0, status: "completed")
+      create(:agreement, :with_participants, :mentorship, project:, initiator: owner, other_party: mentor, status: Agreement::ACCEPTED)
+      create(:time_log, project:, milestone: milestone_for_status, user: mentor, hours_spent: 2.0, status: "completed")
       expect(milestone_for_status.reload.actual_status).to eq(Milestone::IN_PROGRESS)
     end
   end
 
   describe "helper predicates" do
     it "in_progress? reflects actual_status" do
-      ms = create(:milestone, project: project, status: Milestone::IN_PROGRESS)
+      ms = create(:milestone, project:, status: Milestone::IN_PROGRESS)
       expect(ms.in_progress?).to be true
       ms.update!(status: Milestone::PENDING)
       expect(ms.in_progress?).to be false
     end
 
     it "not_started? and pending? are true when actual_status is pending" do
-      ms = create(:milestone, project: project, status: Milestone::PENDING)
+      ms = create(:milestone, project:, status: Milestone::PENDING)
       expect(ms.not_started?).to be true
       expect(ms.pending?).to be true
     end
@@ -119,9 +119,9 @@ RSpec.describe Milestone, type: :model do
 
   describe "scopes with due dates" do
     it "upcoming returns milestones with future due dates ordered asc" do
-      past  = create(:milestone, project: project, due_date: Date.today - 1, status: Milestone::PENDING)
-      soon  = create(:milestone, project: project, due_date: Date.today + 1, status: Milestone::PENDING)
-      later = create(:milestone, project: project, due_date: Date.today + 7, status: Milestone::PENDING)
+      past  = create(:milestone, project:, due_date: Date.today - 1, status: Milestone::PENDING)
+      soon  = create(:milestone, project:, due_date: Date.today + 1, status: Milestone::PENDING)
+      later = create(:milestone, project:, due_date: Date.today + 7, status: Milestone::PENDING)
 
       list = Milestone.upcoming.to_a
       expect(list).to include(soon, later)

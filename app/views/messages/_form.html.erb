@@ -1,5 +1,5 @@
 <% if conversation && message %>
-  <%= form_with(model: [ conversation, message ], html: { multipart: true }, class: "space-y-3", id: "message-form", data: { controller: "message-recorder", message_recorder_target: "form" }) do |form| %>
+  <%= form_with(model: [conversation, message], html: { multipart: true }, class: "space-y-3", id: "message-form", data: { controller: "message-recorder", message_recorder_target: "form" }) do |form| %>
     <!-- Recording Review Area (hidden by default) -->
     <div data-message-recorder-target="recordingReview"
          class="hidden alert alert-info mb-3 transition-all duration-300 ease-in-out">

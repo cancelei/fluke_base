@@ -49,7 +49,7 @@ module Agreements
 
       conversation = Conversation.between(current_user.id, other_party.id)
       Message.create!(
-        conversation: conversation,
+        conversation:,
         user: current_user,
         body: "[Automated] #{current_user.full_name} has rejected an agreement for project '#{agreement.project.name}'. #{controller.agreement_url(agreement)}"
       )
@@ -60,7 +60,7 @@ module Agreements
         ActionView::RecordIdentifier.dom_id(agreement),
         partial: "agreements/agreement_show_content",
         locals: {
-          agreement: agreement,
+          agreement:,
           project: agreement.project,
           can_view_full_details: agreement.can_view_full_project_details?(current_user)
         }

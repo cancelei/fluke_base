@@ -11,7 +11,7 @@ namespace :test do
   desc "Run RSpec (Rails env: test)"
   task :rspec do
     ENV["RAILS_ENV"] = "test"
-    cmd = [ "bundle", "exec", "rspec" ]
+    cmd = ["bundle", "exec", "rspec"]
 
     # Respect coverage toggle
     if ENV["COVERAGE"] == "true"
@@ -19,10 +19,10 @@ namespace :test do
     end
 
     # Prefer concise output by default
-    cmd += [ "--format", ENV["RSPEC_FORMAT"] || "progress" ]
+    cmd += ["--format", ENV["RSPEC_FORMAT"] || "progress"]
 
     # Optional fail-fast via env
-    cmd += [ "--fail-fast" ] if ENV["RSPEC_FAIL_FAST"] == "1"
+    cmd += ["--fail-fast"] if ENV["RSPEC_FAIL_FAST"] == "1"
 
     puts "🧪 Running: #{cmd.join(' ')}"
     system(*cmd)
@@ -32,7 +32,7 @@ namespace :test do
   desc "Run ESLint for JavaScript (NODE_ENV=test)"
   task "js:lint" do
     ENV["NODE_ENV"] ||= "test"
-    cmd = [ "npm", "run", "lint:js" ]
+    cmd = ["npm", "run", "lint:js"]
     puts "⚡ Running: #{cmd.join(' ')}"
     system(*cmd)
     abort("ESLint failed") unless $CHILD_STATUS&.success?
@@ -100,7 +100,7 @@ namespace :coverage do
       add_filter "/storage/"
       add_filter "/node_modules/"
       enable_coverage :branch
-      SimpleCov.formatters = [ SimpleCov::Formatter::HTMLFormatter, SimpleCov::Formatter::LcovFormatter ]
+      SimpleCov.formatters = [SimpleCov::Formatter::HTMLFormatter, SimpleCov::Formatter::LcovFormatter]
     end
     puts "🧩 Merged coverage written to coverage/combined/"
   end

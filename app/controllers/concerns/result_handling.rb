@@ -59,7 +59,7 @@ module ResultHandling
     render turbo_stream: turbo_stream.prepend(
       "flash_messages",
       partial: "shared/flash_message",
-      locals: { type: "alert", message: message }
+      locals: { type: "alert", message: }
     )
   end
 end

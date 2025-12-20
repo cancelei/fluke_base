@@ -90,7 +90,7 @@
                   <%= week_data[:date].strftime("%b %d") %>
                 </div>
                 <div class="flex-1">
-                  <% bar_width = agreement.weekly_hours > 0 ? [ week_data[:hours] / agreement.weekly_hours * 100, 100 ].min : 0 %>
+                  <% bar_width = agreement.weekly_hours > 0 ? [week_data[:hours] / agreement.weekly_hours * 100, 100].min : 0 %>
                   <progress class="progress progress-success w-full" value="<%= bar_width %>" max="100"></progress>
                 </div>
                 <div class="w-24 text-right">

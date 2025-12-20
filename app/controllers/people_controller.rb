@@ -1,6 +1,6 @@
 class PeopleController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_person, only: [ :show ]
+  before_action :set_person, only: [:show]
 
   def explore
     @role = params[:role]
@@ -32,7 +32,7 @@ class PeopleController < ApplicationController
 
     # Only count shared agreements where current_user is actually a party
     @shared_agreements_count = Agreement.joins(:agreement_participants)
-                                        .where(agreement_participants: { user_id: [ current_user.id, @person.id ] })
+                                        .where(agreement_participants: { user_id: [current_user.id, @person.id] })
                                         .group("agreements.id")
                                         .having("COUNT(DISTINCT agreement_participants.user_id) = 2")
                                         .count

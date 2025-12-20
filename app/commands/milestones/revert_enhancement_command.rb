@@ -23,7 +23,7 @@ module Milestones
       milestone = enhancement.milestone
 
       if milestone.update(description: enhancement.original_description)
-        update_frame("milestone_description", partial: "milestones/description", locals: { milestone: milestone })
+        update_frame("milestone_description", partial: "milestones/description", locals: { milestone: })
         clear_frame("ai-suggestion-container")
         flash_notice("Reverted to original description.")
         Success(milestone)

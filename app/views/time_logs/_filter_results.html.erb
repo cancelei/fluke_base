@@ -36,7 +36,7 @@
           <tbody class="bg-base-100 divide-y divide-base-300">
           <% milestones_pending_confirmation.each do |milestone| %>
           <% time_log_users = milestone.time_logs.map(&:user).uniq %>
-            <% (selected_user ? [ selected_user ] : time_log_users).each do |user| %>
+            <% (selected_user ? [selected_user] : time_log_users).each do |user| %>
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-primary truncate">
@@ -130,7 +130,7 @@
           <tbody class="bg-base-100 divide-y divide-base-300">
           <% time_logs_completed.each do |milestone| %>
             <% time_log_users = milestone.time_logs.map(&:user).uniq %>
-              <% (selected_user ? [ selected_user ] : time_log_users).each do |user| %>
+              <% (selected_user ? [selected_user] : time_log_users).each do |user| %>
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-medium text-primary truncate">

@@ -4,6 +4,6 @@ module AgreementsHelper
 
     name = User.find_by_id(meta["id"])&.full_name
     role = meta["role"]
-    [ name, role ]
+    [name, role]
   end
 end

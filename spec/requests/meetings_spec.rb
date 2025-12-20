@@ -4,7 +4,7 @@ require 'rails_helper'
 RSpec.describe "Meetings", type: :request do
   let(:initiator) { create(:user) }
   let(:other) { create(:user) }
-  let(:agreement) { create(:agreement, :mentorship, :with_participants, initiator: initiator, other_party: other) }
+  let(:agreement) { create(:agreement, :mentorship, :with_participants, initiator:, other_party: other) }
 
   before { sign_in initiator }
 

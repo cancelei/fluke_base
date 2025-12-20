@@ -25,7 +25,7 @@
         </ul>
       <% end %>
 
-      <%= fluke_form_with(model: [ @agreement || meeting.agreement, meeting ], class: "space-y-6") do |form| %>
+      <%= fluke_form_with(model: [@agreement || meeting.agreement, meeting], class: "space-y-6") do |form| %>
         <% if meeting.errors.any? %>
           <%= ui_alert(variant: :error, css_class: "mb-6") do %>
             <div>

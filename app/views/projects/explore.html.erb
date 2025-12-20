@@ -16,19 +16,19 @@
               {
                 name: :category,
                 type: :select,
-                options: [ [ "All Categories", "" ],
-                         [ "Technology", "Technology" ],
-                         [ "Health", "Health" ],
-                         [ "Education", "Education" ],
-                         [ "Finance", "Finance" ],
-                         [ "Other", "Other" ] ]
+                options: [["All Categories", ""],
+                         ["Technology", "Technology"],
+                         ["Health", "Health"],
+                         ["Education", "Education"],
+                         ["Finance", "Finance"],
+                         ["Other", "Other"]]
               },
               {
                 name: :collaboration_type,
                 type: :select,
-                options: [ [ "All Types", "" ],
-                         [ "Looking for Mentor", "mentor" ],
-                         [ "Looking for Co-Founder", "co_founder" ] ]
+                options: [["All Types", ""],
+                         ["Looking for Mentor", "mentor"],
+                         ["Looking for Co-Founder", "co_founder"]]
               }
             ],
             form_options: { class: "flex flex-wrap gap-3", data: { turbo_frame: "projects_explore" } } %>

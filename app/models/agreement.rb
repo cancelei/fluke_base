@@ -24,9 +24,9 @@ class Agreement < ApplicationRecord
   before_validation :init_status, :init_agreement_type
 
   validates :project_id, presence: true
-  validates :status, presence: true, inclusion: { in: [ PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED, COUNTERED ] }
-  validates :agreement_type, presence: true, inclusion: { in: [ MENTORSHIP, CO_FOUNDER ] }
-  validates :payment_type, presence: true, inclusion: { in: [ HOURLY, EQUITY, HYBRID ] }
+  validates :status, presence: true, inclusion: { in: [PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED, COUNTERED] }
+  validates :agreement_type, presence: true, inclusion: { in: [MENTORSHIP, CO_FOUNDER] }
+  validates :payment_type, presence: true, inclusion: { in: [HOURLY, EQUITY, HYBRID] }
   validates :start_date, presence: true
   validates :end_date, presence: true
   validates :tasks, presence: true
@@ -50,7 +50,7 @@ class Agreement < ApplicationRecord
   scope :with_project_and_users, -> { includes(:project, agreement_participants: :user) }
   scope :with_meetings, -> { includes(:meetings) }
   scope :recent_first, -> { order(created_at: :desc) }
-  scope :for_user, ->(user_id) { joins(:agreement_participants).where(agreement_participants: { user_id: user_id }) }
+  scope :for_user, ->(user_id) { joins(:agreement_participants).where(agreement_participants: { user_id: }) }
 
   def init_status
     self.status = PENDING if self.status.blank?
@@ -81,7 +81,7 @@ class Agreement < ApplicationRecord
     calculations_service.current_time_log
   end
 
-  scope :not_rejected_or_cancelled, -> { where.not(status: [ REJECTED, CANCELLED ]) }
+  scope :not_rejected_or_cancelled, -> { where.not(status: [REJECTED, CANCELLED]) }
 
   def end_date_after_start_date
     return if end_date.blank? || start_date.blank?
@@ -91,29 +91,12 @@ class Agreement < ApplicationRecord
     end
   end
 
-  def initiator
-    agreement_participants.find_by(is_initiator: true)&.user
-  end
-
-  def initiator_id
-    initiator&.id
-  end
-
-  def other_party
-    agreement_participants.find_by(is_initiator: false)&.user
-  end
-
-  def other_party_id
-    other_party&.id
-  end
-
-  def participants
-    agreement_participants.includes(:user)
-  end
-
-  def participant_for_user(user)
-    agreement_participants.find_by(user: user)
-  end
+  def initiator = agreement_participants.find_by(is_initiator: true)&.user
+  def initiator_id = initiator&.id
+  def other_party = agreement_participants.find_by(is_initiator: false)&.user
+  def other_party_id = other_party&.id
+  def participants = agreement_participants.includes(:user)
+  def participant_for_user(user) = agreement_participants.find_by(user:)
 
   def user_can_accept_or_counter?(user)
     participant = participant_for_user(user)
@@ -165,53 +148,19 @@ class Agreement < ApplicationRecord
     end
   end
 
-  def active?
-    status == ACCEPTED
-  end
+  def active? = status == ACCEPTED
+  def pending? = status == PENDING
+  def completed? = status == COMPLETED
+  def rejected? = status == REJECTED
+  def cancelled? = status == CANCELLED
+  def countered? = status == COUNTERED
 
-  def pending?
-    status == PENDING
-  end
-
-  def completed?
-    status == COMPLETED
-  end
-
-  def rejected?
-    status == REJECTED
-  end
-
-  def cancelled?
-    status == CANCELLED
-  end
-
-  def countered?
-    status == COUNTERED
-  end
-
-  def accept!
-    status_service.accept!
-  end
-
-  def reject!
-    status_service.reject!
-  end
-
-  def complete!
-    status_service.complete!
-  end
-
-  def cancel!
-    status_service.cancel!
-  end
-
-  def counter_offer!(counter_agreement)
-    status_service.counter_offer!(counter_agreement)
-  end
-
-  def payment_details
-    calculations_service.payment_details
-  end
+  def accept! = status_service.accept!
+  def reject! = status_service.reject!
+  def complete! = status_service.complete!
+  def cancel! = status_service.cancel!
+  def counter_offer!(counter_agreement) = status_service.counter_offer!(counter_agreement)
+  def payment_details = calculations_service.payment_details
 
   def can_view_full_project_details?(user)
     return true if initiator&.id == user.id
@@ -219,21 +168,10 @@ class Agreement < ApplicationRecord
     false
   end
 
-  def calculate_total_cost
-    calculations_service.total_cost
-  end
-
-  def duration_in_weeks
-    calculations_service.duration_in_weeks
-  end
-
-  def is_counter_offer?
-    agreement_participants.any?(&:counter_agreement_id)
-  end
-
-  def counter_to_id
-    agreement_participants.first&.counter_agreement_id
-  end
+  def calculate_total_cost = calculations_service.total_cost
+  def duration_in_weeks = calculations_service.duration_in_weeks
+  def is_counter_offer? = agreement_participants.any?(&:counter_agreement_id)
+  def counter_to_id = agreement_participants.first&.counter_agreement_id
 
   def counter_to
     counter_agreement_id = counter_to_id
@@ -246,25 +184,12 @@ class Agreement < ApplicationRecord
             .distinct
   end
 
-  def has_counter_offers?
-    counter_offers.exists?
-  end
-
-  def most_recent_counter_offer
-    counter_offers.order(created_at: :desc).first
-  end
-
-  def latest_counter_offer
-    most_recent_counter_offer
-  end
+  def has_counter_offers? = counter_offers.exists?
+  def most_recent_counter_offer = counter_offers.order(created_at: :desc).first
+  def latest_counter_offer = most_recent_counter_offer
 
   private
 
-  def status_service
-    @status_service ||= AgreementStatusService.new(self)
-  end
-
-  def calculations_service
-    @calculations_service ||= AgreementCalculationsService.new(self)
-  end
+  def status_service = @status_service ||= AgreementStatusService.new(self)
+  def calculations_service = @calculations_service ||= AgreementCalculationsService.new(self)
 end

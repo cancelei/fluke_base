@@ -224,7 +224,7 @@
                           raw_url = @project.project_link.strip
                           normalized_url = raw_url.start_with?("http://", "https://") ? raw_url : "https://#{raw_url}"
                           uri = URI.parse(normalized_url)
-                          if uri.is_a?(URI::HTTP) && [ "http", "https" ].include?(uri.scheme)
+                          if uri.is_a?(URI::HTTP) && ["http", "https"].include?(uri.scheme)
                             project_url = ERB::Util.html_escape(uri.to_s)
                           end
                         rescue URI::InvalidURIError => e

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Users::RegistrationsController < Devise::RegistrationsController
-  skip_before_action :authenticate_user!, only: [ :new, :create, :cancel ]
-  before_action :validate_cloudflare_turnstile, only: [ :create ], if: -> { should_validate_turnstile? }
+  skip_before_action :authenticate_user!, only: [:new, :create, :cancel]
+  before_action :validate_cloudflare_turnstile, only: [:create], if: -> { should_validate_turnstile? }
 
   # The path used after sign up.
   def after_sign_up_path_for(resource)

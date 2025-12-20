@@ -171,7 +171,7 @@
         <% if @recent_commits&.any? %>
           <div class="text-sm text-base-content/60">
             <% start_index = (@recent_commits.current_page - 1) * @recent_commits.limit_value + 1 %>
-            <% end_index = [ @recent_commits.current_page * @recent_commits.limit_value, @recent_commits.total_count ].min %>
+            <% end_index = [@recent_commits.current_page * @recent_commits.limit_value, @recent_commits.total_count].min %>
             Showing <%= start_index %>-<%= end_index %> of <%= @recent_commits.total_count %> commits
           </div>
         <% end %>

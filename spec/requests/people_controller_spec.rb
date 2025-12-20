@@ -22,10 +22,10 @@ RSpec.describe 'People', type: :request do
   describe 'GET /people/:id' do
     let(:person) { create(:user, first_name: 'Kai', last_name: 'Builder') }
     let!(:owned_project) do
-      create(:project, user: person, name: 'Owned Project', description: 'Personal project', public_fields: [ 'name', 'description' ])
+      create(:project, user: person, name: 'Owned Project', description: 'Personal project', public_fields: ['name', 'description'])
     end
     let!(:agreement_project) do
-      create(:project, name: 'Agreement Project', description: 'Collaboration', public_fields: [ 'name', 'description' ])
+      create(:project, name: 'Agreement Project', description: 'Collaboration', public_fields: ['name', 'description'])
     end
 
     before do
@@ -34,7 +34,7 @@ RSpec.describe 'People', type: :request do
              initiator: agreement_project.user,
              other_party: person,
              status: Agreement::ACCEPTED)
-      user.update!(selected_project: create(:project, user: user))
+      user.update!(selected_project: create(:project, user:))
     end
 
     it 'shows the person profile with their project involvement' do

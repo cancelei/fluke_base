@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Stimulus Dropdown Controller', type: :system, js: true do
   let(:user) { create(:user) }
-  let!(:project) { create(:project, user: user, name: 'Navigation Project') }
+  let!(:project) { create(:project, user:, name: 'Navigation Project') }
 
   before do
     sign_in user

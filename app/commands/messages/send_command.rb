@@ -25,7 +25,7 @@ module Messages
 
       message = conversation.messages.build(
         user: current_user,
-        body: body
+        body:
       )
 
       if message.save
@@ -39,7 +39,7 @@ module Messages
         append_to_frame(
           "messages_container",
           partial: "messages/message",
-          locals: { message: message, current_user: current_user }
+          locals: { message:, current_user: }
         )
 
         Success(message)
@@ -55,14 +55,14 @@ module Messages
     private
 
     def broadcast_message(conversation, message)
-      [ conversation.sender, conversation.recipient ].each do |participant|
+      [conversation.sender, conversation.recipient].each do |participant|
         next if participant == current_user
 
         Turbo::StreamsChannel.broadcast_append_to(
           participant,
           target: "messages_container",
           partial: "messages/message",
-          locals: { message: message, current_user: participant }
+          locals: { message:, current_user: participant }
         )
       end
     end

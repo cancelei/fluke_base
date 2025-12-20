@@ -142,9 +142,9 @@ class AgreementForm < ApplicationForm
     @agreement.agreement_participants.create!(
       user_id: initiator_user_id,
       user_role: initiator_role,
-      project_id: project_id,
+      project_id:,
       is_initiator: true,
-      counter_agreement_id: counter_agreement_id,
+      counter_agreement_id:,
       accept_or_counter_turn_id: turn_user_id
     )
 
@@ -153,9 +153,9 @@ class AgreementForm < ApplicationForm
     @agreement.agreement_participants.create!(
       user_id: other_party_user_id,
       user_role: other_party_role,
-      project_id: project_id,
+      project_id:,
       is_initiator: false,
-      counter_agreement_id: counter_agreement_id,
+      counter_agreement_id:,
       accept_or_counter_turn_id: turn_user_id
     )
   end
@@ -261,8 +261,8 @@ class AgreementForm < ApplicationForm
 
     # Check for existing agreements using the new AgreementParticipants structure
     query = Agreement.joins(:agreement_participants)
-      .where(project_id: project_id, status: [ Agreement::ACCEPTED, Agreement::PENDING ])
-      .where(agreement_participants: { user_id: [ initiator_user_id, other_party_user_id ] })
+      .where(project_id:, status: [Agreement::ACCEPTED, Agreement::PENDING])
+      .where(agreement_participants: { user_id: [initiator_user_id, other_party_user_id] })
       .group("agreements.id")
       .having("COUNT(agreement_participants.id) = 2")
 

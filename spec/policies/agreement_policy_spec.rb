@@ -13,14 +13,14 @@ RSpec.describe AgreementPolicy, type: :policy do
 
   # Helper to create agreement with participants
   def create_agreement_with_participants(project:, initiator:, other_party:, status: 'Pending')
-    agreement = create(:agreement, project: project, status: status)
-    create(:agreement_participant, agreement: agreement, user: initiator, is_initiator: true, accept_or_counter_turn_id: other_party.id)
-    create(:agreement_participant, agreement: agreement, user: other_party, is_initiator: false, accept_or_counter_turn_id: other_party.id)
+    agreement = create(:agreement, project:, status:)
+    create(:agreement_participant, agreement:, user: initiator, is_initiator: true, accept_or_counter_turn_id: other_party.id)
+    create(:agreement_participant, agreement:, user: other_party, is_initiator: false, accept_or_counter_turn_id: other_party.id)
     agreement
   end
 
   describe 'permissions' do
-    let(:agreement) { create_agreement_with_participants(project: project, initiator: project_owner, other_party: user) }
+    let(:agreement) { create_agreement_with_participants(project:, initiator: project_owner, other_party: user) }
 
     context 'for a visitor (not signed in)' do
       permissions :index?, :show?, :create?, :new? do
@@ -54,7 +54,7 @@ RSpec.describe AgreementPolicy, type: :policy do
 
         it 'denies editing accepted agreements' do
           accepted_agreement = create_agreement_with_participants(
-            project: project,
+            project:,
             initiator: project_owner,
             other_party: user,
             status: 'Accepted'
@@ -70,7 +70,7 @@ RSpec.describe AgreementPolicy, type: :policy do
 
         it 'denies deleting accepted agreements' do
           accepted_agreement = create_agreement_with_participants(
-            project: project,
+            project:,
             initiator: project_owner,
             other_party: user,
             status: 'Accepted'
@@ -86,7 +86,7 @@ RSpec.describe AgreementPolicy, type: :policy do
 
         it 'allows completing active agreements' do
           active_agreement = create_agreement_with_participants(
-            project: project,
+            project:,
             initiator: project_owner,
             other_party: user,
             status: 'Accepted'
@@ -113,7 +113,7 @@ RSpec.describe AgreementPolicy, type: :policy do
 
         it 'denies accepting when not their turn' do
           agreement_not_turn = create_agreement_with_participants(
-            project: project,
+            project:,
             initiator: project_owner,
             other_party: user
           )
@@ -136,7 +136,7 @@ RSpec.describe AgreementPolicy, type: :policy do
 
         it 'allows canceling active agreements' do
           active_agreement = create_agreement_with_participants(
-            project: project,
+            project:,
             initiator: project_owner,
             other_party: user,
             status: 'Accepted'
@@ -163,7 +163,7 @@ RSpec.describe AgreementPolicy, type: :policy do
     context 'for viewing permissions' do
       let(:active_agreement) do
         create_agreement_with_participants(
-          project: project,
+          project:,
           initiator: project_owner,
           other_party: user,
           status: 'Accepted'
@@ -189,7 +189,7 @@ RSpec.describe AgreementPolicy, type: :policy do
 
         it 'allows participants to view on completed agreements' do
           completed_agreement = create_agreement_with_participants(
-            project: project,
+            project:,
             initiator: project_owner,
             other_party: user,
             status: 'Completed'
@@ -206,15 +206,15 @@ RSpec.describe AgreementPolicy, type: :policy do
 
   describe 'Scope' do
     let!(:user_initiated_agreement) do
-      create_agreement_with_participants(project: project, initiator: user, other_party: project_owner)
+      create_agreement_with_participants(project:, initiator: user, other_party: project_owner)
     end
 
     let!(:user_received_agreement) do
-      create_agreement_with_participants(project: project, initiator: project_owner, other_party: user)
+      create_agreement_with_participants(project:, initiator: project_owner, other_party: user)
     end
 
     let!(:other_agreement) do
-      create_agreement_with_participants(project: project, initiator: project_owner, other_party: other_user)
+      create_agreement_with_participants(project:, initiator: project_owner, other_party: other_user)
     end
 
     context 'for a visitor' do

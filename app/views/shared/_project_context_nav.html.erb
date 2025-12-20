@@ -11,16 +11,16 @@
           <div class="flex items-center gap-1">
             <%# Project Selector Dropdown %>
             <%= render "shared/context_project_selector",
-                       current_user: current_user,
-                       selected_project: selected_project %>
+                       current_user:,
+                       selected_project: %>
 
             <% if selected_project.present? %>
               <div class="divider divider-horizontal mx-1 w-px h-6 before:bg-base-300 after:bg-base-300"></div>
 
               <%# Milestones Dropdown %>
               <%= render "shared/context_milestones_dropdown",
-                         current_user: current_user,
-                         selected_project: selected_project %>
+                         current_user:,
+                         selected_project: %>
             <% end %>
           </div>
 

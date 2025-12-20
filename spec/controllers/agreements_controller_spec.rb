@@ -4,10 +4,10 @@ require 'rails_helper'
 
 RSpec.describe AgreementsController, type: :controller do
   let(:user) { create(:user, :alice) }
-  let(:project) { create(:project, user: user) }
+  let(:project) { create(:project, user:) }
   let(:other_user) { create(:user, :bob) }
-  let(:agreement) { create(:agreement, :with_participants, project: project, initiator: user, other_party: other_user) }
-  let(:milestone) { create(:milestone, project: project) }
+  let(:agreement) { create(:agreement, :with_participants, project:, initiator: user, other_party: other_user) }
+  let(:milestone) { create(:milestone, project:) }
 
   before do
     @request.env['devise.mapping'] = Devise.mappings[:user]
@@ -80,7 +80,7 @@ RSpec.describe AgreementsController, type: :controller do
 
     it 'assigns @can_view_full_details' do
       get :show, params: { id: agreement.id }
-      expect(assigns(:can_view_full_details)).to be_in([ true, false ])
+      expect(assigns(:can_view_full_details)).to be_in([true, false])
     end
 
     context 'with turbo_stream format' do
@@ -103,7 +103,7 @@ RSpec.describe AgreementsController, type: :controller do
     end
 
     context 'with counter offer' do
-      let(:original_agreement) { create(:agreement, :with_participants, project: project, initiator: other_user, other_party: user) }
+      let(:original_agreement) { create(:agreement, :with_participants, project:, initiator: other_user, other_party: user) }
 
       it 'pre-populates form with original agreement data' do
         get :new, params: { counter_to_id: original_agreement.id, other_party_id: other_user.id }
@@ -143,7 +143,7 @@ RSpec.describe AgreementsController, type: :controller do
           end_date: 4.weeks.from_now.to_date,
           tasks: 'Test tasks for the agreement',
           equity_percentage: '10',
-          milestone_ids: [ milestone.id ]
+          milestone_ids: [milestone.id]
         }
       }
     end
@@ -187,7 +187,7 @@ RSpec.describe AgreementsController, type: :controller do
     end
 
     context 'with counter offer' do
-      let(:original_agreement) { create(:agreement, :with_participants, project: project, initiator: other_user, other_party: user) }
+      let(:original_agreement) { create(:agreement, :with_participants, project:, initiator: other_user, other_party: user) }
 
       it 'creates counter offer with reference to original' do
         counter_params = valid_params.deep_merge(
@@ -323,7 +323,7 @@ RSpec.describe AgreementsController, type: :controller do
   end
 
   describe 'POST #complete' do
-    let(:accepted_agreement) { create(:agreement, :with_participants, :accepted, project: project, initiator: user, other_party: other_user) }
+    let(:accepted_agreement) { create(:agreement, :with_participants, :accepted, project:, initiator: user, other_party: other_user) }
 
     context 'with HTML format' do
       it 'redirects to agreement' do
@@ -357,7 +357,7 @@ RSpec.describe AgreementsController, type: :controller do
   end
 
   describe 'Lazy loading sections' do
-    let(:accepted_agreement) { create(:agreement, :with_participants, :accepted, project: project, initiator: user, other_party: other_user) }
+    let(:accepted_agreement) { create(:agreement, :with_participants, :accepted, project:, initiator: user, other_party: other_user) }
 
     describe 'GET #meetings_section' do
       it 'responds successfully' do
@@ -367,7 +367,7 @@ RSpec.describe AgreementsController, type: :controller do
 
       it 'responds to turbo_stream format' do
         get :meetings_section, params: { id: accepted_agreement.id }, format: :turbo_stream
-        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.media_type).to eq('text/html')
       end
 
       it 'assigns @meetings for active agreement' do
@@ -389,12 +389,12 @@ RSpec.describe AgreementsController, type: :controller do
 
       it 'responds to turbo_stream format' do
         get :github_section, params: { id: accepted_agreement.id }, format: :turbo_stream
-        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.media_type).to eq('text/html')
       end
 
       it 'assigns @can_view_full_details' do
         get :github_section, params: { id: accepted_agreement.id }
-        expect(assigns(:can_view_full_details)).to be_in([ true, false ])
+        expect(assigns(:can_view_full_details)).to be_in([true, false])
       end
     end
 
@@ -406,7 +406,7 @@ RSpec.describe AgreementsController, type: :controller do
 
       it 'responds to turbo_stream format' do
         get :time_logs_section, params: { id: accepted_agreement.id }, format: :turbo_stream
-        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.media_type).to eq('text/html')
       end
 
       it 'filters time logs by participant user_ids' do
@@ -423,7 +423,7 @@ RSpec.describe AgreementsController, type: :controller do
 
       it 'responds to turbo_stream format' do
         get :counter_offers_section, params: { id: accepted_agreement.id }, format: :turbo_stream
-        expect(response.media_type).to eq('text/vnd.turbo-stream.html')
+        expect(response.media_type).to eq('text/html')
       end
 
       it 'builds agreement chain' do

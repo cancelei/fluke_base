@@ -94,7 +94,7 @@
                                     <%= button_to role.titleize,
                                         project_membership_path(project, membership),
                                         method: :patch,
-                                        params: { project_membership: { role: role } },
+                                        params: { project_membership: { role: } },
                                         class: "w-full text-left" %>
                                   </li>
                                 <% end %>

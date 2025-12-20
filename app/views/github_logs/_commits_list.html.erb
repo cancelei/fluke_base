@@ -51,6 +51,6 @@
       </li>
     <% end %>
     <% associated_time_log = commit.time_log %>
-    <%= render "github_logs/commit_item", commit: commit, associated_time_log: associated_time_log, project: project %>
+    <%= render "github_logs/commit_item", commit:, associated_time_log:, project: %>
   <% end %>
 </ul>

@@ -34,8 +34,8 @@ module Flashable
   # @param options [Hash] Additional options (title:, timeout:, etc.)
   def flash_toast(type, message, **options)
     component = Ui::ToastComponent.new(
-      type: type,
-      message: message,
+      type:,
+      message:,
       title: options[:title],
       timeout: options[:timeout] || 5000,
       close_button: options.fetch(:close_button, true),
@@ -50,19 +50,19 @@ module Flashable
   end
 
   # Convenience methods for specific toast types
-  def toast_success(message, **options)
-    flash_toast(:success, message, **options)
+  def toast_success(message, **)
+    flash_toast(:success, message, **)
   end
 
-  def toast_error(message, **options)
-    flash_toast(:error, message, **options)
+  def toast_error(message, **)
+    flash_toast(:error, message, **)
   end
 
-  def toast_info(message, **options)
-    flash_toast(:info, message, **options)
+  def toast_info(message, **)
+    flash_toast(:info, message, **)
   end
 
-  def toast_warning(message, **options)
-    flash_toast(:warning, message, **options)
+  def toast_warning(message, **)
+    flash_toast(:warning, message, **)
   end
 end

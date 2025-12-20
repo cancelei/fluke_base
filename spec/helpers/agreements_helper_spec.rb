@@ -16,7 +16,7 @@ RSpec.describe AgreementsHelper, type: :helper do
 
     it 'returns [name, role] when meta has id and role' do
       meta = { 'id' => user.id, 'role' => 'entrepreneur' }
-      expect(helper.fetch_initiator_data(meta)).to eq([ user.full_name, 'entrepreneur' ])
+      expect(helper.fetch_initiator_data(meta)).to eq([user.full_name, 'entrepreneur'])
     end
 
     it 'returns nil when meta is blank' do
@@ -25,7 +25,7 @@ RSpec.describe AgreementsHelper, type: :helper do
 
     it 'returns [nil, role] when user not found' do
       meta = { 'id' => 999_999, 'role' => 'mentor' }
-      expect(helper.fetch_initiator_data(meta)).to eq([ nil, 'mentor' ])
+      expect(helper.fetch_initiator_data(meta)).to eq([nil, 'mentor'])
     end
   end
 end

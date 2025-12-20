@@ -4,8 +4,8 @@ require 'rails_helper'
 
 RSpec.describe "TimeLogs multi-project tracking", type: :request do
   let(:user) { create(:user) }
-  let(:project_a) { create(:project, user: user) }
-  let(:project_b) { create(:project, user: user) }
+  let(:project_a) { create(:project, user:) }
+  let(:project_b) { create(:project, user:) }
   let!(:milestone_a) { create(:milestone, project: project_a) }
   let!(:milestone_b) { create(:milestone, project: project_b) }
 
@@ -28,12 +28,12 @@ RSpec.describe "TimeLogs multi-project tracking", type: :request do
 
     it "does not allow starting a second active log on another project" do
       start_tracking(project_a, milestone_a)
-      expect(TimeLog.in_progress.where(user: user).count).to eq(1)
+      expect(TimeLog.in_progress.where(user:).count).to eq(1)
 
       start_tracking(project_b, milestone_b)
 
       # Should still be only one active log due to guard
-      expect(TimeLog.in_progress.where(user: user).count).to eq(1)
+      expect(TimeLog.in_progress.where(user:).count).to eq(1)
     end
   end
 
@@ -44,12 +44,12 @@ RSpec.describe "TimeLogs multi-project tracking", type: :request do
       start_tracking(project_a, milestone_a)
       start_tracking(project_b, milestone_b)
 
-      expect(TimeLog.in_progress.where(user: user, project: project_a).count).to eq(1)
-      expect(TimeLog.in_progress.where(user: user, project: project_b).count).to eq(1)
+      expect(TimeLog.in_progress.where(user:, project: project_a).count).to eq(1)
+      expect(TimeLog.in_progress.where(user:, project: project_b).count).to eq(1)
 
       stop_tracking(project_a, milestone_a)
-      expect(TimeLog.in_progress.where(user: user, project: project_a).count).to eq(0)
-      expect(TimeLog.in_progress.where(user: user, project: project_b).count).to eq(1)
+      expect(TimeLog.in_progress.where(user:, project: project_a).count).to eq(0)
+      expect(TimeLog.in_progress.where(user:, project: project_b).count).to eq(1)
     end
   end
 end

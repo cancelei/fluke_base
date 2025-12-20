@@ -63,7 +63,7 @@ end
 # Command that requires authentication
 RSpec.shared_examples "a command requiring authentication" do |element_data:|
   context "when user is not authenticated" do
-    let(:command) { build_command(described_class, user: nil, element_data: element_data) }
+    let(:command) { build_command(described_class, user: nil, element_data:) }
 
     it "raises an error or returns early" do
       expect { command.execute }.to raise_error(NoMethodError)
@@ -80,7 +80,7 @@ RSpec.shared_examples "a command requiring project access" do |element_data_proc
 
   context "when user doesn't have access to project" do
     let(:element_data) { element_data_proc.call(other_project) }
-    let(:command) { build_command(described_class, user: user, element_data: element_data) }
+    let(:command) { build_command(described_class, user:, element_data:) }
 
     it "handles authorization error gracefully" do
       expect { command.execute }.to raise_error(ActiveRecord::RecordNotFound)

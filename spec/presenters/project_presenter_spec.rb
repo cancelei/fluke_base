@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe ProjectPresenter do
   let(:owner) { create(:user) }
-  let(:project) { create(:project, user: owner, stage: Project::IDEA, collaboration_type: Project::SEEKING_BOTH, public_fields: [ 'name' ]) }
+  let(:project) { create(:project, user: owner, stage: Project::IDEA, collaboration_type: Project::SEEKING_BOTH, public_fields: ['name']) }
   subject(:presenter) { described_class.new(project) }
 
   it 'displays name for owner and masks for strangers if not visible' do

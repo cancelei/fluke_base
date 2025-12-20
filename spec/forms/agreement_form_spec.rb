@@ -4,8 +4,8 @@ RSpec.describe AgreementForm, type: :model do
   let(:alice) { create(:user, :alice) }
   let(:bob) { create(:user, :bob) }
   let(:project) { create(:project, user: alice) }
-  let(:milestone1) { create(:milestone, project: project) }
-  let(:milestone2) { create(:milestone, project: project) }
+  let(:milestone1) { create(:milestone, project:) }
+  let(:milestone2) { create(:milestone, project:) }
 
   let(:valid_attributes) do
     {
@@ -104,7 +104,7 @@ RSpec.describe AgreementForm, type: :model do
 
     describe "no_duplicate_agreement" do
       it "prevents duplicate agreements" do
-        create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob)
+        create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob)
 
         form = AgreementForm.new(valid_attributes)
         expect(form).not_to be_valid
@@ -112,7 +112,7 @@ RSpec.describe AgreementForm, type: :model do
       end
 
       it "allows counter offers" do
-        original = create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob)
+        original = create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob)
 
         form = AgreementForm.new(valid_attributes.merge(counter_agreement_id: original.id))
         expect(form).to be_valid
@@ -128,12 +128,12 @@ RSpec.describe AgreementForm, type: :model do
       end
 
       it "handles array input" do
-        form = AgreementForm.new(milestone_ids: [ milestone1.id, milestone2.id ])
+        form = AgreementForm.new(milestone_ids: [milestone1.id, milestone2.id])
         expect(form.milestone_ids_array).to contain_exactly(milestone1.id, milestone2.id)
       end
 
       it "handles JSON string" do
-        json_string = [ milestone1.id, milestone2.id ].to_json
+        json_string = [milestone1.id, milestone2.id].to_json
         form = AgreementForm.new(milestone_ids: json_string)
         expect(form.milestone_ids_array).to contain_exactly(milestone1.id, milestone2.id)
       end
@@ -182,7 +182,7 @@ RSpec.describe AgreementForm, type: :model do
     end
 
     context "with counter offer" do
-      let(:original_agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: bob, other_party: alice) }
+      let(:original_agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: bob, other_party: alice) }
       let(:counter_form) { AgreementForm.new(valid_attributes.merge(counter_agreement_id: original_agreement.id)) }
 
       it "loads counter agreement" do
@@ -269,7 +269,7 @@ RSpec.describe AgreementForm, type: :model do
   end
 
   describe "counter offer creation" do
-    let(:original_agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: bob, other_party: alice) }
+    let(:original_agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: bob, other_party: alice) }
 
     it "creates counter offer and updates original agreement" do
       form = AgreementForm.new(valid_attributes.merge(
@@ -289,7 +289,7 @@ RSpec.describe AgreementForm, type: :model do
   end
 
   describe "update functionality" do
-    let(:existing_agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob) }
+    let(:existing_agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob) }
 
     it "updates existing agreement" do
       form = AgreementForm.new(valid_attributes.merge(

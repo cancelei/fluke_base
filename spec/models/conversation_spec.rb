@@ -45,8 +45,8 @@ RSpec.describe Conversation, type: :model do
 
     describe "#last_message" do
       it "returns most recent message" do
-        old_message = create(:message, conversation: conversation, user: alice, created_at: 1.hour.ago)
-        new_message = create(:message, conversation: conversation, user: bob, created_at: 1.minute.ago)
+        old_message = create(:message, conversation:, user: alice, created_at: 1.hour.ago)
+        new_message = create(:message, conversation:, user: bob, created_at: 1.minute.ago)
 
         expect(conversation.last_message).to eq(new_message)
       end
@@ -54,20 +54,20 @@ RSpec.describe Conversation, type: :model do
 
     describe "#unread_messages_for?" do
       it "returns true when user has unread messages" do
-        create(:message, conversation: conversation, user: bob, read: false)
+        create(:message, conversation:, user: bob, read: false)
         expect(conversation.unread_messages_for?(alice)).to be true
       end
 
       it "returns false when user has no unread messages" do
-        create(:message, conversation: conversation, user: bob, read: true)
+        create(:message, conversation:, user: bob, read: true)
         expect(conversation.unread_messages_for?(alice)).to be false
       end
     end
 
     describe "#mark_as_read_for" do
       it "marks all messages as read for user" do
-        message1 = create(:message, conversation: conversation, user: bob, read: false)
-        message2 = create(:message, conversation: conversation, user: bob, read: false)
+        message1 = create(:message, conversation:, user: bob, read: false)
+        message2 = create(:message, conversation:, user: bob, read: false)
 
         conversation.mark_as_read_for(alice)
 

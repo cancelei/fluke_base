@@ -17,9 +17,7 @@ class Milestone < ApplicationRecord
   scope :not_completed, -> { where.not(status: COMPLETED) }
   scope :upcoming, -> { where("due_date > ?", Date.today).order(due_date: :asc) }
 
-  def completed?
-    status == COMPLETED
-  end
+  def completed? = status == COMPLETED
 
   # Get the actual status based on time logs and explicit status
   def actual_status
@@ -45,37 +43,17 @@ class Milestone < ApplicationRecord
       agreement_participant_ids = project.agreements.active
                                         .joins(:agreement_participants)
                                         .pluck("agreement_participants.user_id")
-      [ project_owner_id ] + agreement_participant_ids
+      [project_owner_id] + agreement_participant_ids
     end
 
     time_logs.exists?(user_id: @authorized_user_ids)
   end
 
-  def in_progress?
-    actual_status == IN_PROGRESS
-  end
-
-  def not_started?
-    actual_status == PENDING
-  end
-
-  def pending?
-    actual_status == PENDING
-  end
-
-  def latest_enhancement
-    milestone_enhancements.recent.first
-  end
-
-  def enhancement_history
-    milestone_enhancements.recent.limit(10)
-  end
-
-  def has_successful_enhancement?
-    milestone_enhancements.successful.exists?
-  end
-
-  def can_be_enhanced?
-    description.present?
-  end
+  def in_progress? = actual_status == IN_PROGRESS
+  def not_started? = actual_status == PENDING
+  def pending? = actual_status == PENDING
+  def latest_enhancement = milestone_enhancements.recent.first
+  def enhancement_history = milestone_enhancements.recent.limit(10)
+  def has_successful_enhancement? = milestone_enhancements.successful.exists?
+  def can_be_enhanced? = description.present?
 end

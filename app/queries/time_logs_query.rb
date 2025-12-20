@@ -64,6 +64,6 @@ class TimeLogsQuery
 
   def manual_time_logs(selected_user = nil)
     user_id = selected_user&.id || @current_user.id
-    TimeLog.where(milestone_id: nil, user_id: user_id)
+    TimeLog.where(milestone_id: nil, user_id:)
   end
 end

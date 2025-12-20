@@ -13,8 +13,8 @@ class CreateProjectMemberships < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :project_memberships, [ :project_id, :user_id ], unique: true
-    add_index :project_memberships, [ :user_id, :role ]
+    add_index :project_memberships, [:project_id, :user_id], unique: true
+    add_index :project_memberships, [:user_id, :role]
 
     # Add check constraint for valid roles
     add_check_constraint :project_memberships,

@@ -4,7 +4,7 @@ RSpec.describe AgreementCalculationsService do
   let(:alice) { create(:user, :alice) }
   let(:bob) { create(:user, :bob) }
   let(:project) { create(:project, user: alice) }
-  let(:agreement) { create(:agreement, :with_participants, project: project, initiator: alice, other_party: bob) }
+  let(:agreement) { create(:agreement, :with_participants, project:, initiator: alice, other_party: bob) }
   let(:service) { described_class.new(agreement) }
 
   describe "initialization" do
@@ -159,29 +159,29 @@ RSpec.describe AgreementCalculationsService do
   end
 
   describe "#total_hours_logged" do
-    let(:milestone1) { create(:milestone, project: project) }
-    let(:milestone2) { create(:milestone, project: project) }
+    let(:milestone1) { create(:milestone, project:) }
+    let(:milestone2) { create(:milestone, project:) }
 
     before do
-      agreement.update!(milestone_ids: [ milestone1.id, milestone2.id ])
+      agreement.update!(milestone_ids: [milestone1.id, milestone2.id])
     end
 
     context "without context user" do
       it "returns total hours from all participants" do
         # Create time logs for both users
-        create(:time_log, project: project, milestone: milestone1, user: alice, hours_spent: 5)
-        create(:time_log, project: project, milestone: milestone1, user: bob, hours_spent: 3)
-        create(:time_log, project: project, milestone: milestone2, user: alice, hours_spent: 2)
+        create(:time_log, project:, milestone: milestone1, user: alice, hours_spent: 5)
+        create(:time_log, project:, milestone: milestone1, user: bob, hours_spent: 3)
+        create(:time_log, project:, milestone: milestone2, user: alice, hours_spent: 2)
 
         total_hours = service.total_hours_logged
         expect(total_hours.to_f).to eq(10.0)  # 5 + 3 + 2
       end
 
       it "only counts hours for agreement milestones" do
-        other_milestone = create(:milestone, project: project)
+        other_milestone = create(:milestone, project:)
 
-        create(:time_log, project: project, milestone: milestone1, user: alice, hours_spent: 5)
-        create(:time_log, project: project, milestone: other_milestone, user: alice, hours_spent: 10)
+        create(:time_log, project:, milestone: milestone1, user: alice, hours_spent: 5)
+        create(:time_log, project:, milestone: other_milestone, user: alice, hours_spent: 10)
 
         total_hours = service.total_hours_logged
         expect(total_hours).to eq(5)  # Only milestone1 is in the agreement
@@ -190,9 +190,9 @@ RSpec.describe AgreementCalculationsService do
 
     context "with context user" do
       it "returns hours logged by specific user" do
-        create(:time_log, project: project, milestone: milestone1, user: alice, hours_spent: 5)
-        create(:time_log, project: project, milestone: milestone1, user: bob, hours_spent: 3)
-        create(:time_log, project: project, milestone: milestone2, user: alice, hours_spent: 2)
+        create(:time_log, project:, milestone: milestone1, user: alice, hours_spent: 5)
+        create(:time_log, project:, milestone: milestone1, user: bob, hours_spent: 3)
+        create(:time_log, project:, milestone: milestone2, user: alice, hours_spent: 2)
 
         alice_hours = service.total_hours_logged(alice)
         expect(alice_hours).to eq(7)  # 5 + 2
@@ -203,7 +203,7 @@ RSpec.describe AgreementCalculationsService do
 
       it "returns zero for user with no logged hours" do
         charlie = create(:user)
-        create(:time_log, project: project, milestone: milestone1, user: alice, hours_spent: 5)
+        create(:time_log, project:, milestone: milestone1, user: alice, hours_spent: 5)
 
         charlie_hours = service.total_hours_logged(charlie)
         expect(charlie_hours).to eq(0)
@@ -218,10 +218,10 @@ RSpec.describe AgreementCalculationsService do
   end
 
   describe "#current_time_log" do
-    let(:milestone) { create(:milestone, project: project) }
+    let(:milestone) { create(:milestone, project:) }
 
     before do
-      agreement.update!(milestone_ids: [ milestone.id ])
+      agreement.update!(milestone_ids: [milestone.id])
     end
 
     it "returns nil when no active time logs exist" do
@@ -231,8 +231,8 @@ RSpec.describe AgreementCalculationsService do
     it "finds currently active time log for agreement participants" do
       # Create an active time log (ended_at is nil)
       active_log = create(:time_log,
-        project: project,
-        milestone: milestone,
+        project:,
+        milestone:,
         user: alice,
         started_at: 1.hour.ago,
         ended_at: nil,
@@ -244,8 +244,8 @@ RSpec.describe AgreementCalculationsService do
 
     it "ignores completed time logs" do
       create(:time_log,
-        project: project,
-        milestone: milestone,
+        project:,
+        milestone:,
         user: alice,
         started_at: 2.hours.ago,
         ended_at: 1.hour.ago,
@@ -257,8 +257,8 @@ RSpec.describe AgreementCalculationsService do
 
     it "prioritizes most recent active log" do
       older_log = create(:time_log,
-        project: project,
-        milestone: milestone,
+        project:,
+        milestone:,
         user: alice,
         started_at: 2.hours.ago,
         ended_at: nil,
@@ -266,8 +266,8 @@ RSpec.describe AgreementCalculationsService do
       )
 
       newer_log = create(:time_log,
-        project: project,
-        milestone: milestone,
+        project:,
+        milestone:,
         user: bob,
         started_at: 1.hour.ago,
         ended_at: nil,
@@ -348,15 +348,15 @@ RSpec.describe AgreementCalculationsService do
 
   describe "performance considerations" do
     it "efficiently calculates with many time logs" do
-      milestone = create(:milestone, project: project)
-      agreement.update!(milestone_ids: [ milestone.id ])
+      milestone = create(:milestone, project:)
+      agreement.update!(milestone_ids: [milestone.id])
 
       # Create many time logs
       50.times do |i|
         create(:time_log,
-          project: project,
-          milestone: milestone,
-          user: [ alice, bob ].sample,
+          project:,
+          milestone:,
+          user: [alice, bob].sample,
           hours_spent: rand(1..8)
         )
       end

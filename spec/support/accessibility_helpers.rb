@@ -188,7 +188,7 @@ module AccessibilityHelpers
     # aria-expanded should be on interactive elements
     expandable_elements = page.all('[aria-expanded]')
     expandable_elements.each do |element|
-      expect(element.tag_name.downcase).to be_in([ 'button', 'a' ]).or(
+      expect(element.tag_name.downcase).to be_in(['button', 'a']).or(
         expect(element).to have_attribute('role', /button|link/)
       )
     end

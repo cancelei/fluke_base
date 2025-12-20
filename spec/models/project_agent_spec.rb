@@ -8,7 +8,7 @@ RSpec.describe ProjectAgent, type: :model do
   end
 
   describe 'validations' do
-    subject { build(:project_agent, project: project) }
+    subject { build(:project_agent, project:) }
 
     it 'validates presence of provider' do
       # Test by setting provider to empty string (bypasses default callback)
@@ -25,7 +25,7 @@ RSpec.describe ProjectAgent, type: :model do
     it { should validate_inclusion_of(:provider).in_array(%w[openai anthropic]) }
 
     context 'when provider is openai' do
-      subject { build(:project_agent, project: project, provider: 'openai') }
+      subject { build(:project_agent, project:, provider: 'openai') }
 
       it 'validates model is valid for OpenAI' do
         subject.model = 'gpt-4'
@@ -38,7 +38,7 @@ RSpec.describe ProjectAgent, type: :model do
     end
 
     context 'when provider is anthropic' do
-      subject { build(:project_agent, project: project, provider: 'anthropic') }
+      subject { build(:project_agent, project:, provider: 'anthropic') }
 
       it 'validates model is valid for Anthropic' do
         subject.model = 'claude-3-sonnet'
@@ -53,25 +53,25 @@ RSpec.describe ProjectAgent, type: :model do
 
   describe 'defaults' do
     it 'sets default provider to openai' do
-      agent = ProjectAgent.new(project: project)
+      agent = ProjectAgent.new(project:)
       agent.valid?
       expect(agent.provider).to eq('openai')
     end
 
     it 'sets default model based on provider' do
-      agent = ProjectAgent.new(project: project, provider: 'openai')
+      agent = ProjectAgent.new(project:, provider: 'openai')
       agent.valid?
       expect(agent.model).to eq('gpt-4')
 
-      agent = ProjectAgent.new(project: project, provider: 'anthropic')
+      agent = ProjectAgent.new(project:, provider: 'anthropic')
       agent.valid?
       expect(agent.model).to eq('claude-3-sonnet')
     end
   end
 
   describe 'methods' do
-    let(:openai_agent) { create(:project_agent, project: project, provider: 'openai') }
-    let(:anthropic_agent) { create(:project_agent, :anthropic, project: project) }
+    let(:openai_agent) { create(:project_agent, project:, provider: 'openai') }
+    let(:anthropic_agent) { create(:project_agent, :anthropic, project:) }
 
     describe '#openai?' do
       it 'returns true for OpenAI agents' do
@@ -97,7 +97,7 @@ RSpec.describe ProjectAgent, type: :model do
 
   describe 'scopes' do
     before do
-      create(:project_agent, project: project, provider: 'openai')
+      create(:project_agent, project:, provider: 'openai')
       create(:project_agent, :anthropic, project: create(:project))
     end
 

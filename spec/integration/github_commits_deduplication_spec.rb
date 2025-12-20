@@ -16,9 +16,9 @@ RSpec.describe 'GitHub Commits SHA-based Deduplication', type: :integration do
     it 'demonstrates helper methods work correctly' do
       # Create branch
       github_branch = GithubBranch.create!(
-        project: project,
+        project:,
         user: owner,
-        branch_name: branch_name
+        branch_name:
       )
 
       service = GithubService.new(project, nil, branch: branch_name)
@@ -73,9 +73,9 @@ RSpec.describe 'GitHub Commits SHA-based Deduplication', type: :integration do
 
       GithubLog.upsert_all(sample_commits, unique_by: :commit_sha)
 
-      log_ids = GithubLog.where(project: project).pluck(:id)
+      log_ids = GithubLog.where(project:).pluck(:id)
       github_branch_logs = log_ids.map { |id| { github_branch_id: github_branch.id, github_log_id: id } }
-      GithubBranchLog.upsert_all(github_branch_logs, unique_by: [ :github_branch_id, :github_log_id ])
+      GithubBranchLog.upsert_all(github_branch_logs, unique_by: [:github_branch_id, :github_log_id])
 
       puts "  ✓ Inserted 3 sample commits"
 
@@ -93,7 +93,7 @@ RSpec.describe 'GitHub Commits SHA-based Deduplication', type: :integration do
       puts "\n[4] Testing SHA uniqueness constraint:"
 
       # Check count before attempting duplicate
-      initial_sha_count = GithubLog.where(project: project, commit_sha: 'aaa111').count
+      initial_sha_count = GithubLog.where(project:, commit_sha: 'aaa111').count
       puts "  • Initial count for SHA 'aaa111': #{initial_sha_count}"
 
       duplicate_commit = {
@@ -108,10 +108,10 @@ RSpec.describe 'GitHub Commits SHA-based Deduplication', type: :integration do
       }
 
       # Upsert will update existing record (not create duplicate)
-      GithubLog.upsert_all([ duplicate_commit ], unique_by: :commit_sha)
+      GithubLog.upsert_all([duplicate_commit], unique_by: :commit_sha)
 
-      final_count = GithubLog.where(project: project).count
-      final_sha_count = GithubLog.where(project: project, commit_sha: 'aaa111').count
+      final_count = GithubLog.where(project:).count
+      final_sha_count = GithubLog.where(project:, commit_sha: 'aaa111').count
 
       puts "  ✓ Final commit count: #{final_count} (expected: 3, not 4)"
       puts "  ✓ Count for SHA 'aaa111': #{final_sha_count} (still only 1 record)"
@@ -134,9 +134,9 @@ RSpec.describe 'GitHub Commits SHA-based Deduplication', type: :integration do
     it 'demonstrates API efficiency with real GitHub repo' do
       # This test shows the optimization but doesn't fetch all commits to avoid timeout
       github_branch = GithubBranch.create!(
-        project: project,
+        project:,
         user: owner,
-        branch_name: branch_name
+        branch_name:
       )
 
       puts "\n" + "="*70

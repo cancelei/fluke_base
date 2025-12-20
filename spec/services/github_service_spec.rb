@@ -2,26 +2,26 @@ require 'rails_helper'
 
 RSpec.describe GithubService do
   let(:owner) { create(:user, github_username: 'owner') }
-  let(:project) { create(:project, user: owner, repository_url: 'testuser/testrepo', public_fields: [ 'name' ]) }
+  let(:project) { create(:project, user: owner, repository_url: 'testuser/testrepo', public_fields: ['name']) }
 
   # Minimal fake branch object
   Branch = Struct.new(:name)
 
   def build_commit(sha:, author_login: nil, author_email: 'dev@example.com', additions: 3, deletions: 1)
-    file = OpenStruct.new(filename: 'file.rb', status: 'modified', additions: additions, deletions: deletions, patch: '+ code')
+    file = OpenStruct.new(filename: 'file.rb', status: 'modified', additions:, deletions:, patch: '+ code')
     commit_obj = OpenStruct.new(
-      sha: sha,
+      sha:,
       html_url: "https://github.com/x/y/commit/#{sha}",
       author: (author_login ? OpenStruct.new(login: author_login) : nil),
       commit: OpenStruct.new(
         author: OpenStruct.new(email: author_email, date: Time.current),
         message: 'Commit msg'
       ),
-      stats: { additions: additions, deletions: deletions },
-      files: [ file ]
+      stats: { additions:, deletions: },
+      files: [file]
     )
-    shallow = OpenStruct.new(sha: sha, commit: OpenStruct.new(message: 'Shallow'))
-    [ shallow, commit_obj ]
+    shallow = OpenStruct.new(sha:, commit: OpenStruct.new(message: 'Shallow'))
+    [shallow, commit_obj]
   end
 
   describe '#fetch_branches_with_owner' do
@@ -38,7 +38,7 @@ RSpec.describe GithubService do
       client = double('client')
       allow(service).to receive(:github_client).and_return(client)
 
-      branches = [ Branch.new('main'), Branch.new('feature/x') ]
+      branches = [Branch.new('main'), Branch.new('feature/x')]
       allow(service).to receive(:branches).and_return(branches)
 
       # first_commit_on_branch invoked per branch
@@ -60,8 +60,8 @@ RSpec.describe GithubService do
 
   describe '#fetch_commits' do
     let(:mentor) { create(:user, github_username: 'mentor') }
-    let!(:branch) { create(:github_branch, project: project, user: owner, branch_name: 'main') }
-    let!(:agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: owner, other_party: mentor, status: Agreement::ACCEPTED) }
+    let!(:branch) { create(:github_branch, project:, user: owner, branch_name: 'main') }
+    let!(:agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: owner, other_party: mentor, status: Agreement::ACCEPTED) }
 
     it 'returns processed commits for a specified branch and maps user by github login' do
       client = double('client')
@@ -80,7 +80,7 @@ RSpec.describe GithubService do
       allow(client).to receive(:last_response).and_return(last_response)
 
       # Return both commits on first page (since we're not testing pagination here)
-      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([ shallow1, shallow2 ])
+      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([shallow1, shallow2])
       allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 2, per_page: 100)).and_return([])
 
       allow(client).to receive(:commit).with('testuser/testrepo', 'a1').and_return(full1)
@@ -110,14 +110,14 @@ RSpec.describe GithubService do
       shallow3, full3 = build_commit(sha: 'c3', author_login: 'mentor')
 
       # Mock that 'a1' and 'b2' already exist in database
-      allow(service).to receive(:get_existing_commit_shas).and_return(Set.new([ 'a1', 'b2' ]))
+      allow(service).to receive(:get_existing_commit_shas).and_return(Set.new(['a1', 'b2']))
 
       # Mock last_response for pagination
       last_response = double('last_response', rels: {})
       allow(client).to receive(:last_response).and_return(last_response)
 
       # API returns all three commits
-      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([ shallow1, shallow2, shallow3 ])
+      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([shallow1, shallow2, shallow3])
       allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 2, per_page: 100)).and_return([])
 
       # Only c3 should be fetched in detail
@@ -147,7 +147,7 @@ RSpec.describe GithubService do
 
       # Expect API call WITHOUT since parameter (to ensure we get complete history)
       # This prevents missing older commits in case of partial fetches
-      expect(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([ shallow1 ])
+      expect(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'main', page: 1, per_page: 100)).and_return([shallow1])
 
       allow(client).to receive(:commit).with('testuser/testrepo', 'a1').and_return(full1)
 
@@ -161,7 +161,7 @@ RSpec.describe GithubService do
 
     it 'returns [] when DB branch missing' do
       client = double('client')
-      GithubBranch.where(project: project, branch_name: 'main').delete_all
+      GithubBranch.where(project:, branch_name: 'main').delete_all
       service = described_class.new(project, nil, branch: 'main')
       allow(service).to receive(:github_client).and_return(client)
 

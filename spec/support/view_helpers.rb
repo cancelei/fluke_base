@@ -56,7 +56,7 @@ module ViewHelpers
   def expect_agreement_button(current_user, person, project_id = nil)
     if current_user != person && project_id.present?
       expect(rendered).to have_link('Initiate Agreement',
-        href: new_agreement_path(project_id: project_id, other_party_id: person.id))
+        href: new_agreement_path(project_id:, other_party_id: person.id))
     else
       expect(rendered).not_to have_link('Initiate Agreement')
     end

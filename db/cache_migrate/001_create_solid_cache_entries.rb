@@ -12,6 +12,6 @@ class CreateSolidCacheEntries < ActiveRecord::Migration[7.2]
 
     add_index :solid_cache_entries, :key_hash, unique: true
     add_index :solid_cache_entries, :byte_size
-    add_index :solid_cache_entries, [ :key_hash, :byte_size ]
+    add_index :solid_cache_entries, [:key_hash, :byte_size]
   end
 end

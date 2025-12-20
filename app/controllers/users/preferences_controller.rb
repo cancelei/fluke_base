@@ -1,6 +1,6 @@
 module Users
   class PreferencesController < ApplicationController
-    skip_before_action :authenticate_user!, only: [ :update_theme ]
+    skip_before_action :authenticate_user!, only: [:update_theme]
 
     def update_theme
       service = ThemePreferenceService.new(current_user, session, params[:theme])

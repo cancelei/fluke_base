@@ -24,7 +24,7 @@ class ProjectForm < ApplicationForm
   attribute :stealth_category, :string
 
   validates :name, :description, :stage, presence: true
-  validates :collaboration_type, inclusion: { in: [ "mentor", "co_founder", "both", nil ] }
+  validates :collaboration_type, inclusion: { in: ["mentor", "co_founder", "both", nil] }
   validates :repository_url, format: {
     with: /(^$|^https?:\/\/github\.com\/[^\/]+\/[^\/]+$|^[^\/\s]+\/[^\/\s]+$)/,
     message: "must be a valid GitHub repository URL or in the format username/repository"
@@ -48,18 +48,18 @@ class ProjectForm < ApplicationForm
 
   def stage_options
     [
-      [ Project::IDEA.humanize, Project::IDEA ],
-      [ Project::PROTOTYPE.humanize, Project::PROTOTYPE ],
-      [ Project::LAUNCHED.humanize, Project::LAUNCHED ],
-      [ Project::SCALING.humanize, Project::SCALING ]
+      [Project::IDEA.humanize, Project::IDEA],
+      [Project::PROTOTYPE.humanize, Project::PROTOTYPE],
+      [Project::LAUNCHED.humanize, Project::LAUNCHED],
+      [Project::SCALING.humanize, Project::SCALING]
     ]
   end
 
   def collaboration_type_options
     [
-      [ "Seeking Mentor", Project::SEEKING_MENTOR ],
-      [ "Seeking Co-Founder", Project::SEEKING_COFOUNDER ],
-      [ "Seeking Both", Project::SEEKING_BOTH ]
+      ["Seeking Mentor", Project::SEEKING_MENTOR],
+      ["Seeking Co-Founder", Project::SEEKING_COFOUNDER],
+      ["Seeking Both", Project::SEEKING_BOTH]
     ]
   end
 
@@ -97,23 +97,23 @@ class ProjectForm < ApplicationForm
 
   def assign_attributes_to_project
     @project.assign_attributes(
-      name: name,
-      description: description,
-      stage: stage,
-      category: category,
-      current_stage: current_stage,
-      target_market: target_market,
-      funding_status: funding_status,
-      team_size: team_size,
-      collaboration_type: collaboration_type,
-      repository_url: repository_url,
-      project_link: project_link,
+      name:,
+      description:,
+      stage:,
+      category:,
+      current_stage:,
+      target_market:,
+      funding_status:,
+      team_size:,
+      collaboration_type:,
+      repository_url:,
+      project_link:,
       public_fields: public_fields_array,
-      user_id: user_id,
-      stealth_mode: stealth_mode,
-      stealth_name: stealth_name,
-      stealth_description: stealth_description,
-      stealth_category: stealth_category
+      user_id:,
+      stealth_mode:,
+      stealth_name:,
+      stealth_description:,
+      stealth_category:
     )
   end
 

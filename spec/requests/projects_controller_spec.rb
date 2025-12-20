@@ -8,7 +8,7 @@ RSpec.describe 'Projects', type: :request do
              user: owner,
              name: 'Owner Project',
              description: 'Owner description',
-             public_fields: [ 'name', 'description' ])
+             public_fields: ['name', 'description'])
     end
 
     context 'when signed in as the project owner' do
@@ -31,7 +31,7 @@ RSpec.describe 'Projects', type: :request do
 
       before do
         create(:agreement, :with_participants,
-               project: project,
+               project:,
                initiator: owner,
                other_party: collaborator,
                status: Agreement::ACCEPTED)

@@ -3,7 +3,7 @@ module ApplicationHelper
 
   # Presenter helper exposed to views/specs
   def present(object, with: nil)
-    controller.present(object, with: with)
+    controller.present(object, with:)
   end
 
   def page_entries_info(collection = nil)
@@ -11,7 +11,7 @@ module ApplicationHelper
 
     if collection&.total_count.to_i > 0
       start_number = (collection.current_page - 1) * collection.limit_value + 1
-      end_number = [ collection.current_page * collection.limit_value, collection.total_count ].min
+      end_number = [collection.current_page * collection.limit_value, collection.total_count].min
       "#{start_number} to #{end_number} of #{collection.total_count} entries"
     else
       "No entries found"
@@ -46,15 +46,15 @@ module ApplicationHelper
 
   def truncate_html(html, options = {})
     length = options[:length] || 100
-    truncate(strip_tags(html), length: length)
+    truncate(strip_tags(html), length:)
   end
 
   def page_header(title, subtitle = nil, actions = nil, options = {})
-    render "shared/page_header", title: title, subtitle: subtitle, actions: actions, options: options
+    render "shared/page_header", title:, subtitle:, actions:, options:
   end
 
   def search_form(url, options = {}, &block)
-    render partial: "shared/search_form", locals: { url: url, **options, block: block }
+    render partial: "shared/search_form", locals: { url:, **options, block: }
   end
 
   # DaisyUI navbar link - uses menu-item styling

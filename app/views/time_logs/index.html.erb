@@ -41,14 +41,14 @@
     <div id="current_tracking_container">
       <% if @project.time_logs.where(user_id: current_user.id).in_progress.exists? %>
         <% current_log = @project.time_logs.in_progress.last %>
-        <%= render "time_logs/current_tracking", current_log: current_log, project: @project %>
+        <%= render "time_logs/current_tracking", current_log:, project: @project %>
       <% end %>
     </div>
 
   <!-- Expanded Time Used Section -->
   <div class="card bg-base-100 shadow-xl mb-6">
     <div class="card-body">
-      <%= render "time_logs/expanded_time_used", project: @project, current_log: current_log, owner: @owner %>
+      <%= render "time_logs/expanded_time_used", project: @project, current_log:, owner: @owner %>
     </div>
   </div>
 

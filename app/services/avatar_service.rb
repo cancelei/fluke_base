@@ -15,9 +15,7 @@ class AvatarService < ApplicationService
     end
   end
 
-  def initials
-    "#{@user.first_name&.first}#{@user.last_name&.first}".upcase
-  end
+  def initials = "#{@user.first_name&.first}#{@user.last_name&.first}".upcase
 
   private
 

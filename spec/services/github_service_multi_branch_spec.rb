@@ -7,7 +7,7 @@ RSpec.describe 'GithubService multi-branch optimization' do
   def build_commit(sha:, author_login: nil, author_email: 'dev@example.com')
     file = OpenStruct.new(filename: 'file.rb', status: 'modified', additions: 10, deletions: 5, patch: '+ code')
     commit_obj = OpenStruct.new(
-      sha: sha,
+      sha:,
       html_url: "https://github.com/x/y/commit/#{sha}",
       author: (author_login ? OpenStruct.new(login: author_login) : nil),
       commit: OpenStruct.new(
@@ -15,17 +15,17 @@ RSpec.describe 'GithubService multi-branch optimization' do
         message: "Commit #{sha}"
       ),
       stats: { additions: 10, deletions: 5 },
-      files: [ file ]
+      files: [file]
     )
-    shallow = OpenStruct.new(sha: sha, commit: OpenStruct.new(message: "Commit #{sha}"))
-    [ shallow, commit_obj ]
+    shallow = OpenStruct.new(sha:, commit: OpenStruct.new(message: "Commit #{sha}"))
+    [shallow, commit_obj]
   end
 
   describe 'fetching commits from multiple branches' do
     it 'checks for existing commits globally across all branches' do
       # Create commits in database for one branch
-      GithubBranch.create!(project: project, user: owner, branch_name: 'main')
-      GithubBranch.create!(project: project, user: owner, branch_name: 'develop')
+      GithubBranch.create!(project:, user: owner, branch_name: 'main')
+      GithubBranch.create!(project:, user: owner, branch_name: 'develop')
 
       # Create some commits
       commits = [
@@ -69,8 +69,8 @@ RSpec.describe 'GithubService multi-branch optimization' do
 
     it 'returns all commit SHAs including existing ones for branch associations' do
       # Setup: main branch already has commits A and B
-      GithubBranch.create!(project: project, user: owner, branch_name: 'main')
-      GithubBranch.create!(project: project, user: owner, branch_name: 'develop')
+      GithubBranch.create!(project:, user: owner, branch_name: 'main')
+      GithubBranch.create!(project:, user: owner, branch_name: 'develop')
 
       # Store commits A and B (from main branch)
       existing_commits = [
@@ -110,7 +110,7 @@ RSpec.describe 'GithubService multi-branch optimization' do
       allow(client).to receive(:last_response).and_return(last_response)
 
       # API returns all three commits
-      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'develop', page: 1)).and_return([ shallow_a, shallow_b, shallow_c ])
+      allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'develop', page: 1)).and_return([shallow_a, shallow_b, shallow_c])
       allow(client).to receive(:commits).with('testuser/testrepo', hash_including(sha: 'develop', page: 2)).and_return([])
 
       # Only commit C needs full details

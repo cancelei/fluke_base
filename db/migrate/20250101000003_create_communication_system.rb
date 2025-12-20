@@ -12,7 +12,7 @@ class CreateCommunicationSystem < ActiveRecord::Migration[8.0]
 
     # Conversation indexes
     add_index :conversations, :sender_id
-    add_index :conversations, [ :recipient_id, :sender_id ], unique: true, name: "index_conversations_on_recipient_and_sender"
+    add_index :conversations, [:recipient_id, :sender_id], unique: true, name: "index_conversations_on_recipient_and_sender"
 
     # Messages table
     create_table :messages do |t|
@@ -29,7 +29,7 @@ class CreateCommunicationSystem < ActiveRecord::Migration[8.0]
     add_index :messages, :user_id
     add_index :messages, :read, comment: "Improves unread message queries"
     add_index :messages, :created_at, comment: "Improves message ordering in conversations"
-    add_index :messages, [ :conversation_id, :created_at ], comment: "Composite index for conversation message history"
+    add_index :messages, [:conversation_id, :created_at], comment: "Composite index for conversation message history"
 
     # Notifications table
     create_table :notifications do |t|
@@ -45,6 +45,6 @@ class CreateCommunicationSystem < ActiveRecord::Migration[8.0]
     add_index :notifications, :user_id
     add_index :notifications, :read_at, comment: "Improves unread notifications queries"
     add_index :notifications, :created_at, comment: "Improves ordering notifications by recency"
-    add_index :notifications, [ :user_id, :read_at ], comment: "Composite index for user's unread notifications"
+    add_index :notifications, [:user_id, :read_at], comment: "Composite index for user's unread notifications"
   end
 end

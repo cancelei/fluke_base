@@ -7,12 +7,12 @@ RSpec.describe TimeLogs::CreateManualCommand, type: :command do
 
   describe "#execute" do
     let(:user) { create(:user) }
-    let(:project) { create(:project, user: user) }
-    let(:milestone) { create(:milestone, project: project, status: "pending") }
+    let(:project) { create(:project, user:) }
+    let(:milestone) { create(:milestone, project:, status: "pending") }
 
     context "with valid parameters" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s
         }, params: {
           milestone_id: milestone.id.to_s,
@@ -60,7 +60,7 @@ RSpec.describe TimeLogs::CreateManualCommand, type: :command do
 
     context "without milestone selection" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s
         }, params: {
           time_log: {
@@ -84,7 +84,7 @@ RSpec.describe TimeLogs::CreateManualCommand, type: :command do
 
     context "with non-existent milestone" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s
         }, params: {
           milestone_id: "999999",
@@ -105,7 +105,7 @@ RSpec.describe TimeLogs::CreateManualCommand, type: :command do
 
     context "with non-existent project" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: "999999"
         }, params: {
           milestone_id: milestone.id.to_s,
@@ -125,7 +125,7 @@ RSpec.describe TimeLogs::CreateManualCommand, type: :command do
 
     context "with invalid time log params" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s
         }, params: {
           milestone_id: milestone.id.to_s,

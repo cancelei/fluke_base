@@ -12,21 +12,21 @@ RSpec.describe Rating, type: :model do
   end
 
   describe "validations" do
-    subject { build(:rating, rater: rater, rateable: rateable) }
+    subject { build(:rating, rater:, rateable:) }
 
     it { is_expected.to validate_presence_of(:value) }
     it { is_expected.to validate_inclusion_of(:value).in_range(1..5).with_message("must be between 1 and 5") }
 
     it "validates uniqueness of rater per rateable" do
-      create(:rating, rater: rater, rateable: rateable, value: 4)
-      duplicate = build(:rating, rater: rater, rateable: rateable, value: 5)
+      create(:rating, rater:, rateable:, value: 4)
+      duplicate = build(:rating, rater:, rateable:, value: 5)
 
       expect(duplicate).not_to be_valid
       expect(duplicate.errors[:rater_id]).to include("has already rated this")
     end
 
     it "prevents users from rating themselves" do
-      self_rating = build(:rating, rater: rater, rateable: rater, value: 5)
+      self_rating = build(:rating, rater:, rateable: rater, value: 5)
 
       expect(self_rating).not_to be_valid
       expect(self_rating.errors[:base]).to include("You cannot rate yourself")
@@ -34,8 +34,8 @@ RSpec.describe Rating, type: :model do
   end
 
   describe "scopes" do
-    let!(:rating1) { create(:rating, rater: rater, rateable: rateable, value: 4) }
-    let!(:rating2) { create(:rating, rater: create(:user), rateable: rateable, value: 5) }
+    let!(:rating1) { create(:rating, rater:, rateable:, value: 4) }
+    let!(:rating2) { create(:rating, rater: create(:user), rateable:, value: 5) }
 
     describe ".for_user" do
       it "returns ratings for a specific user" do
@@ -52,9 +52,9 @@ RSpec.describe Rating, type: :model do
 
   describe "class methods" do
     before do
-      create(:rating, rater: create(:user), rateable: rateable, value: 4)
-      create(:rating, rater: create(:user), rateable: rateable, value: 5)
-      create(:rating, rater: create(:user), rateable: rateable, value: 3)
+      create(:rating, rater: create(:user), rateable:, value: 4)
+      create(:rating, rater: create(:user), rateable:, value: 5)
+      create(:rating, rater: create(:user), rateable:, value: 3)
     end
 
     describe ".average_rating" do

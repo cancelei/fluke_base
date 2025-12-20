@@ -1,6 +1,6 @@
 
 class Admin::SolidQueueJobsController < ApplicationController
-  before_action :find_job, only: [ :show, :destroy, :retry ]
+  before_action :find_job, only: [:show, :destroy, :retry]
 
   def index
     @jobs = SolidQueue::Job.all
@@ -66,7 +66,7 @@ class Admin::SolidQueueJobsController < ApplicationController
 
   def filter_by_queue(jobs, queue_name)
     return jobs if queue_name.blank?
-    jobs.where(queue_name: queue_name)
+    jobs.where(queue_name:)
   end
 
   def filter_by_priority(jobs, priority)

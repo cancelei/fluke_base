@@ -10,7 +10,7 @@ RSpec.describe "Frontend Turbo Interactions", type: :system, js: true do
   end
 
   describe "People show page interactions" do
-    let!(:agreement) { create(:agreement, :with_participants, project: project, initiator: alice, other_party: bob) }
+    let!(:agreement) { create(:agreement, :with_participants, project:, initiator: alice, other_party: bob) }
 
     it "displays user profile with proper Turbo Stream integration" do
       visit person_path(bob)
@@ -131,8 +131,8 @@ RSpec.describe "Frontend Turbo Interactions", type: :system, js: true do
   end
 
   describe "Lazy loading Turbo Frames" do
-    let!(:agreement) { create(:agreement, :with_participants, :accepted, project: project, initiator: alice, other_party: bob) }
-    let!(:meeting) { create(:meeting, agreement: agreement, user: alice) }
+    let!(:agreement) { create(:agreement, :with_participants, :accepted, project:, initiator: alice, other_party: bob) }
+    let!(:meeting) { create(:meeting, agreement:, user: alice) }
 
     it "loads lazy frames on agreement show page" do
       visit agreement_path(agreement)
@@ -162,7 +162,7 @@ RSpec.describe "Frontend Turbo Interactions", type: :system, js: true do
   end
 
   describe "GitHub integration Turbo features" do
-    let!(:github_branch) { create(:github_branch, project: project, name: "main") }
+    let!(:github_branch) { create(:github_branch, project:, name: "main") }
 
     before do
       # Ensure user has access to project
@@ -206,7 +206,7 @@ RSpec.describe "Frontend Turbo Interactions", type: :system, js: true do
   end
 
   describe "Agreement Turbo Streams integration" do
-    let!(:pending_agreement) { create(:agreement, :with_participants, :pending, project: project, initiator: alice, other_party: bob) }
+    let!(:pending_agreement) { create(:agreement, :with_participants, :pending, project:, initiator: alice, other_party: bob) }
 
     before do
       sign_in bob
@@ -275,7 +275,7 @@ RSpec.describe "Frontend Turbo Interactions", type: :system, js: true do
     end
 
     it "handles concurrent Turbo Frame loading" do
-      agreement = create(:agreement, :with_participants, :accepted, project: project)
+      agreement = create(:agreement, :with_participants, :accepted, project:)
 
       start_time = Time.current
       visit agreement_path(agreement)
@@ -352,7 +352,7 @@ RSpec.describe "Frontend Turbo Interactions", type: :system, js: true do
 
       # Focus should be on first interactive element
       focused_element = page.evaluate_script("document.activeElement.tagName")
-      expect([ 'BUTTON', 'A', 'INPUT' ]).to include(focused_element)
+      expect(['BUTTON', 'A', 'INPUT']).to include(focused_element)
     end
   end
 end

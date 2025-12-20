@@ -53,7 +53,7 @@ module Ui
     end
 
     def build_fallback_presenter
-      OpenStruct.new(
+      UserStatsPresenter.new(
         projects_count: helpers.pluralize(@user.projects.count, "project"),
         agreements_count: helpers.pluralize(@user.all_agreements.count, "agreement"),
         member_since: "Member since #{@user.created_at.strftime('%B %Y')}"

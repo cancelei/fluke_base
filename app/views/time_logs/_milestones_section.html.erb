@@ -15,7 +15,7 @@
   <div class="divide-y divide-base-200">
     <% milestones.not_completed.each do |milestone| %>
       <% active_log = project.time_logs.in_progress.find_by(milestone_id: milestone.id, user_id: current_user.id) %>
-      <%= render "time_logs/milestone_row", milestone: milestone, project: project, active_log: active_log %>
+      <%= render "time_logs/milestone_row", milestone:, project:, active_log: %>
     <% end %>
   </div>
 </div>

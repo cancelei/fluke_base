@@ -61,7 +61,7 @@ module Milestones
         description = enhanced_text.sub(/Title:\s*.+?\n/i, "").strip
       end
 
-      { title: title, description: description }
+      { title:, description: }
     end
   end
 end

@@ -7,12 +7,12 @@ RSpec.describe Milestones::AiEnhanceCommand, type: :command do
 
   describe "#execute" do
     let(:user) { create(:user) }
-    let(:project) { create(:project, user: user) }
-    let(:milestone) { create(:milestone, project: project, description: "Original description") }
+    let(:project) { create(:project, user:) }
+    let(:milestone) { create(:milestone, project:, description: "Original description") }
 
     context "with existing milestone" do
       let(:command) do
-        build_command(described_class, user: user,
+        build_command(described_class, user:,
           element_data: {
             projectId: project.id.to_s,
             milestoneId: milestone.id.to_s
@@ -68,7 +68,7 @@ RSpec.describe Milestones::AiEnhanceCommand, type: :command do
 
     context "with direct enhancement (no milestone ID)" do
       let(:command) do
-        build_command(described_class, user: user,
+        build_command(described_class, user:,
           element_data: {
             projectId: project.id.to_s
           },
@@ -101,7 +101,7 @@ RSpec.describe Milestones::AiEnhanceCommand, type: :command do
 
     context "with empty content" do
       let(:command) do
-        build_command(described_class, user: user,
+        build_command(described_class, user:,
           element_data: {
             projectId: project.id.to_s
           },
@@ -125,7 +125,7 @@ RSpec.describe Milestones::AiEnhanceCommand, type: :command do
 
     context "when AI service fails" do
       let(:command) do
-        build_command(described_class, user: user,
+        build_command(described_class, user:,
           element_data: {
             projectId: project.id.to_s
           },
@@ -155,7 +155,7 @@ RSpec.describe Milestones::AiEnhanceCommand, type: :command do
         it "accepts #{style} enhancement style" do
           allow(MilestoneEnhancementJob).to receive(:perform_later).and_return(true)
 
-          command = build_command(described_class, user: user,
+          command = build_command(described_class, user:,
             element_data: {
               projectId: project.id.to_s,
               milestoneId: milestone.id.to_s

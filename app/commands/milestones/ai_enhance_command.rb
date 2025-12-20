@@ -53,7 +53,7 @@ module Milestones
       set_page_state(:enhancement_id, enhancement.id)
       set_page_state(:polling_active, true)
 
-      update_ai_suggestion(enhancement: enhancement, milestone: milestone)
+      update_ai_suggestion(enhancement:, milestone:)
       flash_notice("AI enhancement started. Please wait...")
       Success(enhancement)
     end
@@ -61,27 +61,27 @@ module Milestones
     def enhance_direct(project, title, description, style)
       service = MilestoneAiEnhancementService.new(project)
       enhanced_description = service.augment_description(
-        title: title,
-        description: description
+        title:,
+        description:
       )
 
       # Create a simple enhancement object for the UI (not persisted)
-      enhancement = OpenStruct.new(
+      enhancement = EnhancementResult.new(
         id: nil,
         original_title: title,
         original_description: description,
-        enhanced_description: enhanced_description,
+        enhanced_description:,
         enhancement_style: style,
         status: "completed",
-        successful?: true,
+        successful: true,
         direct_enhancement: true,
         created_at: Time.current,
         user: current_user
       )
 
-      milestone = OpenStruct.new(id: nil)
+      milestone = MilestoneStub.new(id: nil)
 
-      update_ai_suggestion(enhancement: enhancement, milestone: milestone)
+      update_ai_suggestion(enhancement:, milestone:)
       flash_notice("AI enhancement completed!")
       Success(enhancement)
     rescue StandardError => e

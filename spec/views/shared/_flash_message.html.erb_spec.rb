@@ -8,7 +8,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     let(:message) { 'Operation completed successfully!' }
 
     before do
-      render 'shared/flash_message', type: type, message: message
+      render 'shared/flash_message', type:, message:
     end
 
     it 'renders with success styling' do
@@ -35,7 +35,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     let(:message) { 'Something went wrong!' }
 
     before do
-      render 'shared/flash_message', type: type, message: message
+      render 'shared/flash_message', type:, message:
     end
 
     it 'renders with error styling' do
@@ -64,7 +64,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:message) { 'Simple success message' }
 
       before do
-        render 'shared/flash_message', type: type, message: message
+        render 'shared/flash_message', type:, message:
       end
 
       it 'renders plain text safely' do
@@ -77,7 +77,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:message) { 'Success! <a href="/dashboard">Go to dashboard</a>' }
 
       before do
-        render 'shared/flash_message', type: type, message: message
+        render 'shared/flash_message', type:, message:
       end
 
       it 'renders HTML content safely' do
@@ -90,7 +90,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:message) { 'This is a very long message that should wrap properly and not break the layout even on smaller screens or narrow containers' }
 
       before do
-        render 'shared/flash_message', type: type, message: message
+        render 'shared/flash_message', type:, message:
       end
 
       it 'handles long messages gracefully' do
@@ -105,7 +105,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:message) { 'Message with "quotes" & ampersands < > symbols' }
 
       before do
-        render 'shared/flash_message', type: type, message: message
+        render 'shared/flash_message', type:, message:
       end
 
       it 'safely escapes special characters' do
@@ -124,7 +124,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:type) { :notice }
 
       before do
-        render 'shared/flash_message', type: type, message: message
+        render 'shared/flash_message', type:, message:
       end
 
       it 'renders notice icon partial' do
@@ -141,7 +141,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:type) { :alert }
 
       before do
-        render 'shared/flash_message', type: type, message: message
+        render 'shared/flash_message', type:, message:
       end
 
       it 'renders alert icon partial' do
@@ -157,7 +157,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:type) { :notice }
 
       before do
-        render 'shared/flash_message', type: type, message: message
+        render 'shared/flash_message', type:, message:
       end
 
       it 'uses consistent success styling' do
@@ -169,7 +169,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:type) { :alert }
 
       before do
-        render 'shared/flash_message', type: type, message: message
+        render 'shared/flash_message', type:, message:
       end
 
       it 'uses consistent error styling' do
@@ -183,7 +183,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     let(:message) { 'Test message' }
 
     before do
-      render 'shared/flash_message', type: type, message: message
+      render 'shared/flash_message', type:, message:
     end
 
     it 'has proper container structure' do
@@ -206,7 +206,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
     let(:message) { 'Accessible message' }
 
     before do
-      render 'shared/flash_message', type: type, message: message
+      render 'shared/flash_message', type:, message:
     end
 
     it 'provides semantic content structure' do
@@ -231,7 +231,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:message) { nil }
 
       it 'handles nil message gracefully' do
-        expect { render 'shared/flash_message', type: type, message: message }.not_to raise_error
+        expect { render 'shared/flash_message', type:, message: }.not_to raise_error
       end
     end
 
@@ -240,7 +240,7 @@ RSpec.describe 'shared/_flash_message.html.erb', type: :view do
       let(:message) { 'Test message' }
 
       before do
-        render 'shared/flash_message', type: type, message: message
+        render 'shared/flash_message', type:, message:
       end
 
       it 'defaults to alert styling for unknown types' do

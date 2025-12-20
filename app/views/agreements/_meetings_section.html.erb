@@ -24,7 +24,7 @@
 
     <div class="border-t border-base-200">
       <% if agreement.active? || agreement.completed? %>
-        <%= render "meetings/meetings_list", meetings: meetings || [], agreement: agreement %>
+        <%= render "meetings/meetings_list", meetings: meetings || [], agreement: %>
 
         <!-- Meeting Form Frame -->
         <%= turbo_frame_tag "#{dom_id(agreement)}_meeting_form", loading: "lazy" do %>

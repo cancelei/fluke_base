@@ -21,7 +21,7 @@
       </h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <% available_themes[:light].each do |theme| %>
-          <%= render "shared/theme_preview_card", theme: theme, is_selected: current_theme == theme[:id] %>
+          <%= render "shared/theme_preview_card", theme:, is_selected: current_theme == theme[:id] %>
         <% end %>
       </div>
     </div>
@@ -36,7 +36,7 @@
       </h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <% available_themes[:dark].each do |theme| %>
-          <%= render "shared/theme_preview_card", theme: theme, is_selected: current_theme == theme[:id] %>
+          <%= render "shared/theme_preview_card", theme:, is_selected: current_theme == theme[:id] %>
         <% end %>
       </div>
     </div>

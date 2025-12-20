@@ -2,11 +2,11 @@ class TimeLogsController < ApplicationController
   include ResultHandling
 
   before_action :authenticate_user!
-  before_action :set_project, except: [ :filter ]
-  before_action :set_milestone, only: [ :create, :stop_tracking ]
-  before_action :set_time_log, only: [ :stop_tracking ]
-  before_action :set_manual_time_log, only: [ :index ]
-  before_action :ensure_no_active_time_log, only: [ :create_manual, :create ]
+  before_action :set_project, except: [:filter]
+  before_action :set_milestone, only: [:create, :stop_tracking]
+  before_action :set_time_log, only: [:stop_tracking]
+  before_action :set_manual_time_log, only: [:index]
+  before_action :ensure_no_active_time_log, only: [:create_manual, :create]
 
   def create_manual
     # Check if milestone_id is provided
@@ -185,7 +185,7 @@ class TimeLogsController < ApplicationController
             ),
             turbo_stream.update("context_milestones_list",
               partial: "shared/context_milestones_list",
-              locals: { selected_project: @project, current_user: current_user }
+              locals: { selected_project: @project, current_user: }
             ),
             turbo_stream.update("remaining_time_progress",
               partial: "remaining_time_progress",
@@ -238,7 +238,7 @@ class TimeLogsController < ApplicationController
             ),
             turbo_stream.update("context_milestones_list",
               partial: "shared/context_milestones_list",
-              locals: { selected_project: @project, current_user: current_user }
+              locals: { selected_project: @project, current_user: }
             ),
             turbo_stream.update("pending_confirmation_section",
               partial: "time_logs/pending_confirmation_section",

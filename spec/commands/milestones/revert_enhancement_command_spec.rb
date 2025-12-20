@@ -7,21 +7,21 @@ RSpec.describe Milestones::RevertEnhancementCommand, type: :command do
 
   describe "#execute" do
     let(:user) { create(:user) }
-    let(:project) { create(:project, user: user) }
-    let(:milestone) { create(:milestone, project: project, description: "Enhanced description") }
+    let(:project) { create(:project, user:) }
+    let(:milestone) { create(:milestone, project:, description: "Enhanced description") }
 
     context "with valid enhancement" do
       let(:enhancement) do
         create(:milestone_enhancement,
-               milestone: milestone,
-               user: user,
+               milestone:,
+               user:,
                original_description: "Original description",
                enhanced_description: "Enhanced description",
                status: "completed")
       end
 
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           enhancementId: enhancement.id.to_s
         })
       end
@@ -48,7 +48,7 @@ RSpec.describe Milestones::RevertEnhancementCommand, type: :command do
 
     context "with missing enhancement ID" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {})
+        build_command(described_class, user:, element_data: {})
       end
 
       it "displays an error message" do
@@ -61,7 +61,7 @@ RSpec.describe Milestones::RevertEnhancementCommand, type: :command do
 
     context "with non-existent enhancement" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           enhancementId: "999999"
         })
       end

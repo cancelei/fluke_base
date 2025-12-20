@@ -7,12 +7,12 @@ RSpec.describe TimeLogs::StartTrackingCommand, type: :command do
 
   describe "#execute" do
     let(:user) { create(:user) }
-    let(:project) { create(:project, user: user) }
-    let(:milestone) { create(:milestone, project: project, status: "pending") }
+    let(:project) { create(:project, user:) }
+    let(:milestone) { create(:milestone, project:, status: "pending") }
 
     context "with valid project and milestone" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s,
           milestoneId: milestone.id.to_s
         })
@@ -65,14 +65,14 @@ RSpec.describe TimeLogs::StartTrackingCommand, type: :command do
 
     context "when already tracking" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s,
           milestoneId: milestone.id.to_s
         })
       end
 
       before do
-        create(:time_log, :active, user: user, project: project, milestone: milestone)
+        create(:time_log, :active, user:, project:, milestone:)
       end
 
       it "displays an error message" do
@@ -87,7 +87,7 @@ RSpec.describe TimeLogs::StartTrackingCommand, type: :command do
 
     context "with non-existent project" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: "999999",
           milestoneId: milestone.id.to_s
         })
@@ -103,7 +103,7 @@ RSpec.describe TimeLogs::StartTrackingCommand, type: :command do
 
     context "with non-existent milestone" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s,
           milestoneId: "999999"
         })

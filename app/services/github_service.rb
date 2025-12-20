@@ -113,7 +113,7 @@ class GithubService < ApplicationService
         # Prepare branch data for upsert
         branch_owners << {
           project_id: project.id,
-          user_id: user_id,
+          user_id:,
           branch_name: branch.name,
           created_at: Time.current,
           updated_at: Time.current
@@ -126,7 +126,7 @@ class GithubService < ApplicationService
 
     # Upsert all branch owners in a single query
     unless branch_owners.empty?
-      GithubBranch.upsert_all(branch_owners, unique_by: [ :project_id, :branch_name, :user_id ])
+      GithubBranch.upsert_all(branch_owners, unique_by: [:project_id, :branch_name, :user_id])
       Rails.logger.info "Stored #{branch_owners.size} branches for project #{project.id}"
     else
       Rails.logger.warn "No valid branches found for project #{project.id}"
@@ -181,7 +181,7 @@ class GithubService < ApplicationService
 
     # Preload all related users and their GitHub usernames
     agreement_users = agreements.flat_map { |agreement| agreement.agreement_participants.map(&:user) }
-    related_users = ([ project.user ] + agreement_users).compact.uniq
+    related_users = ([project.user] + agreement_users).compact.uniq
 
     # Create a hash of email => user_id for quick lookup
     @user_emails = {}
@@ -189,7 +189,7 @@ class GithubService < ApplicationService
     @user_github_identifiers = {}
 
     # Preload users and their GitHub usernames
-    User.where(id: related_users.map(&:id)).where.not(github_username: [ nil, "" ]).find_each do |user|
+    User.where(id: related_users.map(&:id)).where.not(github_username: [nil, ""]).find_each do |user|
       @user_emails[user.email.downcase] = user.id if user.email.present?
       @user_github_identifiers[user.github_username.downcase] = user.id if user.github_username.present?
     end
@@ -197,7 +197,7 @@ class GithubService < ApplicationService
 
   def github_client(access_token = nil)
     if access_token.present?
-      Octokit::Client.new(access_token: access_token)
+      Octokit::Client.new(access_token:)
     else
       Octokit::Client.new
     end
@@ -255,14 +255,14 @@ class GithubService < ApplicationService
       {
         project_id: project.id,
         agreement_id: agreement&.id,
-        user_id: user_id,
+        user_id:,
         commit_sha: commit.sha,
         commit_url: commit.html_url,
         commit_message: commit.commit.message,
         lines_added: stats[:additions].to_i,
         lines_removed: stats[:deletions].to_i,
         commit_date: commit.commit.author.date,
-        changed_files: changed_files, # This gives you per-file details including diffs
+        changed_files:, # This gives you per-file details including diffs
         created_at: Time.current,
         updated_at: Time.current,
         unregistered_user_name: author_email
@@ -286,7 +286,7 @@ class GithubService < ApplicationService
     Rails.logger.info "Starting commit fetch for branch '#{branch}' (page size: #{per_page})"
 
     loop do
-      api_options = { sha: branch, per_page: per_page, page: page }
+      api_options = { sha: branch, per_page:, page: }
 
       commits = client.commits(repo_path, api_options)
       break if commits.empty?
@@ -324,13 +324,13 @@ class GithubService < ApplicationService
     end
 
     Rails.logger.info "Fetch complete: #{all_commit_shas.size} total commits in branch, #{new_commits.size} new commits to process"
-    [ all_commit_shas, new_commits ]
+    [all_commit_shas, new_commits]
   end
 
   # Handle GitHub API rate limiting
   def handle_rate_limit(error)
     reset_time = error.response_headers["x-ratelimit-reset"].to_i
-    wait_time = [ reset_time - Time.now.to_i + 1, 1 ].max
+    wait_time = [reset_time - Time.now.to_i + 1, 1].max
     Rails.logger.warn "GitHub API rate limit reached. Waiting #{wait_time} seconds..."
     sleep(wait_time)
   end

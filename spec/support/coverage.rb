@@ -71,9 +71,9 @@ if ENV['COVERAGE'] == 'true'
       result = SimpleCov.result
 
       # Check coverage by group
-      primary_groups = [ 'Controllers', 'Models', 'Services', 'Forms', 'Queries' ]
-      secondary_groups = [ 'Helpers', 'Presenters', 'Policies', 'Validators' ]
-      tertiary_groups = [ 'Views', 'Jobs', 'Mailers' ]
+      primary_groups = ['Controllers', 'Models', 'Services', 'Forms', 'Queries']
+      secondary_groups = ['Helpers', 'Presenters', 'Policies', 'Validators']
+      tertiary_groups = ['Views', 'Jobs', 'Mailers']
 
       primary_files = result.files.select { |f| primary_groups.any? { |g| f.filename.include?(g.downcase) } }
       secondary_files = result.files.select { |f| secondary_groups.any? { |g| f.filename.include?(g.downcase) } }

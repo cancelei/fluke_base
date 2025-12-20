@@ -5,10 +5,10 @@ require 'rails_helper'
 
 RSpec.describe GithubBranchLog, type: :model do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
-  let(:github_branch) { create(:github_branch, project: project, user: user) }
-  let(:github_log) { create(:github_log, project: project, user: user) }
-  let(:github_branch_log) { create(:github_branch_log, github_branch: github_branch, github_log: github_log) }
+  let(:project) { create(:project, user:) }
+  let(:github_branch) { create(:github_branch, project:, user:) }
+  let(:github_log) { create(:github_log, project:, user:) }
+  let(:github_branch_log) { create(:github_branch_log, github_branch:, github_log:) }
 
   # Association Testing - Line 49-58 in test_spec
   describe "associations" do
@@ -53,8 +53,8 @@ RSpec.describe GithubBranchLog, type: :model do
 
   # Scope Testing - Line 104-126 in test_spec
   describe "scopes" do
-    let(:other_branch) { create(:github_branch, project: project, user: user) }
-    let!(:branch_log_1) { create(:github_branch_log, github_branch: github_branch) }
+    let(:other_branch) { create(:github_branch, project:, user:) }
+    let!(:branch_log_1) { create(:github_branch_log, github_branch:) }
     let!(:branch_log_2) { create(:github_branch_log, github_branch: other_branch) }
 
     describe ".for_branch" do
@@ -77,7 +77,7 @@ RSpec.describe GithubBranchLog, type: :model do
         new_branch_log = create(:github_branch_log, github_log: new_log)
 
         # Get only the branch logs we created and verify ordering
-        created_logs = GithubBranchLog.where(id: [ old_branch_log.id, new_branch_log.id ]).recent
+        created_logs = GithubBranchLog.where(id: [old_branch_log.id, new_branch_log.id]).recent
         expect(created_logs.first.github_log).to eq(new_log)
         expect(created_logs.last.github_log).to eq(old_log)
       end

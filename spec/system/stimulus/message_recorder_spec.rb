@@ -4,7 +4,7 @@ RSpec.describe 'Stimulus Message Recorder Controller', type: :system, js: true d
   let(:user) { create(:user) }
   let(:partner) { create(:user) }
   let!(:conversation) { create(:conversation, sender: user, recipient: partner) }
-  let!(:message) { create(:message, conversation: conversation, user: partner, body: 'Hello from partner') }
+  let!(:message) { create(:message, conversation:, user: partner, body: 'Hello from partner') }
 
   before do
     sign_in user

@@ -4,7 +4,7 @@ RSpec.describe 'Agreements Integration', type: :request do
   let(:alice) { create(:user) }
   let(:bob) { create(:user) }
   let(:project) { create(:project, user: alice) }
-  let(:milestone) { create(:milestone, project: project) }
+  let(:milestone) { create(:milestone, project:) }
 
   before { sign_in alice }
 
@@ -21,7 +21,7 @@ RSpec.describe 'Agreements Integration', type: :request do
           start_date: 1.week.from_now.to_date,
           end_date: 4.weeks.from_now.to_date,
           tasks: 'Help with development',
-          milestone_ids: [ milestone.id ]
+          milestone_ids: [milestone.id]
         }
       }
 
@@ -64,7 +64,7 @@ RSpec.describe 'Agreements Integration', type: :request do
 
     it 'handles counter offers end-to-end (minimal)' do
       # Original agreement (co-founder to avoid milestone/weekly_hours constraints)
-      original = create(:agreement, :with_participants, :co_founder, project: project, initiator: alice, other_party: bob)
+      original = create(:agreement, :with_participants, :co_founder, project:, initiator: alice, other_party: bob)
 
       sign_in bob
       post '/agreements', params: {

@@ -1,7 +1,7 @@
 <div class="card bg-base-100 shadow-xl">
   <%= fluke_form_with(
-        url: url,
-        method: method,
+        url:,
+        method:,
         model: project,
         class: "space-y-6",
         local: true
@@ -11,11 +11,11 @@
       <%= render "shared/form_errors", object: project %>
 
       <div data-controller="stealth-mode" data-stealth-mode-edit-mode-value="<%= project.persisted? %>">
-        <%= render "stealth_mode_section", form: form, project: project %>
+        <%= render "stealth_mode_section", form:, project: %>
 
-        <%= render "stealth_summary_section", project: project, show_summary: false %>
+        <%= render "stealth_summary_section", project:, show_summary: false %>
 
-        <%= render "main_form_section", form: form, project: project, show_form: true %>
+        <%= render "main_form_section", form:, project:, show_form: true %>
       </div>
 
       <!-- Form Actions -->

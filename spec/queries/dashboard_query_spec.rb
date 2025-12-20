@@ -5,14 +5,14 @@ RSpec.describe DashboardQuery do
   subject(:query) { described_class.new(user) }
 
   describe '#recent_projects' do
-    let!(:older) { create(:project, user: user, created_at: 2.days.ago) }
-    let!(:newer) { create(:project, user: user, created_at: 1.day.ago) }
-    let!(:newest) { create(:project, user: user, created_at: Time.current) }
+    let!(:older) { create(:project, user:, created_at: 2.days.ago) }
+    let!(:newer) { create(:project, user:, created_at: 1.day.ago) }
+    let!(:newest) { create(:project, user:, created_at: Time.current) }
 
     it 'returns projects ordered by newest first with limit' do
       results = query.recent_projects(2)
 
-      expect(results).to eq([ newest, newer ])
+      expect(results).to eq([newest, newer])
       expect(results).not_to include(older)
     end
   end
@@ -22,7 +22,7 @@ RSpec.describe DashboardQuery do
 
     let!(:older_agreement) do
       create(:agreement, :with_participants,
-             project: create(:project, user: user),
+             project: create(:project, user:),
              initiator: user,
              other_party: other_user,
              created_at: 3.days.ago)
@@ -30,7 +30,7 @@ RSpec.describe DashboardQuery do
 
     let!(:newer_agreement) do
       create(:agreement, :with_participants,
-             project: create(:project, user: user),
+             project: create(:project, user:),
              initiator: user,
              other_party: other_user,
              created_at: 1.day.ago)
@@ -39,7 +39,7 @@ RSpec.describe DashboardQuery do
     it 'returns agreements involving the user ordered by newest first' do
       results = query.recent_agreements(1)
 
-      expect(results).to eq([ newer_agreement ])
+      expect(results).to eq([newer_agreement])
       expect(results).not_to include(older_agreement)
     end
   end
@@ -47,28 +47,28 @@ RSpec.describe DashboardQuery do
   describe '#upcoming_meetings' do
     let(:agreement) do
       create(:agreement, :with_participants,
-             project: create(:project, user: user),
+             project: create(:project, user:),
              initiator: user,
              other_party: create(:user),
              status: Agreement::ACCEPTED)
     end
 
     let!(:future_meeting) do
-      create(:meeting, agreement: agreement, start_time: 2.days.from_now, end_time: 3.days.from_now)
+      create(:meeting, agreement:, start_time: 2.days.from_now, end_time: 3.days.from_now)
     end
 
     let!(:sooner_meeting) do
-      create(:meeting, agreement: agreement, start_time: 1.day.from_now, end_time: 1.day.from_now + 1.hour)
+      create(:meeting, agreement:, start_time: 1.day.from_now, end_time: 1.day.from_now + 1.hour)
     end
 
     let!(:past_meeting) do
-      create(:meeting, agreement: agreement, start_time: 2.days.ago, end_time: 2.days.ago + 1.hour)
+      create(:meeting, agreement:, start_time: 2.days.ago, end_time: 2.days.ago + 1.hour)
     end
 
     it 'returns upcoming meetings ordered soonest first' do
       results = query.upcoming_meetings(2)
 
-      expect(results).to eq([ sooner_meeting, future_meeting ])
+      expect(results).to eq([sooner_meeting, future_meeting])
       expect(results).not_to include(past_meeting)
     end
   end
@@ -79,7 +79,7 @@ RSpec.describe DashboardQuery do
     let!(:matched_project) do
       project = create(:project, collaboration_type: Project::SEEKING_MENTOR)
       create(:agreement, :with_participants,
-             project: project,
+             project:,
              initiator: project.user,
              other_party: user,
              status: Agreement::ACCEPTED)

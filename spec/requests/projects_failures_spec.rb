@@ -14,7 +14,7 @@ RSpec.describe 'Projects controller failures', type: :request do
   end
 
   it 'PATCH /projects/:id renders :edit with 422 when invalid' do
-    project = create(:project, user: user)
+    project = create(:project, user:)
     patch project_path(project), params: { project: { name: '' } }
     expect(response).to have_http_status(:unprocessable_content)
     expect(response.body).to include('Edit Project').or include('error').or include('can\'t be blank')

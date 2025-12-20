@@ -8,7 +8,7 @@ if project_id.nil?
   puts "Usage: rails runner script/verify_github_commits.rb <project_id>"
   puts ""
   puts "Available projects:"
-  Project.where.not(repository_url: [ nil, '' ]).each do |p|
+  Project.where.not(repository_url: [nil, '']).each do |p|
     puts "  #{p.id}: #{p.name} (#{p.repository_url})"
   end
   exit 1

@@ -1,5 +1,5 @@
 class HomeController < ApplicationController
-  skip_before_action :authenticate_user!, only: [ :index ]
+  skip_before_action :authenticate_user!, only: [:index]
 
   def index
     # Real statistics for the landing page
@@ -9,5 +9,8 @@ class HomeController < ApplicationController
       total_agreements: Agreement.count,
       active_agreements: Agreement.active.count
     }
+
+    # GitHub repository stats (cached)
+    @github_stats = Github::RepositoryStats.call
   end
 end

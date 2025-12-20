@@ -1,7 +1,7 @@
 class MilestonesController < ApplicationController
   before_action :set_project
-  before_action :set_milestone, only: [ :show, :edit, :update, :destroy, :confirm, :enhancement_status, :enhancement_display ]
-  before_action :set_project_for_ai, only: [ :ai_enhance, :apply_ai_enhancement, :revert_ai_enhancement, :discard_ai_enhancement ]
+  before_action :set_milestone, only: [:show, :edit, :update, :destroy, :confirm, :enhancement_status, :enhancement_display]
+  before_action :set_project_for_ai, only: [:ai_enhance, :apply_ai_enhancement, :revert_ai_enhancement, :discard_ai_enhancement]
 
   def index
     @milestones = @project.milestones.order(due_date: :asc)
@@ -141,26 +141,26 @@ class MilestonesController < ApplicationController
       begin
         service = MilestoneAiEnhancementService.new(@project)
         enhanced_description = service.augment_description(
-          title: title,
-          description: description
+          title:,
+          description:
         )
 
         # Create a simple enhancement object for the UI (not saved to DB)
-        @enhancement = OpenStruct.new(
+        @enhancement = EnhancementResult.new(
           id: nil,
           original_title: title,
           original_description: description,
-          enhanced_description: enhanced_description,
+          enhanced_description:,
           enhancement_style: params[:enhancement_style] || "professional",
           status: "completed",
-          successful?: true,
+          successful: true,
           direct_enhancement: true,
           created_at: Time.current,
           user: current_user
         )
 
         # Create a simple milestone object for the UI
-        @milestone = OpenStruct.new(id: nil)
+        @milestone = MilestoneStub.new(id: nil)
 
         respond_to do |format|
           format.turbo_stream do

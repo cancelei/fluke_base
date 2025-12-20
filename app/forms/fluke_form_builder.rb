@@ -3,7 +3,7 @@
 class FlukeFormBuilder < ActionView::Helpers::FormBuilder
   # DaisyUI form-control wrapper
   # Usage: form.form_control(:email, label: "Email Address") { |f| f.email_field :email }
-  def form_control(attribute, options = {}, &block)
+  def form_control(attribute, options = {}, &)
     label_text = options.delete(:label) || attribute.to_s.humanize
     hint = options.delete(:hint)
     required = options.delete(:required) || false
@@ -21,7 +21,7 @@ class FlukeFormBuilder < ActionView::Helpers::FormBuilder
       end
 
       # Input (yielded content)
-      parts << @template.capture(self, &block)
+      parts << @template.capture(self, &)
 
       # Error message
       if @object&.errors&.[](attribute)&.any?
@@ -106,7 +106,7 @@ class FlukeFormBuilder < ActionView::Helpers::FormBuilder
     rows = options.delete(:rows) || 4
 
     form_control(attribute, wrapper_options) do |_f|
-      text_area(attribute, options.merge(class: "textarea textarea-bordered w-full #{textarea_class}", rows: rows))
+      text_area(attribute, options.merge(class: "textarea textarea-bordered w-full #{textarea_class}", rows:))
     end
   end
 
@@ -221,13 +221,13 @@ class FlukeFormBuilder < ActionView::Helpers::FormBuilder
     @template.render(Ui::ButtonComponent.new(
       text: value,
       form: self,
-      variant: variant,
-      size: size,
-      icon: icon,
-      css_class: css_class,
+      variant:,
+      size:,
+      icon:,
+      css_class:,
       form_submission_target: !skip_loading,
-      loading_text: loading_text,
-      data: data,
+      loading_text:,
+      data:,
       **options.except(:data)
     ))
   end

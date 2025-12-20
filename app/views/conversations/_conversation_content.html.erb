@@ -47,7 +47,7 @@
     <div id="conversation_<%= conversation.id %>_messages" class="space-y-3" data-controller="scroll-into-view">
       <% if messages.present? %>
         <% messages.each do |message| %>
-          <%= render "messages/message", message: message, current_user: current_user %>
+          <%= render "messages/message", message:, current_user: %>
         <% end %>
       <% else %>
         <!-- Empty state -->
@@ -68,7 +68,7 @@
 
   <!-- Message form -->
   <div id="new_message_form" class="p-4 border-t border-base-200 bg-base-100">
-    <%= render "messages/form", conversation: conversation, message: message %>
+    <%= render "messages/form", conversation:, message: %>
   </div>
 <% else %>
   <!-- No conversation selected state -->

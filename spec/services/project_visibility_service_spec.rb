@@ -9,13 +9,13 @@ RSpec.describe ProjectVisibilityService do
            user: owner,
            name: 'Visible Project',
            description: 'Hidden content',
-           public_fields: [ 'name' ])
+           public_fields: ['name'])
   end
   let(:service) { described_class.new(project) }
 
   before do
     create(:agreement, :with_participants, :mentorship,
-           project: project,
+           project:,
            initiator: owner,
            other_party: collaborator,
            status: Agreement::ACCEPTED)
@@ -62,7 +62,7 @@ RSpec.describe ProjectVisibilityService do
   end
 
   describe '.batch_check_access' do
-    let(:second_project) { create(:project, user: owner, public_fields: [ 'name' ]) }
+    let(:second_project) { create(:project, user: owner, public_fields: ['name']) }
     let(:second_collaborator) { create(:user) }
 
     before do
@@ -74,7 +74,7 @@ RSpec.describe ProjectVisibilityService do
     end
 
     it 'maps project ids to collaborator user ids' do
-      access_map = described_class.batch_check_access([ project, second_project ], [ collaborator, second_collaborator ])
+      access_map = described_class.batch_check_access([project, second_project], [collaborator, second_collaborator])
 
       expect(access_map[project.id]).to include(collaborator.id)
       expect(access_map[second_project.id]).to include(second_collaborator.id)

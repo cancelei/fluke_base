@@ -4,7 +4,7 @@
   <%= turbo_stream_from "project_#{@project.id}_milestone_enhancement" %>
 <% end %>
 
-<%= fluke_form_with(model: [ @project, milestone ], class: "mx-auto mt-4", id: "milestone-form",
+<%= fluke_form_with(model: [@project, milestone], class: "mx-auto mt-4", id: "milestone-form",
     data: {
       controller: "milestone-ai",
       milestone_ai_project_id_value: @project.id,
@@ -54,7 +54,7 @@
       <!-- AI Suggestion Container -->
       <div id="ai-suggestion-container">
         <% if defined?(@enhancement) && @enhancement %>
-          <%= render "ai_suggestion", enhancement: @enhancement, milestone: milestone %>
+          <%= render "ai_suggestion", enhancement: @enhancement, milestone: %>
         <% end %>
       </div>
     </fieldset>
@@ -68,10 +68,10 @@
       <%= form.label :status, class: "fieldset-legend" %>
       <%= form.select :status,
         options_for_select([
-          [ "Pending", Milestone::PENDING ],
-          [ "In Progress", Milestone::IN_PROGRESS ],
-          [ "Completed", Milestone::COMPLETED ],
-          [ "Cancelled", Milestone::CANCELLED ]
+          ["Pending", Milestone::PENDING],
+          ["In Progress", Milestone::IN_PROGRESS],
+          ["Completed", Milestone::COMPLETED],
+          ["Cancelled", Milestone::CANCELLED]
         ], selected: milestone.status),
         { blank: "Pending" },
         class: "select select-bordered w-full" %>

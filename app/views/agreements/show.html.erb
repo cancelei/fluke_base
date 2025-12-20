@@ -38,7 +38,7 @@
     <%= render "agreement_details",
         agreement: @agreement,
         project: @project,
-        current_user: current_user,
+        current_user:,
         can_view_full_details: @can_view_full_details %>
   </div>
 <% end %>
@@ -63,7 +63,7 @@
   <% agreement_participant_ids = @agreement.agreement_participants.pluck(:user_id) %>
   <% agreement_participant_time_logs = @project.time_logs.where(user_id: agreement_participant_ids) %>
 <% end %>
-<%= render "time_logs_section", agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details, agreement_participant_time_logs: agreement_participant_time_logs %>
+<%= render "time_logs_section", agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details, agreement_participant_time_logs: %>
 
 <!-- Meetings Section -->
 <%= render "shared/lazy_turbo_frame",

@@ -22,7 +22,7 @@
           <div class="flex justify-between items-center">
             <span class="text-sm font-medium text-success"><b>Milestone in progress:</b> <%= milestone.title %></span>
             <span class="ml-4 text-sm font-medium text-success" data-timer-target="timer">
-              <%= "%02d:%02d:%02d" % [ hours, minutes, seconds ] %>
+              <%= "%02d:%02d:%02d" % [hours, minutes, seconds] %>
             </span>
             <div class="flex items-center ml-4 gap-2">
               <%= button_to stop_tracking_time_logs_path(selected_project, milestone_id: milestone.id), method: :post, class: "btn btn-error btn-sm", form: { data: { turbo: true, timer_target: "stopButton", action: "click->timer#stopTimer" } } do %>

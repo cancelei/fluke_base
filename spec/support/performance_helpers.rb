@@ -13,38 +13,38 @@ module PerformanceHelpers
   end
 
   # Time execution of a block
-  def time_execution(&block)
+  def time_execution(&)
     start_time = Time.current
     result = yield
     end_time = Time.current
     {
-      result: result,
+      result:,
       duration: end_time - start_time
     }
   end
 
   # Expect operation to complete within time limit
-  def expect_fast_execution(max_seconds = 1, &block)
-    execution = time_execution(&block)
+  def expect_fast_execution(max_seconds = 1, &)
+    execution = time_execution(&)
     expect(execution[:duration]).to be < max_seconds.seconds
     execution[:result]
   end
 
   # Memory usage tracking (simplified)
-  def track_memory_usage(&block)
+  def track_memory_usage(&)
     GC.start
     memory_before = `ps -o rss= -p #{Process.pid}`.to_i
     result = yield
     GC.start
     memory_after = `ps -o rss= -p #{Process.pid}`.to_i
     {
-      result: result,
+      result:,
       memory_used: memory_after - memory_before
     }
   end
 
   # Database query counting
-  def count_queries(&block)
+  def count_queries(&)
     query_count = 0
     callback = lambda do |*args|
       query_count += 1 unless args[0] =~ /^(BEGIN|COMMIT|ROLLBACK|SAVEPOINT|RELEASE)/
@@ -58,8 +58,8 @@ module PerformanceHelpers
   end
 
   # Expect specific number of database queries
-  def expect_query_count(expected_count, &block)
-    actual_count = count_queries(&block)
+  def expect_query_count(expected_count, &)
+    actual_count = count_queries(&)
     expect(actual_count).to eq(expected_count)
   end
 
@@ -73,10 +73,10 @@ module PerformanceHelpers
   end
 
   # Performance benchmark helper
-  def benchmark_operation(name, iterations = 10, &block)
+  def benchmark_operation(name, iterations = 10, &)
     times = []
     iterations.times do
-      execution = time_execution(&block)
+      execution = time_execution(&)
       times << execution[:duration]
     end
 

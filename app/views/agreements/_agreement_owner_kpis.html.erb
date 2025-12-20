@@ -36,7 +36,7 @@
               </span>
             </div>
             <% if hours_kpi[:performance_ratio].present? %>
-              <progress class="progress progress-info w-full mt-2" value="<%= [ hours_kpi[:performance_ratio], 100 ].min %>" max="100"></progress>
+              <progress class="progress progress-info w-full mt-2" value="<%= [hours_kpi[:performance_ratio], 100].min %>" max="100"></progress>
             <% end %>
           </div>
         <% end %>

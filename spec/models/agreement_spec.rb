@@ -4,8 +4,8 @@ RSpec.describe Agreement, type: :model do
   let(:alice) { create(:user, :alice) }
   let(:bob) { create(:user, :bob) }
   let(:project) { create(:project, user: alice) }
-  let(:milestone1) { create(:milestone, project: project) }
-  let(:milestone2) { create(:milestone, project: project) }
+  let(:milestone1) { create(:milestone, project:) }
+  let(:milestone2) { create(:milestone, project:) }
 
   describe "associations" do
     it { should belong_to(:project) }
@@ -16,7 +16,7 @@ RSpec.describe Agreement, type: :model do
   end
 
   describe "validations" do
-    subject { create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob) }
+    subject { create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob) }
 
     it { should validate_presence_of(:project_id) }
     # Note: status and agreement_type are auto-set by before_validation callbacks
@@ -33,7 +33,7 @@ RSpec.describe Agreement, type: :model do
     ]) }
 
     it "validates agreement type inclusion" do
-      agreement = build(:agreement, :co_founder, project: project)
+      agreement = build(:agreement, :co_founder, project:)
       # Set an invalid type and skip callbacks to test validation
       agreement.agreement_type = "Invalid"
       agreement.valid?
@@ -57,7 +57,7 @@ RSpec.describe Agreement, type: :model do
     end
 
     context "when agreement type is mentorship" do
-      subject { build(:agreement, :mentorship, project: project) }
+      subject { build(:agreement, :mentorship, project:) }
       it { should validate_presence_of(:milestone_ids) }
       it { should validate_presence_of(:weekly_hours) }
       it { should validate_numericality_of(:weekly_hours).is_greater_than(0).is_less_than_or_equal_to(40) }
@@ -66,7 +66,7 @@ RSpec.describe Agreement, type: :model do
     describe "end_date_after_start_date" do
       it "is valid when end date is after start date" do
         agreement = build(:agreement, :co_founder,
-          project: project,
+          project:,
           start_date: 1.week.from_now,
           end_date: 2.weeks.from_now
         )
@@ -75,7 +75,7 @@ RSpec.describe Agreement, type: :model do
 
       it "is invalid when end date is before start date" do
         agreement = build(:agreement, :co_founder,
-          project: project,
+          project:,
           start_date: 2.weeks.from_now,
           end_date: 1.week.from_now
         )
@@ -141,7 +141,7 @@ RSpec.describe Agreement, type: :model do
   end
 
   describe "participant methods" do
-    let(:agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob) }
+    let(:agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob) }
 
     it "identifies the initiator" do
       expect(agreement.initiator).to eq(alice)
@@ -167,7 +167,7 @@ RSpec.describe Agreement, type: :model do
   end
 
   describe "turn-based system" do
-    let(:agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob) }
+    let(:agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob) }
 
     it "determines whose turn it is" do
       # By default, it should be the other party's turn (bob)
@@ -189,7 +189,7 @@ RSpec.describe Agreement, type: :model do
   end
 
   describe "milestone handling" do
-    let(:agreement) { create(:agreement, :mentorship, project: project, milestone_ids: [ milestone1.id, milestone2.id ]) }
+    let(:agreement) { create(:agreement, :mentorship, project:, milestone_ids: [milestone1.id, milestone2.id]) }
 
     it "handles milestone IDs as array" do
       expect(agreement.milestone_ids).to contain_exactly(milestone1.id, milestone2.id)
@@ -208,9 +208,9 @@ RSpec.describe Agreement, type: :model do
   end
 
   describe "counter offer system" do
-    let(:original_agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob) }
+    let(:original_agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob) }
     let(:counter_agreement) do
-      create(:agreement, :with_participants, :mentorship, project: project, initiator: bob, other_party: alice).tap do |agreement|
+      create(:agreement, :with_participants, :mentorship, project:, initiator: bob, other_party: alice).tap do |agreement|
         agreement.agreement_participants.update_all(counter_agreement_id: original_agreement.id)
       end
     end
@@ -233,7 +233,7 @@ RSpec.describe Agreement, type: :model do
 
     it "finds most recent counter offer" do
       counter_agreement
-      second_counter = create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob).tap do |agreement|
+      second_counter = create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob).tap do |agreement|
         agreement.agreement_participants.update_all(counter_agreement_id: original_agreement.id)
         agreement.update!(created_at: 1.day.from_now)
       end
@@ -244,7 +244,7 @@ RSpec.describe Agreement, type: :model do
   end
 
   describe "status transitions" do
-    let(:agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob) }
+    let(:agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob) }
 
     describe "#accept!" do
       it "transitions from pending to accepted" do
@@ -299,7 +299,7 @@ RSpec.describe Agreement, type: :model do
   end
 
   describe "access control" do
-    let(:agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob) }
+    let(:agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob) }
     let(:charlie) { create(:user) }
 
     it "allows participants to view full project details" do
@@ -310,7 +310,7 @@ RSpec.describe Agreement, type: :model do
   end
 
   describe "calculations" do
-    let(:agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob, weekly_hours: 10, hourly_rate: 50.0) }
+    let(:agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob, weekly_hours: 10, hourly_rate: 50.0) }
 
     it "calculates duration in weeks" do
       agreement.update!(start_date: Date.current, end_date: 4.weeks.from_now.to_date)
@@ -357,14 +357,14 @@ RSpec.describe Agreement, type: :model do
   describe "payment boundaries and date edges" do
     it "allows same-day start and end dates" do
       project = create(:project)
-      agreement = build(:agreement, :co_founder, project: project, start_date: Date.today, end_date: Date.today)
+      agreement = build(:agreement, :co_founder, project:, start_date: Date.today, end_date: Date.today)
       expect(agreement).to be_valid
     end
 
     context "hourly payments" do
       it "requires hourly_rate and accepts 0+" do
         project = create(:project)
-        a = build(:agreement, :mentorship, project: project, payment_type: Agreement::HOURLY, hourly_rate: nil)
+        a = build(:agreement, :mentorship, project:, payment_type: Agreement::HOURLY, hourly_rate: nil)
         expect(a).not_to be_valid
         a.hourly_rate = 0
         expect(a).to be_valid
@@ -376,7 +376,7 @@ RSpec.describe Agreement, type: :model do
     context "equity payments" do
       it "requires equity_percentage and enforces 0..100" do
         project = create(:project)
-        a = build(:agreement, :co_founder, project: project, payment_type: Agreement::EQUITY, equity_percentage: nil)
+        a = build(:agreement, :co_founder, project:, payment_type: Agreement::EQUITY, equity_percentage: nil)
         expect(a).not_to be_valid
         a.equity_percentage = 0
         expect(a).to be_valid
@@ -390,7 +390,7 @@ RSpec.describe Agreement, type: :model do
     context "hybrid payments" do
       it "require both hourly_rate and equity_percentage" do
         project = create(:project)
-        a = build(:agreement, :mentorship, project: project, payment_type: Agreement::HYBRID, hourly_rate: nil, equity_percentage: 10)
+        a = build(:agreement, :mentorship, project:, payment_type: Agreement::HYBRID, hourly_rate: nil, equity_percentage: 10)
         expect(a).not_to be_valid
         a.hourly_rate = 30
         a.equity_percentage = nil
@@ -403,11 +403,11 @@ RSpec.describe Agreement, type: :model do
     context "mentorship requirements" do
       it "requires weekly_hours and milestone_ids" do
         project = create(:project)
-        a = build(:agreement, :mentorship, project: project)
+        a = build(:agreement, :mentorship, project:)
         # Remove milestone_ids to test presence
         a.milestone_ids = []
         expect(a).not_to be_valid
-        a.milestone_ids = [ create(:milestone, project: project).id ]
+        a.milestone_ids = [create(:milestone, project:).id]
         a.weekly_hours = nil
         expect(a).not_to be_valid
         a.weekly_hours = 5

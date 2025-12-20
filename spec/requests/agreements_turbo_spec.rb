@@ -5,9 +5,9 @@ require 'rails_helper'
 RSpec.describe "Agreements Turbo Streams", type: :request do
   let(:user) { create(:user, :alice) }
   let(:other_user) { create(:user, :bob) }
-  let(:project) { create(:project, user: user) }
-  let(:agreement) { create(:agreement, :with_participants, project: project, initiator: user, other_party: other_user) }
-  let(:accepted_agreement) { create(:agreement, :with_participants, :accepted, project: project, initiator: user, other_party: other_user) }
+  let(:project) { create(:project, user:) }
+  let(:agreement) { create(:agreement, :with_participants, project:, initiator: user, other_party: other_user) }
+  let(:accepted_agreement) { create(:agreement, :with_participants, :accepted, project:, initiator: user, other_party: other_user) }
 
   describe "POST /agreements/:id/accept" do
     before { sign_in other_user }
@@ -104,18 +104,22 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
     end
   end
 
+  # Lazy-loaded turbo frames expect HTML responses with matching <turbo-frame> elements.
+  # They do NOT use turbo_stream format - that's for explicit stream actions.
+  # See: https://turbo.hotwired.dev/reference/frames
   describe "Lazy loading sections" do
     before { sign_in user }
 
     describe "GET /agreements/:id/meetings_section" do
-      it "returns turbo stream for meetings frame" do
-        get meetings_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
-        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      it "returns HTML with turbo-frame for meetings" do
+        get meetings_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/html" }
+        expect(response.media_type).to eq("text/html")
       end
 
-      it "includes turbo-stream replace action" do
-        get meetings_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
-        expect(response.body).to include("turbo-stream")
+      it "includes turbo-frame element with correct ID" do
+        get meetings_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/html" }
+        expect(response.body).to include("turbo-frame")
+        expect(response.body).to include("_meetings")
       end
 
       it "returns success status" do
@@ -125,9 +129,9 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
     end
 
     describe "GET /agreements/:id/github_section" do
-      it "returns turbo stream for github frame" do
-        get github_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
-        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      it "returns HTML with turbo-frame for github" do
+        get github_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/html" }
+        expect(response.media_type).to eq("text/html")
       end
 
       it "returns success status" do
@@ -137,9 +141,9 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
     end
 
     describe "GET /agreements/:id/time_logs_section" do
-      it "returns turbo stream for time_logs frame" do
-        get time_logs_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
-        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      it "returns HTML with turbo-frame for time_logs" do
+        get time_logs_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/html" }
+        expect(response.media_type).to eq("text/html")
       end
 
       it "returns success status" do
@@ -149,9 +153,9 @@ RSpec.describe "Agreements Turbo Streams", type: :request do
     end
 
     describe "GET /agreements/:id/counter_offers_section" do
-      it "returns turbo stream for counter_offers frame" do
-        get counter_offers_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/vnd.turbo-stream.html" }
-        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      it "returns HTML with turbo-frame for counter_offers" do
+        get counter_offers_section_agreement_path(accepted_agreement), headers: { "Accept" => "text/html" }
+        expect(response.media_type).to eq("text/html")
       end
 
       it "returns success status" do

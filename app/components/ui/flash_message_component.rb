@@ -18,7 +18,7 @@ module Ui
 
     def call
       tag.div(class: container_classes, role: "alert") do
-        safe_join([ render_icon, render_message ])
+        safe_join([render_icon, render_message])
       end
     end
 

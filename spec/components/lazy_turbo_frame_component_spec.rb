@@ -11,10 +11,10 @@ RSpec.describe LazyTurboFrameComponent, type: :component do
   describe "rendering" do
     it "renders a turbo-frame element" do
       render_inline(described_class.new(
-        frame_id: frame_id,
-        src_path: src_path,
-        title: title,
-        description: description
+        frame_id:,
+        src_path:,
+        title:,
+        description:
       ))
 
       expect(page).to have_css("turbo-frame")
@@ -23,9 +23,9 @@ RSpec.describe LazyTurboFrameComponent, type: :component do
     it "renders with correct frame id" do
       render_inline(described_class.new(
         frame_id: "my-frame",
-        src_path: src_path,
-        title: title,
-        description: description
+        src_path:,
+        title:,
+        description:
       ))
 
       expect(page).to have_css("turbo-frame#my-frame")
@@ -33,10 +33,10 @@ RSpec.describe LazyTurboFrameComponent, type: :component do
 
     it "renders with src attribute" do
       render_inline(described_class.new(
-        frame_id: frame_id,
+        frame_id:,
         src_path: "/custom/path",
-        title: title,
-        description: description
+        title:,
+        description:
       ))
 
       expect(page).to have_css("turbo-frame[src='/custom/path']")
@@ -44,10 +44,10 @@ RSpec.describe LazyTurboFrameComponent, type: :component do
 
     it "renders with lazy loading" do
       render_inline(described_class.new(
-        frame_id: frame_id,
-        src_path: src_path,
-        title: title,
-        description: description
+        frame_id:,
+        src_path:,
+        title:,
+        description:
       ))
 
       expect(page).to have_css("turbo-frame[loading='lazy']")
@@ -57,10 +57,10 @@ RSpec.describe LazyTurboFrameComponent, type: :component do
   describe "loading placeholder" do
     it "renders loading placeholder inside frame" do
       render_inline(described_class.new(
-        frame_id: frame_id,
-        src_path: src_path,
+        frame_id:,
+        src_path:,
         title: "Test Title",
-        description: description
+        description:
       ))
 
       expect(page).to have_text("Test Title")
@@ -68,9 +68,9 @@ RSpec.describe LazyTurboFrameComponent, type: :component do
 
     it "renders placeholder description" do
       render_inline(described_class.new(
-        frame_id: frame_id,
-        src_path: src_path,
-        title: title,
+        frame_id:,
+        src_path:,
+        title:,
         description: "Custom description"
       ))
 
@@ -79,10 +79,10 @@ RSpec.describe LazyTurboFrameComponent, type: :component do
 
     it "renders DaisyUI loading spinner" do
       render_inline(described_class.new(
-        frame_id: frame_id,
-        src_path: src_path,
-        title: title,
-        description: description
+        frame_id:,
+        src_path:,
+        title:,
+        description:
       ))
 
       expect(page).to have_css("span.loading.loading-spinner")

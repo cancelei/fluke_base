@@ -18,7 +18,7 @@
   <%= render Homepage::HowItWorksComponent.new %>
 
   <%# Tech Stack %>
-  <%= render Homepage::TechStackComponent.new %>
+  <%= render Homepage::TechStackComponent.new(github_stats: @github_stats) %>
 
   <%# FAQ Section %>
   <%= render "faq_section" %>

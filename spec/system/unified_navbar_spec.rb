@@ -12,8 +12,8 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
   end
 
   let(:user) { create(:user) }
-  let!(:project1) { create(:project, user: user, name: "Project Alpha") }
-  let!(:project2) { create(:project, user: user, name: "Project Beta") }
+  let!(:project1) { create(:project, user:, name: "Project Alpha") }
+  let!(:project2) { create(:project, user:, name: "Project Beta") }
   let!(:milestone1) { create(:milestone, project: project1, title: "Alpha Milestone", status: "pending") }
   let!(:milestone2) { create(:milestone, project: project2, title: "Beta Milestone", status: "pending") }
 

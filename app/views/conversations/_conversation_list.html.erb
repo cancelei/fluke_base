@@ -1,7 +1,7 @@
 <% if conversations.any? %>
   <ul id="conversations_list" class="menu p-0">
     <% conversations.each do |conversation| %>
-      <%= render "conversations/conversation_item", conversation: conversation, current_conversation: current_conversation, current_user: current_user %>
+      <%= render "conversations/conversation_item", conversation:, current_conversation:, current_user: %>
     <% end %>
   </ul>
 <% else %>

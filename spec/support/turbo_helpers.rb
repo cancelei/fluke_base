@@ -40,23 +40,23 @@ module TurboHelpers
   end
 
   def expect_stream_append(target)
-    expect_turbo_stream_action("append", target: target)
+    expect_turbo_stream_action("append", target:)
   end
 
   def expect_stream_prepend(target)
-    expect_turbo_stream_action("prepend", target: target)
+    expect_turbo_stream_action("prepend", target:)
   end
 
   def expect_stream_replace(target)
-    expect_turbo_stream_action("replace", target: target)
+    expect_turbo_stream_action("replace", target:)
   end
 
   def expect_stream_remove(target)
-    expect_turbo_stream_action("remove", target: target)
+    expect_turbo_stream_action("remove", target:)
   end
 
   def expect_stream_update(target)
-    expect_turbo_stream_action("update", target: target)
+    expect_turbo_stream_action("update", target:)
   end
 
   # Form submission helpers

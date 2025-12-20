@@ -18,9 +18,9 @@ class TestOnly::DataController < ApplicationController
 
     project = Project.create!(
       user: current_user,
-      name: name,
-      description: description,
-      stage: stage,
+      name:,
+      description:,
+      stage:,
       category: nil,
       current_stage: nil,
       target_market: nil,
@@ -64,8 +64,8 @@ class TestOnly::DataController < ApplicationController
 
     # Avoid duplicate pending/accepted agreements between the two users for this project
     existing = Agreement.joins(:agreement_participants)
-                        .where(project_id: project.id, status: [ Agreement::PENDING, Agreement::ACCEPTED ])
-                        .where(agreement_participants: { user_id: [ current_user.id, other.id ] })
+                        .where(project_id: project.id, status: [Agreement::PENDING, Agreement::ACCEPTED])
+                        .where(agreement_participants: { user_id: [current_user.id, other.id] })
                         .group("agreements.id")
                         .having("COUNT(agreement_participants.id) = 2")
                         .first
@@ -88,7 +88,7 @@ class TestOnly::DataController < ApplicationController
       weekly_hours: 5,
       hourly_rate: 10,
       equity_percentage: 0,
-      milestone_ids: [ milestone.id ]
+      milestone_ids: [milestone.id]
     )
 
     form.save
@@ -110,11 +110,11 @@ class TestOnly::DataController < ApplicationController
     other = find_or_create_user(params[:other_email].presence || "mentor@example.com", first_name: "Mentor", last_name: "User")
     conversation = Conversation.between(current_user.id, other.id)
     body = params[:body].presence || "Hello E2E"
-    conversation.messages.create!(user: current_user, body: body)
+    conversation.messages.create!(user: current_user, body:)
 
     respond_to do |format|
       format.html { redirect_to conversation_path(conversation), notice: "Conversation created for E2E" }
-      format.json { render json: { ok: true, id: conversation.id, body: body } }
+      format.json { render json: { ok: true, id: conversation.id, body: } }
     end
   end
 
@@ -132,15 +132,15 @@ class TestOnly::DataController < ApplicationController
   end
 
   def find_or_create_user(email, first_name: "E2E", last_name: "User")
-    user = User.find_by(email: email)
+    user = User.find_by(email:)
     return user if user
     password = "Password!123"
     user = User.new(
-      email: email,
-      password: password,
+      email:,
+      password:,
       password_confirmation: password,
-      first_name: first_name,
-      last_name: last_name
+      first_name:,
+      last_name:
     )
     user.skip_confirmation! if user.respond_to?(:skip_confirmation!)
     user.save!

@@ -1,7 +1,7 @@
 class ConversationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_conversation, only: [ :show ]
-  after_action :delete_empty_conversations, only: [ :show ]
+  before_action :set_conversation, only: [:show]
+  after_action :delete_empty_conversations, only: [:show]
 
   def index
     @conversations = Conversation.involving(current_user)
@@ -24,8 +24,8 @@ class ConversationsController < ApplicationController
     respond_to do |format|
       format.html
       format.turbo_stream do
-        render turbo_stream: [ turbo_stream.update("conversation_content", partial: "conversations/conversation_content", locals: { conversation: @conversation, messages: @messages, message: @message }),
-                             turbo_stream.update("conversation_list", partial: "conversations/conversation_list", locals: { conversations: @conversations, current_conversation: @conversation }) ]
+        render turbo_stream: [turbo_stream.update("conversation_content", partial: "conversations/conversation_content", locals: { conversation: @conversation, messages: @messages, message: @message }),
+                             turbo_stream.update("conversation_list", partial: "conversations/conversation_list", locals: { conversations: @conversations, current_conversation: @conversation })]
       end
     end
   end
@@ -35,8 +35,8 @@ class ConversationsController < ApplicationController
     respond_to do |format|
       format.html
       format.turbo_stream do
-        render turbo_stream: [ turbo_stream.update("conversation_content", partial: "conversations/conversation_content", locals: { conversation: @conversation, messages: @messages, message: @message }),
-                               turbo_stream.update("conversation_list", partial: "conversations/conversation_list", locals: { conversations: @conversations, current_conversation: @conversation }) ]
+        render turbo_stream: [turbo_stream.update("conversation_content", partial: "conversations/conversation_content", locals: { conversation: @conversation, messages: @messages, message: @message }),
+                               turbo_stream.update("conversation_list", partial: "conversations/conversation_list", locals: { conversations: @conversations, current_conversation: @conversation })]
       end
     end
   end

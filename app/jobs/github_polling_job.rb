@@ -33,8 +33,8 @@ class GithubPollingJob < ApplicationJob
   # - Haven't been polled in the last 50 seconds (prevents overlap)
   def find_eligible_projects
     Project.joins(:user, :github_branches)
-           .where.not(repository_url: [ nil, "" ])
-           .where.not(users: { github_token: [ nil, "" ] })
+           .where.not(repository_url: [nil, ""])
+           .where.not(users: { github_token: [nil, ""] })
            .where("projects.github_last_polled_at IS NULL OR projects.github_last_polled_at < ?", 50.seconds.ago)
            .distinct
            .order(Arel.sql("projects.github_last_polled_at ASC NULLS FIRST"))

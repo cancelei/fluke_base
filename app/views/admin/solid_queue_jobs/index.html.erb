@@ -19,8 +19,8 @@
             <span class="label-text font-semibold">Queue</span>
           </label>
           <%= f.select :queue,
-                      [ [ "All Queues", "" ] ] +
-                      SolidQueue::Job.select(:queue_name).distinct.pluck(:queue_name).map { |q| [ q, q ] },
+                      [["All Queues", ""]] +
+                      SolidQueue::Job.select(:queue_name).distinct.pluck(:queue_name).map { |q| [q, q] },
                       { selected: params[:queue] },
                       { class: "select select-bordered w-full", onchange: "this.form.submit()" } %>
         </div>
@@ -30,8 +30,8 @@
             <span class="label-text font-semibold">Priority</span>
           </label>
           <%= f.select :priority,
-                      [ [ "All Priorities", "" ] ] +
-                      [ [ "High (1)", "1" ], [ "Medium (2)", "2" ], [ "Low (3)", "3" ] ],
+                      [["All Priorities", ""]] +
+                      [["High (1)", "1"], ["Medium (2)", "2"], ["Low (3)", "3"]],
                       { selected: params[:priority] },
                       { class: "select select-bordered w-full", onchange: "this.form.submit()" } %>
         </div>
@@ -41,8 +41,8 @@
             <span class="label-text font-semibold">Status</span>
           </label>
           <%= f.select :status,
-                      [ [ "All Statuses", "" ] ] +
-                      [ [ "Pending", "pending" ], [ "Failed", "failed" ], [ "Completed", "completed" ], [ "Running", "running" ] ],
+                      [["All Statuses", ""]] +
+                      [["Pending", "pending"], ["Failed", "failed"], ["Completed", "completed"], ["Running", "running"]],
                       { selected: params[:status] },
                       { class: "select select-bordered w-full", onchange: "this.form.submit()" } %>
         </div>
@@ -52,7 +52,7 @@
             <span class="label-text font-semibold">Sort</span>
           </label>
           <%= f.select :sort,
-                      [ [ "Newest First", "desc" ], [ "Oldest First", "asc" ] ],
+                      [["Newest First", "desc"], ["Oldest First", "asc"]],
                       { selected: params[:sort] || "desc" },
                       { class: "select select-bordered w-full", onchange: "this.form.submit()" } %>
         </div>
@@ -62,7 +62,7 @@
             <span class="label-text font-semibold">Per Page</span>
           </label>
           <%= f.select :per_page,
-                      [ [ "25", "25" ], [ "50", "50" ], [ "100", "100" ] ],
+                      [["25", "25"], ["50", "50"], ["100", "100"]],
                       { selected: params[:per_page] || "25" },
                       { class: "select select-bordered w-full", onchange: "this.form.submit()" } %>
         </div>

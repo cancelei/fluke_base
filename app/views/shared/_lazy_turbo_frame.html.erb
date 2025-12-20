@@ -2,6 +2,6 @@
   <% if defined?(skeleton_variant) && skeleton_variant.present? %>
     <%= render Ui::SkeletonComponent.new(variant: skeleton_variant) %>
   <% else %>
-    <%= render "shared/lazy_loading_placeholder", title: title, description: description %>
+    <%= render "shared/lazy_loading_placeholder", title:, description: %>
   <% end %>
 <% end %>

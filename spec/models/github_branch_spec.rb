@@ -5,8 +5,8 @@ require 'rails_helper'
 
 RSpec.describe GithubBranch, type: :model do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
-  let(:github_branch) { create(:github_branch, project: project, user: user) }
+  let(:project) { create(:project, user:) }
+  let(:github_branch) { create(:github_branch, project:, user:) }
 
   # Association Testing - Line 49-58 in test_spec
   describe "associations" do
@@ -23,7 +23,7 @@ RSpec.describe GithubBranch, type: :model do
     it { should validate_presence_of(:branch_name) }
     # Project and User presence validations are tested by belongs_to matchers in associations section
 
-    it { should validate_uniqueness_of(:branch_name).scoped_to([ :project_id, :user_id ]) }
+    it { should validate_uniqueness_of(:branch_name).scoped_to([:project_id, :user_id]) }
     it { should validate_length_of(:branch_name).is_at_most(255) }
 
     context "branch name format" do
@@ -36,7 +36,7 @@ RSpec.describe GithubBranch, type: :model do
       end
 
       it "rejects invalid branch names" do
-        invalid_names = [ '', ' ', 'branch with spaces', 'branch..name' ]
+        invalid_names = ['', ' ', 'branch with spaces', 'branch..name']
         invalid_names.each do |name|
           branch = build(:github_branch, branch_name: name)
           expect(branch).not_to be_valid
@@ -49,8 +49,8 @@ RSpec.describe GithubBranch, type: :model do
   describe "instance methods" do
     describe "#commit_count" do
       it "returns number of commits on branch" do
-        create_list(:github_log, 3, project: project, user: user).each do |log|
-          create(:github_branch_log, github_branch: github_branch, github_log: log)
+        create_list(:github_log, 3, project:, user:).each do |log|
+          create(:github_branch_log, github_branch:, github_log: log)
         end
 
         expect(github_branch.commit_count).to eq(3)
@@ -59,11 +59,11 @@ RSpec.describe GithubBranch, type: :model do
 
     describe "#latest_commit" do
       it "returns most recent commit on branch" do
-        old_commit = create(:github_log, project: project, user: user, commit_date: 2.days.ago)
-        new_commit = create(:github_log, project: project, user: user, commit_date: 1.day.ago)
+        old_commit = create(:github_log, project:, user:, commit_date: 2.days.ago)
+        new_commit = create(:github_log, project:, user:, commit_date: 1.day.ago)
 
-        create(:github_branch_log, github_branch: github_branch, github_log: old_commit)
-        create(:github_branch_log, github_branch: github_branch, github_log: new_commit)
+        create(:github_branch_log, github_branch:, github_log: old_commit)
+        create(:github_branch_log, github_branch:, github_log: new_commit)
 
         expect(github_branch.latest_commit).to eq(new_commit)
       end
@@ -71,11 +71,11 @@ RSpec.describe GithubBranch, type: :model do
 
     describe "#total_lines_changed" do
       it "returns sum of lines added and removed" do
-        commit1 = create(:github_log, project: project, user: user, lines_added: 50, lines_removed: 10)
-        commit2 = create(:github_log, project: project, user: user, lines_added: 30, lines_removed: 5)
+        commit1 = create(:github_log, project:, user:, lines_added: 50, lines_removed: 10)
+        commit2 = create(:github_log, project:, user:, lines_added: 30, lines_removed: 5)
 
-        create(:github_branch_log, github_branch: github_branch, github_log: commit1)
-        create(:github_branch_log, github_branch: github_branch, github_log: commit2)
+        create(:github_branch_log, github_branch:, github_log: commit1)
+        create(:github_branch_log, github_branch:, github_log: commit2)
 
         expect(github_branch.total_lines_changed).to eq(95) # (50+10) + (30+5)
       end
@@ -108,7 +108,7 @@ RSpec.describe GithubBranch, type: :model do
   describe "scopes" do
     let!(:main_branch) { create(:github_branch, branch_name: "main") }
     let!(:feature_branch) { create(:github_branch, branch_name: "feature/new-ui") }
-    let!(:user_branch) { create(:github_branch, user: user) }
+    let!(:user_branch) { create(:github_branch, user:) }
     let!(:other_user_branch) { create(:github_branch, user: create(:user)) }
 
     describe ".for_project" do
@@ -141,7 +141,7 @@ RSpec.describe GithubBranch, type: :model do
         new_branch.update!(created_at: 1.day.ago)
 
         # Get only the branches we created and verify ordering
-        created_branches = GithubBranch.where(id: [ old_branch.id, new_branch.id ]).recent
+        created_branches = GithubBranch.where(id: [old_branch.id, new_branch.id]).recent
         expect(created_branches.first).to eq(new_branch)
         expect(created_branches.last).to eq(old_branch)
       end

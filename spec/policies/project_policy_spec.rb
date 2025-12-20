@@ -13,14 +13,14 @@ RSpec.describe ProjectPolicy, type: :policy do
 
   # Helper to create membership
   def create_membership(project, user, role)
-    create(:project_membership, project: project, user: user, role: role, accepted_at: Time.current)
+    create(:project_membership, project:, user:, role:, accepted_at: Time.current)
   end
 
   # Helper to create agreement
   def create_accepted_agreement(project, user)
-    agreement = create(:agreement, project: project, status: 'Accepted')
-    create(:agreement_participant, agreement: agreement, user: user, is_initiator: false)
-    create(:agreement_participant, agreement: agreement, user: project.user, is_initiator: true)
+    agreement = create(:agreement, project:, status: 'Accepted')
+    create(:agreement_participant, agreement:, user:, is_initiator: false)
+    create(:agreement_participant, agreement:, user: project.user, is_initiator: true)
     agreement
   end
 
@@ -167,7 +167,7 @@ RSpec.describe ProjectPolicy, type: :policy do
   end
 
   describe 'Scope' do
-    let!(:user_project) { create(:project, user: user) }
+    let!(:user_project) { create(:project, user:) }
     let!(:public_project) { create(:project, stealth_mode: false) }
     let!(:stealth_project) { create(:project, stealth_mode: true) }
     let!(:member_project) { create(:project) }

@@ -26,6 +26,6 @@ RSpec.describe PeopleSearchQuery do
   it 'filters by project ownership' do
     results = run_query(project_id: project.id)
 
-    expect(results).to eq([ other_user ])
+    expect(results).to eq([other_user])
   end
 end

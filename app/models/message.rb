@@ -23,7 +23,7 @@ class Message < ApplicationRecord
       locals: { message: self, current_user: user }
 
     # Broadcast update to both users' conversation lists
-    [ conversation.sender, conversation.recipient ].each do |recipient_user|
+    [conversation.sender, conversation.recipient].each do |recipient_user|
       broadcast_replace_to recipient_user,
         target: "conversation_list",
         partial: "conversations/conversation_list",

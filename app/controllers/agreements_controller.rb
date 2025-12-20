@@ -1,6 +1,7 @@
 class AgreementsController < ApplicationController
   include ActionView::RecordIdentifier
   include ResultHandling
+  include ProjectContextSwitchable
 
   before_action :authenticate_user!
   before_action :set_agreement, only: %i[show edit update destroy accept reject complete cancel counter_offer meetings_section github_section time_logs_section counter_offers_section]
@@ -47,6 +48,11 @@ class AgreementsController < ApplicationController
 
   def show
     @project = @agreement.project
+
+    # Auto-select the agreement's project in the context navigation
+    # This ensures the project dropdown matches the agreement being viewed
+    switch_project_context(@project) if @project
+
     # Heavy data loading moved to lazy sections:
     # - @meetings moved to meetings_section
     # - GitHub logs moved to github_section
@@ -65,20 +71,13 @@ class AgreementsController < ApplicationController
     respond_to do |format|
       format.html
       format.turbo_stream do
-        if turbo_frame_request?
-          render turbo_stream: turbo_stream.replace(
-            dom_id(@agreement),
-            partial: "agreement_show_content",
-            locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details }
-          )
-        else
-          # For non-frame turbo stream requests, just replace the main content
-          render turbo_stream: turbo_stream.replace(
-            dom_id(@agreement),
-            partial: "agreement_show_content",
-            locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details }
-          )
-        end
+        agreement_stream = turbo_stream.replace(
+          dom_id(@agreement),
+          partial: "agreement_show_content",
+          locals: { agreement: @agreement, project: @project, can_view_full_details: @can_view_full_details }
+        )
+        # Include project context streams to update the navbar when context changes
+        render turbo_stream: project_context_turbo_streams_with(agreement_stream)
       end
     end
   end
@@ -325,25 +324,29 @@ class AgreementsController < ApplicationController
   private
 
     # Unified lazy section renderer with error handling
+    #
+    # IMPORTANT: Lazy-loaded turbo frames (turbo_frame_tag with src: and loading: "lazy")
+    # expect an HTML response containing a matching <turbo-frame id="..."> element.
+    # They do NOT work with turbo_stream responses (which use <turbo-stream action="replace">).
+    #
+    # The partial being rendered MUST include a turbo_frame_tag wrapper with the matching ID.
+    # See: https://turbo.hotwired.dev/reference/frames (Lazy-loaded frame documentation)
     def render_lazy_section(section_name, error_title, error_description)
       locals = yield
       partial_name = "#{section_name}_section"
-      frame_id = "#{dom_id(@agreement)}_#{section_name}"
 
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace(frame_id, partial: partial_name, locals: locals) }
-        format.html { render partial: partial_name, locals: locals }
-      end
+      # Render the partial directly - the partial must include its own turbo_frame_tag wrapper
+      # with the correct frame_id: "#{dom_id(@agreement)}_#{section_name}"
+      render partial: partial_name, locals:, layout: false, formats: [:html]
     rescue => e
       Rails.logger.error "Error loading #{section_name} section: #{e.message}"
       frame_id = "#{dom_id(@agreement)}_#{section_name}"
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace(frame_id, partial: "lazy_loading_error", locals: { title: error_title, description: error_description }) }
-        format.html do
-          html = view_context.turbo_frame_tag(frame_id) { view_context.render(partial: "lazy_loading_error", locals: { title: error_title, description: error_description }) }
-          render html: html
-        end
+      # For errors, we need to wrap the error partial in a turbo_frame_tag
+      # because the error partial doesn't have its own frame wrapper
+      html = view_context.turbo_frame_tag(frame_id) do
+        view_context.render(partial: "lazy_loading_error", locals: { title: error_title, description: error_description }, formats: [:html])
       end
+      render html:, layout: false
     end
 
     # --- Refactored helpers below ---
@@ -360,8 +363,8 @@ class AgreementsController < ApplicationController
 
       # Check for existing agreements using the new AgreementParticipants structure
       query = Agreement.joins(:agreement_participants)
-        .where(project_id: params[:project_id], status: [ Agreement::ACCEPTED, Agreement::PENDING ])
-        .where(agreement_participants: { user_id: [ current_user.id, params[:other_party_id] ] })
+        .where(project_id: params[:project_id], status: [Agreement::ACCEPTED, Agreement::PENDING])
+        .where(agreement_participants: { user_id: [current_user.id, params[:other_party_id]] })
         .group("agreements.id")
         .having("COUNT(agreement_participants.id) = 2")
 
@@ -376,8 +379,8 @@ class AgreementsController < ApplicationController
     def duplicate_agreement_flash
       # Find existing agreement using AgreementParticipants structure
       agreement = Agreement.joins(:agreement_participants)
-        .where(project_id: params[:project_id], status: [ Agreement::ACCEPTED, Agreement::PENDING ])
-        .where(agreement_participants: { user_id: [ current_user.id, params[:other_party_id] ] })
+        .where(project_id: params[:project_id], status: [Agreement::ACCEPTED, Agreement::PENDING])
+        .where(agreement_participants: { user_id: [current_user.id, params[:other_party_id]] })
         .group("agreements.id")
         .having("COUNT(agreement_participants.id) = 2")
         .first
@@ -429,7 +432,7 @@ class AgreementsController < ApplicationController
 
     # Centralized notification and message logic
     def notify_and_message_other_party(action)
-      other_party = if @original_agreement&.present? && [ :create ].include?(action)
+      other_party = if @original_agreement&.present? && [:create].include?(action)
         current_user.id == @original_agreement.initiator&.id ? @original_agreement.other_party : @original_agreement.initiator
       else
         current_user.id == @agreement.initiator&.id ? @agreement.other_party : @agreement.initiator
@@ -491,15 +494,15 @@ class AgreementsController < ApplicationController
 
     def notify_and_message(other_party, title, message, body)
       NotificationService.new(other_party).notify(
-        title: title,
-        message: message,
+        title:,
+        message:,
         url: agreement_path(@agreement)
       )
       conversation = Conversation.between(current_user.id, other_party.id)
       Message.create!(
-        conversation: conversation,
+        conversation:,
         user: current_user,
-        body: body
+        body:
       )
     end
 
@@ -632,9 +635,7 @@ class AgreementsController < ApplicationController
       HTML
     end
 
-    def filter_params
-      params.permit(:project_id, :status, :agreement_type, :start_date_from, :start_date_to, :end_date_from, :end_date_to, :search, :clear_filters, :page, :turbo_frame)
-    end
+    def filter_params = params.permit(:project_id, :status, :agreement_type, :start_date_from, :start_date_to, :end_date_from, :end_date_to, :search, :clear_filters, :page, :turbo_frame)
 
     def build_agreement_chain_optimized(agreement)
       # Collect all agreement IDs in the chain first
@@ -657,7 +658,7 @@ class AgreementsController < ApplicationController
       current = agreement
       while current.counter_to_id.present?
         previous = agreements_by_id[current.counter_to_id]
-        agreement_chain << [ current, previous ]
+        agreement_chain << [current, previous]
         current = previous
       end
 

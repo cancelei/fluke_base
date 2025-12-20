@@ -18,8 +18,8 @@ module MultiFrameUpdatable
       partial: "time_logs/pending_confirmation_section",
       locals: {
         milestones_pending_confirmation: milestones_pending,
-        project: project,
-        owner: owner
+        project:,
+        owner:
       }
     )
 
@@ -27,9 +27,9 @@ module MultiFrameUpdatable
       "remaining_time_progress",
       partial: "remaining_time_progress",
       locals: {
-        project: project,
-        current_log: current_log,
-        owner: owner,
+        project:,
+        current_log:,
+        owner:,
         project_wide: true
       }
     )
@@ -55,9 +55,9 @@ module MultiFrameUpdatable
       "milestone_#{milestone.id}",
       partial: "time_logs/milestone_row",
       locals: {
-        milestone: milestone,
-        project: project,
-        active_log: active_log
+        milestone:,
+        project:,
+        active_log:
       }
     )
   end
@@ -72,7 +72,7 @@ module MultiFrameUpdatable
       partial: "time_logs/manual_form",
       locals: {
         time_log_manual: time_log,
-        milestones: milestones
+        milestones:
       }
     )
   end
@@ -86,8 +86,8 @@ module MultiFrameUpdatable
       "ai-suggestion-container",
       partial: "milestones/ai_suggestion",
       locals: {
-        enhancement: enhancement,
-        milestone: milestone
+        enhancement:,
+        milestone:
       }
     )
   end
@@ -105,7 +105,7 @@ module MultiFrameUpdatable
   # @param partial [String] The partial path
   # @param locals [Hash] Local variables for the partial
   def replace_frame(target_id, partial:, locals: {})
-    turbo_streams << turbo_stream.replace(target_id, partial: partial, locals: locals)
+    turbo_streams << turbo_stream.replace(target_id, partial:, locals:)
   end
 
   # Update a frame's content with a partial
@@ -114,7 +114,7 @@ module MultiFrameUpdatable
   # @param partial [String] The partial path
   # @param locals [Hash] Local variables for the partial
   def update_frame(target_id, partial:, locals: {})
-    turbo_streams << turbo_stream.update(target_id, partial: partial, locals: locals)
+    turbo_streams << turbo_stream.update(target_id, partial:, locals:)
   end
 
   # Append content to a frame
@@ -123,6 +123,6 @@ module MultiFrameUpdatable
   # @param partial [String] The partial path
   # @param locals [Hash] Local variables for the partial
   def append_to_frame(target_id, partial:, locals: {})
-    turbo_streams << turbo_stream.append(target_id, partial: partial, locals: locals)
+    turbo_streams << turbo_stream.append(target_id, partial:, locals:)
   end
 end

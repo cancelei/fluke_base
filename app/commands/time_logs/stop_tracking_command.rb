@@ -20,7 +20,7 @@ module TimeLogs
 
       # Find the active time log
       time_log = project.time_logs.in_progress.find_by!(
-        milestone_id: milestone_id,
+        milestone_id:,
         user_id: current_user.id
       )
 
@@ -33,7 +33,7 @@ module TimeLogs
         milestones_pending = load_pending_milestones(project, owner)
 
         # Update milestone row
-        update_milestone_row(milestone: time_log.milestone, project: project, active_log: nil)
+        update_milestone_row(milestone: time_log.milestone, project:, active_log: nil)
 
         # Clear current tracking container
         clear_frame("current_tracking_container")
@@ -48,8 +48,8 @@ module TimeLogs
           partial: "time_logs/pending_confirmation_section",
           locals: {
             milestones_pending_confirmation: milestones_pending,
-            project: project,
-            owner: owner
+            project:,
+            owner:
           }
         )
 
@@ -57,7 +57,7 @@ module TimeLogs
         update_frame(
           "remaining_time_progress",
           partial: "remaining_time_progress",
-          locals: { project: project, current_log: nil, owner: owner, project_wide: true }
+          locals: { project:, current_log: nil, owner:, project_wide: true }
         )
 
         flash_notice("Stopped tracking time.")

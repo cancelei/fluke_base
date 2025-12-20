@@ -20,7 +20,7 @@ RSpec.describe 'Query Performance', type: :model do
   describe 'project with related data' do
     it 'efficiently loads agreements with participants' do
       project = create(:project)
-      create_list(:agreement, 5, :with_participants, project: project)
+      create_list(:agreement, 5, :with_participants, project:)
 
       expect do
         proj = Project.includes(agreements: { agreement_participants: :user }).find(project.id)

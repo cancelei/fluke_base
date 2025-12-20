@@ -7,7 +7,7 @@ RSpec.describe Milestones::RevertDirectEnhancementCommand, type: :command do
   it_behaves_like "a milestone command"
 
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
+  let(:project) { create(:project, user:) }
 
   describe "#execute" do
     context "with valid original content" do
@@ -17,10 +17,10 @@ RSpec.describe Milestones::RevertDirectEnhancementCommand, type: :command do
       let(:command) do
         build_command(
           described_class,
-          user: user,
+          user:,
           element_data: {
-            original_title: original_title,
-            original_description: original_description
+            original_title:,
+            original_description:
           }
         )
       end
@@ -58,9 +58,9 @@ RSpec.describe Milestones::RevertDirectEnhancementCommand, type: :command do
       let(:command) do
         build_command(
           described_class,
-          user: user,
+          user:,
           element_data: {
-            original_description: original_description
+            original_description:
           }
         )
       end
@@ -84,7 +84,7 @@ RSpec.describe Milestones::RevertDirectEnhancementCommand, type: :command do
       let(:command) do
         build_command(
           described_class,
-          user: user,
+          user:,
           element_data: {
             original_title: "Title",
             original_description: ""
@@ -109,7 +109,7 @@ RSpec.describe Milestones::RevertDirectEnhancementCommand, type: :command do
       let(:command) do
         build_command(
           described_class,
-          user: user,
+          user:,
           element_data: {
             original_title: "Some Title"
           }
@@ -131,10 +131,10 @@ RSpec.describe Milestones::RevertDirectEnhancementCommand, type: :command do
       let(:command) do
         build_command(
           described_class,
-          user: user,
+          user:,
           element_data: {
-            original_title: original_title,
-            original_description: original_description
+            original_title:,
+            original_description:
           }
         )
       end

@@ -8,7 +8,7 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "render?" do
     it "renders when user is present" do
-      component = described_class.new(user: user)
+      component = described_class.new(user:)
 
       expect(component.render?).to be true
     end
@@ -22,13 +22,13 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "rendering" do
     it "renders a link element" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_css("a")
     end
 
     it "renders with card styling" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_css("a.bg-base-100")
       expect(page).to have_css("a.border-base-300")
@@ -37,7 +37,7 @@ RSpec.describe UserCardComponent, type: :component do
     end
 
     it "renders with hover effects" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_css("a.hover\\:shadow-md")
       expect(page).to have_css("a.hover\\:-translate-y-0\\.5")
@@ -46,13 +46,13 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "user name" do
     it "displays user full name" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_text("John Doe")
     end
 
     it "renders name in h3 tag" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_css("h3", text: "John Doe")
     end
@@ -60,7 +60,7 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "bio" do
     it "displays user bio when present" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_text("Test bio")
     end
@@ -75,13 +75,13 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "avatar section" do
     it "renders avatar component" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_css("div.avatar")
     end
 
     it "renders avatar with initials placeholder" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_css("div.avatar.placeholder")
     end
@@ -89,19 +89,19 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "compact mode" do
     it "renders compact card when compact is true" do
-      render_inline(described_class.new(user: user, compact: true))
+      render_inline(described_class.new(user:, compact: true))
 
       expect(page).to have_css("a.p-3")
     end
 
     it "hides bio in compact mode" do
-      render_inline(described_class.new(user: user, compact: true))
+      render_inline(described_class.new(user:, compact: true))
 
       expect(page).not_to have_text("Test bio")
     end
 
     it "hides stats in compact mode" do
-      render_inline(described_class.new(user: user, compact: true))
+      render_inline(described_class.new(user:, compact: true))
 
       expect(page).not_to have_text("projects")
     end
@@ -109,7 +109,7 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "footer section" do
     it "renders view text" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_text("View")
     end
@@ -117,13 +117,13 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "message button" do
     it "does not render connect button when user is current_user" do
-      render_inline(described_class.new(user: user, current_user: user))
+      render_inline(described_class.new(user:, current_user: user))
 
       expect(page).not_to have_button("Connect")
     end
 
     it "does not render connect button when show_message_button is false" do
-      render_inline(described_class.new(user: user, current_user: current_user, show_message_button: false))
+      render_inline(described_class.new(user:, current_user:, show_message_button: false))
 
       expect(page).not_to have_button("Connect")
     end
@@ -131,13 +131,13 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "stats" do
     it "renders stats section by default" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_text("projects")
     end
 
     it "hides stats when show_stats is false" do
-      render_inline(described_class.new(user: user, show_stats: false))
+      render_inline(described_class.new(user:, show_stats: false))
 
       expect(page).not_to have_text("projects")
     end
@@ -145,7 +145,7 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "skills" do
     it "hides skills when show_skills is false" do
-      render_inline(described_class.new(user: user, show_skills: false))
+      render_inline(described_class.new(user:, show_skills: false))
 
       expect(page).not_to have_css("div.flex-wrap.gap-1.mb-2")
     end
@@ -153,13 +153,13 @@ RSpec.describe UserCardComponent, type: :component do
 
   describe "member badge" do
     it "displays member badge" do
-      render_inline(described_class.new(user: user))
+      render_inline(described_class.new(user:))
 
       expect(page).to have_text("Member")
     end
 
     it "hides member badge in compact mode" do
-      render_inline(described_class.new(user: user, compact: true))
+      render_inline(described_class.new(user:, compact: true))
 
       expect(page).not_to have_css(".badge", text: "Member")
     end

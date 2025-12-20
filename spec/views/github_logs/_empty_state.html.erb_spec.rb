@@ -11,7 +11,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
   end
 
   describe 'basic empty state structure' do
-    before { render 'github_logs/empty_state', project: project }
+    before { render 'github_logs/empty_state', project: }
 
     it 'displays empty state with proper styling' do
       expect(rendered).to have_css('.px-6.py-12.text-center')
@@ -32,7 +32,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     context 'for project owner' do
       let(:project) { create(:project, user: current_user) }
 
-      before { render 'github_logs/empty_state', project: project }
+      before { render 'github_logs/empty_state', project: }
 
       it 'displays owner-specific empty state message' do
         expect(rendered).to have_content('The repository might be empty or there was an issue accessing it')
@@ -52,8 +52,8 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     end
 
     context 'for collaborator with active agreement' do
-      let(:agreement) { create(:agreement, project: project, status: Agreement::ACCEPTED) }
-      let!(:agreement_participant) { create(:agreement_participant, agreement: agreement, user: current_user) }
+      let(:agreement) { create(:agreement, project:, status: Agreement::ACCEPTED) }
+      let!(:agreement_participant) { create(:agreement_participant, agreement:, user: current_user) }
 
       before do
         allow(project).to receive(:agreements).and_return(double('agreements',
@@ -63,7 +63,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
             )
           )
         ))
-        render 'github_logs/empty_state', project: project
+        render 'github_logs/empty_state', project:
       end
 
       it 'displays collaborator-specific message' do
@@ -78,7 +78,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     end
 
     context 'for non-collaborator users' do
-      before { render 'github_logs/empty_state', project: project }
+      before { render 'github_logs/empty_state', project: }
 
       it 'displays general empty state message' do
         expect(rendered).to have_content("doesn't have any GitHub activity yet or the repository is not properly configured")
@@ -91,7 +91,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     end
 
     context 'in job context' do
-      before { render 'github_logs/empty_state', project: project, job_context: true }
+      before { render 'github_logs/empty_state', project:, job_context: true }
 
       it 'displays job-specific empty state message' do
         expect(rendered).to have_content("doesn't have any GitHub activity yet or the repository is not properly configured")
@@ -104,7 +104,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
   end
 
   describe 'accessibility features' do
-    before { render 'github_logs/empty_state', project: project }
+    before { render 'github_logs/empty_state', project: }
 
     it 'provides semantic content structure' do
       expect(rendered).to have_css('h3') # Proper heading
@@ -126,7 +126,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
   end
 
   describe 'responsive design' do
-    before { render 'github_logs/empty_state', project: project }
+    before { render 'github_logs/empty_state', project: }
 
     it 'uses responsive spacing and layout' do
       expect(rendered).to include('px-6 py-12') # Responsive padding
@@ -148,7 +148,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
   describe 'troubleshooting guidance styling' do
     let(:project) { create(:project, user: current_user) }
 
-    before { render 'github_logs/empty_state', project: project }
+    before { render 'github_logs/empty_state', project: }
 
     it 'styles troubleshooting section appropriately' do
       expect(rendered).to have_css('.text-sm.text-base-content\/60')
@@ -168,7 +168,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
 
   describe 'conditional rendering logic' do
     context 'with current_user defined' do
-      before { render 'github_logs/empty_state', project: project }
+      before { render 'github_logs/empty_state', project: }
 
       it 'checks for current_user availability' do
         # Should handle current_user being defined
@@ -182,12 +182,12 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
       end
 
       it 'handles missing current_user gracefully' do
-        expect { render 'github_logs/empty_state', project: project }.not_to raise_error
+        expect { render 'github_logs/empty_state', project: }.not_to raise_error
       end
     end
 
     context 'with job_context parameter' do
-      before { render 'github_logs/empty_state', project: project, job_context: true }
+      before { render 'github_logs/empty_state', project:, job_context: true }
 
       it 'uses job-specific messaging' do
         expect(rendered).to have_content("doesn't have any GitHub activity yet")
@@ -196,7 +196,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     end
 
     context 'without job_context parameter' do
-      before { render 'github_logs/empty_state', project: project }
+      before { render 'github_logs/empty_state', project: }
 
       it 'uses default user-facing messaging' do
         expect(rendered).to have_content("doesn't have any GitHub activity yet")
@@ -208,7 +208,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     context 'when user is project owner' do
       let(:project) { create(:project, user: current_user) }
 
-      before { render 'github_logs/empty_state', project: project }
+      before { render 'github_logs/empty_state', project: }
 
       it 'shows actionable troubleshooting steps' do
         expect(rendered).to have_content('repository URL is correctly set')
@@ -226,7 +226,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
             )
           )
         )
-        render 'github_logs/empty_state', project: project
+        render 'github_logs/empty_state', project:
       end
 
       it 'shows collaborator-appropriate guidance' do
@@ -236,7 +236,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
     end
 
     context 'when user is not owner or collaborator' do
-      before { render 'github_logs/empty_state', project: project }
+      before { render 'github_logs/empty_state', project: }
 
       it 'shows general informational message' do
         expect(rendered).not_to have_content('Make sure:')
@@ -246,7 +246,7 @@ RSpec.describe 'github_logs/_empty_state.html.erb', type: :view do
   end
 
   describe 'visual hierarchy and layout' do
-    before { render 'github_logs/empty_state', project: project }
+    before { render 'github_logs/empty_state', project: }
 
     it 'maintains proper visual hierarchy' do
       expect(rendered).to have_css('h3.mt-4') # Heading positioned after icon

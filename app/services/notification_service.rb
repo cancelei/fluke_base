@@ -40,7 +40,7 @@ class NotificationService < ApplicationService
   def render_notification(notification)
     ApplicationController.renderer.render(
       partial: "notifications/notification",
-      locals: { notification: notification }
+      locals: { notification: }
     )
   end
 end

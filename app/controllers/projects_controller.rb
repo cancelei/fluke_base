@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_project, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_project, only: [:show, :edit, :update, :destroy]
 
   def index
     @projects = current_user.projects
@@ -94,13 +94,9 @@ class ProjectsController < ApplicationController
     ActionView::Helpers::FormBuilder.new(:project, object, view_context, {})
   end
 
-  def set_project
-    @project = Project.includes(:user, :milestones, agreements: :agreement_participants).find(params[:id])
-  end
+  def set_project = @project = Project.includes(:user, :milestones, agreements: :agreement_participants).find(params[:id])
 
-  def project_params
-    params.require(:project).permit(:name, :description, :stage, :category, :current_stage, :target_market, :funding_status, :team_size, :collaboration_type, :repository_url, :project_link, :stealth_mode, :stealth_name, :stealth_description, :stealth_category, public_fields: [])
-  end
+  def project_params = params.require(:project).permit(:name, :description, :stage, :category, :current_stage, :target_market, :funding_status, :team_size, :collaboration_type, :repository_url, :project_link, :stealth_mode, :stealth_name, :stealth_description, :stealth_category, public_fields: [])
 
   def project_to_form_attributes(project)
     {

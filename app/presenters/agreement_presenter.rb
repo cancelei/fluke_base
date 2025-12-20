@@ -274,10 +274,10 @@ class AgreementPresenter < ApplicationPresenter
     end
 
     {
-      status: status,
-      hours_logged: hours_logged,
-      expected_hours: expected_hours,
-      performance_ratio: performance_ratio,
+      status:,
+      hours_logged:,
+      expected_hours:,
+      performance_ratio:,
       message: "#{hours_logged}/#{expected_hours}h logged (#{performance_ratio}%)"
     }
   end
@@ -310,7 +310,7 @@ class AgreementPresenter < ApplicationPresenter
       end
     end
 
-    { status: status, message: message }
+    { status:, message: }
   end
 
   def milestone_performance_kpi
@@ -332,10 +332,10 @@ class AgreementPresenter < ApplicationPresenter
     end
 
     {
-      status: status,
+      status:,
       completed: completed_count,
-      total: total,
-      completion_rate: completion_rate,
+      total:,
+      completion_rate:,
       message: "#{completed_count}/#{total} milestones (#{completion_rate}%)"
     }
   end
@@ -375,7 +375,7 @@ class AgreementPresenter < ApplicationPresenter
       end
     end
 
-    { status: status, message: message, actual_cost: actual_cost }
+    { status:, message:, actual_cost: }
   end
 
   def completion_status_kpi
@@ -408,7 +408,7 @@ class AgreementPresenter < ApplicationPresenter
   def weeks_elapsed
     return 0 unless start_date.present? && start_date <= Date.current
 
-    end_comparison = [ Date.current, end_date ].compact.min
+    end_comparison = [Date.current, end_date].compact.min
     ((end_comparison - start_date) / 7.0).ceil
   end
 

@@ -4,8 +4,8 @@ RSpec.describe AgreementParticipant, type: :model do
   let(:alice) { create(:user, :alice) }
   let(:bob) { create(:user, :bob) }
   let(:project) { create(:project, user: alice) }
-  let(:agreement) { create(:agreement, project: project) }
-  let(:agreement_with_participants) { create(:agreement, :with_participants, project: project, initiator: alice, other_party: bob) }
+  let(:agreement) { create(:agreement, project:) }
+  let(:agreement_with_participants) { create(:agreement, :with_participants, project:, initiator: alice, other_party: bob) }
 
   describe "associations" do
     it { should belong_to(:agreement) }
@@ -16,7 +16,7 @@ RSpec.describe AgreementParticipant, type: :model do
   end
 
   describe "validations" do
-    subject { create(:agreement_participant, agreement: agreement, user: alice, project: project) }
+    subject { create(:agreement_participant, agreement:, user: alice, project:) }
 
     it { should validate_presence_of(:agreement_id) }
     it { should validate_presence_of(:user_id) }
@@ -176,7 +176,7 @@ RSpec.describe AgreementParticipant, type: :model do
     end
 
     context "for co-founder agreements" do
-      let(:co_founder_agreement) { create(:agreement, :co_founder, :with_participants, project: project, initiator: alice, other_party: bob) }
+      let(:co_founder_agreement) { create(:agreement, :co_founder, :with_participants, project:, initiator: alice, other_party: bob) }
 
       it "assigns co-founder role to non-project-owner" do
         other_participant = co_founder_agreement.agreement_participants.find_by(is_initiator: false)
@@ -186,13 +186,13 @@ RSpec.describe AgreementParticipant, type: :model do
   end
 
   describe "counter offer integration" do
-    let(:original_agreement) { create(:agreement, :with_participants, project: project, initiator: alice, other_party: bob) }
+    let(:original_agreement) { create(:agreement, :with_participants, project:, initiator: alice, other_party: bob) }
 
     it "links to counter agreement when specified" do
       counter_participant = create(:agreement_participant,
-        agreement: agreement,
+        agreement:,
         user: bob,
-        project: project,
+        project:,
         counter_agreement: original_agreement,
         is_initiator: true
       )
@@ -203,7 +203,7 @@ RSpec.describe AgreementParticipant, type: :model do
 
   describe "factory integration" do
     it "creates valid participants with factory" do
-      participant = create(:agreement_participant, :initiator, agreement: agreement, user: alice, project: project)
+      participant = create(:agreement_participant, :initiator, agreement:, user: alice, project:)
 
       expect(participant).to be_valid
       expect(participant).to be_initiator
@@ -211,7 +211,7 @@ RSpec.describe AgreementParticipant, type: :model do
     end
 
     it "creates mentor participants" do
-      participant = create(:agreement_participant, :mentor, agreement: agreement, user: bob, project: project)
+      participant = create(:agreement_participant, :mentor, agreement:, user: bob, project:)
 
       expect(participant).to be_valid
       expect(participant.user_role).to eq("mentor")

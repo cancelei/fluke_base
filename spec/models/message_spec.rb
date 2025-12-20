@@ -7,7 +7,7 @@ RSpec.describe Message, type: :model do
   let(:alice) { create(:user, :alice) }
   let(:bob) { create(:user, :bob) }
   let(:conversation) { create(:conversation) }
-  let(:message) { create(:message, conversation: conversation, user: alice) }
+  let(:message) { create(:message, conversation:, user: alice) }
 
   # Association Testing - Line 49-58 in test_spec
   describe "associations" do
@@ -27,14 +27,14 @@ RSpec.describe Message, type: :model do
 
     context "when message has body" do
       it "is valid with body content" do
-        message = build(:message, body: "Hello there!", conversation: conversation, user: user)
+        message = build(:message, body: "Hello there!", conversation:, user:)
         expect(message).to be_valid
       end
     end
 
     context "when message has attachments" do
       it "is valid without body if attachments present" do
-        message = build(:message, body: nil, conversation: conversation, user: user)
+        message = build(:message, body: nil, conversation:, user:)
         # Mock attachment
         allow(message.attachments).to receive(:attached?).and_return(true)
         expect(message).to be_valid
@@ -42,7 +42,7 @@ RSpec.describe Message, type: :model do
     end
 
     it "requires either body or attachments" do
-      message = build(:message, body: nil, conversation: conversation, user: user)
+      message = build(:message, body: nil, conversation:, user:)
       allow(message.attachments).to receive(:attached?).and_return(false)
       allow(message.audio).to receive(:attached?).and_return(false)
       expect(message).not_to be_valid
@@ -77,7 +77,7 @@ RSpec.describe Message, type: :model do
   # Factory Integration Testing - Line 507-549 in test_spec
   describe "factory integration" do
     it "creates valid message with factory" do
-      message = create(:message, conversation: conversation, user: alice)
+      message = create(:message, conversation:, user: alice)
       expect(message).to be_valid
       expect(message.body).to be_present
       expect(message.user).to be_present

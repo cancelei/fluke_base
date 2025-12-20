@@ -11,7 +11,7 @@
       <div class="card-body">
         <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name),
                      html: { method: :post, class: "space-y-4", data: { turbo: false } }) do |f| %>
-          <%= render "devise/shared/error_messages", resource: resource %>
+          <%= render "devise/shared/error_messages", resource: %>
 
           <fieldset class="fieldset">
             <%= f.label :email, "Email", class: "fieldset-legend" %>

@@ -28,8 +28,8 @@ class ApplicationController < ActionController::Base
   protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [ :first_name, :last_name, :github_username, :github_token, :turnstile_token ])
-    devise_parameter_sanitizer.permit(:account_update, keys: [ :first_name, :last_name, :github_username, :github_token, :turnstile_token ])
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name, :last_name, :github_username, :github_token, :turnstile_token])
+    devise_parameter_sanitizer.permit(:account_update, keys: [:first_name, :last_name, :github_username, :github_token, :turnstile_token])
   end
 
   def after_sign_in_path_for(resource)
@@ -126,51 +126,51 @@ class ApplicationController < ActionController::Base
   # Toast notification helpers for controllers
 
   # Add a toast notification to flash for next request
-  def toast_flash(type, message, **options)
+  def toast_flash(type, message, **)
     flash[:toast] ||= []
-    flash[:toast] << { type: type, message: message, **options }
+    flash[:toast] <<({ type:, message:, ** })
   end
 
   # Render a toast notification via Turbo Stream
   def render_toast_stream(type, message, **options)
     render turbo_stream: turbo_stream.after("body", render_to_string(
       "shared/toast_notification",
-      locals: { type: type, message: message, **options }
+      locals: { type:, message:, **options }
     ))
   end
 
   # Convenience methods for different toast types
-  def toast_success(message, **options)
-    toast_flash(:success, message, **options)
+  def toast_success(message, **)
+    toast_flash(:success, message, **)
   end
 
-  def toast_error(message, **options)
-    toast_flash(:error, message, **options)
+  def toast_error(message, **)
+    toast_flash(:error, message, **)
   end
 
-  def toast_info(message, **options)
-    toast_flash(:info, message, **options)
+  def toast_info(message, **)
+    toast_flash(:info, message, **)
   end
 
-  def toast_warning(message, **options)
-    toast_flash(:warning, message, **options)
+  def toast_warning(message, **)
+    toast_flash(:warning, message, **)
   end
 
 
   # Turbo Stream toast methods
-  def stream_toast_success(message, **options)
-    render_toast_stream(:success, message, **options)
+  def stream_toast_success(message, **)
+    render_toast_stream(:success, message, **)
   end
 
-  def stream_toast_error(message, **options)
-    render_toast_stream(:error, message, **options)
+  def stream_toast_error(message, **)
+    render_toast_stream(:error, message, **)
   end
 
-  def stream_toast_info(message, **options)
-    render_toast_stream(:info, message, **options)
+  def stream_toast_info(message, **)
+    render_toast_stream(:info, message, **)
   end
 
-  def stream_toast_warning(message, **options)
-    render_toast_stream(:warning, message, **options)
+  def stream_toast_warning(message, **)
+    render_toast_stream(:warning, message, **)
   end
 end

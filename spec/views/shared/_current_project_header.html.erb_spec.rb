@@ -8,7 +8,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
   end
 
   describe "with selected project" do
-    let(:project) { create(:project, name: "FlukeBase Platform", user: user) }
+    let(:project) { create(:project, name: "FlukeBase Platform", user:) }
 
     before do
       user.update!(selected_project: project)
@@ -48,7 +48,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
   end
 
   describe "with project name containing special characters" do
-    let(:project) { create(:project, name: "AI & Machine Learning Project <2024>", user: user) }
+    let(:project) { create(:project, name: "AI & Machine Learning Project <2024>", user:) }
 
     before do
       user.update!(selected_project: project)
@@ -65,7 +65,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
   end
 
   describe "with very long project name" do
-    let(:project) { create(:project, name: "This is a very long project name that might cause layout issues if not handled properly in the user interface", user: user) }
+    let(:project) { create(:project, name: "This is a very long project name that might cause layout issues if not handled properly in the user interface", user:) }
 
     before do
       user.update!(selected_project: project)
@@ -82,7 +82,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
   end
 
   describe "with empty project name" do
-    let(:project) { build(:project, name: "", user: user) }
+    let(:project) { build(:project, name: "", user:) }
 
     before do
       user.selected_project = project
@@ -129,7 +129,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
   end
 
   describe "accessibility considerations" do
-    let(:project) { create(:project, name: "Test Project", user: user) }
+    let(:project) { create(:project, name: "Test Project", user:) }
 
     before do
       user.update!(selected_project: project)
@@ -151,7 +151,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
 
   describe "integration scenarios" do
     context "when used in navigation contexts" do
-      let(:project) { create(:project, name: "Navigation Test", user: user) }
+      let(:project) { create(:project, name: "Navigation Test", user:) }
 
       before do
         user.update!(selected_project: project)
@@ -166,7 +166,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
 
     context "when project is deleted after selection" do
       before do
-        project = create(:project, name: "Deleted Project", user: user)
+        project = create(:project, name: "Deleted Project", user:)
         user.update!(selected_project: project)
         project.destroy
         user.reload
@@ -205,7 +205,7 @@ RSpec.describe "shared/_current_project_header", type: :view do
 
   describe "internationalization support" do
     context "with unicode project names" do
-      let(:project) { create(:project, name: "项目名称 プロジェクト名 اسم المشروع", user: user) }
+      let(:project) { create(:project, name: "项目名称 プロジェクト名 اسم المشروع", user:) }
 
       before do
         user.update!(selected_project: project)

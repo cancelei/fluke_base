@@ -24,8 +24,8 @@ module ToastHelper
 
     # Delegate to ToastComponent (DaisyUI-based)
     render(Ui::ToastComponent.new(
-      type: type,
-      message: message,
+      type:,
+      message:,
       title: options[:title],
       timeout: options[:timeout] || 5000,
       close_button: options.fetch(:close_button, true),
@@ -50,7 +50,7 @@ module ToastHelper
 
       render(Ui::ToastComponent.new(
         type: flash_type,
-        message: message
+        message:
       ))
     end.compact
 
@@ -68,9 +68,9 @@ module ToastHelper
   #   toast_flash(:success, "User created successfully!")
   #   redirect_to users_path
   #
-  def toast_flash(type, message, **options)
+  def toast_flash(type, message, **)
     flash[:toast] ||= []
-    flash[:toast] << { type: type, message: message, **options }
+    flash[:toast] <<({ type:, message:, ** })
   end
 
   # Render toast notifications from toast_flash

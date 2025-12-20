@@ -13,8 +13,8 @@ module SkeletonHelper
   # @option options [Symbol] :gap Gap between elements (:sm, :md, :lg)
   # @option options [Boolean] :stagger Apply staggered animation delays
   # @return [String] Rendered skeleton HTML
-  def skeleton(variant, **options)
-    render Ui::SkeletonComponent.new(variant: variant, **options)
+  def skeleton(variant, **)
+    render Ui::SkeletonComponent.new(variant:, **)
   end
 
   # Render multiple skeleton elements of the same type
@@ -23,8 +23,8 @@ module SkeletonHelper
   # @param count [Integer] Number of skeletons to render
   # @param options [Hash] Additional options
   # @return [String] Rendered skeletons HTML
-  def skeleton_list(variant, count: 3, **options)
-    render Ui::SkeletonComponent.new(variant: variant, count: count, **options)
+  def skeleton_list(variant, count: 3, **)
+    render Ui::SkeletonComponent.new(variant:, count:, **)
   end
 
   # Render a grid of skeleton cards using the GridComponent
@@ -35,13 +35,13 @@ module SkeletonHelper
   # @param gap [Symbol] Grid gap size
   # @param options [Hash] Additional options
   # @return [String] Rendered skeleton grid HTML
-  def skeleton_grid(variant, count: 3, columns: :default, gap: :md, **options)
+  def skeleton_grid(variant, count: 3, columns: :default, gap: :md, **)
     render Skeletons::GridComponent.new(
-      variant: variant,
-      count: count,
-      columns: columns,
-      gap: gap,
-      **options
+      variant:,
+      count:,
+      columns:,
+      gap:,
+      **
     )
   end
 
@@ -52,12 +52,12 @@ module SkeletonHelper
   # @param with_header [Boolean] Include table header skeleton
   # @param options [Hash] Additional options
   # @return [String] Rendered skeleton table HTML
-  def skeleton_table(rows: 5, columns: 5, with_header: true, **options)
+  def skeleton_table(rows: 5, columns: 5, with_header: true, **)
     render Skeletons::TableComponent.new(
-      rows: rows,
-      columns: columns,
-      with_header: with_header,
-      **options
+      rows:,
+      columns:,
+      with_header:,
+      **
     )
   end
 
@@ -68,7 +68,7 @@ module SkeletonHelper
   # @param options [Hash] Container options
   # @yield Block content for the skeleton
   # @return [String] Rendered skeleton container HTML
-  def skeleton_container(title: nil, description: nil, **options, &block)
+  def skeleton_container(title: nil, description: nil, **options, &)
     css_class = options.delete(:css_class) || options.delete(:class)
     variant = options.delete(:variant) || :default
 
@@ -92,7 +92,7 @@ module SkeletonHelper
           end
         end
 
-        parts << capture(&block) if block_given?
+        parts << capture(&) if block_given?
         safe_join(parts)
       end
     end
@@ -104,8 +104,8 @@ module SkeletonHelper
   # @param items [Integer] Number of items for lists/grids
   # @param options [Hash] Additional options
   # @return [String] Rendered page skeleton HTML
-  def skeleton_page(layout: :dashboard, items: 5, **options)
-    render Skeletons::PageComponent.new(layout: layout, items: items, **options)
+  def skeleton_page(layout: :dashboard, items: 5, **)
+    render Skeletons::PageComponent.new(layout:, items:, **)
   end
 
   # Render a stats skeleton using the StatsComponent
@@ -114,8 +114,8 @@ module SkeletonHelper
   # @param horizontal [Boolean] Display horizontally
   # @param options [Hash] Additional options
   # @return [String] Rendered stats skeleton HTML
-  def skeleton_stats(count: 3, horizontal: true, **options)
-    render Skeletons::StatsComponent.new(count: count, horizontal: horizontal, **options)
+  def skeleton_stats(count: 3, horizontal: true, **)
+    render Skeletons::StatsComponent.new(count:, horizontal:, **)
   end
 
   # Render a form skeleton using the FormComponent
@@ -124,8 +124,8 @@ module SkeletonHelper
   # @param with_actions [Boolean] Show action buttons
   # @param options [Hash] Additional options
   # @return [String] Rendered form skeleton HTML
-  def skeleton_form(fields: 4, with_actions: true, **options)
-    render Skeletons::FormComponent.new(fields: fields, with_actions: with_actions, **options)
+  def skeleton_form(fields: 4, with_actions: true, **)
+    render Skeletons::FormComponent.new(fields:, with_actions:, **)
   end
 
   # Render a dashboard widget skeleton
@@ -134,8 +134,8 @@ module SkeletonHelper
   # @param items [Integer] Number of items
   # @param options [Hash] Additional options
   # @return [String] Rendered widget skeleton HTML
-  def skeleton_widget(title: nil, items: 3, **options)
-    render Skeletons::DashboardWidgetComponent.new(title: title, items: items, **options)
+  def skeleton_widget(title: nil, items: 3, **)
+    render Skeletons::DashboardWidgetComponent.new(title:, items:, **)
   end
 
   # Render a skeleton loader container with content
@@ -148,7 +148,7 @@ module SkeletonHelper
   # @param options [Hash] Additional options
   # @yield Block containing the actual content
   # @return [String] Rendered skeleton loader HTML
-  def skeleton_loader(variant: :card, count: 3, layout: :single, delay: 0, **options, &block)
+  def skeleton_loader(variant: :card, count: 3, layout: :single, delay: 0, **options, &)
     css_class = options.delete(:css_class) || options.delete(:class)
 
     content_tag(
@@ -162,7 +162,7 @@ module SkeletonHelper
     ) do
       safe_join([
         render_skeleton_placeholder(variant, count, layout, options),
-        content_tag(:div, data: { skeleton_loader_target: "content" }, class: "hidden", &block)
+        content_tag(:div, data: { skeleton_loader_target: "content" }, class: "hidden", &)
       ])
     end
   end
@@ -177,9 +177,9 @@ module SkeletonHelper
   # @param variant [Symbol] The skeleton variant to show while loading
   # @param options [Hash] Additional options
   # @return [String] Rendered Turbo Frame with skeleton HTML
-  def skeleton_turbo_frame(frame_id:, src:, variant: :card, **options)
-    turbo_frame_tag(frame_id, src: src, loading: "lazy") do
-      skeleton(variant, **options)
+  def skeleton_turbo_frame(frame_id:, src:, variant: :card, **)
+    turbo_frame_tag(frame_id, src:, loading: "lazy") do
+      skeleton(variant, **)
     end
   end
 
@@ -192,18 +192,18 @@ module SkeletonHelper
     case variant
     when :projects
       skeleton_container(title: "Recent Projects") do
-        skeleton_list(:list_item, count: count)
+        skeleton_list(:list_item, count:)
       end
     when :agreements
       skeleton_container(title: "Active Agreements") do
-        skeleton_list(:list_item, count: count)
+        skeleton_list(:list_item, count:)
       end
     when :meetings
       skeleton_container(title: "Upcoming Meetings") do
         safe_join(count.times.map { skeleton(:meeting_item) })
       end
     when :stats
-      skeleton(:stats, count: count)
+      skeleton(:stats, count:)
     else
       skeleton(:dashboard_widget)
     end
@@ -271,16 +271,16 @@ module SkeletonHelper
     content_tag(:div, data: { skeleton_loader_target: "skeleton" }) do
       case layout
       when :grid
-        render Skeletons::GridComponent.new(variant: variant, count: count, **options)
+        render Skeletons::GridComponent.new(variant:, count:, **options)
       when :list
-        render Skeletons::ListComponent.new(count: count, **options)
+        render Skeletons::ListComponent.new(count:, **options)
       when :table
         render Skeletons::TableComponent.new(rows: count, **options)
       else
         if count > 1
-          safe_join(count.times.map { render Ui::SkeletonComponent.new(variant: variant, **options) })
+          safe_join(count.times.map { render Ui::SkeletonComponent.new(variant:, **options) })
         else
-          render Ui::SkeletonComponent.new(variant: variant, **options)
+          render Ui::SkeletonComponent.new(variant:, **options)
         end
       end
     end

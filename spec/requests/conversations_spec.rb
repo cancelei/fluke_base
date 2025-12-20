@@ -31,7 +31,7 @@ RSpec.describe "Conversations", type: :request do
     end
 
     it "shows conversation messages" do
-      message = create(:message, conversation: conversation, user: user, body: "Test message")
+      message = create(:message, conversation:, user:, body: "Test message")
       get "/conversations/#{conversation.id}"
       expect(response.body).to include("Test message")
     end

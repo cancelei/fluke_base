@@ -61,7 +61,7 @@ RSpec.describe User, type: :model do
 
     describe "#accessible_projects" do
       it "returns projects user has access to" do
-        project = create(:project, user: user)
+        project = create(:project, user:)
         expect(user.accessible_projects).to include(project)
       end
     end

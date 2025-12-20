@@ -34,10 +34,10 @@
           </tr>
           </thead>
           <tbody>
-          <% time_log_users = owner ? project.time_logs.map(&:user).uniq : [ current_user, project.user ].compact %>
+          <% time_log_users = owner ? project.time_logs.map(&:user).uniq : [current_user, project.user].compact %>
           <% time_log_users.each do |user| %>
             <% time_logs_completed.each do |milestone| %>
-                <% next unless milestone.time_logs.where(user: user).any? %>
+                <% next unless milestone.time_logs.where(user:).any? %>
 
                 <tr class="hover">
                   <td class="whitespace-nowrap">

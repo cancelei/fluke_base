@@ -28,14 +28,14 @@ class TimeLogsDataService < ApplicationService
 
   def milestones_data
     {
-      milestones: milestones,
+      milestones:,
       project: @project
     }
   end
 
   def pending_data
     {
-      milestones_pending_confirmation: milestones_pending_confirmation,
+      milestones_pending_confirmation:,
       project: @project,
       owner: owner?
     }
@@ -43,7 +43,7 @@ class TimeLogsDataService < ApplicationService
 
   def completed_data
     {
-      time_logs_completed: time_logs_completed,
+      time_logs_completed:,
       project: @project,
       owner: owner?
     }

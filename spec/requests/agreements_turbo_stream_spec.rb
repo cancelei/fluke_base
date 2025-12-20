@@ -4,7 +4,7 @@ RSpec.describe 'Agreements Turbo Streams', type: :request do
   let(:alice) { create(:user) }
   let(:bob) { create(:user) }
   let(:project) { create(:project, user: alice) }
-  let!(:agreement) { create(:agreement, :with_participants, project: project, initiator: alice, other_party: bob) }
+  let!(:agreement) { create(:agreement, :with_participants, project:, initiator: alice, other_party: bob) }
 
   describe 'PATCH /agreements/:id/accept (turbo_stream)' do
     before { sign_in bob }

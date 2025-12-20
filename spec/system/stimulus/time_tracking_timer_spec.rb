@@ -2,8 +2,8 @@ require 'rails_helper'
 
 RSpec.describe 'Stimulus Timer Controller', type: :system, js: true do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user, public_fields: [ 'name' ]) }
-  let!(:milestone) { create(:milestone, project: project, title: 'Kickoff Sync', status: Milestone::PENDING) }
+  let(:project) { create(:project, user:, public_fields: ['name']) }
+  let!(:milestone) { create(:milestone, project:, title: 'Kickoff Sync', status: Milestone::PENDING) }
 
   before do
     sign_in user

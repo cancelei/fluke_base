@@ -22,7 +22,7 @@ class ProjectGithubService < ApplicationService
   def contributions_summary(branch = nil)
     # Get registered users (those who have accounts)
     registered_query = @project.github_logs.joins(:user, :github_branch_logs).where.not(users: { id: nil })
-    unregistered_query = @project.github_logs.joins(:github_branch_logs).where(user_id: nil).where.not(unregistered_user_name: [ nil, "" ])
+    unregistered_query = @project.github_logs.joins(:github_branch_logs).where(user_id: nil).where.not(unregistered_user_name: [nil, ""])
 
     if branch.present?
       registered_query = registered_query.where(github_branch_logs: { github_branch_id: branch })

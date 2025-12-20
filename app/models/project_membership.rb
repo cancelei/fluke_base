@@ -19,58 +19,28 @@ class ProjectMembership < ApplicationRecord
   scope :active, -> { where.not(accepted_at: nil) }
   scope :pending, -> { where(accepted_at: nil) }
 
-  def owner?
-    role == "owner"
-  end
-
-  def admin?
-    role.in?(%w[owner admin])
-  end
-
-  def member?
-    role.in?(%w[owner admin member])
-  end
-
-  def guest?
-    role == "guest"
-  end
-
-  def role_level
-    ROLE_HIERARCHY[role] || 0
-  end
-
-  def can_manage_role?(target_role)
-    role_level > ROLE_HIERARCHY[target_role.to_s]
-  end
+  def owner? = role == "owner"
+  def admin? = role.in?(%w[owner admin])
+  def member? = role.in?(%w[owner admin member])
+  def guest? = role == "guest"
+  def role_level = ROLE_HIERARCHY[role] || 0
+  def can_manage_role?(target_role) = role_level > ROLE_HIERARCHY[target_role.to_s]
 
   def higher_role_than?(other_membership)
     return true if other_membership.nil?
     role_level > other_membership.role_level
   end
 
-  def accepted?
-    accepted_at.present?
-  end
-
-  def pending?
-    accepted_at.nil?
-  end
-
-  def accept!
-    update!(accepted_at: Time.current)
-  end
-
-  def self.role_options
-    ROLES.map { |role| [ role.titleize, role ] }
-  end
+  def accepted? = accepted_at.present?
+  def pending? = accepted_at.nil?
+  def accept! = update!(accepted_at: Time.current)
+  def self.role_options = ROLES.map { |role| [role.titleize, role] }
 
   def self.role_options_for(current_role)
     current_level = ROLE_HIERARCHY[current_role.to_s] || 0
     ROLES.select { |role| ROLE_HIERARCHY[role] < current_level }
-         .map { |role| [ role.titleize, role ] }
+         .map { |role| [role.titleize, role] }
   end
 
-  def role_label
-    role.titleize
-  end
+  def role_label = role.titleize
 end

@@ -109,7 +109,7 @@ module StimulusHelpers
   end
 
   def fill_in_stimulus_target(controller_name, target_name, with:)
-    fill_in find("[data-#{controller_name}-target='#{target_name}']")['id'], with: with
+    fill_in find("[data-#{controller_name}-target='#{target_name}']")['id'], with:
   end
 
   # Toggle and state helpers

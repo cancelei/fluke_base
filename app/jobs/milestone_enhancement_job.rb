@@ -12,7 +12,7 @@ class MilestoneEnhancementJob < ApplicationJob
       # Use the service to get the enhanced description
       service = MilestoneAiEnhancementService.new(enhancement.milestone.project)
       enhanced_description = service.augment_description(
-        title: title,
+        title:,
         description: description || enhancement.original_description
       )
 
@@ -20,9 +20,9 @@ class MilestoneEnhancementJob < ApplicationJob
 
       # Update the enhancement with the result
       enhancement.update!(
-        enhanced_description: enhanced_description,
+        enhanced_description:,
         status: "completed",
-        processing_time_ms: processing_time_ms,
+        processing_time_ms:,
         context_data: enhancement.context_data.merge({
           processed_at: Time.current.iso8601,
           title_used: title,
@@ -42,7 +42,7 @@ class MilestoneEnhancementJob < ApplicationJob
       # Update status to failed with error details
       enhancement.update!(
         status: "failed",
-        processing_time_ms: processing_time_ms,
+        processing_time_ms:,
         context_data: enhancement.context_data.merge({
           error_message: e.message,
           failed_at: Time.current.iso8601
@@ -62,7 +62,7 @@ class MilestoneEnhancementJob < ApplicationJob
       "milestone_#{enhancement.milestone.id}_enhancements",
       target: "ai-suggestion-container",
       partial: "milestones/ai_suggestion",
-      locals: { enhancement: enhancement, milestone: enhancement.milestone }
+      locals: { enhancement:, milestone: enhancement.milestone }
     )
   end
 end

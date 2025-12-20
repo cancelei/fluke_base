@@ -3,8 +3,8 @@
 class ProjectMembershipsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_project
-  before_action :set_membership, only: [ :update, :destroy ]
-  before_action :authorize_manage_members, except: [ :index, :accept, :reject ]
+  before_action :set_membership, only: [:update, :destroy]
+  before_action :authorize_manage_members, except: [:index, :accept, :reject]
 
   def index
     authorize @project, :view_team?
@@ -129,7 +129,7 @@ class ProjectMembershipsController < ApplicationController
   # Owner role is never assignable through mass assignment
   def sanitized_role
     role = params.dig(:project_membership, :role).to_s.downcase
-    assignable_roles = ProjectMembership::ROLES - [ "owner" ]
+    assignable_roles = ProjectMembership::ROLES - ["owner"]
     assignable_roles.include?(role) ? role : "member"
   end
 

@@ -521,9 +521,14 @@ export default class extends Controller {
 
 ---
 
-### Size Management
+### Controller Size Guidelines
 
-**If controller exceeds 150 lines**:
+- **Ideal**: < 50 lines (toggle, debounce, simple interactions)
+- **Acceptable**: 50-100 lines (form enhancements, loading states)
+- **Review needed**: 100-200 lines (Ask: Can this be split or replaced with Turbo?)
+- **Refactor required**: > 200 lines (This is definitely doing too much)
+
+**If controller exceeds limit**:
 
 1. **Split into focused controllers**
 2. **Extract to separate modules**
@@ -745,6 +750,9 @@ end
 ## Related Documentation
 
 - [Turbo Patterns](turbo-patterns.md) - When to use Turbo instead
+- [Turbo AI Agent Guide](turbo-ai-agent-guide.md) - Turbo-first development guide
+- [Ruby Coding Patterns](../../technical_spec/ruby_patterns/README.md) - Ruby 3.4.7 syntax patterns
+- [Linting Guide](../development/linting.md) - Code quality and linting setup
 - [Real-Time Updates](real-time-updates.md) - Turbo Streams vs Stimulus
 - [Testing Strategy](../testing/integration-testing-guide.md) - Testing controllers
 

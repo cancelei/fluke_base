@@ -1,31 +1,21 @@
 class UsersController < ApplicationController
-  def update_selected_project
-    service = ProjectSelectionService.new(current_user, session, params[:project_id])
+  include ProjectContextSwitchable
 
-    if service.call
-      @selected_project = service.project
+  def update_selected_project
+    if switch_project_context(Project.find_by(id: params[:project_id]))
+      @selected_project = switched_project
 
       respond_to do |format|
         # Compute a contextual redirect: if the referrer includes a project path,
         # swap the project id and redirect there. Otherwise, go to the project page.
-        contextual_path = begin
-          ref = request.referer
-          if ref.present?
-            uri = URI.parse(ref)
-            new_path = uri.path.gsub(/\A(.*\/projects\/)\d+(\/?.*)\z/, "\\1#{@selected_project.id}\\2")
-            new_path.presence
-          end
-        rescue URI::InvalidURIError
-          nil
-        end
+        contextual_path = compute_contextual_redirect_path
 
         target_url = contextual_path.present? ? contextual_path : project_path(@selected_project)
 
         format.html { redirect_to target_url, allow_other_host: false }
         format.turbo_stream do
-          streams = base_turbo_streams
-          streams += contextual_turbo_streams
-          render turbo_stream: streams
+          # Use the concern's method for base streams, then add contextual streams
+          render turbo_stream: project_context_turbo_streams_with(contextual_turbo_streams)
         end
       end
     else
@@ -38,15 +28,16 @@ class UsersController < ApplicationController
 
   private
 
-  # Base Turbo Streams that always get updated
-  def base_turbo_streams
-    [
-      turbo_stream.replace(
-        "project-context",
-        partial: "shared/project_context_nav",
-        locals: { selected_project: @selected_project }
-      )
-    ]
+  # Compute a contextual redirect path based on referer
+  def compute_contextual_redirect_path
+    ref = request.referer
+    return nil unless ref.present?
+
+    uri = URI.parse(ref)
+    new_path = uri.path.gsub(/\A(.*\/projects\/)\d+(\/?.*)\z/, "\\1#{@selected_project.id}\\2")
+    new_path.presence
+  rescue URI::InvalidURIError
+    nil
   end
 
   # Contextual Turbo Streams based on the current page

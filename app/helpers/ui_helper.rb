@@ -1,7 +1,7 @@
 module UiHelper
   def status_badge(status, text = nil)
     text ||= status.to_s.humanize
-    render(Ui::BadgeComponent.new(text: text, status: status.to_s))
+    render(Ui::BadgeComponent.new(text:, status: status.to_s))
   end
 
   def kpi_badge_class(status)
@@ -22,10 +22,10 @@ module UiHelper
     when "co_founder", "co-founder" then :purple
     else :info
     end
-    render(Ui::BadgeComponent.new(text: text, variant: variant, rounded: :default, size: :sm))
+    render(Ui::BadgeComponent.new(text:, variant:, rounded: :default, size: :sm))
   end
 
-  def ui_button(text, url_or_options = {}, options = {}, &block)
+  def ui_button(text, url_or_options = {}, options = {}, &)
     if url_or_options.is_a?(Hash)
       options = url_or_options
       url = nil
@@ -42,38 +42,38 @@ module UiHelper
     data = options.delete(:data) || {}
 
     render(Ui::ButtonComponent.new(
-      text: text,
-      url: url,
-      variant: variant,
-      size: size,
-      icon: icon,
-      method: method,
-      data: data,
-      css_class: css_class,
+      text:,
+      url:,
+      variant:,
+      size:,
+      icon:,
+      method:,
+      data:,
+      css_class:,
       **options
     )) do
-      block_given? ? capture(&block) : nil
+      block_given? ? capture(&) : nil
     end
   end
 
   def ui_icon(icon_name, options = {})
     return "" if icon_name.blank?
     size = options.fetch(:size, :md)
-    render(Ui::IconComponent.new(name: icon_name, size: size, css_class: options[:class]))
+    render(Ui::IconComponent.new(name: icon_name, size:, css_class: options[:class]))
   end
 
   def ui_badge(text, variant = :primary, options = {})
-    render(Ui::BadgeComponent.new(text: text, variant: variant, css_class: options[:class]))
+    render(Ui::BadgeComponent.new(text:, variant:, css_class: options[:class]))
   end
 
-  def ui_alert(variant: :info, title: nil, message: nil, **options, &block)
-    render(Ui::AlertComponent.new(variant: variant, title: title, message: message, **options), &block)
+  def ui_alert(variant: :info, title: nil, message: nil, **, &)
+    render(Ui::AlertComponent.new(variant:, title:, message:, **), &)
   end
 
-  def ui_card(options = {}, &block)
+  def ui_card(options = {}, &)
     variant = options.delete(:variant) || :default
     css_class = options.delete(:class)
-    render(Ui::CardComponent.new(variant: variant, css_class: css_class, **options), &block)
+    render(Ui::CardComponent.new(variant:, css_class:, **options), &)
   end
 
   def ui_card_header(title, subtitle = nil, options = {})
@@ -90,26 +90,26 @@ module UiHelper
     icon = options.delete(:icon) || :folder
     css_class = options.delete(:class)
     render(Ui::EmptyStateComponent.new(
-      title: title,
-      description: description,
-      icon: icon,
-      action_text: action_text,
-      action_url: action_url,
-      css_class: css_class
+      title:,
+      description:,
+      icon:,
+      action_text:,
+      action_url:,
+      css_class:
     ))
   end
 
-  def ui_search_form(url, options = {}, &block)
+  def ui_search_form(url, options = {}, &)
     search_value = options[:search_value] || params[:search]
     method = options[:method] || :get
 
-    form_with(url: url, method: method, class: "flex space-x-2") do |f|
+    form_with(url:, method:, class: "flex space-x-2") do |f|
       content = []
       content << f.text_field(:search,
         value: search_value,
         placeholder: options[:placeholder] || "Search...",
         class: "form-input")
-      content << capture(f, &block) if block_given?
+      content << capture(f, &) if block_given?
       content << f.submit(options[:submit_text] || "Search", class: "btn btn-primary")
       safe_join(content)
     end
@@ -120,27 +120,27 @@ module UiHelper
     render(Ui::BadgeComponent.new(text: stage.capitalize, variant: :info))
   end
 
-  def fluke_form_with(model: nil, scope: nil, url: nil, format: nil, **options, &block)
+  def fluke_form_with(model: nil, scope: nil, url: nil, format: nil, **options, &)
     html_options = options.delete(:html) || {}
     data = html_options[:data] || options.delete(:data) || {}
 
     unless options.delete(:skip_loading_states)
       existing_controller = data[:controller]
-      data[:controller] = [ existing_controller, "form-submission" ].compact.join(" ")
+      data[:controller] = [existing_controller, "form-submission"].compact.join(" ")
       existing_action = data[:action]
-      data[:action] = [ existing_action, "submit->form-submission#submit" ].compact.join(" ")
+      data[:action] = [existing_action, "submit->form-submission#submit"].compact.join(" ")
     end
 
     html_options[:data] = data
 
     form_with(
-      model: model,
-      scope: scope,
-      url: url,
-      format: format,
+      model:,
+      scope:,
+      url:,
+      format:,
       builder: FlukeFormBuilder,
       **options.merge(html: html_options),
-      &block
+      &
     )
   end
 
@@ -157,16 +157,16 @@ module UiHelper
     data[:loading_text] = loading_text
 
     render(Ui::ButtonComponent.new(
-      text: text,
+      text:,
       type: "submit",
-      variant: variant,
-      size: size,
-      icon: icon,
-      css_class: css_class,
-      disabled: disabled,
+      variant:,
+      size:,
+      icon:,
+      css_class:,
+      disabled:,
       form_submission_target: true,
-      loading_text: loading_text,
-      data: data
+      loading_text:,
+      data:
     ))
   end
 
@@ -203,7 +203,7 @@ module UiHelper
 
     button_to(
       url,
-      method: method,
+      method:,
       class: button_classes,
       data: data.merge(button_data),
       form: form_data.present? ? { data: form_data } : {},
@@ -213,16 +213,16 @@ module UiHelper
     end
   end
 
-  def ui_modal(id:, title: nil, size: :md, position: :middle, closeable: true, close_button_text: "Close", classes: "", &block)
+  def ui_modal(id:, title: nil, size: :md, position: :middle, closeable: true, close_button_text: "Close", classes: "", &)
     render(Ui::ModalComponent.new(
-      id: id,
-      title: title,
-      size: size,
-      position: position,
-      closeable: closeable,
-      close_button_text: close_button_text,
-      classes: classes
-    ), &block)
+      id:,
+      title:,
+      size:,
+      position:,
+      closeable:,
+      close_button_text:,
+      classes:
+    ), &)
   end
 
   def ui_modal_trigger(text, modal_id:, variant: :primary, size: :md, icon: nil, css_class: nil)

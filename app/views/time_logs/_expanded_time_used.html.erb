@@ -4,7 +4,7 @@
   <% total_allowed_hours = agreement.weekly_hours.to_f * agreement.duration_in_weeks.to_f %>
   <% used_hours = project.time_logs.where(user_id: agreement_participant_ids).where.not(status: "in_progress").sum(:hours_spent) +
       (project.time_logs.where(user_id: agreement_participant_ids).in_progress.any? ? ((Time.zone.now - project.time_logs.where(user_id: agreement_participant_ids).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
-  <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+  <% percent_used = total_allowed_hours > 0 ? [(used_hours.to_f / total_allowed_hours * 100).round, 100].min : 0 %>
 <% elsif local_assigns[:project_wide] %>
 <%# For project-wide time tracking (time logs page) %>
   <% agreements = project.agreements.includes(:agreement_participants) %>
@@ -13,13 +13,13 @@
     <% total_allowed_hours = agreements.sum { |a| a.weekly_hours * a.duration_in_weeks } %>
     <% used_hours = project.time_logs.where.not(status: "in_progress").sum(:hours_spent) +
         (project.time_logs.in_progress.any? ? ((Time.zone.now - project.time_logs.in_progress.last.started_at) / 1.hour).round(2) : 0) %>
-    <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+    <% percent_used = total_allowed_hours > 0 ? [(used_hours.to_f / total_allowed_hours * 100).round, 100].min : 0 %>
   <% else %>
-    <% user_agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }, project: project).first %>
+    <% user_agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }, project:).first %>
     <% total_allowed_hours = user_agreement&.weekly_hours.to_f * user_agreement&.duration_in_weeks.to_f %>
     <% used_hours = project.time_logs.where(user: current_user).where.not(status: "in_progress").sum(:hours_spent) +
         ((project.time_logs.where(user: current_user).in_progress.any?) ? ((Time.zone.now - project.time_logs.where(user: current_user).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
-    <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+    <% percent_used = total_allowed_hours > 0 ? [(used_hours.to_f / total_allowed_hours * 100).round, 100].min : 0 %>
   <% end %>
 <% elsif local_assigns[:owner] %>
 <%# For project owner view in agreement context - show other parties' work  %>
@@ -27,13 +27,13 @@
   <% total_allowed_hours = agreements.sum { |a| a.weekly_hours * a.duration_in_weeks } %>
   <% used_hours = project.time_logs.where.not(user_id: current_user.id).where.not(status: "in_progress").sum(:hours_spent) +
       (project.time_logs.where.not(user_id: current_user.id).in_progress.any? ? ((Time.zone.now - project.time_logs.where.not(user_id: current_user.id).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
-  <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+  <% percent_used = total_allowed_hours > 0 ? [(used_hours.to_f / total_allowed_hours * 100).round, 100].min : 0 %>
 <% else %>
 <%# For individual user view %>
-  <% agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).find_by(project: project) %>
+  <% agreement = Agreement.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).find_by(project:) %>
   <% total_allowed_hours = agreement&.weekly_hours.to_f * agreement&.duration_in_weeks.to_f %>
   <% used_hours = project.time_logs.where(user: current_user).where.not(status: "in_progress").sum(:hours_spent) + ((current_log && current_log.started_at) ? ((Time.zone.now - current_log.started_at) / 1.hour).round(2) : 0) %>
-  <% percent_used = total_allowed_hours > 0 ? [ (used_hours.to_f / total_allowed_hours * 100).round, 100 ].min : 0 %>
+  <% percent_used = total_allowed_hours > 0 ? [(used_hours.to_f / total_allowed_hours * 100).round, 100].min : 0 %>
 <% end %>
 
 <div class="space-y-6">
@@ -105,7 +105,7 @@
         </svg>
       </div>
       <div class="stat-title">Remaining</div>
-      <div class="stat-value text-success"><%= [ total_allowed_hours - used_hours, 0 ].max.round(1) %></div>
+      <div class="stat-value text-success"><%= [total_allowed_hours - used_hours, 0].max.round(1) %></div>
     </div>
   </div>
 
@@ -128,7 +128,7 @@
             <% agreement.agreement_participants.includes(:user).each do |participant| %>
               <% participant_used = project.time_logs.where(user_id: participant.user_id).where.not(status: "in_progress").sum(:hours_spent) + (project.time_logs.where(user_id: participant.user_id).in_progress.any? ? ((Time.zone.now - project.time_logs.where(user_id: participant.user_id).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
               <% participant_total = agreement.weekly_hours * agreement.duration_in_weeks %>
-              <% participant_percent = participant_total > 0 ? [ (participant_used.to_f / participant_total * 100).round, 100 ].min : 0 %>
+              <% participant_percent = participant_total > 0 ? [(participant_used.to_f / participant_total * 100).round, 100].min : 0 %>
               <li class="flex justify-between items-center p-2 bg-base-200 rounded-lg">
                 <span class="font-medium"><%= participant.user&.full_name || participant.user&.email || "User" %></span>
                 <span class="badge badge-primary"><%= participant_used %> / <%= participant_total %>h (<%= participant_percent %>%)</span>
@@ -200,7 +200,7 @@
               <% other_user = (a.initiator&.id == current_user.id ? a.other_party : a.initiator) %>
               <% a_used = project.time_logs.where.not(status: "in_progress").where(user_id: other_user.id).sum(:hours_spent) + (project.time_logs.where(user_id: other_user.id).in_progress.any? ? ((Time.zone.now - project.time_logs.in_progress.where(user_id: other_user.id).last.started_at) / 1.hour).round(2) : 0) %>
               <% a_total = a.weekly_hours * a.duration_in_weeks %>
-              <% a_percent = a_total > 0 ? [ (a_used.to_f / a_total * 100).round, 100 ].min : 0 %>
+              <% a_percent = a_total > 0 ? [(a_used.to_f / a_total * 100).round, 100].min : 0 %>
               <li class="flex justify-between items-center p-2 bg-base-200 rounded-lg">
                 <span class="font-medium"><%= other_user&.full_name || other_user&.email || "User" %></span>
                 <span class="badge badge-primary"><%= a_used %> / <%= a_total %>h (<%= a_percent %>%)</span>

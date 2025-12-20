@@ -12,7 +12,7 @@ RSpec.describe Messages::SendCommand, type: :command do
 
     context "with valid message" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: conversation.id.to_s
         }, params: {
           body: "Hello, how are you?"
@@ -71,7 +71,7 @@ RSpec.describe Messages::SendCommand, type: :command do
 
     context "with empty body" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: conversation.id.to_s
         }, params: {
           body: ""
@@ -92,7 +92,7 @@ RSpec.describe Messages::SendCommand, type: :command do
 
     context "with blank body" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: conversation.id.to_s
         }, params: {
           body: "   "
@@ -109,7 +109,7 @@ RSpec.describe Messages::SendCommand, type: :command do
 
     context "with nested message params" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: conversation.id.to_s
         }, params: {
           message: {
@@ -134,7 +134,7 @@ RSpec.describe Messages::SendCommand, type: :command do
 
     context "with non-existent conversation" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: "999999"
         }, params: {
           body: "Hello"
@@ -158,7 +158,7 @@ RSpec.describe Messages::SendCommand, type: :command do
       let(:other_conversation) { create(:conversation, sender: other_user, recipient: create(:user)) }
 
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: other_conversation.id.to_s
         }, params: {
           body: "Hello"
@@ -180,7 +180,7 @@ RSpec.describe Messages::SendCommand, type: :command do
 
     context "when message save fails" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           conversationId: conversation.id.to_s
         }, params: {
           body: "Test message"

@@ -20,41 +20,41 @@ RSpec.describe ProjectGithubService do
 
   describe '#available_branches' do
     it 'returns sorted [id, branch_name] pairs' do
-      b1 = create(:github_branch, project: project, branch_name: 'feature/x')
-      b2 = create(:github_branch, project: project, branch_name: 'main')
+      b1 = create(:github_branch, project:, branch_name: 'feature/x')
+      b2 = create(:github_branch, project:, branch_name: 'main')
 
-      expect(service.available_branches).to eq([ [ b1.id, 'feature/x' ], [ b2.id, 'main' ] ].sort)
+      expect(service.available_branches).to eq([[b1.id, 'feature/x'], [b2.id, 'main']].sort)
     end
   end
 
   describe '#recent_logs' do
     it 'returns logs ordered by most recent first and limited' do
-      older = create(:github_log, project: project, user: owner, commit_date: 3.days.ago)
-      middle = create(:github_log, project: project, user: owner, commit_date: 2.days.ago)
-      newest = create(:github_log, project: project, user: owner, commit_date: 1.day.ago)
+      older = create(:github_log, project:, user: owner, commit_date: 3.days.ago)
+      middle = create(:github_log, project:, user: owner, commit_date: 2.days.ago)
+      newest = create(:github_log, project:, user: owner, commit_date: 1.day.ago)
 
-      expect(service.recent_logs(2)).to eq([ newest, middle ])
+      expect(service.recent_logs(2)).to eq([newest, middle])
       expect(service.recent_logs).to include(newest, middle, older)
     end
   end
 
   describe '#contributions_summary' do
-    let!(:branch_a) { create(:github_branch, project: project, user: owner, branch_name: 'main') }
-    let!(:branch_b) { create(:github_branch, project: project, user: owner, branch_name: 'feature/one') }
+    let!(:branch_a) { create(:github_branch, project:, user: owner, branch_name: 'main') }
+    let!(:branch_b) { create(:github_branch, project:, user: owner, branch_name: 'feature/one') }
 
     def log_for(user:, branch:, commits: 1, added: 1, removed: 0, unregistered_name: nil)
       commits.times do
         if user.nil?
           log = create(:github_log, :unregistered,
-                       project: project,
+                       project:,
                        unregistered_user_name: unregistered_name,
                        lines_added: added,
                        lines_removed: removed,
                        commit_date: Time.current)
         else
           log = create(:github_log, :with_user,
-                       project: project,
-                       user: user,
+                       project:,
+                       user:,
                        unregistered_user_name: unregistered_name,
                        lines_added: added,
                        lines_removed: removed,
@@ -108,7 +108,7 @@ RSpec.describe ProjectGithubService do
 
       # Create active agreement with other_user as participant
       agreement = create(:agreement, :with_participants, :mentorship,
-                         project: project, initiator: owner, other_party: other_user,
+                         project:, initiator: owner, other_party: other_user,
                          status: Agreement::ACCEPTED)
       expect(service.can_view_logs?(other_user)).to be true
     end

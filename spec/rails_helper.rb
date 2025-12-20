@@ -1,6 +1,14 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 # Set test environment before any Rails loading
 ENV['RAILS_ENV'] = 'test'
+
+database_url_test = ENV['DATABASE_URL_TEST'].to_s
+if !database_url_test.strip.empty?
+  ENV['DATABASE_URL'] = database_url_test
+else
+  ENV.delete('DATABASE_URL')
+end
+
 require 'support/coverage'
 require 'spec_helper'
 require_relative '../config/environment'
@@ -147,7 +155,7 @@ RSpec.configure do |config|
   # Configure Capybara for system tests
   config.before(:each, type: :system) do |example|
     if example.metadata[:js] && selenium_enabled
-      driven_by :selenium, using: :chrome, screen_size: [ 1400, 1400 ] do |options|
+      driven_by :selenium, using: :chrome, screen_size: [1400, 1400] do |options|
         options.add_argument('--headless') if ENV['HEADLESS']
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')

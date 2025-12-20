@@ -20,11 +20,11 @@ class Conversation < ApplicationRecord
 
   # Find or create a conversation between two users
   def self.between(sender_id, recipient_id)
-    conversation = find_by(sender_id: sender_id, recipient_id: recipient_id)
+    conversation = find_by(sender_id:, recipient_id:)
     if conversation.nil?
       conversation = find_by(sender_id: recipient_id, recipient_id: sender_id)
     end
-    conversation = create(sender_id: sender_id, recipient_id: recipient_id) if conversation.nil?
+    conversation = create(sender_id:, recipient_id:) if conversation.nil?
     conversation
   end
 
@@ -35,12 +35,12 @@ class Conversation < ApplicationRecord
 
   # Check if a conversation has unread messages for a user
   def unread_messages_for?(user)
-    messages.where.not(user: user).where(read: false).exists?
+    messages.where.not(user:).where(read: false).exists?
   end
 
   # Mark all unread messages as read for a user
   def mark_as_read_for(user)
-    messages.where.not(user: user).where(read: false).update_all(read: true)
+    messages.where.not(user:).where(read: false).update_all(read: true)
   end
 
   # Get the last message of the conversation

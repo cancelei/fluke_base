@@ -84,11 +84,6 @@ class AgreementStatusService < ApplicationService
     end
   end
 
-  def has_counter_offers?
-    @agreement.counter_offers.exists?
-  end
-
-  def most_recent_counter_offer
-    @agreement.counter_offers.order(created_at: :desc).first
-  end
+  def has_counter_offers? = @agreement.counter_offers.exists?
+  def most_recent_counter_offer = @agreement.counter_offers.order(created_at: :desc).first
 end

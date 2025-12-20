@@ -13,15 +13,15 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
   # Helper to create membership
   def create_membership(project:, user:, role:, accepted: true)
     create(:project_membership,
-           project: project,
-           user: user,
-           role: role,
+           project:,
+           user:,
+           role:,
            accepted_at: accepted ? Time.current : nil)
   end
 
   describe 'permissions' do
     let(:member_user) { create(:user) }
-    let(:membership) { create_membership(project: project, user: member_user, role: 'member') }
+    let(:membership) { create_membership(project:, user: member_user, role: 'member') }
 
     context 'for a visitor (not signed in)' do
       permissions :index?, :show?, :create?, :new?, :update?, :edit?, :destroy? do
@@ -50,7 +50,7 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
         end
 
         it 'denies modifying owner role' do
-          owner_membership = create_membership(project: project, user: other_user, role: 'owner')
+          owner_membership = create_membership(project:, user: other_user, role: 'owner')
           expect(subject).not_to permit(project_owner, owner_membership)
         end
       end
@@ -64,7 +64,7 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
       let(:admin_user) { create(:user) }
 
       before do
-        create_membership(project: project, user: admin_user, role: 'admin')
+        create_membership(project:, user: admin_user, role: 'admin')
       end
 
       permissions :create?, :new? do
@@ -77,12 +77,12 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
         end
 
         it 'denies updating owner' do
-          owner_membership = create_membership(project: project, user: other_user, role: 'owner')
+          owner_membership = create_membership(project:, user: other_user, role: 'owner')
           expect(subject).not_to permit(admin_user, owner_membership)
         end
 
         it 'denies updating other admins' do
-          other_admin_membership = create_membership(project: project, user: other_user, role: 'admin')
+          other_admin_membership = create_membership(project:, user: other_user, role: 'admin')
           expect(subject).not_to permit(admin_user, other_admin_membership)
         end
       end
@@ -93,7 +93,7 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
         end
 
         it 'denies removing owner' do
-          owner_membership = create_membership(project: project, user: project_owner, role: 'owner')
+          owner_membership = create_membership(project:, user: project_owner, role: 'owner')
           expect(subject).not_to permit(admin_user, owner_membership)
         end
       end
@@ -106,7 +106,7 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
 
       permissions :accept? do
         it 'allows accepting their own pending invitation' do
-          pending_membership = create_membership(project: project, user: member_user, role: 'member', accepted: false)
+          pending_membership = create_membership(project:, user: member_user, role: 'member', accepted: false)
           expect(subject).to permit(member_user, pending_membership)
         end
 
@@ -121,7 +121,7 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
         end
 
         it 'denies owner from removing themselves' do
-          owner_membership = create_membership(project: project, user: project_owner, role: 'owner')
+          owner_membership = create_membership(project:, user: project_owner, role: 'owner')
           expect(subject).not_to permit(project_owner, owner_membership)
         end
       end
@@ -142,7 +142,7 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
     end
 
     context 'for pending invitations' do
-      let(:pending_membership) { create_membership(project: project, user: member_user, role: 'member', accepted: false) }
+      let(:pending_membership) { create_membership(project:, user: member_user, role: 'member', accepted: false) }
 
       permissions :resend_invitation? do
         it 'allows project admins to resend' do
@@ -158,13 +158,13 @@ RSpec.describe ProjectMembershipPolicy, type: :policy do
 
   describe 'Scope' do
     let(:user) { create(:user) }
-    let!(:user_own_membership) { create_membership(project: project, user: user, role: 'member') }
+    let!(:user_own_membership) { create_membership(project:, user:, role: 'member') }
     let!(:other_project) { create(:project) }
     let!(:other_membership) { create_membership(project: other_project, user: other_user, role: 'member') }
 
     # Create project where user is admin
     let!(:admin_project) { create(:project) }
-    let!(:admin_membership) { create_membership(project: admin_project, user: user, role: 'admin') }
+    let!(:admin_membership) { create_membership(project: admin_project, user:, role: 'admin') }
     let!(:admin_project_other_membership) { create_membership(project: admin_project, user: other_user, role: 'member') }
 
     context 'for a visitor' do

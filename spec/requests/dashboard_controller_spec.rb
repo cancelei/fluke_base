@@ -8,7 +8,7 @@ RSpec.describe 'Dashboard', type: :request do
              name: 'Mentor Project',
              description: 'Looking for guidance',
              collaboration_type: Project::SEEKING_MENTOR,
-             public_fields: [ 'name', 'description' ])
+             public_fields: ['name', 'description'])
     end
 
     before do

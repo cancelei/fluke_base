@@ -48,8 +48,8 @@ module CommandHelpers
       @data.key?(key) || super
     end
 
-    def public_send(method_name, *args)
-      method_missing(method_name, *args)
+    def public_send(method_name, *)
+      method_missing(method_name, *)
     end
   end
 
@@ -86,7 +86,7 @@ module CommandHelpers
     end
 
     def remove(target)
-      stream = { action: :remove, target: target }
+      stream = { action: :remove, target: }
       @streams << stream
       stream
     end
@@ -95,9 +95,9 @@ module CommandHelpers
 
     def build_stream(action, target, options_or_content)
       if options_or_content.is_a?(Hash)
-        { action: action, target: target }.merge(options_or_content)
+        { action:, target: }.merge(options_or_content)
       else
-        { action: action, target: target, content: options_or_content }
+        { action:, target:, content: options_or_content }
       end
     end
   end
@@ -156,7 +156,7 @@ module CommandHelpers
       command = command_class.allocate
 
       # Set up mock infrastructure
-      mock_controller = MockController.new(user: user, session: session, params: params)
+      mock_controller = MockController.new(user:, session:, params:)
       mock_element = MockElement.new(element_data)
       mock_turbo_stream = MockTurboStreamBuilder.new
       mock_state = MockState.new

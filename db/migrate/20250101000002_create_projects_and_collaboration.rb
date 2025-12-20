@@ -48,8 +48,8 @@ class CreateProjectsAndCollaboration < ActiveRecord::Migration[8.0]
     add_index :milestones, :project_id
     add_index :milestones, :due_date, comment: "Improves due date queries and sorting"
     add_index :milestones, :status, comment: "Improves filtering by milestone status"
-    add_index :milestones, [ :project_id, :due_date ], comment: "Composite index for project milestone timeline"
-    add_index :milestones, [ :project_id, :status ], comment: "Composite index for project milestone progress"
+    add_index :milestones, [:project_id, :due_date], comment: "Composite index for project milestone timeline"
+    add_index :milestones, [:project_id, :status], comment: "Composite index for project milestone progress"
 
     add_check_constraint :milestones,
       "status IN ('pending', 'in_progress', 'completed', 'cancelled')",
@@ -81,7 +81,7 @@ class CreateProjectsAndCollaboration < ActiveRecord::Migration[8.0]
     add_index :agreements, :agreement_type, comment: "Improves filtering by mentorship/co-founder type"
     add_index :agreements, :payment_type
     add_index :agreements, :created_at, comment: "Improves ordering by creation date"
-    add_index :agreements, [ :status, :agreement_type ], comment: "Composite index for combined filtering"
+    add_index :agreements, [:status, :agreement_type], comment: "Composite index for combined filtering"
 
     add_check_constraint :agreements,
       "agreement_type IN ('Mentorship', 'Co-Founder')",
@@ -123,7 +123,7 @@ class CreateProjectsAndCollaboration < ActiveRecord::Migration[8.0]
     add_index :agreement_participants, :counter_agreement_id
     add_index :agreement_participants, :accept_or_counter_turn_id
     add_index :agreement_participants, :is_initiator, name: "idx_agreement_participants_on_is_initiator"
-    add_index :agreement_participants, [ :agreement_id, :user_id ],
+    add_index :agreement_participants, [:agreement_id, :user_id],
       unique: true, name: "idx_agreement_participants_on_agreement_user"
 
     # Meetings table
@@ -142,7 +142,7 @@ class CreateProjectsAndCollaboration < ActiveRecord::Migration[8.0]
     add_index :meetings, :google_calendar_event_id
     add_index :meetings, :start_time, comment: "Improves meeting ordering and time-based queries"
     add_index :meetings, :end_time, comment: "Improves past/upcoming meeting queries"
-    add_index :meetings, [ :agreement_id, :start_time ], comment: "Composite index for agreement meetings ordered by time"
+    add_index :meetings, [:agreement_id, :start_time], comment: "Composite index for agreement meetings ordered by time"
 
     add_check_constraint :meetings,
       "end_time > start_time",

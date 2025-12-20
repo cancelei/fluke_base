@@ -1,6 +1,6 @@
 class MeetingsController < ApplicationController
   before_action :set_agreement
-  before_action :set_meeting, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_meeting, only: [:show, :edit, :update, :destroy]
 
   def index
     @meetings = @agreement.meetings.includes(:agreement).order(start_time: :asc)
@@ -86,7 +86,7 @@ class MeetingsController < ApplicationController
             render :edit, status: :unprocessable_content
           end
         end
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@meeting)}_form", partial: "form", locals: { meeting: @meeting, agreement: @agreement }) }
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("#{dom_id(@agreement)}_meeting_form", partial: "form", locals: { meeting: @meeting, agreement: @agreement }) }
       end
     end
   end

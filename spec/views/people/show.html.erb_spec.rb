@@ -4,11 +4,11 @@ RSpec.describe "people/show", type: :view do
   let(:alice) { create(:user, first_name: "Alice", last_name: "Entrepreneur") }
   let(:bob) { create(:user, first_name: "Bob", last_name: "Developer") }
   let(:project) { create(:project, user: alice, name: "FlukeBase") }
-  let!(:agreement) { create(:agreement, :with_participants, project: project, initiator: alice, other_party: bob) }
+  let!(:agreement) { create(:agreement, :with_participants, project:, initiator: alice, other_party: bob) }
 
   before do
     assign(:person, alice)
-    assign(:projects_involved, [ project ])
+    assign(:projects_involved, [project])
     allow(view).to receive(:current_user).and_return(bob)
     allow(view).to receive(:present).and_return(double("presenter",
       display_name: alice.full_name,
@@ -153,12 +153,12 @@ RSpec.describe "people/show", type: :view do
         before do
           # Add Alice to Bob's project via agreement
           create(:agreement, :with_participants, project: shared_project, initiator: bob, other_party: alice)
-          assign(:projects_involved, [ project, shared_project ])
+          assign(:projects_involved, [project, shared_project])
         end
 
         it "displays shared projects" do
-          allow(bob).to receive(:projects).and_return([ shared_project ])
-          allow(alice).to receive(:projects).and_return([ shared_project ])
+          allow(bob).to receive(:projects).and_return([shared_project])
+          allow(alice).to receive(:projects).and_return([shared_project])
 
           render
 
@@ -169,7 +169,7 @@ RSpec.describe "people/show", type: :view do
       context "with no shared connections" do
         it "shows encouragement message" do
           allow(bob).to receive(:projects).and_return([])
-          allow(alice).to receive(:projects).and_return([ project ])
+          allow(alice).to receive(:projects).and_return([project])
           allow(bob).to receive(:try).with(:skills).and_return([])
           allow(alice).to receive(:try).with(:skills).and_return([])
           allow(bob).to receive(:all_agreements).and_return(double("agreements", joins: double("joined", where: [])))

@@ -142,7 +142,7 @@ RSpec.describe "Complete User Journey", type: :system, js: true do
       alice = create(:user, :alice)
       bob = create(:user, :bob)
       project = create(:project, user: alice)
-      milestone = create(:milestone, project: project)
+      milestone = create(:milestone, project:)
 
       # Alice creates agreement
       sign_in alice
@@ -254,7 +254,7 @@ RSpec.describe "Complete User Journey", type: :system, js: true do
 
       10.times do |i|
         project = create(:project, user: alice, name: "Project #{i}")
-        create(:milestone, project: project, title: "Milestone #{i}")
+        create(:milestone, project:, title: "Milestone #{i}")
       end
 
       visit projects_path

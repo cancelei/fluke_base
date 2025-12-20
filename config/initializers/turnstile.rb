@@ -21,8 +21,8 @@ Rails.application.configure do
   end
 
   config.turnstile = {
-    site_key: site_key,
-    secret_key: secret_key
+    site_key:,
+    secret_key:
   }
 
   # Validate that keys are present

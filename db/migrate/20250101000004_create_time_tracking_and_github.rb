@@ -23,8 +23,8 @@ class CreateTimeTrackingAndGithub < ActiveRecord::Migration[8.0]
     add_index :time_logs, :project_id
     add_index :time_logs, :started_at, comment: "Improves time-based queries and reporting"
     add_index :time_logs, :status, comment: "Improves filtering by active/completed time logs"
-    add_index :time_logs, [ :project_id, :milestone_id ]
-    add_index :time_logs, [ :project_id, :user_id ], comment: "Composite index for user-project time logs"
+    add_index :time_logs, [:project_id, :milestone_id]
+    add_index :time_logs, [:project_id, :user_id], comment: "Composite index for user-project time logs"
 
     add_check_constraint :time_logs,
       "status IN ('in_progress', 'completed', 'paused')",
@@ -43,7 +43,7 @@ class CreateTimeTrackingAndGithub < ActiveRecord::Migration[8.0]
 
     # GitHub branch indexes
     add_index :github_branches, :user_id
-    add_index :github_branches, [ :project_id, :branch_name, :user_id ],
+    add_index :github_branches, [:project_id, :branch_name, :user_id],
       unique: true, name: "idx_on_project_id_branch_name_user_id_fcdce7d2d8"
 
     # GitHub logs table
@@ -68,8 +68,8 @@ class CreateTimeTrackingAndGithub < ActiveRecord::Migration[8.0]
     add_index :github_logs, :user_id
     add_index :github_logs, :commit_sha, unique: true
     add_index :github_logs, :commit_date, comment: "Improves time-based queries for commit history"
-    add_index :github_logs, [ :project_id, :commit_date ], comment: "Composite index for project commit timeline"
-    add_index :github_logs, [ :user_id, :commit_date ], comment: "Composite index for user commit activity"
+    add_index :github_logs, [:project_id, :commit_date], comment: "Composite index for project commit timeline"
+    add_index :github_logs, [:user_id, :commit_date], comment: "Composite index for user commit activity"
 
     # GitHub branch logs junction table
     create_table :github_branch_logs do |t|
@@ -80,7 +80,7 @@ class CreateTimeTrackingAndGithub < ActiveRecord::Migration[8.0]
 
     # GitHub branch log indexes
     add_index :github_branch_logs, :github_log_id
-    add_index :github_branch_logs, [ :github_branch_id, :github_log_id ],
+    add_index :github_branch_logs, [:github_branch_id, :github_log_id],
       unique: true, name: "index_github_branch_logs_on_github_branch_id_and_github_log_id"
   end
 end

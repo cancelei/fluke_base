@@ -15,8 +15,8 @@
       <% if @projects.present? %>
         <ul class="menu p-0">
           <% @projects.each do |project| %>
-            <% cache([ project, current_user ]) do %>
-              <%= render "shared/project_summary", project: project, current_user: current_user %>
+            <% cache([project, current_user]) do %>
+              <%= render "shared/project_summary", project:, current_user: %>
             <% end %>
           <% end %>
         </ul>

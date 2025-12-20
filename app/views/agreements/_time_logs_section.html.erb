@@ -1,3 +1,4 @@
+<%= turbo_frame_tag "#{dom_id(agreement)}_time_logs" do %>
 <%# Fallback: calculate agreement participant time logs if not provided %>
 <% unless defined?(agreement_participant_time_logs) %>
   <% if project.user_id == current_user.id %>
@@ -30,15 +31,15 @@
         <div class="px-4 py-5">
           <% if project.user_id == current_user.id %>
 <%# Project owner: show other party's time progress %>
-            <%= render "time_logs/remaining_time_progress", agreement: agreement, project: project, current_log: nil, owner: true %>
+            <%= render "time_logs/remaining_time_progress", agreement:, project:, current_log: nil, owner: true %>
 
 <%# Enhanced analytics for completed agreements when viewed by project owner %>
             <% if agreement.completed? %>
-              <%= render "completed_agreement_time_analysis", agreement: agreement, project: project, agreement_participant_time_logs: agreement_participant_time_logs %>
+              <%= render "completed_agreement_time_analysis", agreement:, project:, agreement_participant_time_logs: %>
             <% end %>
           <% else %>
 <%# Agreement participant: show agreement-specific progress %>
-            <%= render "time_logs/remaining_time_progress", agreement: agreement, project: project, current_log: nil %>
+            <%= render "time_logs/remaining_time_progress", agreement:, project:, current_log: nil %>
           <% end %>
 
           <% if can_view_full_details && (defined?(agreement_participant_time_logs) && agreement_participant_time_logs.any?) %>
@@ -117,3 +118,4 @@
       <% end %>
     </div>
   </div>
+<% end %>

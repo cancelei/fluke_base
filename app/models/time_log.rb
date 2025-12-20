@@ -14,20 +14,15 @@ class TimeLog < ApplicationRecord
   scope :manual, -> { where(manual_entry: true) }
   scope :in_progress, -> { where(status: "in_progress") }
   scope :completed, -> { where(status: "completed") }
-  scope :for_project, ->(project_id) { where(project_id: project_id) }
-  scope :for_milestone, ->(milestone_id) { where(milestone_id: milestone_id) }
+  scope :for_project, ->(project_id) { where(project_id:) }
+  scope :for_milestone, ->(milestone_id) { where(milestone_id:) }
   scope :manual, -> { where(milestone_id: nil) }
 
   before_save :calculate_hours_spent
   after_update_commit :broadcast_time_log
 
-  def completed?
-    status == "completed"
-  end
-
-  def complete!(end_time = Time.current)
-    update(ended_at: end_time, status: "completed")
-  end
+  def completed? = status == "completed"
+  def complete!(end_time = Time.current) = update(ended_at: end_time, status: "completed")
 
   def calculate_hours_spent
     return unless ended_at.present? && started_at.present?
@@ -38,7 +33,7 @@ class TimeLog < ApplicationRecord
 
   def github_activities
     GithubLog.where(
-      agreement_id: agreement_id,
+      agreement_id:,
       commit_date: (started_at..ended_at)
     )
   end

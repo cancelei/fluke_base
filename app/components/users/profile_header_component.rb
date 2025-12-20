@@ -50,7 +50,7 @@ module Users
     end
 
     def fallback_presenter
-      OpenStruct.new(
+      ProfileHeaderPresenter.new(
         display_name: @person.full_name,
         badges: "",
         formatted_bio: nil,
@@ -156,7 +156,7 @@ module Users
           user: @person,
           variant: :horizontal,
           show_rating: true,
-          presenter: presenter,
+          presenter:,
           current_user: @current_user,
           interactive_rating: !viewing_own_profile?
         ))

@@ -2,15 +2,15 @@ require 'rails_helper'
 
 RSpec.describe "github_logs/index", type: :view do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user, name: "Test Project") }
-  let(:github_branch) { create(:github_branch, project: project, branch_name: "main") }
+  let(:project) { create(:project, user:, name: "Test Project") }
+  let(:github_branch) { create(:github_branch, project:, branch_name: "main") }
   let(:recent_commits) { Kaminari.paginate_array([]).page(1).per(10) }
 
   before do
     assign(:project, project)
     assign(:recent_commits, recent_commits)
-    assign(:available_branches, [ [ github_branch.id, github_branch.branch_name ] ])
-    assign(:available_users, [ "testuser" ])
+    assign(:available_branches, [[github_branch.id, github_branch.branch_name]])
+    assign(:available_users, ["testuser"])
     assign(:selected_branch, nil)
     assign(:user_name, nil)
     assign(:agreement_only, false)
@@ -259,8 +259,8 @@ RSpec.describe "github_logs/index", type: :view do
     end
 
     context "with commits" do
-      let(:github_log) { create(:github_log, project: project, user: user) }
-      let(:recent_commits) { Kaminari.paginate_array([ github_log ]).page(1).per(10) }
+      let(:github_log) { create(:github_log, project:, user:) }
+      let(:recent_commits) { Kaminari.paginate_array([github_log]).page(1).per(10) }
 
       before do
         assign(:recent_commits, recent_commits)
@@ -408,7 +408,7 @@ RSpec.describe "github_logs/index", type: :view do
     context "with large dataset indicators" do
       before do
         assign(:total_commits, 10000)
-        large_commits = Kaminari.paginate_array(Array.new(100) { create(:github_log, project: project, user: user) }).page(1).per(10)
+        large_commits = Kaminari.paginate_array(Array.new(100) { create(:github_log, project:, user:) }).page(1).per(10)
         assign(:recent_commits, large_commits)
         allow(view).to receive(:url_for).and_return('#')
         allow(view).to receive(:number_with_delimiter).and_call_original

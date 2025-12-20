@@ -44,10 +44,10 @@ module TimeLogs
         milestones_pending = load_pending_milestones(project, owner)
 
         # Update the manual form with a fresh time log
-        update_manual_form(time_log: TimeLog.new, milestones: milestones)
+        update_manual_form(time_log: TimeLog.new, milestones:)
 
         # Update milestone row
-        update_milestone_row(milestone: milestone, project: project, active_log: nil)
+        update_milestone_row(milestone:, project:, active_log: nil)
 
         # Update pending confirmation section
         update_frame(
@@ -55,8 +55,8 @@ module TimeLogs
           partial: "time_logs/pending_confirmation_section",
           locals: {
             milestones_pending_confirmation: milestones_pending,
-            project: project,
-            owner: owner
+            project:,
+            owner:
           }
         )
 
@@ -64,14 +64,14 @@ module TimeLogs
         update_frame(
           "remaining_time_progress",
           partial: "remaining_time_progress",
-          locals: { project: project, current_log: nil, owner: owner, project_wide: true }
+          locals: { project:, current_log: nil, owner:, project_wide: true }
         )
 
         flash_notice("Time log created successfully.")
         Success(time_log)
       else
         # Show form with errors
-        update_manual_form(time_log: time_log, milestones: milestones)
+        update_manual_form(time_log:, milestones:)
         flash_error(time_log.errors.full_messages.to_sentence)
         failure_result(:save_failed, time_log.errors.full_messages.to_sentence, errors: time_log.errors)
       end

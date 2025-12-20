@@ -8,10 +8,10 @@ RSpec.describe "shared/_lazy_turbo_frame", type: :view do
 
   before do
     render partial: "shared/lazy_turbo_frame", locals: {
-      frame_id: frame_id,
-      src_path: src_path,
-      title: title,
-      description: description
+      frame_id:,
+      src_path:,
+      title:,
+      description:
     }
   end
 

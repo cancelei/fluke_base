@@ -8,7 +8,7 @@ class Rating < ApplicationRecord
   # Validations
   validates :value, presence: true, inclusion: { in: 1..5, message: "must be between 1 and 5" }
   validates :rater_id, uniqueness: {
-    scope: [ :rateable_type, :rateable_id ],
+    scope: [:rateable_type, :rateable_id],
     message: "has already rated this"
   }
   validate :cannot_rate_self

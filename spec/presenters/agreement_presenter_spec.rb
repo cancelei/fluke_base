@@ -4,7 +4,7 @@ RSpec.describe AgreementPresenter do
   let(:alice) { create(:user) }
   let(:bob) { create(:user) }
   let(:project) { create(:project, user: alice) }
-  let(:agreement) { create(:agreement, :with_participants, :mentorship, project: project, initiator: alice, other_party: bob) }
+  let(:agreement) { create(:agreement, :with_participants, :mentorship, project:, initiator: alice, other_party: bob) }
   subject(:presenter) { described_class.new(agreement) }
 
   it 'renders status badge HTML containing status' do

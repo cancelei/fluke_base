@@ -29,11 +29,11 @@ RSpec.describe Flashable, type: :concern do
   before do
     stub_const("MockTurboStreamHelper", Class.new do
       def update(target, options = {})
-        { action: :update, target: target, **options }
+        { action: :update, target:, **options }
       end
 
       def append(target, content)
-        { action: :append, target: target, content: content }
+        { action: :append, target:, content: }
       end
     end)
 

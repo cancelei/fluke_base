@@ -17,7 +17,7 @@ Rails.application.config.after_initialize do
         end
 
         # Add inclusion validator instead
-        validates :static, inclusion: { in: [ true, false ] }
+        validates :static, inclusion: { in: [true, false] }
       end
     end
 
@@ -34,7 +34,7 @@ Rails.application.config.after_initialize do
         end
 
         # Add inclusion validator instead
-        validates :show_project_context_nav, inclusion: { in: [ true, false ] }
+        validates :show_project_context_nav, inclusion: { in: [true, false] }
       end
     end
   end

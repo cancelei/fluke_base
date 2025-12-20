@@ -9,7 +9,7 @@ class MilestoneEnhancement < ApplicationRecord
 
   scope :recent, -> { order(created_at: :desc) }
   scope :successful, -> { where(status: "completed") }
-  scope :for_milestone, ->(milestone) { where(milestone: milestone) }
+  scope :for_milestone, ->(milestone) { where(milestone:) }
 
   after_initialize :set_defaults, if: :new_record?
 

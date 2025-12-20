@@ -7,16 +7,16 @@ RSpec.describe TimeLogs::StopTrackingCommand, type: :command do
 
   describe "#execute" do
     let(:user) { create(:user) }
-    let(:project) { create(:project, user: user) }
-    let(:milestone) { create(:milestone, project: project, status: "in_progress") }
+    let(:project) { create(:project, user:) }
+    let(:milestone) { create(:milestone, project:, status: "in_progress") }
 
     context "with active time log" do
       let!(:time_log) do
-        create(:time_log, :active, user: user, project: project, milestone: milestone)
+        create(:time_log, :active, user:, project:, milestone:)
       end
 
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s,
           milestoneId: milestone.id.to_s
         })
@@ -66,7 +66,7 @@ RSpec.describe TimeLogs::StopTrackingCommand, type: :command do
 
     context "without active time log" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s,
           milestoneId: milestone.id.to_s
         })
@@ -82,7 +82,7 @@ RSpec.describe TimeLogs::StopTrackingCommand, type: :command do
 
     context "with non-existent project" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: "999999",
           milestoneId: milestone.id.to_s
         })
@@ -99,11 +99,11 @@ RSpec.describe TimeLogs::StopTrackingCommand, type: :command do
     context "when another user is tracking" do
       let(:other_user) { create(:user) }
       let!(:other_time_log) do
-        create(:time_log, :active, user: other_user, project: project, milestone: milestone)
+        create(:time_log, :active, user: other_user, project:, milestone:)
       end
 
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           projectId: project.id.to_s,
           milestoneId: milestone.id.to_s
         })

@@ -13,22 +13,22 @@ RSpec.describe MeetingPolicy, type: :policy do
 
   # Helper to create agreement with participants
   def create_agreement_with_participants(project:, initiator:, other_party:, status: 'Accepted')
-    agreement = create(:agreement, project: project, status: status)
-    create(:agreement_participant, agreement: agreement, user: initiator, is_initiator: true)
-    create(:agreement_participant, agreement: agreement, user: other_party, is_initiator: false)
+    agreement = create(:agreement, project:, status:)
+    create(:agreement_participant, agreement:, user: initiator, is_initiator: true)
+    create(:agreement_participant, agreement:, user: other_party, is_initiator: false)
     agreement
   end
 
   describe 'permissions' do
     let(:agreement) do
       create_agreement_with_participants(
-        project: project,
+        project:,
         initiator: project_owner,
         other_party: participant_user,
         status: 'Accepted'
       )
     end
-    let(:meeting) { create(:meeting, agreement: agreement) }
+    let(:meeting) { create(:meeting, agreement:) }
 
     context 'for a visitor (not signed in)' do
       permissions :index?, :show?, :create?, :new?, :update?, :edit?, :destroy? do
@@ -58,7 +58,7 @@ RSpec.describe MeetingPolicy, type: :policy do
 
         it 'denies creating meetings on pending agreements' do
           pending_agreement = create_agreement_with_participants(
-            project: project,
+            project:,
             initiator: project_owner,
             other_party: participant_user,
             status: 'Pending'
@@ -85,7 +85,7 @@ RSpec.describe MeetingPolicy, type: :policy do
     context 'for different agreement statuses' do
       let(:pending_agreement) do
         create_agreement_with_participants(
-          project: project,
+          project:,
           initiator: project_owner,
           other_party: participant_user,
           status: 'Pending'
@@ -105,7 +105,7 @@ RSpec.describe MeetingPolicy, type: :policy do
   describe 'Scope' do
     let!(:participant_agreement) do
       create_agreement_with_participants(
-        project: project,
+        project:,
         initiator: project_owner,
         other_party: participant_user
       )
@@ -113,7 +113,7 @@ RSpec.describe MeetingPolicy, type: :policy do
 
     let!(:other_agreement) do
       create_agreement_with_participants(
-        project: project,
+        project:,
         initiator: project_owner,
         other_party: other_user
       )

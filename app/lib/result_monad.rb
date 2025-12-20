@@ -27,7 +27,7 @@ module ResultMonad
   # @param details [Hash] Optional additional error details
   # @return [Dry::Monads::Result::Failure]
   def failure_result(code, message = nil, **details)
-    error_data = { code: code }
+    error_data = { code: }
     error_data[:message] = message if message
     error_data.merge!(details) if details.any?
     Dry::Monads::Failure(error_data)

@@ -11,9 +11,9 @@ class ApplicationPresenter
   end
 
   # Delegate all missing methods to the wrapped object
-  def method_missing(method_name, *args, &block)
+  def method_missing(method_name, *, &)
     if @object.respond_to?(method_name)
-      @object.send(method_name, *args, &block)
+      @object.send(method_name, *, &)
     else
       super
     end

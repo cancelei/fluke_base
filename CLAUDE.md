@@ -70,6 +70,14 @@ These endpoints work without authentication and confirm all Turbo implementation
 - Flash messaging properly configured for Turbo Streams
 - Controller responses include proper frame awareness
 - JavaScript moved to Stimulus controllers
+- See `docs/TURBO_BEST_PRACTICES.md` for detailed patterns and anti-patterns
+
+### Turbo Frame Anti-Patterns to Avoid
+
+1. **Never use Turbo Stream for lazy-loaded frames**: Lazy frames expect `<turbo-frame>` responses, not `<turbo-stream>` responses
+2. **Always include frame wrapper in partials**: Partials rendered for lazy frames must wrap content in matching `turbo_frame_tag`
+3. **Use consistent frame ID patterns**: Follow `dom_id(model)_section` convention (e.g., `agreement_123_github`)
+4. **Match frame IDs across create/update paths**: Ensure form error handling uses the same frame ID as success paths
 
 ## Devise Authentication (No Turbo)
 

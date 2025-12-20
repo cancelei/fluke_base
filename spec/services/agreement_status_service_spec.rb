@@ -5,8 +5,8 @@ require 'rails_helper'
 RSpec.describe AgreementStatusService do
   let(:user) { create(:user, :alice) }
   let(:other_user) { create(:user, :bob) }
-  let(:project) { create(:project, user: user) }
-  let(:agreement) { create(:agreement, :with_participants, project: project, initiator: user, other_party: other_user) }
+  let(:project) { create(:project, user:) }
+  let(:agreement) { create(:agreement, :with_participants, project:, initiator: user, other_party: other_user) }
 
   subject(:service) { described_class.new(agreement) }
 
@@ -128,7 +128,7 @@ RSpec.describe AgreementStatusService do
 
   describe '#counter_offer!' do
     let(:counter_agreement) do
-      build(:agreement, :with_participants, project: project, initiator: other_user, other_party: user)
+      build(:agreement, :with_participants, project:, initiator: other_user, other_party: user)
     end
 
     context 'when agreement is pending' do

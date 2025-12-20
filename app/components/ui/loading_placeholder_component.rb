@@ -12,7 +12,7 @@ module Ui
     def call
       tag.div(class: container_classes) do
         if @title.present?
-          safe_join([ render_header, render_loading ])
+          safe_join([render_header, render_loading])
         else
           render_loading
         end

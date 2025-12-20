@@ -7,21 +7,21 @@ RSpec.describe Milestones::ApplyEnhancementCommand, type: :command do
 
   describe "#execute" do
     let(:user) { create(:user) }
-    let(:project) { create(:project, user: user) }
-    let(:milestone) { create(:milestone, project: project, description: "Original description") }
+    let(:project) { create(:project, user:) }
+    let(:milestone) { create(:milestone, project:, description: "Original description") }
 
     context "with valid completed enhancement" do
       let(:enhancement) do
         create(:milestone_enhancement,
-               milestone: milestone,
-               user: user,
+               milestone:,
+               user:,
                original_description: "Original description",
                enhanced_description: "Enhanced description with more detail",
                status: "completed")
       end
 
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           enhancementId: enhancement.id.to_s
         })
       end
@@ -49,12 +49,12 @@ RSpec.describe Milestones::ApplyEnhancementCommand, type: :command do
     context "with enhancement not ready" do
       let(:enhancement) do
         create(:milestone_enhancement, :processing,
-               milestone: milestone,
-               user: user)
+               milestone:,
+               user:)
       end
 
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           enhancementId: enhancement.id.to_s
         })
       end
@@ -76,7 +76,7 @@ RSpec.describe Milestones::ApplyEnhancementCommand, type: :command do
 
     context "with missing enhancement ID" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {})
+        build_command(described_class, user:, element_data: {})
       end
 
       it "displays an error message" do
@@ -89,7 +89,7 @@ RSpec.describe Milestones::ApplyEnhancementCommand, type: :command do
 
     context "with non-existent enhancement" do
       let(:command) do
-        build_command(described_class, user: user, element_data: {
+        build_command(described_class, user:, element_data: {
           enhancementId: "999999"
         })
       end

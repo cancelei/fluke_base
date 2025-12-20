@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Projects", type: :request do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
+  let(:project) { create(:project, user:) }
 
   before do
     post user_session_path, params: {

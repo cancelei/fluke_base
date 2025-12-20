@@ -22,21 +22,21 @@ class AgreementsQuery
 
   def filter_by_status(my_agreements, other_party_agreements)
     status_filter = @params[:status]
-    return [ my_agreements, other_party_agreements ] unless status_filter.present?
+    return [my_agreements, other_party_agreements] unless status_filter.present?
 
     case status_filter
     when "pending"
-      [ my_agreements.pending, other_party_agreements.pending ]
+      [my_agreements.pending, other_party_agreements.pending]
     when "accepted"
-      [ my_agreements.active, other_party_agreements.active ]
+      [my_agreements.active, other_party_agreements.active]
     when "completed"
-      [ my_agreements.completed, other_party_agreements.completed ]
+      [my_agreements.completed, other_party_agreements.completed]
     when "rejected"
-      [ my_agreements.rejected, other_party_agreements.rejected ]
+      [my_agreements.rejected, other_party_agreements.rejected]
     when "cancelled"
-      [ my_agreements.cancelled, other_party_agreements.cancelled ]
+      [my_agreements.cancelled, other_party_agreements.cancelled]
     else
-      [ my_agreements, other_party_agreements ]
+      [my_agreements, other_party_agreements]
     end
   end
 
@@ -139,21 +139,21 @@ class AgreementsQuery
   # Helper methods for filter options
   def self.status_options
     [
-      [ "All Statuses", "" ],
-      [ "Pending", "pending" ],
-      [ "Accepted", "accepted" ],
-      [ "Completed", "completed" ],
-      [ "Rejected", "rejected" ],
-      [ "Cancelled", "cancelled" ],
-      [ "Countered", "countered" ]
+      ["All Statuses", ""],
+      ["Pending", "pending"],
+      ["Accepted", "accepted"],
+      ["Completed", "completed"],
+      ["Rejected", "rejected"],
+      ["Cancelled", "cancelled"],
+      ["Countered", "countered"]
     ]
   end
 
   def self.agreement_type_options
     [
-      [ "All Types", "" ],
-      [ "Mentorship", "mentorship" ],
-      [ "Co-Founder", "co_founder" ]
+      ["All Types", ""],
+      ["Mentorship", "mentorship"],
+      ["Co-Founder", "co_founder"]
     ]
   end
 
@@ -188,16 +188,14 @@ class AgreementsQuery
   def check_duplicate_agreement(other_party_id, project_id)
     Agreement.joins(:agreement_participants)
       .where(
-        project_id: project_id,
-        status: [ Agreement::ACCEPTED, Agreement::PENDING ]
+        project_id:,
+        status: [Agreement::ACCEPTED, Agreement::PENDING]
       )
-      .where(agreement_participants: { user_id: [ @current_user.id, other_party_id ] })
+      .where(agreement_participants: { user_id: [@current_user.id, other_party_id] })
       .group("agreements.id")
       .having("COUNT(agreement_participants.id) = 2")
       .first
   end
 
-  def existing_agreements_for_project(project)
-    project.agreements.where(status: [ Agreement::ACCEPTED, Agreement::PENDING ])
-  end
+  def existing_agreements_for_project(project) = project.agreements.where(status: [Agreement::ACCEPTED, Agreement::PENDING])
 end

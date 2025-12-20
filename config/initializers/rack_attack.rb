@@ -12,7 +12,7 @@ module Rack
 
     # Always allow requests from localhost (development/testing)
     Rack::Attack.safelist("allow-localhost") do |req|
-      [ "127.0.0.1", "::1" ].include?(req.ip)
+      ["127.0.0.1", "::1"].include?(req.ip)
     end
 
     # Allow health checks
@@ -73,7 +73,7 @@ module Rack
         "Content-Type" => "text/plain"
       }
 
-      [ 429, headers, [ "Rate limit exceeded. Please try again later.\n" ] ]
+      [429, headers, ["Rate limit exceeded. Please try again later.\n"]]
     end
 
     ### Logging ###

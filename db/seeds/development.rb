@@ -46,8 +46,8 @@ if Rails.env.development? || Rails.env.staging?
       email: "#{first_name.downcase}.#{last_name.downcase}@flukebase.me",
       password: 'password123',
       password_confirmation: 'password123',
-      first_name: first_name,
-      last_name: last_name
+      first_name:,
+      last_name:
     )
     user
   end
@@ -140,8 +140,8 @@ if Rails.env.development? || Rails.env.staging?
       email: "user#{idx+1}@flukebase.me",
       password: 'password123',
       password_confirmation: 'password123',
-      first_name: first_name,
-      last_name: last_name
+      first_name:,
+      last_name:
     )
 
     # Note: Role system removed - all users are community members
@@ -164,11 +164,11 @@ if Rails.env.development? || Rails.env.staging?
         name: project_data[:name],
         description: project_data[:desc],
         stage: project_data[:stage],
-        user: user,
-        collaboration_type: [ Project::SEEKING_MENTOR, Project::SEEKING_COFOUNDER, Project::SEEKING_BOTH ].sample,
-        category: [ 'FinTech', 'HealthTech', 'EdTech', 'Web3', 'DeFi', 'NFT', 'DAO', 'ReFi', 'AgTech', 'CleanTech' ].sample,
-        target_market: [ 'B2B', 'B2C', 'B2B2C' ].sample,
-        funding_status: [ 'Pre-seed', 'Seed', 'Series A', 'Bootstrapped' ].sample,
+        user:,
+        collaboration_type: [Project::SEEKING_MENTOR, Project::SEEKING_COFOUNDER, Project::SEEKING_BOTH].sample,
+        category: ['FinTech', 'HealthTech', 'EdTech', 'Web3', 'DeFi', 'NFT', 'DAO', 'ReFi', 'AgTech', 'CleanTech'].sample,
+        target_market: ['B2B', 'B2C', 'B2B2C'].sample,
+        funding_status: ['Pre-seed', 'Seed', 'Series A', 'Bootstrapped'].sample,
         team_size: rand(1..15)
       )
 
@@ -219,8 +219,8 @@ if Rails.env.development? || Rails.env.staging?
           title: milestone_templates.sample,
           description: Faker::Lorem.paragraph(sentence_count: 2),
           due_date: rand(1..120).days.from_now,
-          status: [ Milestone::PENDING, Milestone::IN_PROGRESS, Milestone::COMPLETED ].sample,
-          project: project
+          status: [Milestone::PENDING, Milestone::IN_PROGRESS, Milestone::COMPLETED].sample,
+          project:
         )
       end
     end
@@ -243,11 +243,11 @@ if Rails.env.development? || Rails.env.staging?
     end_date = start_date + duration_weeks.weeks
 
     agreement = Agreement.create!(
-      project: project,
-      agreement_type: agreement_type,
-      status: status,
-      start_date: start_date,
-      end_date: end_date,
+      project:,
+      agreement_type:,
+      status:,
+      start_date:,
+      end_date:,
       terms: agreement_type == Agreement::MENTORSHIP ?
         "Weekly mentoring sessions, strategic guidance, and industry connections" :
         "Equal partnership with shared responsibilities and equity split",
@@ -263,19 +263,19 @@ if Rails.env.development? || Rails.env.staging?
 
     # Create agreement participants
     AgreementParticipant.create!(
-      agreement: agreement,
+      agreement:,
       user: project.user,
       user_role: 'entrepreneur',
-      project: project,
+      project:,
       is_initiator: true,
       accept_or_counter_turn_id: partner.id
     )
 
     AgreementParticipant.create!(
-      agreement: agreement,
+      agreement:,
       user: partner,
       user_role: agreement_type == Agreement::MENTORSHIP ? 'mentor' : 'co_founder',
-      project: project,
+      project:,
       is_initiator: false,
       accept_or_counter_turn_id: partner.id
     )
@@ -314,8 +314,8 @@ if Rails.env.development? || Rails.env.staging?
       partner = potential_partners.sample
       next if partner.nil?
 
-      agreement_type = [ Agreement::MENTORSHIP, Agreement::CO_FOUNDER ].sample
-      status = [ Agreement::PENDING, Agreement::ACCEPTED, Agreement::COMPLETED ].sample
+      agreement_type = [Agreement::MENTORSHIP, Agreement::CO_FOUNDER].sample
+      status = [Agreement::PENDING, Agreement::ACCEPTED, Agreement::COMPLETED].sample
 
       agreements << create_agreement(
         project,
@@ -343,7 +343,7 @@ if Rails.env.development? || Rails.env.staging?
     weeks_active = if agreement.completed?
       ((agreement.updated_at.to_date - agreement.start_date) / 7).ceil
     else
-      [ ((Date.current - agreement.start_date) / 7).ceil, 0 ].max
+      [((Date.current - agreement.start_date) / 7).ceil, 0].max
     end
 
     return if weeks_active <= 0
@@ -385,12 +385,12 @@ if Rails.env.development? || Rails.env.staging?
 
       # Random session length (1-8 hours, weighted toward 2-4 hours)
       remaining_hours = target_hours - logged_hours
-      session_hours = [ rand(1..8), remaining_hours ].min
-      session_hours = [ session_hours, rand(2..4) ].min if rand < 0.6  # Weight toward shorter sessions
+      session_hours = [rand(1..8), remaining_hours].min
+      session_hours = [session_hours, rand(2..4)].min if rand < 0.6  # Weight toward shorter sessions
 
       # Ensure start_time is in the past (at least 1 hour ago)
-      max_start_time = [ Time.current - 1.hour, current_date.end_of_day ].min
-      start_time = [ current_date.beginning_of_day + rand(9..17).hours + rand(0..59).minutes, max_start_time ].min
+      max_start_time = [Time.current - 1.hour, current_date.end_of_day].min
+      start_time = [current_date.beginning_of_day + rand(9..17).hours + rand(0..59).minutes, max_start_time].min
       end_time = start_time + session_hours.hours
 
       TimeLog.create!(
@@ -483,10 +483,10 @@ if Rails.env.development? || Rails.env.staging?
       ]
 
       Message.create!(
-        conversation: conversation,
+        conversation:,
         user: sender,
         body: message_templates.sample,
-        read: [ true, false ].sample,
+        read: [true, false].sample,
         created_at: rand(30.days.ago..Time.current)
       )
     end
@@ -500,7 +500,7 @@ if Rails.env.development? || Rails.env.staging?
       start_time = rand(7.days.ago..30.days.from_now).change(hour: rand(9..17))
 
       Meeting.create!(
-        agreement: agreement,
+        agreement:,
         title: [
           "Weekly Progress Review",
           "Strategic Planning Session",
@@ -514,8 +514,8 @@ if Rails.env.development? || Rails.env.staging?
           "Partnership Discussion"
         ].sample,
         description: Faker::Lorem.paragraph(sentence_count: 2),
-        start_time: start_time,
-        end_time: start_time + [ 1, 1.5, 2 ].sample.hours
+        start_time:,
+        end_time: start_time + [1, 1.5, 2].sample.hours
       )
     end
   end

@@ -65,7 +65,9 @@ export default class extends Controller {
       card.addEventListener('keydown', event => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          Turbo.visit(this.urlValue);
+          if (window.Turbo) {
+            window.Turbo.visit(this.urlValue);
+          }
         }
       });
     }

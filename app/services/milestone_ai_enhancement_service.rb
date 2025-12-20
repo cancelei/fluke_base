@@ -12,7 +12,7 @@ class MilestoneAiEnhancementService < ApplicationService
 
   # @return [Dry::Monads::Result] Success(enhanced_text) or Failure(error)
   def call(title:, description:)
-    augment_description(title: title, description: description)
+    augment_description(title:, description:)
   end
 
   # @return [String] Enhanced description text (raises on error)
