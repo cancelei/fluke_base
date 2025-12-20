@@ -75,6 +75,7 @@ class ProjectsController < ApplicationController
 
     if @project_form.valid?
       @project_form.update_project(@project)
+      GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
       redirect_to @project, notice: "Project was successfully updated."
     else
       render :edit, status: :unprocessable_content

@@ -51,7 +51,7 @@ class GithubLogsController < ApplicationController
   private
 
   def filter_params
-    params.permit(:branch, :agreement_only, :user_name)
+    params.permit(:project_id, :branch, :agreement_only, :user_name)
   end
 
   def set_project
