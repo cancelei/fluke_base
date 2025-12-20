@@ -47,6 +47,9 @@ namespace :test do
     abort("Playwright failed") unless $CHILD_STATUS&.success?
   end
 
+  # Clear Rails' default test:all task that runs Minitest
+  Rake::Task["test:all"].clear if Rake::Task.task_defined?("test:all")
+
   desc "Run all tests: ESLint → RSpec → Playwright"
   task :all do
     # Ensure a clean test database before RSpec to avoid cross-framework residue
