@@ -53,7 +53,10 @@ module Github
     # Get available branches for dropdown
     # @return [Array<Array>] Array of [id, branch_name] pairs
     def available_branches
-      project.github_branches.pluck(:id, :branch_name).compact.sort_by { |_, name| name.to_s }
+      puts "=====================#{params.inspect}======================="
+      puts "===================#{params[:user_name]}========================="
+      puts "============================================"
+      project.github_branches.pluck(:id, :branch_name).compact.sort_by { |_, name| params[:user_name].to_s }
     end
 
     # Selected branch ID from params

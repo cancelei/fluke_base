@@ -13,6 +13,7 @@ class GithubLogsController < ApplicationController
   def index
     # Use LogsQuery for all filtering logic
     @logs_query = Github::LogsQuery.new(project: @project, params: filter_params)
+    puts "==============Filter Params#{filter_params.inspect}========================"
 
     # Get filter values for view
     @selected_branch = @logs_query.selected_branch
