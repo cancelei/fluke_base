@@ -11,11 +11,11 @@
       <div class="divider my-2"></div>
 
       <% if @upcoming_meetings.present? %>
-        <ul class="menu p-0">
+        <ul class="menu p-0 w-full">
           <% @upcoming_meetings.each do |meeting| %>
             <% cache([meeting, current_user]) do %>
-              <li class="group">
-                <div class="flex flex-col w-full p-4 mx-2 my-1 hover:bg-base-200 rounded-lg transition-colors cursor-pointer"
+              <li class="group px-2 py-1">
+                <div class="flex flex-col w-full p-4 hover:bg-base-200 rounded-lg transition-colors cursor-pointer"
                      onclick="if(event.target.tagName !== 'A' && !event.target.closest('a')) { Turbo.visit(<%= agreement_meeting_path(meeting.agreement, meeting).to_json %>); }">
                   <!-- Header with title and chevron -->
                   <div class="flex items-start justify-between mb-1">
