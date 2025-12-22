@@ -1,16 +1,59 @@
-<div class="drawer lg:drawer-open h-[calc(100vh-8rem)]" data-controller="conversation">
-  <input id="conversation-drawer" type="checkbox" class="drawer-toggle">
+<!-- Conversations Layout with Sidebar -->
+<div class="flex h-[calc(100vh-8rem)] overflow-hidden" data-controller="conversation">
+  <!-- Sidebar - Hidden on mobile, visible on desktop -->
+  <div id="conversation-sidebar" class="hidden lg:flex lg:flex-col w-80 bg-base-100 border-r border-base-200">
+    <!-- Sidebar header -->
+    <div class="p-4 border-b border-base-200">
+      <h2 class="text-xl font-bold flex items-center gap-2">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        Conversations
+      </h2>
+    </div>
+
+    <!-- Conversation list -->
+    <div class="flex-1 overflow-y-auto" id="conversation_list">
+      <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: %>
+    </div>
+  </div>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div id="mobile-conversation-sidebar" class="lg:hidden fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" onclick="document.getElementById('mobile-conversation-sidebar').classList.add('hidden')"></div>
+    <div class="absolute inset-y-0 left-0 w-80 bg-base-100 flex flex-col shadow-xl">
+      <!-- Sidebar header -->
+      <div class="p-4 border-b border-base-200 flex items-center justify-between">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          Conversations
+        </h2>
+        <button onclick="document.getElementById('mobile-conversation-sidebar').classList.add('hidden')" class="btn btn-ghost btn-sm btn-circle">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Conversation list -->
+      <div class="flex-1 overflow-y-auto">
+        <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: %>
+      </div>
+    </div>
+  </div>
 
   <!-- Main content area -->
-  <div class="drawer-content flex flex-col">
+  <div class="flex-1 flex flex-col overflow-hidden bg-base-100">
     <!-- Header with mobile toggle -->
     <div class="navbar bg-base-100 shadow-sm border-b border-base-200 lg:hidden">
       <div class="flex-none">
-        <label for="conversation-drawer" class="btn btn-square btn-ghost drawer-button">
+        <button onclick="document.getElementById('mobile-conversation-sidebar').classList.remove('hidden')" class="btn btn-square btn-ghost">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-        </label>
+        </button>
       </div>
       <div class="flex-1">
         <h1 class="text-xl font-bold">Messages</h1>
@@ -18,30 +61,8 @@
     </div>
 
     <!-- Conversation content -->
-    <div id="conversation_content" class="flex-1 flex flex-col overflow-hidden bg-base-100">
+    <div id="conversation_content" class="flex-1 flex flex-col overflow-hidden">
       <%= render "conversations/conversation_content", conversation: @conversation, messages: @conversation&.messages&.to_a || [], message: @message || Message.new %>
-    </div>
-  </div>
-
-  <!-- Drawer sidebar -->
-  <div class="drawer-side z-40">
-    <label for="conversation-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-
-    <div class="bg-base-100 w-80 min-h-full border-r border-base-200 flex flex-col">
-      <!-- Sidebar header -->
-      <div class="p-4 border-b border-base-200">
-        <h2 class="text-xl font-bold flex items-center gap-2">
-          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-          Conversations
-        </h2>
-      </div>
-
-      <!-- Conversation list -->
-      <div class="flex-1 overflow-y-auto">
-        <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: %>
-      </div>
     </div>
   </div>
 </div>

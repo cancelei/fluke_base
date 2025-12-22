@@ -2,6 +2,7 @@
 <li id="conversation_<%= conversation.id %>_item">
   <%= link_to conversation_path(conversation),
         class: "flex items-center gap-3 p-3 rounded-lg transition-colors #{current_conversation == conversation ? 'bg-primary/10 text-primary' : 'hover:bg-base-200'}",
+        onclick: "document.getElementById('mobile-conversation-sidebar')?.classList.add('hidden')",
         data: {
           turbo_stream: true,
           turbo_command: "Messages::MarkAsReadCommand#execute",

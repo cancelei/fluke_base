@@ -1,63 +1,61 @@
-<div class="min-h-screen">
-  <div class="py-8">
-    <% if @propose_for_project %>
-      <%# Project Agreement Context Banner %>
-      <div class="alert alert-info shadow-lg mb-8">
-        <div class="flex items-center justify-between w-full flex-wrap gap-4">
-          <div class="flex items-center gap-4">
-            <div class="p-3 bg-info-content/20 rounded-xl">
-              <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-            </div>
-            <div>
-              <h2 class="text-xl font-bold">Find a Collaborator</h2>
-              <p class="text-base-content/90">Select someone below to propose an agreement for <span class="font-semibold">"<%= @propose_for_project.name %>"</span></p>
-            </div>
-          </div>
-          <%= link_to project_path(@propose_for_project), class: "btn btn-ghost btn-sm gap-2" do %>
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+<div class="py-8">
+  <% if @propose_for_project %>
+    <%# Project Agreement Context Banner %>
+    <div class="alert alert-info shadow-lg mb-8">
+      <div class="flex items-center justify-between w-full flex-wrap gap-4">
+        <div class="flex items-center gap-4">
+          <div class="p-3 bg-info-content/20 rounded-xl">
+            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
-            Back to Project
-          <% end %>
-        </div>
-      </div>
-    <% else %>
-      <%# Hero Section %>
-      <div class="text-center mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">
-          Discover Amazing People
-        </h1>
-        <p class="text-xl text-base-content/70 max-w-3xl mx-auto leading-relaxed">
-          Connect with talented individuals from around the world. Find collaborators, mentors, and friends in our vibrant community.
-        </p>
-      </div>
-    <% end %>
-
-    <%# Search Section %>
-    <div class="card bg-base-100 shadow-xl mb-8">
-      <div class="card-body">
-        <%= form_with url: explore_people_path, method: :get, class: "flex flex-col sm:flex-row gap-4" do |f| %>
-          <% if @propose_for_project %>
-            <%= f.hidden_field :propose_for_project, value: @propose_for_project.id %>
-          <% end %>
-          <div class="flex-1">
-            <%= f.text_field :search, value: params[:search],
-                placeholder: "Search by name, skills, or interests...",
-                class: "input input-bordered w-full" %>
           </div>
-          <%= f.submit "Explore", class: "btn btn-primary" %>
+          <div>
+            <h2 class="text-xl font-bold">Find a Collaborator</h2>
+            <p class="text-base-content/90">Select someone below to propose an agreement for <span class="font-semibold">"<%= @propose_for_project.name %>"</span></p>
+          </div>
+        </div>
+        <%= link_to project_path(@propose_for_project), class: "btn btn-ghost btn-sm gap-2" do %>
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Project
         <% end %>
       </div>
     </div>
+  <% else %>
+    <%# Hero Section %>
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">
+        Discover Amazing People
+      </h1>
+      <p class="text-xl text-base-content/70 max-w-3xl mx-auto leading-relaxed">
+        Connect with talented individuals from around the world. Find collaborators, mentors, and friends in our vibrant community.
+      </p>
+    </div>
+  <% end %>
 
-    <%# Results Section %>
-    <%= render partial: "shared/explore_users", locals: {
-        users: @users,
-        title: @propose_for_project ? "Select a Collaborator" : "Community People",
-        description: @propose_for_project ? "Choose someone to collaborate with on your project" : "Connect with #{@users.respond_to?(:total_count) ? @users.total_count : User.count} talented people in our community",
-        propose_for_project: @propose_for_project
-      } %>
+  <%# Search Section %>
+  <div class="card bg-base-100 shadow-xl mb-8">
+    <div class="card-body">
+      <%= form_with url: explore_people_path, method: :get, class: "flex flex-col sm:flex-row gap-4" do |f| %>
+        <% if @propose_for_project %>
+          <%= f.hidden_field :propose_for_project, value: @propose_for_project.id %>
+        <% end %>
+        <div class="flex-1">
+          <%= f.text_field :search, value: params[:search],
+              placeholder: "Search by name, skills, or interests...",
+              class: "input input-bordered w-full" %>
+        </div>
+        <%= f.submit "Explore", class: "btn btn-primary" %>
+      <% end %>
+    </div>
   </div>
+
+  <%# Results Section %>
+  <%= render partial: "shared/explore_users", locals: {
+      users: @users,
+      title: @propose_for_project ? "Select a Collaborator" : "Community People",
+      description: @propose_for_project ? "Choose someone to collaborate with on your project" : "Connect with #{@users.respond_to?(:total_count) ? @users.total_count : User.count} talented people in our community",
+      propose_for_project: @propose_for_project
+    } %>
 </div>

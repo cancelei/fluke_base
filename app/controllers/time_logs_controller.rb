@@ -397,7 +397,7 @@ class TimeLogsController < ApplicationController
 
   def reload_data_for_views
     @owner = current_user.id == @project.user_id
-    @milestones = (@owner ? @project.milestones : Milestone.where(id: @project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).pluck(:milestone_ids).flatten))
+    @milestones = (@owner ? @project.milestones.order(due_date: :asc, id: :asc) : Milestone.where(id: @project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).pluck(:milestone_ids).flatten).order(due_date: :asc, id: :asc))
     @milestones_pending_confirmation = @milestones
                                          .includes(:time_logs)
                                          .where(status: "in_progress", time_logs: { status: "completed" })

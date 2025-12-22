@@ -6,7 +6,7 @@
 
 <% return unless selected_project.present? %>
 
-<% milestones = selected_project.milestones %>
+<% milestones = selected_project.milestones.order(due_date: :asc, id: :asc) %>
 <% active_milestones = milestones.reject(&:completed?) %>
 
 <details class="dropdown dropdown-end" data-context-nav-target="milestoneDropdown">
