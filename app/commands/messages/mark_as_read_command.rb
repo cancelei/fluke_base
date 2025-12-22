@@ -22,15 +22,27 @@ module Messages
       conversation = Conversation.involving(current_user).find(conversation_id)
       conversation.mark_as_read_for(current_user)
 
-      # Update unread badge in navbar if it exists
+      # Update unread badge in navbar (both desktop and mobile)
       unread_count = current_user.unread_conversations_count
 
+      # Update desktop navbar badge
       if unread_count.zero?
         clear_frame("unread_messages_badge")
       else
         update_frame(
           "unread_messages_badge",
           partial: "shared/unread_messages_badge",
+          locals: { count: unread_count }
+        )
+      end
+
+      # Update mobile drawer badge
+      if unread_count.zero?
+        clear_frame("unread_messages_badge_mobile")
+      else
+        update_frame(
+          "unread_messages_badge_mobile",
+          partial: "shared/unread_messages_badge_mobile",
           locals: { count: unread_count }
         )
       end

@@ -219,24 +219,28 @@ class AgreementPresenter < ApplicationPresenter
     parts.join(", ")
   end
 
+  # Turn-based negotiation methods - delegate to model's turn-based logic
+  # These use accept_or_counter_turn_id to determine whose turn it is to act
   def can_be_accepted_by?(user)
-    pending? && agreement_participants.exists?(user_id: user.id, is_initiator: false)
+    object.user_can_accept?(user)
   end
 
   def can_be_rejected_by?(user)
-    pending? && agreement_participants.exists?(user_id: user.id, is_initiator: false)
+    object.user_can_reject?(user)
   end
 
   def can_be_cancelled_by?(user)
+    # Any participant can cancel a pending agreement
     pending? && agreement_participants.exists?(user_id: user.id)
   end
 
   def can_be_completed_by?(user)
+    # Any participant can mark an active agreement as completed
     active? && agreement_participants.exists?(user_id: user.id)
   end
 
   def can_make_counter_offer?(user)
-    pending? && agreement_participants.exists?(user_id: user.id, is_initiator: false)
+    object.user_can_make_counter_offer?(user)
   end
 
   def kpi_metrics_for_owner(current_user = nil)

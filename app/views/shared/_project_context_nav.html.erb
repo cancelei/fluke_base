@@ -6,27 +6,29 @@
   <% if user_signed_in? %>
     <div class="bg-base-200 border-b border-base-300" data-controller="context-nav">
       <div class="mx-auto px-4 sm:px-6 lg:px-8 w-[90%]">
-        <div class="flex items-center justify-between h-11">
-          <%# Left side: Project Selector + Milestone Dropdown %>
-          <div class="flex items-center gap-1">
-            <%# Project Selector Dropdown %>
-            <%= render "shared/context_project_selector",
-                       current_user:,
-                       selected_project: %>
-
-            <% if selected_project.present? %>
-              <div class="divider divider-horizontal mx-1 w-px h-6 before:bg-base-300 after:bg-base-300"></div>
-
-              <%# Milestones Dropdown %>
-              <%= render "shared/context_milestones_dropdown",
+        <%# Mobile: horizontal scroll wrapper %>
+        <div class="context-nav-wrapper">
+          <div class="flex items-center justify-between h-11 gap-2 min-w-max sm:min-w-0">
+            <%# Left side: Project Selector + Milestone Dropdown %>
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <%# Project Selector Dropdown %>
+              <%= render "shared/context_project_selector",
                          current_user:,
                          selected_project: %>
-            <% end %>
-          </div>
 
-          <%# Right side: Quick Actions (only when project is selected) %>
-          <% if selected_project.present? %>
-            <nav class="flex items-center gap-1" aria-label="Project quick actions">
+              <% if selected_project.present? %>
+                <div class="divider divider-horizontal mx-1 w-px h-6 before:bg-base-300 after:bg-base-300"></div>
+
+                <%# Milestones Dropdown %>
+                <%= render "shared/context_milestones_dropdown",
+                           current_user:,
+                           selected_project: %>
+              <% end %>
+            </div>
+
+            <%# Right side: Quick Actions (only when project is selected) %>
+            <% if selected_project.present? %>
+              <nav class="flex items-center gap-1 flex-shrink-0" aria-label="Project quick actions">
               <%= link_to project_path(selected_project),
                         class: "btn btn-ghost btn-xs gap-1.5 text-base-content/70 hover:text-primary",
                         title: "Project details",
@@ -66,13 +68,14 @@
                 </svg>
                 <span class="hidden sm:inline">GitHub</span>
               <% end %>
-            </nav>
-          <% else %>
-            <%# Placeholder when no project selected %>
-            <div class="text-xs text-base-content/50">
-              Select a project to get started
-            </div>
-          <% end %>
+              </nav>
+            <% else %>
+              <%# Placeholder when no project selected %>
+              <div class="text-xs text-base-content/50 flex-shrink-0">
+                Select a project to get started
+              </div>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>

@@ -19,12 +19,14 @@
     </fieldset>
   <% end %>
 
-  <div>
+  <%# Turnstile widget - ensure it doesn't overflow on mobile %>
+  <div class="max-w-full overflow-hidden">
     <%= render "devise/shared/turnstile_widget" %>
   </div>
 
-  <div>
-    <%= f.submit "Sign in", class: "btn btn-primary w-full" %>
+  <%# Sticky submit on mobile, normal on desktop %>
+  <div class="sm:relative sm:bg-transparent sm:border-0 sm:p-0 sm:m-0 form-actions-sticky">
+    <%= f.submit "Sign in", class: "btn btn-primary w-full touch-target" %>
   </div>
 <% end %>
 

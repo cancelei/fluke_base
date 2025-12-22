@@ -26,6 +26,21 @@ class MessagesController < ApplicationController
             partial: "conversations/conversation_item",
             locals: { conversation: @conversation, current_conversation: nil, current_user: @conversation.sender }
           )
+
+          # Update unread badge for the other user
+          unread_count = @conversation.sender.unread_conversations_count
+          Turbo::StreamsChannel.broadcast_update_to(
+            @conversation.sender,
+            target: "unread_messages_badge",
+            partial: "shared/unread_messages_badge",
+            locals: { count: unread_count }
+          )
+          Turbo::StreamsChannel.broadcast_update_to(
+            @conversation.sender,
+            target: "unread_messages_badge_mobile",
+            partial: "shared/unread_messages_badge_mobile",
+            locals: { count: unread_count }
+          )
         end
 
         if @conversation.recipient != current_user
@@ -41,6 +56,21 @@ class MessagesController < ApplicationController
             target: "conversation_#{@conversation.id}_item",
             partial: "conversations/conversation_item",
             locals: { conversation: @conversation, current_conversation: nil, current_user: @conversation.recipient }
+          )
+
+          # Update unread badge for the other user
+          unread_count = @conversation.recipient.unread_conversations_count
+          Turbo::StreamsChannel.broadcast_update_to(
+            @conversation.recipient,
+            target: "unread_messages_badge",
+            partial: "shared/unread_messages_badge",
+            locals: { count: unread_count }
+          )
+          Turbo::StreamsChannel.broadcast_update_to(
+            @conversation.recipient,
+            target: "unread_messages_badge_mobile",
+            partial: "shared/unread_messages_badge_mobile",
+            locals: { count: unread_count }
           )
         end
 

@@ -2,7 +2,8 @@ class ApplicationController < ActionController::Base
   include Pundit::Authorization
   include RailsCloudflareTurnstile::ControllerHelpers
   # Allow browsers with reasonable modern feature support while not being overly restrictive
-  allow_browser versions: { chrome: 100, safari: 15, firefox: 100, opera: 85, ie: false }
+  # More lenient for mobile browsers - block only IE
+  allow_browser versions: { chrome: 90, safari: 13, firefox: 90, opera: 75, ie: false }
   protect_from_forgery with: :exception
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?

@@ -47,7 +47,7 @@
               <%= render Ui::AvatarComponent.new(user: commit.user, size: :sm, placeholder: :initials) %>
             <% else %>
               <div class="avatar placeholder">
-                <div class="bg-neutral text-neutral-content w-8 h-8 rounded-full">
+                <div class="bg-neutral text-neutral-content w-8 h-8 rounded-full flex items-center justify-center">
                   <span class="text-xs"><%= commit.unregistered_user_name&.first(2)&.upcase || "?" %></span>
                 </div>
               </div>

@@ -21,13 +21,13 @@
       <%= form_with url: demo_async_path, method: :post, class: "space-y-4" do |f| %>
         <div class="form-control">
           <label class="label"><span class="label-text">Data Value</span></label>
-          <input type="text" name="data_value" value="Hello Foobara"
+          <input type="text" name="data_value" value="Hello Foobara" autocomplete="off"
                  class="input input-bordered w-full" placeholder="Enter text to process">
         </div>
 
         <div class="form-control">
           <label class="label"><span class="label-text">Processing Time (0-10 seconds)</span></label>
-          <input type="number" name="processing_time" min="0" max="10" value="2"
+          <input type="number" name="processing_time" min="0" max="10" value="2" autocomplete="off"
                  class="input input-bordered w-full">
         </div>
 

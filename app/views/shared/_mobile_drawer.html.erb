@@ -58,9 +58,9 @@
           </svg>
           Messages
         </span>
-        <% if current_user&.unread_conversations_count.to_i > 0 %>
-          <span class="badge badge-primary badge-sm"><%= current_user.unread_conversations_count %></span>
-        <% end %>
+        <span id="unread_messages_badge_mobile">
+          <%= render "shared/unread_messages_badge_mobile", count: current_user&.unread_conversations_count %>
+        </span>
       <% end %>
     </li>
 

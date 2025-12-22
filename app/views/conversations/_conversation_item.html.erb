@@ -4,15 +4,13 @@
         class: "flex items-center gap-3 p-3 rounded-lg transition-colors #{current_conversation == conversation ? 'bg-primary/10 text-primary' : 'hover:bg-base-200'}",
         onclick: "document.getElementById('mobile-conversation-sidebar')?.classList.add('hidden')",
         data: {
-          turbo_stream: true,
-          turbo_command: "Messages::MarkAsReadCommand#execute",
-          conversation_id: conversation.id
+          turbo_stream: true
         } do %>
     <!-- Avatar -->
     <div class="avatar <%= "online" if other_user.respond_to?(:online?) && other_user.online? %> placeholder">
-      <div class="<%= current_conversation == conversation ? "bg-primary text-primary-content" : "bg-base-200" %> rounded-full w-12">
+      <div class="<%= current_conversation == conversation ? "bg-primary text-primary-content" : "bg-base-200" %> rounded-full w-12 h-12 flex items-center justify-center">
         <% if other_user.avatar.attached? %>
-          <%= image_tag other_user.avatar, class: "rounded-full" %>
+          <%= image_tag other_user.avatar, class: "rounded-full w-full h-full object-cover" %>
         <% else %>
           <span class="text-sm font-medium"><%= other_user.initials %></span>
         <% end %>
