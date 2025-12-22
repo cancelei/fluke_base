@@ -1,0 +1,53 @@
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+  <h1 class="text-3xl font-bold mb-6">Foobara ActiveJob Demo</h1>
+
+  <div class="bg-base-200 rounded-lg p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4">How It Works</h2>
+    <p class="mb-2">
+      The <code class="bg-base-300 px-2 py-1 rounded">Demo::ProcessData</code> command
+      automatically gets a <code class="bg-base-300 px-2 py-1 rounded">Demo::ProcessDataAsync</code>
+      variant when connected to the ActiveJob connector.
+    </p>
+    <ul class="list-disc list-inside mt-2 space-y-1">
+      <li><strong>Sync:</strong> Blocks until processing completes</li>
+      <li><strong>Async:</strong> Enqueues to SolidQueue and returns immediately</li>
+    </ul>
+  </div>
+
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title">Process Data</h2>
+
+      <%= form_with url: demo_async_path, method: :post, class: "space-y-4" do |f| %>
+        <div class="form-control">
+          <label class="label"><span class="label-text">Data Value</span></label>
+          <input type="text" name="data_value" value="Hello Foobara"
+                 class="input input-bordered w-full" placeholder="Enter text to process" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Processing Time (0-10 seconds)</span></label>
+          <input type="number" name="processing_time" min="0" max="10" value="2"
+                 class="input input-bordered w-full" />
+        </div>
+
+        <div class="flex gap-4">
+          <button type="submit" class="btn btn-primary">Process Async (Background)</button>
+          <button type="submit" formaction="<%= demo_sync_path %>" class="btn btn-secondary">
+            Process Sync (Blocking)
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mt-8 bg-base-200 rounded-lg p-6">
+    <h2 class="text-xl font-semibold mb-4">Technical Details</h2>
+    <div class="space-y-2">
+      <p><strong>ActiveJob Backend:</strong> SolidQueue</p>
+      <p><strong>Command:</strong> <code class="bg-base-300 px-2 py-1 rounded">app/commands/demo/process_data.rb</code></p>
+      <p><strong>Config:</strong> <code class="bg-base-300 px-2 py-1 rounded">config/initializers/foobara.rb</code></p>
+      <p><strong>Connector:</strong> foobara-activejob-connector (local gem)</p>
+    </div>
+  </div>
+</div>

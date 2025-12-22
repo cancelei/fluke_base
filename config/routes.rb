@@ -7,6 +7,11 @@ Rails.application.routes.draw do
   if Rails.env.development?
     get "test/turbo" => "test#turbo_test", as: :turbo_test
     get "test/agreements" => "test#agreements", as: :test_agreements
+
+    # Foobara ActiveJob Demo
+    get "demo", to: "demo#index", as: :demo
+    post "demo/async", to: "demo#process_async", as: :demo_async
+    post "demo/sync", to: "demo#process_sync", as: :demo_sync
   end
 
   # Authentication

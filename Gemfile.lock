@@ -1,3 +1,19 @@
+PATH
+  remote: ../foobara/activejob-connector
+  specs:
+    foobara-activejob-connector (0.1.0)
+      activejob (>= 6.0)
+      foobara (>= 0.1.1, < 2.0.0)
+
+PATH
+  remote: ../foobara/foobara
+  specs:
+    foobara (0.3.0)
+      bigdecimal
+      foobara-lru-cache (< 2.0.0)
+      foobara-util (< 2.0.0)
+      inheritable-thread-vars (< 2.0.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -199,6 +215,8 @@ GEM
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
+    foobara-lru-cache (1.0.0)
+    foobara-util (1.0.7)
     fugit (1.12.1)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
@@ -251,6 +269,7 @@ GEM
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
+    inheritable-thread-vars (0.0.3)
     io-console (0.8.2)
     irb (1.16.0)
       pp (>= 0.6.0)
@@ -669,6 +688,8 @@ DEPENDENCIES
   factory_bot_rails
   faker
   faraday-retry (~> 2.3)
+  foobara!
+  foobara-activejob-connector!
   google-api-client
   httparty
   image_processing (~> 1.2)

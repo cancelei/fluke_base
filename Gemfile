@@ -47,6 +47,10 @@ gem "octokit", "~> 6.1"
 # AI Agent integration for milestone AI augmentation
 gem "ruby_llm"
 
+# Foobara command framework with ActiveJob connector
+gem "foobara", path: "../foobara/foobara"
+gem "foobara-activejob-connector", path: "../foobara/activejob-connector"
+
 # Result types for explicit success/failure handling
 gem "dry-monads", "~> 1.6"
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
