@@ -23,6 +23,6 @@
 <!-- Pagination using Pagy (Turbo frame navigation) -->
 <% if local_assigns[:pagy] && pagy.pages > 1 %>
   <div class="px-6 py-3">
-    <%= render partial: "shared/pagination", locals: { pagy: pagy, remote: true } %>
+    <%= render partial: "shared/pagination", locals: { pagy:, remote: true } %>
   </div>
 <% end %>

@@ -262,7 +262,7 @@ RSpec.describe "github_logs/index", type: :view do
 
     context "with commits" do
       let(:github_log) { create(:github_log, project:, user:) }
-      let(:recent_commits) { [ github_log ] }
+      let(:recent_commits) { [github_log] }
       let(:pagy) { Pagy.new(count: 1, page: 1, items: 10) }
 
       before do

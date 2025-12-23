@@ -6,7 +6,7 @@ RSpec.describe "projects/index.html.erb", type: :view do
 
   before do
     allow(view).to receive(:current_user).and_return(user)
-    assign(:projects, [ project ])
+    assign(:projects, [project])
     assign(:pagy, Pagy.new(count: 1, page: 1, items: 12))
     allow(view).to receive(:present) do |object|
       instance_double('ProjectPresenter',
