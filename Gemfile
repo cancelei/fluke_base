@@ -126,7 +126,7 @@ end
 
 # cssbundling-rails removed - tailwindcss-rails v4 handles CSS natively
 
-gem "kaminari", "~> 1.2"
+gem "pagy", "~> 9.0"
 
 gem "pundit"
 

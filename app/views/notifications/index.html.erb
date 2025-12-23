@@ -20,7 +20,7 @@
 
     <!-- Pagination using our shared component (Turbo) -->
     <div class="mt-6">
-      <%= render partial: "shared/pagination", locals: { records: @notifications, remote: true } %>
+      <%= render partial: "shared/pagination", locals: { pagy: @pagy, remote: true } %>
     </div>
   </div>
 </div>

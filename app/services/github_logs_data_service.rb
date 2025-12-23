@@ -69,7 +69,7 @@ class GithubLogsDataService < ApplicationService
       query = @project.github_logs.includes(:user, :github_branch_logs).order(commit_date: :desc)
       query = query.where(github_branch_logs: { github_branch_id: selected_branch }) if selected_branch.present? && selected_branch.to_i != 0
       query = query.where(user_id: agreement_user_ids) if agreement_only?
-      query.page(1).per(15)
+      query.limit(15)
     end
   end
 

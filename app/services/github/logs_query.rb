@@ -27,15 +27,11 @@ module Github
       @params = params.to_h.with_indifferent_access
     end
 
-    # Get recent commits with pagination
-    # @param page [Integer] Page number
-    # @param per_page [Integer] Items per page
-    # @return [ActiveRecord::Relation] Paginated commits
-    def recent_commits(page: 1, per_page: 15)
+    # Get recent commits (unpaginated - caller should handle pagination)
+    # @return [ActiveRecord::Relation] Commits ordered by date
+    def recent_commits
       apply_filters(base_query)
         .order(commit_date: :desc)
-        .page(page)
-        .per(per_page)
     end
 
     # Get base query for statistics (uses distinct to avoid double-counting)

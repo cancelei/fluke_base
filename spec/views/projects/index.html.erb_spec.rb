@@ -6,7 +6,8 @@ RSpec.describe "projects/index.html.erb", type: :view do
 
   before do
     allow(view).to receive(:current_user).and_return(user)
-    assign(:projects, Kaminari.paginate_array([project]).page(1))
+    assign(:projects, [ project ])
+    assign(:pagy, Pagy.new(count: 1, page: 1, items: 12))
     allow(view).to receive(:present) do |object|
       instance_double('ProjectPresenter',
         display_name: object.name,

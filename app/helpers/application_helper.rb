@@ -1,4 +1,5 @@
 module ApplicationHelper
+  include Pagy::Frontend
   include UiHelper
 
   # Presenter helper exposed to views/specs
@@ -6,16 +7,13 @@ module ApplicationHelper
     controller.present(object, with:)
   end
 
-  def page_entries_info(collection = nil)
-    collection ||= @projects
+  # Display pagination info from a Pagy object
+  # @param pagy [Pagy] Pagy pagination object
+  # @return [String] Formatted pagination info
+  def page_entries_info(pagy)
+    return "No entries found" if pagy.nil? || pagy.count == 0
 
-    if collection&.total_count.to_i > 0
-      start_number = (collection.current_page - 1) * collection.limit_value + 1
-      end_number = [collection.current_page * collection.limit_value, collection.total_count].min
-      "#{start_number} to #{end_number} of #{collection.total_count} entries"
-    else
-      "No entries found"
-    end
+    "#{pagy.from} to #{pagy.to} of #{pagy.count} entries"
   end
 
   # Formats a GitHub repository URL for display and linking

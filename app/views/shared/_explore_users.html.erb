@@ -33,9 +33,9 @@
     <% end %>
 
     <!-- Pagination -->
-    <% if users.any? %>
+    <% if users.any? && local_assigns[:pagy] %>
       <div class="border-t border-base-200 pt-6">
-        <%= render partial: "shared/pagination", locals: { records: users } %>
+        <%= render partial: "shared/pagination", locals: { pagy: } %>
       </div>
     <% end %>
   </div>

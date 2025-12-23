@@ -3,7 +3,7 @@ class NotificationsController < ApplicationController
   before_action :set_notification, only: [:show, :mark_as_read]
 
   def index
-    @notifications = current_user.notifications.order(created_at: :desc).page(params[:page]).per(20)
+    @pagy, @notifications = pagy(current_user.notifications.order(created_at: :desc), items: 20)
   end
 
   def show

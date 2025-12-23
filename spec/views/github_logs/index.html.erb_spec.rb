@@ -4,11 +4,13 @@ RSpec.describe "github_logs/index", type: :view do
   let(:user) { create(:user) }
   let(:project) { create(:project, user:, name: "Test Project") }
   let(:github_branch) { create(:github_branch, project:, branch_name: "main") }
-  let(:recent_commits) { Kaminari.paginate_array([]).page(1).per(10) }
+  let(:recent_commits) { [] }
+  let(:pagy) { Pagy.new(count: 0, page: 1, items: 10) }
 
   before do
     assign(:project, project)
     assign(:recent_commits, recent_commits)
+    assign(:pagy, pagy)
     assign(:available_branches, [[github_branch.id, github_branch.branch_name]])
     assign(:available_users, ["testuser"])
     assign(:selected_branch, nil)
@@ -260,10 +262,12 @@ RSpec.describe "github_logs/index", type: :view do
 
     context "with commits" do
       let(:github_log) { create(:github_log, project:, user:) }
-      let(:recent_commits) { Kaminari.paginate_array([github_log]).page(1).per(10) }
+      let(:recent_commits) { [ github_log ] }
+      let(:pagy) { Pagy.new(count: 1, page: 1, items: 10) }
 
       before do
         assign(:recent_commits, recent_commits)
+        assign(:pagy, pagy)
       end
 
       it "renders commits list partial" do
@@ -408,8 +412,9 @@ RSpec.describe "github_logs/index", type: :view do
     context "with large dataset indicators" do
       before do
         assign(:total_commits, 10000)
-        large_commits = Kaminari.paginate_array(Array.new(100) { create(:github_log, project:, user:) }).page(1).per(10)
+        large_commits = Array.new(10) { create(:github_log, project:, user:) }
         assign(:recent_commits, large_commits)
+        assign(:pagy, Pagy.new(count: 100, page: 1, items: 10))
         allow(view).to receive(:url_for).and_return('#')
         allow(view).to receive(:number_with_delimiter).and_call_original
       end

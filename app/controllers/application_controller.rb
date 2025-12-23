@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  include Pagy::Backend
   include Pundit::Authorization
   include RailsCloudflareTurnstile::ControllerHelpers
   # Allow browsers with reasonable modern feature support while not being overly restrictive

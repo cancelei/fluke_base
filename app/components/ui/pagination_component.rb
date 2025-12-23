@@ -2,32 +2,30 @@
 
 module Ui
   class PaginationComponent < ApplicationComponent
-    def initialize(records:, remote: false, css_class: nil)
-      @records = records
+    include Pagy::Frontend
+
+    def initialize(pagy:, remote: false, css_class: nil)
+      @pagy = pagy
       @remote = remote
       @css_class = css_class
     end
 
     def render?
-      paginated? && multiple_pages?
+      @pagy && multiple_pages?
     end
 
     def call
       tag.div(class: @css_class) do
         tag.div(class: container_classes) do
-          helpers.paginate(@records, remote: @remote)
+          pagy_nav(@pagy).html_safe
         end
       end
     end
 
     private
 
-    def paginated?
-      @records.respond_to?(:total_pages)
-    end
-
     def multiple_pages?
-      @records.total_pages > 1
+      @pagy.pages > 1
     end
 
     def container_classes

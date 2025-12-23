@@ -14,7 +14,7 @@ class Admin::SolidQueueJobsController < ApplicationController
     @jobs = @jobs.order(created_at: (params[:sort] == "asc" ? :asc : :desc))
 
     # Apply pagination
-    @jobs = @jobs.page(params[:page]).per(params[:per_page] || 25)
+    @pagy, @jobs = pagy(@jobs, items: params[:per_page]&.to_i || 25)
   end
 
   def show

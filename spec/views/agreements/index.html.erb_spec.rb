@@ -6,8 +6,8 @@ RSpec.describe "agreements/index.html.erb", type: :view do
   before do
     allow(view).to receive(:current_user).and_return(user)
     assign(:query, AgreementsQuery.new(user, {}))
-    assign(:my_agreements, Kaminari.paginate_array([]).page(1))
-    assign(:other_party_agreements, Kaminari.paginate_array([]).page(1))
+    assign(:my_agreements, [])
+    assign(:other_party_agreements, [])
   end
 
   it 'renders the Agreements header and sections' do

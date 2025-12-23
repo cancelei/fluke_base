@@ -54,8 +54,9 @@
   <%# Results Section %>
   <%= render partial: "shared/explore_users", locals: {
       users: @users,
+      pagy: @pagy,
       title: @propose_for_project ? "Select a Collaborator" : "Community People",
-      description: @propose_for_project ? "Choose someone to collaborate with on your project" : "Connect with #{@users.respond_to?(:total_count) ? @users.total_count : User.count} talented people in our community",
+      description: @propose_for_project ? "Choose someone to collaborate with on your project" : "Connect with #{@pagy ? @pagy.count : User.count} talented people in our community",
       propose_for_project: @propose_for_project
     } %>
 </div>

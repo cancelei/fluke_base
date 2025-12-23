@@ -92,11 +92,9 @@
     <div class="px-4 py-5 sm:px-6">
       <div class="flex items-center justify-between">
         <h3 class="text-lg leading-6 font-medium text-base-content">Recent Commits</h3>
-        <% if @recent_commits&.any? %>
+        <% if @pagy && @recent_commits&.any? %>
           <div class="text-sm text-base-content/60">
-            <% start_index = (@recent_commits.current_page - 1) * @recent_commits.limit_value + 1 %>
-            <% end_index = [@recent_commits.current_page * @recent_commits.limit_value, @recent_commits.total_count].min %>
-            Showing <%= start_index %>-<%= end_index %> of <%= @recent_commits.total_count %> commits
+            Showing <%= @pagy.from %>-<%= @pagy.to %> of <%= @pagy.count %> commits
           </div>
         <% end %>
       </div>
@@ -117,7 +115,7 @@
     <!-- Pagination for commits -->
     <% if @recent_commits&.any? %>
       <div class="px-6 py-4 border-t border-base-200">
-        <%= render partial: "shared/pagination", locals: { records: @recent_commits, remote: true } %>
+        <%= render partial: "shared/pagination", locals: { pagy: @pagy, remote: true } %>
       </div>
     <% end %>
   </div>

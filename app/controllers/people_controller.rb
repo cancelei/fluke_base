@@ -16,7 +16,7 @@ class PeopleController < ApplicationController
     end
 
     query = PeopleSearchQuery.new(current_user, params)
-    @users = query.results
+    @pagy, @users = pagy(query.results, items: 12)
   end
 
   def show

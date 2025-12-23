@@ -12,8 +12,8 @@ class AgreementsController < ApplicationController
 
   def index
     @query = AgreementsQuery.new(current_user, filter_params)
-    @my_agreements = @query.my_agreements
-    @other_party_agreements = @query.other_party_agreements
+    @pagy_my, @my_agreements = pagy(@query.my_agreements, items: 10, page_param: :my_page)
+    @pagy_other, @other_party_agreements = pagy(@query.other_party_agreements, items: 10, page_param: :other_page)
 
     respond_to do |format|
       format.html do

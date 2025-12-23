@@ -3,15 +3,14 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: [:show, :edit, :update, :destroy]
 
   def index
-    @projects = current_user.projects
+    @pagy, @projects = pagy(current_user.projects
                               .includes(:user, :milestones, :agreements)
-                              .order(created_at: :desc)
-                              .page(params[:page])
-                              .per(12)
+                              .order(created_at: :desc), items: 12)
   end
 
   def explore
-    @projects = ProjectSearchQuery.new(current_user, params).results
+    scope = ProjectSearchQuery.new(current_user, params).results
+    @pagy, @projects = pagy(scope, items: 12)
   end
 
   def show

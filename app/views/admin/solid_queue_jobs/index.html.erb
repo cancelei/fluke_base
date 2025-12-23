@@ -148,7 +148,7 @@
 
     <!-- Pagination -->
     <div class="card-body pt-0">
-      <%= paginate @jobs %>
+      <%== pagy_nav(@pagy) if @pagy && @pagy.pages > 1 %>
     </div>
   </div>
 </div>

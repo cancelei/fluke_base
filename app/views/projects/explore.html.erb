@@ -88,7 +88,7 @@
 
         <!-- Pagination using our shared component with Turbo -->
         <div class="mt-12">
-          <%= render partial: "shared/pagination", locals: { records: @projects, class_name: "flex justify-center", remote: true } %>
+          <%= render partial: "shared/pagination", locals: { pagy: @pagy, class_name: "flex justify-center", remote: true } %>
         </div>
       <% else %>
         <div class="card bg-base-100 shadow-xl">

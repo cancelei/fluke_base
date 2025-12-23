@@ -8,8 +8,7 @@ class ProjectSearchQuery
     scope = base_scope
     scope = filter_by_collaboration_type(scope)
     scope = filter_by_category(scope)
-    scope = search_by_text(scope)
-    scope.page(@params[:page]).per(12)
+    search_by_text(scope)
   end
 
   # Alternative method for authenticated users to see their own stealth projects
@@ -17,8 +16,7 @@ class ProjectSearchQuery
     scope = base_scope_with_user_stealth
     scope = filter_by_collaboration_type(scope)
     scope = filter_by_category(scope)
-    scope = search_by_text(scope)
-    scope.page(@params[:page]).per(12)
+    search_by_text(scope)
   end
 
   private

@@ -28,9 +28,9 @@ This document catalogs icon alignment issues found in the FlukeBase application 
 **Locations:**
 - `app/views/dashboard/index.html.erb:32-34` - Arrow icon in "See all" button
 - `app/views/dashboard/_recent_projects.html.erb:39-41` - Search icon in explore button
-- `app/views/kaminari/_next_page.html.erb:12-14` - Next page arrow
-- `app/views/kaminari/_prev_page.html.erb:12-14` - Previous page arrow
 - `app/views/projects/show.html.erb:10, 18, 38, 73, 81, 90` - Various icons in breadcrumbs and buttons
+
+**Note:** Pagination is now handled by Pagy gem, which provides consistent pagination styling.
 
 **Example:**
 ```erb
@@ -241,9 +241,9 @@ SIZES = {
 ### Medium Priority (Inline SVG Replacements)
 1. `app/views/dashboard/index.html.erb:32` - Replace with IconComponent
 2. `app/views/dashboard/_recent_projects.html.erb:39` - Replace with IconComponent
-3. `app/views/kaminari/_next_page.html.erb:12` - Replace with IconComponent
-4. `app/views/kaminari/_prev_page.html.erb:12` - Replace with IconComponent
-5. `app/views/projects/show.html.erb:10, 18, 38, 73, 81, 90` - Replace with IconComponent
+3. `app/views/projects/show.html.erb:10, 18, 38, 73, 81, 90` - Replace with IconComponent
+
+**Note:** Pagination icons are now handled by Pagy gem (see `config/initializers/pagy.rb`).
 
 ### Low Priority (Review and Verify)
 1. All button gap spacing - ensure consistent gap-2 usage

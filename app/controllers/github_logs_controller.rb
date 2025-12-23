@@ -21,7 +21,7 @@ class GithubLogsController < ApplicationController
     @user_name = filter_params[:user_name]
 
     # Get paginated commits using the query object
-    @recent_commits = @logs_query.recent_commits(page: params[:page])
+    @pagy, @recent_commits = pagy(@logs_query.recent_commits, items: 15)
 
     # Calculate statistics using the calculator service
     stats = Github::StatisticsCalculator.new(project: @project, query: @logs_query.stats_query)
@@ -77,10 +77,10 @@ class GithubLogsController < ApplicationController
         last_updated: @last_updated
       },
       pagination: {
-        current_page: @recent_commits.current_page,
-        total_pages: @recent_commits.total_pages,
-        per_page: @recent_commits.limit_value,
-        total_count: @recent_commits.total_count
+        current_page: @pagy.page,
+        total_pages: @pagy.pages,
+        per_page: @pagy.limit,
+        total_count: @pagy.count
       }
     }
   end

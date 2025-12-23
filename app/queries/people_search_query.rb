@@ -10,8 +10,7 @@ class PeopleSearchQuery
     scope = filter_by_role(scope)
     scope = filter_by_project(scope)
     # Removed exclude_current_user to allow users to see their own profile
-    scope = add_includes(scope)
-    scope.page(@params[:page]).per(12)
+    add_includes(scope)
   end
 
   private

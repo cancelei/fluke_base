@@ -1,16 +1,16 @@
 <%#
-  Reusable pagination partial that wraps Kaminari's paginator
+  Reusable pagination partial that wraps Pagy
 
   Parameters:
-  - records: The ActiveRecord::Relation that has been paginated with Kaminari
+  - pagy: The Pagy pagination object
   - remote: (optional) Whether to use AJAX for pagination (default: false)
   - class_name: (optional) Additional CSS classes for the pagination container
 %>
 
-<% if records.respond_to?(:total_pages) && records.total_pages > 1 %>
+<% if pagy && pagy.pages > 1 %>
   <div class="<%= local_assigns[:class_name] %>">
     <div class="bg-base-100/95 backdrop-blur-md shadow-lg ring-1 ring-base-300/50 border border-base-300 rounded-2xl px-6 py-4">
-      <%= paginate records, remote: local_assigns[:remote] || false %>
+      <%== pagy_nav(pagy) %>
     </div>
   </div>
 <% end %>

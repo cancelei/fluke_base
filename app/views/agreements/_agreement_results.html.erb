@@ -33,7 +33,7 @@
 
       <% if @my_agreements.any? %>
         <%= turbo_frame_tag "agreements_my" do %>
-          <%= render "my_agreements_section", my_agreements: @my_agreements, query: @query %>
+          <%= render "my_agreements_section", my_agreements: @my_agreements, query: @query, pagy: @pagy_my %>
         <% end %>
       <% else %>
         <%= render "shared/empty_state",
@@ -63,7 +63,7 @@
 
       <% if @other_party_agreements.any? %>
         <%= turbo_frame_tag "agreements_other" do %>
-          <%= render "other_agreements_section", other_party_agreements: @other_party_agreements, query: @query %>
+          <%= render "other_agreements_section", other_party_agreements: @other_party_agreements, query: @query, pagy: @pagy_other %>
         <% end %>
       <% else %>
         <%= render "shared/empty_state",

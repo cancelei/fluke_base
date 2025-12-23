@@ -1,0 +1,10 @@
+Script started on 2025-12-23 03:39:00-03:00 [COMMAND="gemini help me with this project" TERM="screen" TTY="/dev/pts/9" COLUMNS="185" LINES="42"]
+[31mInvalid configuration in /home/cancelei/.gemini/settings.json:
+
+Error in: mcpServers.stripe
+    Unrecognized key(s) in object: 'type'
+
+Please fix the configuration and try again.
+See: https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md[0m
+
+Script done on 2025-12-23 03:39:02-03:00 [COMMAND_EXIT_CODE="52"]
