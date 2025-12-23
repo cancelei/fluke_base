@@ -635,7 +635,7 @@ class AgreementsController < ApplicationController
       HTML
     end
 
-    def filter_params = params.permit(:project_id, :status, :agreement_type, :start_date_from, :start_date_to, :end_date_from, :end_date_to, :search, :clear_filters, :page, :turbo_frame)
+    def filter_params = params.permit(:project_id, :status, :agreement_type, :start_date_from, :start_date_to, :end_date_from, :end_date_to, :search, :clear_filters, :page, :my_page, :other_page, :turbo_frame)
 
     def build_agreement_chain_optimized(agreement)
       # Collect all agreement IDs in the chain first

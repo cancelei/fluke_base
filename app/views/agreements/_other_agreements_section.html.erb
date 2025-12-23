@@ -1,5 +1,6 @@
 <%= render "agreements_table",
       agreements: other_party_agreements,
+      pagy: local_assigns[:pagy],
       responsive_classes: "overflow-x-auto",
       table_classes: "table-fixed",
       columns: [
@@ -13,5 +14,4 @@
       actions_th_class: "px-2 py-2 w-1/12 text-right",
       tbody_class: "text-sm",
       tbody_id: "other_party_agreements_tbody",
-      pagination_params: { turbo_frame: "agreements_other" },
-      pagination_data: { turbo_frame: "agreements_other" } %>
+      frame_id: "agreements_other" %>
