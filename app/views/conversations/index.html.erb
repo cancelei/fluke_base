@@ -1,5 +1,5 @@
 <!-- Conversations Layout with Sidebar -->
-<div class="flex h-[calc(100vh-8rem)] overflow-hidden" data-controller="conversation">
+<div class="flex md:h-[calc(100vh-185px)] h-[calc(100vh-150px)] overflow-hidden" data-controller="conversation">
   <!-- Sidebar - Hidden on mobile, visible on desktop -->
   <div id="conversation-sidebar" class="hidden lg:flex lg:flex-col w-80 bg-base-100 border-r border-base-200">
     <!-- Sidebar header -->
@@ -13,7 +13,7 @@
     </div>
 
     <!-- Conversation list -->
-    <div class="flex-1 overflow-y-auto" id="conversation_list">
+    <div class="flex-1 overflow-y-auto w-full" id="conversation_list">
       <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: %>
     </div>
   </div>
@@ -44,26 +44,9 @@
     </div>
   </div>
 
-  <!-- Main content area -->
-  <div class="flex-1 flex flex-col overflow-hidden bg-base-100">
-    <!-- Header with mobile toggle -->
-    <div class="navbar bg-base-100 shadow-sm border-b border-base-200 lg:hidden">
-      <div class="flex-none">
-        <button onclick="document.getElementById('mobile-conversation-sidebar').classList.remove('hidden')" class="btn btn-square btn-ghost">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </div>
-      <div class="flex-1">
-        <h1 class="text-xl font-bold">Messages</h1>
-      </div>
-    </div>
-
-    <!-- Conversation content -->
-    <div id="conversation_content" class="flex-1 flex flex-col overflow-hidden">
-      <%= render "conversations/conversation_content", conversation: @conversation, messages: @conversation&.messages&.to_a || [], message: @message || Message.new %>
-    </div>
+  <!-- Conversation content -->
+  <div id="conversation_content" class="flex-1 flex flex-col overflow-hidden">
+    <%= render "conversations/conversation_content", conversation: @conversation, messages: @conversation&.messages&.to_a || [], message: @message || Message.new %>
   </div>
 </div>
 

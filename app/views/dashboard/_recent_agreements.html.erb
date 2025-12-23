@@ -11,19 +11,19 @@
       <div class="divider my-2"></div>
 
       <% if @agreements.present? %>
-        <ul class="menu p-0">
+        <ul class="menu p-0 w-full">
           <% @agreements.each do |agreement| %>
             <% cache([agreement, current_user]) do %>
               <% agreement_presenter = present(agreement) %>
               <% is_initiator = agreement.initiator&.id == current_user.id %>
               <% needs_action = agreement.pending? && !is_initiator %>
 
-              <li class="group">
-                <div class="flex flex-col w-full p-4 mx-2 my-1 hover:bg-base-200 rounded-lg transition-colors cursor-pointer <%= "border-l-4 border-warning" if needs_action %>"
+              <li class="group px-2 py-1">
+                <div class="flex flex-col w-full p-4 hover:bg-base-200 rounded-lg transition-colors cursor-pointer <%= "border-l-4 border-warning" if needs_action %>"
                      onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON' && !event.target.closest('a, button')) { Turbo.visit(<%= agreement_path(agreement).to_json %>); }">
 
                   <!-- Header -->
-                  <div class="flex items-start justify-between gap-2 mb-2">
+                  <div class="flex items-start justify-between gap-2 mb-2 w-full">
                     <span class="font-semibold text-primary truncate">
                       <%= present(agreement.project).display_name(current_user) %>
                     </span>
@@ -38,7 +38,7 @@
                   </div>
 
                   <!-- Details with Other Party Avatar -->
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 w-full">
                     <% the_other_party = is_initiator ? agreement.other_party : agreement.initiator %>
                     <% if the_other_party %>
                       <%= link_to person_path(the_other_party), onclick: "event.stopPropagation();", class: "flex items-center gap-2 hover:text-primary transition-colors" do %>

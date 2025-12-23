@@ -2,23 +2,38 @@
   <% other_user = conversation.other_user(current_user) %>
 
   <!-- Header -->
-  <div class="navbar bg-base-100 border-b border-base-200 px-4">
-    <div class="flex-1 gap-3">
-      <!-- Avatar -->
-      <div class="avatar placeholder">
-        <div class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
-          <% if other_user.avatar.attached? %>
-            <%= image_tag other_user.avatar, class: "rounded-full w-full h-full object-cover" %>
-          <% else %>
-            <span class="text-sm font-medium"><%= other_user.initials %></span>
-          <% end %>
+  <div class="navbar bg-base-100 border-b border-base-200 px-4 justify-between">
+    <div class="flex md:flex-col flex-row">
+      <div class="shadow-sm md:border-b border-base-200 lg:hidden md:mr-0 mr-1">
+        <div class="flex-none">
+          <button onclick="document.getElementById('mobile-conversation-sidebar').classList.remove('hidden')" class="btn btn-square btn-ghost">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+        <div class="flex-1 md:block hidden">
+          <h1 class="text-xl font-bold">Messages</h1>
         </div>
       </div>
 
-      <!-- User info -->
-      <div>
-        <h2 class="font-semibold"><%= other_user.full_name %></h2>
-        <span class="badge badge-info badge-sm">Community Member</span>
+      <div class="flex flex-1 gap-3 items-center">
+        <!-- Avatar -->
+        <div class="avatar placeholder">
+          <div class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
+            <% if other_user.avatar.attached? %>
+              <%= image_tag other_user.avatar, class: "rounded-full w-full h-full object-cover" %>
+            <% else %>
+              <span class="text-sm font-medium"><%= other_user.initials %></span>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- User info -->
+        <div>
+          <h2 class="text-xl font-semibold"><%= other_user.full_name %></h2>
+          <span class="badge badge-info badge-sm text-nowrap">Community Member</span>
+        </div>
       </div>
     </div>
 
@@ -67,7 +82,7 @@
   </div>
 
   <!-- Message form -->
-  <div id="new_message_form" class="p-4 border-t border-base-200 bg-base-100">
+  <div id="new_message_form" class="md:p-4 p-2 border-t border-base-200 bg-base-100">
     <%= render "messages/form", conversation:, message: %>
   </div>
 <% else %>
