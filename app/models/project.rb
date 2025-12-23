@@ -20,11 +20,12 @@ class Project < ApplicationRecord
   validates :stage, presence: true
   validates :collaboration_type, inclusion: { in: ["mentor", "co_founder", "both", nil] }
   validates :repository_url, format: {
-    with: %r{\A(\z|https?://github\.com/[^/]+/[^/]+|[^/\s]+/[^/\s]+)\z},
-    message: "must be a valid GitHub repository URL or in the format username/repository"
+    with: /\A([a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+)?\z/,
+    message: "must be a valid GitHub repository (e.g., username/repository)"
   }, allow_blank: true
 
   # Default values and lifecycle hooks
+  before_validation :normalize_repository_url
   before_save :set_defaults
 
   # Project stages
@@ -336,5 +337,28 @@ class Project < ApplicationRecord
 
   def generate_stealth_name
     "Stealth Startup #{SecureRandom.hex(2).upcase}"
+  end
+
+  def normalize_repository_url
+    return if repository_url.blank?
+
+    url = repository_url.to_s.strip
+
+    # Remove query parameters and fragments
+    url = url.split("?").first.to_s
+    url = url.split("#").first.to_s
+
+    if url.match?(%r{github\.com/}i)
+      # Extract path after github.com/
+      path = url.gsub(%r{^https?://(www\.)?github\.com/}i, "")
+      # Remove .git suffix, trailing slashes, and extra paths (tree/main, issues, etc.)
+      path = path.gsub(/\.git$/i, "").gsub(%r{/+$}, "")
+      # Take only first two segments (owner/repo)
+      segments = path.split("/").first(2)
+      self.repository_url = segments.length == 2 ? segments.join("/") : nil
+    else
+      # Already in owner/repo format - just clean it
+      self.repository_url = url.gsub(/\.git$/i, "").gsub(%r{/+$}, "")
+    end
   end
 end

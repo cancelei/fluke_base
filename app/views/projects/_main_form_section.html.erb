@@ -92,12 +92,11 @@
                field_name: :repository_url,
                project:,
                label: "GitHub Repository URL",
-               field_type: :url_field,
+               field_type: :text_field,
                col_span: 6,
-               help_text: "Optional. The GitHub repository for this project (e.g., username/repository)",
+               help_text: "Paste a GitHub URL or enter username/repository. Full URLs, .git links, and branch URLs all work.",
                options: {
-                 prefix: "github.com/",
-                 placeholder: "username/repository"
+                 placeholder: "https://github.com/username/repo or username/repo"
                } %>
 
     <!-- Project Link -->

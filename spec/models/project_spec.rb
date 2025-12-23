@@ -34,7 +34,7 @@ RSpec.describe Project, type: :model do
 
     context "when project has repository URL" do
       it "validates repository URL format" do
-        project = build(:project, repository_url: "https://github.com/user/repo", public_fields: ['name'])
+        project = build(:project, repository_url: "user/repo", public_fields: ['name'])
         expect(project).to be_valid
 
         project.repository_url = "invalid-url"
@@ -46,6 +46,105 @@ RSpec.describe Project, type: :model do
         project = build(:project, repository_url: "user/repo", public_fields: ['name'])
         expect(project).to be_valid
       end
+    end
+  end
+
+  # Repository URL Normalization Testing
+  describe "repository URL normalization" do
+    it "normalizes full HTTPS GitHub URL to owner/repo format" do
+      project = build(:project, repository_url: "https://github.com/owner/repo", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "normalizes HTTP GitHub URL to owner/repo format" do
+      project = build(:project, repository_url: "http://github.com/owner/repo", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "normalizes GitHub URL with www prefix" do
+      project = build(:project, repository_url: "https://www.github.com/owner/repo", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "removes trailing slash from URL" do
+      project = build(:project, repository_url: "https://github.com/owner/repo/", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "removes .git suffix from URL" do
+      project = build(:project, repository_url: "https://github.com/owner/repo.git", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "removes extra paths like /tree/main" do
+      project = build(:project, repository_url: "https://github.com/owner/repo/tree/main", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "removes extra paths like /issues" do
+      project = build(:project, repository_url: "https://github.com/owner/repo/issues", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "removes query parameters from URL" do
+      project = build(:project, repository_url: "https://github.com/owner/repo?tab=readme", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "removes fragment identifiers from URL" do
+      project = build(:project, repository_url: "https://github.com/owner/repo#readme", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "strips leading and trailing whitespace" do
+      project = build(:project, repository_url: "  owner/repo  ", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "keeps short format owner/repo unchanged" do
+      project = build(:project, repository_url: "owner/repo", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "removes trailing slash from short format" do
+      project = build(:project, repository_url: "owner/repo/", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "removes .git suffix from short format" do
+      project = build(:project, repository_url: "owner/repo.git", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("owner/repo")
+    end
+
+    it "handles empty string" do
+      project = build(:project, repository_url: "", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("")
+    end
+
+    it "handles nil" do
+      project = build(:project, repository_url: nil, public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to be_nil
+    end
+
+    it "handles case-insensitive GitHub URL" do
+      project = build(:project, repository_url: "HTTPS://GITHUB.COM/Owner/Repo", public_fields: ['name'])
+      project.valid?
+      expect(project.repository_url).to eq("Owner/Repo")
     end
   end
 
