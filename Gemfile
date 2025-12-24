@@ -26,7 +26,12 @@ gem "view_component", "~> 3.20"
 
 # Authentication
 gem "devise"
+gem "omniauth-github", "~> 2.0"
+gem "omniauth-rails_csrf_protection", "~> 1.0"
 gem "httparty"
+
+# JWT for GitHub App authentication
+gem "jwt", "~> 2.8"
 
 # Cloudflare Turnstile integration
 gem "rails_cloudflare_turnstile"

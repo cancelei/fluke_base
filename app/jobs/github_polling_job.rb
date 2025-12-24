@@ -28,13 +28,16 @@ class GithubPollingJob < ApplicationJob
 
   # Find projects that are eligible for polling:
   # - Have a repository_url configured
-  # - Owner has a valid github_token
+  # - Owner has a valid GitHub token (OAuth or PAT)
   # - Haven't been polled in the last 50 seconds (prevents overlap)
   # - Either have branches already OR have no branches (to discover initial branches)
   def find_eligible_projects
     Project.joins(:user)
            .where.not(repository_url: [nil, ""])
-           .where.not(users: { github_token: [nil, ""] })
+           .where(
+             "(users.github_user_access_token IS NOT NULL AND users.github_user_access_token != '') " \
+             "OR (users.github_token IS NOT NULL AND users.github_token != '')"
+           )
            .where("projects.github_last_polled_at IS NULL OR projects.github_last_polled_at < ?", 50.seconds.ago)
            .distinct
            .order(Arel.sql("projects.github_last_polled_at ASC NULLS FIRST"))
@@ -42,7 +45,7 @@ class GithubPollingJob < ApplicationJob
 
   # Poll a single project for new commits and new branches
   def poll_project(project)
-    token = project.user.github_token
+    token = project.user.effective_github_token
 
     # Update polling timestamp before starting to prevent concurrent polls
     project.update_column(:github_last_polled_at, Time.current)

@@ -12,7 +12,12 @@
 #  encrypted_password       :string           default(""), not null
 #  facebook                 :string
 #  first_name               :string           not null
+#  github_connected_at      :datetime
+#  github_refresh_token     :string
 #  github_token             :string(255)
+#  github_token_expires_at  :datetime
+#  github_uid               :string
+#  github_user_access_token :string
 #  github_username          :string
 #  help_seekings            :string           default([]), is an Array
 #  hourly_rate              :float
@@ -40,6 +45,7 @@
 #
 #  index_users_on_admin                 (admin)
 #  index_users_on_email                 (email) UNIQUE
+#  index_users_on_github_uid            (github_uid) UNIQUE
 #  index_users_on_reset_password_token  (reset_password_token) UNIQUE
 #  index_users_on_selected_project_id   (selected_project_id)
 #  index_users_on_slug                  (slug) UNIQUE

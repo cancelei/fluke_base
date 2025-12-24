@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_24_031232) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_24_095023) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -127,6 +127,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_031232) do
     t.index ["slug", "sluggable_type", "scope"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type_and_scope", unique: true
     t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
     t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
+  end
+
+  create_table "github_app_installations", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "installation_id", null: false
+    t.string "account_login"
+    t.string "account_type"
+    t.jsonb "repository_selection", default: {}
+    t.jsonb "permissions", default: {}
+    t.datetime "installed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["installation_id"], name: "index_github_app_installations_on_installation_id", unique: true
+    t.index ["user_id"], name: "index_github_app_installations_on_user_id"
   end
 
   create_table "github_branch_logs", force: :cascade do |t|
@@ -537,8 +551,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_031232) do
     t.string "instagram"
     t.boolean "admin", default: false, null: false
     t.string "slug"
+    t.string "github_user_access_token"
+    t.string "github_refresh_token"
+    t.datetime "github_token_expires_at"
+    t.string "github_uid"
+    t.datetime "github_connected_at"
     t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["github_uid"], name: "index_users_on_github_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["selected_project_id"], name: "index_users_on_selected_project_id"
     t.index ["slug"], name: "index_users_on_slug", unique: true
@@ -568,6 +588,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_031232) do
   add_foreign_key "agreements", "projects"
   add_foreign_key "conversations", "users", column: "recipient_id"
   add_foreign_key "conversations", "users", column: "sender_id"
+  add_foreign_key "github_app_installations", "users"
   add_foreign_key "github_branch_logs", "github_branches", on_delete: :cascade
   add_foreign_key "github_branch_logs", "github_logs", on_delete: :cascade
   add_foreign_key "github_branches", "projects"

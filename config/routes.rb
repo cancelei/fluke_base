@@ -13,8 +13,21 @@ Rails.application.routes.draw do
   devise_for :users, controllers: {
     registrations: "users/registrations",
     sessions: "users/sessions",
-    passwords: "users/passwords"
+    passwords: "users/passwords",
+    omniauth_callbacks: "users/omniauth_callbacks"
   }
+
+  # GitHub App webhooks
+  namespace :webhooks do
+    post :github, to: "github#create"
+  end
+
+  # GitHub connection management
+  namespace :github do
+    delete :disconnect, to: "settings#disconnect"
+    get :installations, to: "settings#installations"
+    get :check_access, to: "settings#check_access"
+  end
 
   # Root and main pages
   root "home#index"
