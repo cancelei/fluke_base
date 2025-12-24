@@ -16,8 +16,15 @@ module Users
     def github
       auth = request.env["omniauth.auth"]
 
+      # Check for OAuth errors (e.g., rate limits, API issues)
+      if auth.nil?
+        error = request.env["omniauth.error"]
+        handle_oauth_error(error)
+        return
+      end
+
       # Validate we have required data from GitHub
-      unless auth&.info&.email.present?
+      unless auth.info&.email.present?
         flash[:error] = "Could not get your email from GitHub. Please ensure your email is public or try signing up with email."
         redirect_to new_user_registration_path
         return
@@ -30,6 +37,8 @@ module Users
         # User is not signed in - find or create user
         handle_github_signup_or_login(auth)
       end
+    rescue OAuth2::Error => e
+      handle_oauth_error(e)
     end
 
     # OAuth failure callback
@@ -82,6 +91,21 @@ module Users
 
     def failure_message
       params[:message] || request.env["omniauth.error"]&.message
+    end
+
+    def handle_oauth_error(error)
+      Rails.logger.error "[OmniAuth] GitHub OAuth error: #{error&.message || 'Unknown error'}"
+
+      error_message = if error&.message&.include?("rate limit")
+        "GitHub API rate limit exceeded. Please wait a few minutes and try again."
+      elsif error&.message&.include?("403")
+        "GitHub access was denied. Please try again or sign up with email."
+      else
+        "GitHub connection failed. Please try again or sign up with email."
+      end
+
+      flash[:error] = error_message
+      redirect_to new_user_registration_path
     end
 
     def handle_github_signup_or_login(auth)
