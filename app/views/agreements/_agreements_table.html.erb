@@ -1,23 +1,59 @@
 <div class="<%= responsive_classes %>">
-  <table class="table table-zebra <%= table_classes %>">
-    <thead>
-      <tr>
-        <% columns.each do |column| %>
-          <th scope="col" class="<%= column[:th_class] %>">
-            <%= column[:label] %>
-          </th>
-        <% end %>
-        <th scope="col" class="relative <%= actions_th_class %>">
-          <span class="sr-only">Actions</span>
-        </th>
-      </tr>
-    </thead>
-    <tbody class="<%= tbody_class %>" id="<%= tbody_id %>">
-      <% agreements.each do |agreement| %>
-        <%= render "agreement_index_row", agreement: %>
-      <% end %>
-    </tbody>
-  </table>
+  <%= render Ui::FlexTableComponent.new(
+    columns: [
+      { span: 2, header: columns[0][:label] },
+      { span: 2, header: columns[1][:label] },
+      { span: 2, header: columns[2][:label] },
+      { span: 1, header: columns[3][:label] },
+      { span: 1, header: columns[4][:label] },
+      { span: 2, header: columns[5][:label] },
+      { span: 2, header: "Actions", align: "end" }
+    ],
+    rows: agreements.map do |agreement|
+      presenter = present(agreement)
+
+      # Project column
+      project_cell = if agreement.active? || agreement.completed?
+        present(agreement.project).display_name(current_user)
+      elsif agreement.initiator&.id == current_user.id
+        present(agreement.project).display_name(current_user)
+      else
+        "#{present(agreement.project).display_name(current_user)} (limited access)"
+      end
+
+      # Type column
+      type_cell = "#{presenter.agreement_type_badge} #{presenter.payment_type_badge if agreement.initiator&.id == current_user.id}".html_safe
+
+      # Third column (Mentor/Project Owner)
+      is_initiator = agreement.initiator&.id == current_user.id
+      the_other_party = is_initiator ? agreement.other_party : agreement.initiator
+      third_cell = if the_other_party
+        the_other_party.full_name
+      else
+        "No other party"
+      end
+
+      # Status column
+      status_cell = presenter.status_badge.to_s
+
+      # Fifth column (Start Date/Payment)
+      if agreement.initiator&.id == current_user.id
+        fifth_cell = presenter.created_timeframe_simple
+      else
+        fifth_cell = presenter.payment_type_badge.to_s
+      end
+
+      # Sixth column (Remaining)
+      sixth_cell = presenter.time_remaining
+
+      # Actions column
+      actions_cell = link_to("View", agreement_path(agreement), class: "link link-primary", data: { turbo_frame: "_top" }).to_s
+
+      [project_cell, type_cell, third_cell, status_cell, fifth_cell, sixth_cell, actions_cell]
+    end,
+    zebra: true,
+    hover: true
+  ) %>
 </div>
 
 <!-- Pagination using Pagy (Turbo frame navigation) -->
