@@ -1,6 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    aasm (5.5.2)
+      concurrent-ruby (~> 1.0)
     actioncable (8.0.4)
       actionpack (= 8.0.4)
       activesupport (= 8.0.4)
@@ -76,6 +78,9 @@ GEM
       uri (>= 0.13.1)
     addressable (2.8.8)
       public_suffix (>= 2.0.2, < 8.0)
+    annotaterb (4.20.0)
+      activerecord (>= 6.0.0)
+      activesupport (>= 6.0.0)
     ast (2.4.3)
     aws-eventstream (1.4.0)
     aws-partitions (1.1198.0)
@@ -199,6 +204,8 @@ GEM
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
+    friendly_id (5.6.0)
+      activerecord (>= 4.0.0)
     fugit (1.12.1)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
@@ -433,6 +440,10 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.3.1)
+    ransack (4.4.1)
+      activerecord (>= 7.2)
+      activesupport (>= 7.2)
+      i18n
     rdoc (7.0.1)
       erb
       psych (>= 4.0.0)
@@ -645,7 +656,9 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  aasm (~> 5.5)
   active_record_doctor
+  annotaterb
   aws-sdk-s3
   bootsnap
   brakeman (~> 7.1.0)
@@ -658,6 +671,7 @@ DEPENDENCIES
   factory_bot_rails
   faker
   faraday-retry (~> 2.3)
+  friendly_id (~> 5.5)
   google-api-client
   httparty
   image_processing (~> 1.2)
@@ -678,6 +692,7 @@ DEPENDENCIES
   rails (~> 8.0.4)
   rails-controller-testing
   rails_cloudflare_turnstile
+  ransack (~> 4.2)
   rspec-rails
   rspec_junit_formatter
   rubocop-rails-omakase

@@ -459,36 +459,39 @@ if Rails.env.development? || Rails.env.staging?
 
   puts "Creating conversations and messages..."
 
-  # Create conversations between agreement participants
-  agreements.each do |agreement|
-    next unless agreement.initiator && agreement.other_party
+  # Skip Turbo broadcasts during seeding for performance
+  Message.without_broadcasts do
+    # Create conversations between agreement participants
+    agreements.each do |agreement|
+      next unless agreement.initiator && agreement.other_party
 
-    conversation = Conversation.between(agreement.initiator.id, agreement.other_party.id)
+      conversation = Conversation.between(agreement.initiator.id, agreement.other_party.id)
 
-    # Create 3-10 messages per conversation
-    rand(3..10).times do |i|
-      sender = i.even? ? conversation.sender : conversation.recipient
+      # Create 3-10 messages per conversation
+      rand(3..10).times do |i|
+        sender = i.even? ? conversation.sender : conversation.recipient
 
-      message_templates = [
-        "Hey! I've been working on the #{agreement.project.name} project. What do you think about our progress?",
-        "Great work on the latest milestone! The results look promising.",
-        "I have some ideas for improving our approach. Can we schedule a call?",
-        "The market feedback has been positive. Let's discuss next steps.",
-        "I've completed the tasks we discussed. Ready for your review.",
-        "Found an interesting opportunity that might be relevant to our project.",
-        "The technical implementation is going well. Any concerns on your end?",
-        "Let's sync up on the timeline. Are we still on track for the deadline?",
-        "I've updated the project documentation. Please take a look when you can.",
-        "Excited about the progress we're making together!"
-      ]
+        message_templates = [
+          "Hey! I've been working on the #{agreement.project.name} project. What do you think about our progress?",
+          "Great work on the latest milestone! The results look promising.",
+          "I have some ideas for improving our approach. Can we schedule a call?",
+          "The market feedback has been positive. Let's discuss next steps.",
+          "I've completed the tasks we discussed. Ready for your review.",
+          "Found an interesting opportunity that might be relevant to our project.",
+          "The technical implementation is going well. Any concerns on your end?",
+          "Let's sync up on the timeline. Are we still on track for the deadline?",
+          "I've updated the project documentation. Please take a look when you can.",
+          "Excited about the progress we're making together!"
+        ]
 
-      Message.create!(
-        conversation:,
-        user: sender,
-        body: message_templates.sample,
-        read: [true, false].sample,
-        created_at: rand(30.days.ago..Time.current)
-      )
+        Message.create!(
+          conversation:,
+          user: sender,
+          body: message_templates.sample,
+          read: [true, false].sample,
+          created_at: rand(30.days.ago..Time.current)
+        )
+      end
     end
   end
 

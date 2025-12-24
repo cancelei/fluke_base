@@ -1,65 +1,70 @@
+# Query object for searching and filtering projects
+# Uses Ransack for declarative filtering
 class ProjectSearchQuery
   def initialize(user, params = {})
     @user = user
-    @params = params
+    @params = normalize_params(params)
+    @q = build_ransack_params
   end
 
+  attr_reader :q
+
   def results
-    scope = base_scope
-    scope = filter_by_collaboration_type(scope)
-    scope = filter_by_category(scope)
-    search_by_text(scope)
+    apply_ransack(base_scope)
   end
 
   # Alternative method for authenticated users to see their own stealth projects
   def results_including_user_stealth_projects
-    scope = base_scope_with_user_stealth
-    scope = filter_by_collaboration_type(scope)
-    scope = filter_by_category(scope)
-    search_by_text(scope)
+    apply_ransack(base_scope_with_user_stealth)
+  end
+
+  def search_object(scope = Project.all)
+    scope.ransack(@q)
   end
 
   private
 
+  def normalize_params(params)
+    hash = params.respond_to?(:to_unsafe_h) ? params.to_unsafe_h : params.to_h
+    hash.with_indifferent_access
+  end
+
+  def apply_ransack(scope)
+    scope.ransack(@q).result(distinct: true).order(created_at: :desc)
+  end
+
   def base_scope
-    Project.joins(:user)
-           .publicly_visible  # Filter out stealth projects from public exploration
-           .order(created_at: :desc)
+    Project.joins(:user).publicly_visible
   end
 
   def base_scope_with_user_stealth
-    # Include both public projects and user's own stealth projects
     if @user.present?
       Project.joins(:user)
              .where("projects.stealth_mode = false OR projects.user_id = ?", @user.id)
-             .order(created_at: :desc)
     else
       base_scope
     end
   end
 
-  def filter_by_collaboration_type(scope)
-    return scope unless @params[:collaboration_type].present?
+  def build_ransack_params
+    q = {}
 
-    case @params[:collaboration_type]
-    when "mentor"
-      scope.seeking_mentor
-    when "co_founder"
-      scope.seeking_cofounder
-    else
-      scope
+    # Collaboration type filter
+    if @params[:collaboration_type].present?
+      case @params[:collaboration_type]
+      when "mentor"
+        q[:collaboration_type_in] = [Project::SEEKING_MENTOR, Project::SEEKING_BOTH]
+      when "co_founder"
+        q[:collaboration_type_in] = [Project::SEEKING_COFOUNDER, Project::SEEKING_BOTH]
+      end
     end
-  end
 
-  def filter_by_category(scope)
-    return scope unless @params[:category].present?
-    scope.where(category: @params[:category])
-  end
+    # Category filter
+    q[:category_eq] = @params[:category] if @params[:category].present?
 
-  def search_by_text(scope)
-    return scope unless @params[:search].present?
-    scope.where("name ILIKE ? OR description ILIKE ?",
-               "%#{@params[:search]}%",
-               "%#{@params[:search]}%")
+    # Text search
+    q[:name_or_description_cont] = @params[:search] if @params[:search].present?
+
+    q
   end
 end

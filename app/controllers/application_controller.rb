@@ -53,7 +53,8 @@ class ApplicationController < ActionController::Base
     end
 
     if incoming_project_id.present?
-      project = Project.find_by(id: incoming_project_id)
+      # Use friendly_id finder to support both numeric IDs and slugs
+      project = Project.friendly.find(incoming_project_id) rescue nil
       if project
         involved_as_owner = current_user.projects.include?(project)
         involved_via_initiated = current_user.initiated_agreements.where(project_id: project.id, status: "Accepted").exists?

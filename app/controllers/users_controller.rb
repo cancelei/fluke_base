@@ -2,7 +2,9 @@ class UsersController < ApplicationController
   include ProjectContextSwitchable
 
   def update_selected_project
-    if switch_project_context(Project.find_by(id: params[:project_id]))
+    # Support both numeric IDs and slugs for project lookup
+    project = Project.friendly.find(params[:project_id]) rescue nil
+    if switch_project_context(project)
       @selected_project = switched_project
 
       respond_to do |format|
@@ -34,7 +36,8 @@ class UsersController < ApplicationController
     return nil unless ref.present?
 
     uri = URI.parse(ref)
-    new_path = uri.path.gsub(/\A(.*\/projects\/)\d+(\/?.*)\z/, "\\1#{@selected_project.id}\\2")
+    # Match slugs (alphanumeric with hyphens) or numeric IDs
+    new_path = uri.path.gsub(%r{\A(.*\/projects\/)[^/]+(\/?.*)\z}, "\\1#{@selected_project.to_param}\\2")
     new_path.presence
   rescue URI::InvalidURIError
     nil

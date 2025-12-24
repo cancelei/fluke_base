@@ -1,12 +1,7 @@
 <%= turbo_frame_tag "agreement_filters", class: "block" do %>
   <div class="card bg-base-100 shadow-sm mb-8">
     <div class="card-body">
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="text-lg font-medium">Filter Agreements</h3>
-          <p class="mt-1 text-sm text-base-content/70">Narrow down your agreements using the filters below</p>
-        </div>
-        <% if @query.active_filters? %>
+      <% if @query.active_filters? %>
           <div class="flex items-center space-x-2">
             <span class="badge badge-primary badge-sm">
               <%= @query.active_filters_count %> filter<%= "s" if @query.active_filters_count > 1 %> active
@@ -18,7 +13,6 @@
             <% end %>
           </div>
         <% end %>
-      </div>
 
       <%= form_with url: agreements_path, method: :get, local: false,
           class: "mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6" do |form| %>

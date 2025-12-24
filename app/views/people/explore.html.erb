@@ -22,41 +22,34 @@
         <% end %>
       </div>
     </div>
-  <% else %>
-    <%# Hero Section %>
-    <div class="text-center mb-12">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4">
-        Discover Amazing People
-      </h1>
-      <p class="text-xl text-base-content/70 max-w-3xl mx-auto leading-relaxed">
-        Connect with talented individuals from around the world. Find collaborators, mentors, and friends in our vibrant community.
-      </p>
-    </div>
   <% end %>
 
-  <%# Search Section %>
+  <%# Search Section with Live Search %>
   <div class="card bg-base-100 shadow-xl mb-8">
     <div class="card-body">
-      <%= form_with url: explore_people_path, method: :get, class: "flex flex-col sm:flex-row gap-4" do |f| %>
-        <% if @propose_for_project %>
-          <%= f.hidden_field :propose_for_project, value: @propose_for_project.id %>
-        <% end %>
-        <div class="flex-1">
-          <%= f.text_field :search, value: params[:search],
-              placeholder: "Search by name, skills, or interests...",
-              class: "input input-bordered w-full" %>
-        </div>
-        <%= f.submit "Explore", class: "btn btn-primary" %>
-      <% end %>
+      <%
+        # Build hidden fields for context preservation
+        hidden_fields = {}
+        hidden_fields[:propose_for_project] = @propose_for_project.id if @propose_for_project
+      %>
+      <%= search_form explore_people_path,
+          search_placeholder: "Search by name, skills, or interests...",
+          filters: hidden_fields.map { |k, v| { name: k, type: :hidden, value: v } },
+          form_options: {
+            class: "flex flex-wrap items-center gap-3",
+            data: { turbo_frame: "people_explore" }
+          } %>
     </div>
   </div>
 
-  <%# Results Section %>
-  <%= render partial: "shared/explore_users", locals: {
-      users: @users,
-      pagy: @pagy,
-      title: @propose_for_project ? "Select a Collaborator" : "Community People",
-      description: @propose_for_project ? "Choose someone to collaborate with on your project" : "Connect with #{@pagy ? @pagy.count : User.count} talented people in our community",
-      propose_for_project: @propose_for_project
-    } %>
+  <%# Results Section with Turbo Frame %>
+  <%= turbo_frame_tag "people_explore" do %>
+    <%= render partial: "shared/explore_users", locals: {
+        users: @users,
+        pagy: @pagy,
+        title: @propose_for_project ? "Select a Collaborator" : "",
+        description: @propose_for_project ? "" : "Connect with #{@pagy ? @pagy.count : User.count} talented people in our community",
+        propose_for_project: @propose_for_project
+      } %>
+  <% end %>
 </div>

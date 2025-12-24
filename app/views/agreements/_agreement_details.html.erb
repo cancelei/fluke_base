@@ -13,7 +13,11 @@
   <div class="bg-base-200/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
     <dt class="text-sm font-medium text-base-content/70">Parties</dt>
     <dd class="mt-1 text-sm sm:col-span-2 sm:mt-0">
-      <%= presenter.parties_display %>
+      <%= render Ui::AvatarGroupComponent.new(
+        users: agreement.agreement_participants.includes(:user).map(&:user),
+        size: :sm,
+        max_visible: 4
+      ) %>
     </dd>
   </div>
 

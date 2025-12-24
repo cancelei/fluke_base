@@ -1,3 +1,35 @@
+# == Schema Information
+#
+# Table name: time_logs
+#
+#  id           :bigint           not null, primary key
+#  description  :text
+#  ended_at     :datetime
+#  hours_spent  :decimal(10, 2)   default(0.0)
+#  manual_entry :boolean          default(FALSE)
+#  started_at   :datetime         not null
+#  status       :string           default("in_progress")
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  milestone_id :bigint
+#  project_id   :bigint           not null
+#  user_id      :bigint           not null
+#
+# Indexes
+#
+#  index_time_logs_on_milestone_id                 (milestone_id)
+#  index_time_logs_on_project_id_and_milestone_id  (project_id,milestone_id)
+#  index_time_logs_on_project_id_and_user_id       (project_id,user_id)
+#  index_time_logs_on_started_at                   (started_at)
+#  index_time_logs_on_status                       (status)
+#  index_time_logs_on_user_id                      (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (milestone_id => milestones.id)
+#  fk_rails_...  (project_id => projects.id)
+#  fk_rails_...  (user_id => users.id)
+#
 FactoryBot.define do
   factory :time_log do
     association :project

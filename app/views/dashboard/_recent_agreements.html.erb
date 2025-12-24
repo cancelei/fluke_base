@@ -37,17 +37,13 @@
                     </div>
                   </div>
 
-                  <!-- Details with Other Party Avatar -->
+                  <!-- Details with Parties Avatar Group -->
                   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 w-full">
-                    <% the_other_party = is_initiator ? agreement.other_party : agreement.initiator %>
-                    <% if the_other_party %>
-                      <%= link_to person_path(the_other_party), onclick: "event.stopPropagation();", class: "flex items-center gap-2 hover:text-primary transition-colors" do %>
-                        <%= render Ui::AvatarComponent.new(user: the_other_party, size: :sm, placeholder: :initials) %>
-                        <span class="text-sm font-medium truncate max-w-[120px]"><%= the_other_party.full_name %></span>
-                      <% end %>
-                    <% else %>
-                      <span class="text-sm text-base-content/70"><%= agreement_presenter.parties_display %></span>
-                    <% end %>
+                    <%= render Ui::AvatarGroupComponent.new(
+                      users: [agreement.initiator, agreement.other_party].compact,
+                      size: :sm,
+                      max_visible: 2
+                    ) %>
                     <div class="flex items-center gap-3">
                       <span class="text-sm text-base-content/60"><%= agreement_presenter.time_remaining %></span>
                       <% if needs_action %>

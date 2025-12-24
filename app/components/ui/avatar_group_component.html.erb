@@ -1,0 +1,167 @@
+<%# Avatar Group Component - Stacked avatars with hover popovers and overflow dropdown %>
+<div class="<%= container_classes %>"
+     data-controller="avatar-group"
+     data-avatar-group-popover-delay-value="200">
+
+  <%# Visible Avatars %>
+  <% visible_users.each do |user| %>
+    <div class="relative"
+         data-avatar-group-target="avatarWrapper"
+         data-user-id="<%= user.id %>">
+
+      <%# Popover Trigger Area %>
+      <div data-action="mouseenter->avatar-group#showPopover mouseleave->avatar-group#scheduleHidePopover focus->avatar-group#showPopover blur->avatar-group#hidePopover"
+           tabindex="0"
+           role="button"
+           aria-haspopup="true"
+           aria-label="View <%= user.full_name %> profile"
+           class="cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full">
+
+        <%# Avatar using existing component %>
+        <% if link_to_profile? %>
+          <%= link_to profile_path(user), class: "block", data: { turbo_frame: "_top" } do %>
+            <%= render Ui::AvatarComponent.new(
+              user:,
+              size: avatar_size,
+              ring: show_ring?,
+              ring_color: avatar_ring_color,
+              placeholder: :initials
+            ) %>
+          <% end %>
+        <% else %>
+          <%= render Ui::AvatarComponent.new(
+            user:,
+            size: avatar_size,
+            ring: show_ring?,
+            ring_color: avatar_ring_color,
+            placeholder: :initials
+          ) %>
+        <% end %>
+      </div>
+
+      <%# Popover Card (hidden by default) %>
+      <% if show_popover? %>
+        <div class="absolute z-50 hidden opacity-0 transition-opacity duration-200 pointer-events-none"
+             data-avatar-group-target="popover"
+             data-user-id="<%= user.id %>"
+             role="tooltip"
+             aria-hidden="true">
+          <div class="card card-compact bg-base-100 shadow-xl w-56 border border-base-300">
+            <div class="card-body p-3">
+              <%# Avatar and Name %>
+              <div class="flex items-center gap-3 mb-2">
+                <%= render Ui::AvatarComponent.new(user:, size: :md, placeholder: :initials) %>
+                <div class="min-w-0 flex-1">
+                  <div class="font-semibold text-sm truncate"><%= user.full_name %></div>
+                  <% if (role = user_role(user)) %>
+                    <div class="text-xs text-base-content/60 truncate"><%= role.to_s.titleize %></div>
+                  <% end %>
+                </div>
+              </div>
+
+              <div class="divider my-1"></div>
+
+              <%# Profile Link %>
+              <% if link_to_profile? %>
+                <%= link_to "View Profile", profile_path(user),
+                    class: "btn btn-primary btn-sm btn-block",
+                    data: { turbo_frame: "_top" } %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# Overflow Badge with Dropdown %>
+  <% if has_overflow? %>
+    <div class="dropdown dropdown-hover dropdown-end"
+         data-avatar-group-target="overflowDropdown">
+      <%# Overflow Badge %>
+      <div tabindex="0"
+           role="button"
+           class="avatar placeholder cursor-pointer"
+           aria-label="Show <%= total_overflow_count %> more users">
+        <div class="<%= overflow_badge_classes %>">
+          <span class="<%= overflow_text_classes %>">+<%= total_overflow_count %></span>
+        </div>
+      </div>
+
+      <%# Dropdown Content %>
+      <div tabindex="0"
+           class="dropdown-content z-[100] card card-compact bg-base-100 shadow-xl w-72 max-h-80 overflow-y-auto border border-base-300"
+           role="menu"
+           aria-label="Additional team members">
+        <div class="card-body p-2">
+          <div class="text-xs font-semibold text-base-content/60 px-2 py-1">
+            <%= total_overflow_count %> more <%= "person".pluralize(total_overflow_count) %>
+          </div>
+          <ul class="menu p-0">
+            <% overflow_users.each do |user| %>
+              <li>
+                <div class="flex items-center gap-3 p-2 hover:bg-base-200 rounded-lg relative group"
+                     data-action="mouseenter->avatar-group#showOverflowPopover mouseleave->avatar-group#hideOverflowPopover"
+                     data-user-id="<%= user.id %>">
+                  <%# Small Avatar %>
+                  <%= render Ui::AvatarComponent.new(
+                    user:,
+                    size: :sm,
+                    placeholder: :initials
+                  ) %>
+
+                  <%# User Info %>
+                  <div class="flex-1 min-w-0">
+                    <% if link_to_profile? %>
+                      <%= link_to user.full_name, profile_path(user),
+                          class: "font-medium text-sm truncate block hover:text-primary",
+                          data: { turbo_frame: "_top" } %>
+                    <% else %>
+                      <span class="font-medium text-sm truncate block"><%= user.full_name %></span>
+                    <% end %>
+                    <% if (role = user_role(user)) %>
+                      <span class="text-xs text-base-content/60 truncate block"><%= role.to_s.titleize %></span>
+                    <% end %>
+                  </div>
+
+                  <%# Hover Popover for overflow items %>
+                  <% if show_popover? %>
+                    <div class="absolute left-full ml-2 hidden group-hover:block z-[110]"
+                         data-avatar-group-target="overflowPopover"
+                         role="tooltip">
+                      <div class="card card-compact bg-base-100 shadow-xl w-56 border border-base-300">
+                        <div class="card-body p-3">
+                          <div class="flex items-center gap-3 mb-2">
+                            <%= render Ui::AvatarComponent.new(user:, size: :md, placeholder: :initials) %>
+                            <div class="min-w-0 flex-1">
+                              <div class="font-semibold text-sm truncate"><%= user.full_name %></div>
+                              <% if (role = user_role(user)) %>
+                                <div class="text-xs text-base-content/60 truncate"><%= role.to_s.titleize %></div>
+                              <% end %>
+                            </div>
+                          </div>
+                          <div class="divider my-1"></div>
+                          <% if link_to_profile? %>
+                            <%= link_to "View Profile", profile_path(user),
+                                class: "btn btn-primary btn-sm btn-block",
+                                data: { turbo_frame: "_top" } %>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </li>
+            <% end %>
+
+            <% if total_overflow_count > overflow_users.size %>
+              <li class="text-center text-xs text-base-content/50 py-2 px-2">
+                And <%= total_overflow_count - overflow_users.size %> more...
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

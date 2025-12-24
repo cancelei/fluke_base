@@ -51,7 +51,7 @@ RSpec.describe ProjectCardComponent, type: :component do
     it "displays project name as link" do
       render_inline(described_class.new(project:))
 
-      expect(page).to have_link(href: "/projects/#{project.id}")
+      expect(page).to have_link(href: "/projects/#{project.friendly_id}")
     end
 
     it "renders name in h3 with semibold styling" do

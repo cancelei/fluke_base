@@ -1,6 +1,8 @@
 require "json"
 
 class ProjectForm < ApplicationForm
+  include UrlNormalizable
+
   # Make this form object use 'project' as the param key for Rails forms
   def self.model_name
     ActiveModel::Name.new(self, nil, "Project")
@@ -29,10 +31,12 @@ class ProjectForm < ApplicationForm
     with: /\A([a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+)?\z/,
     message: "must be a valid GitHub repository (e.g., username/repository)"
   }, allow_blank: true
+  validate :project_link_is_valid_url
 
   def initialize(attributes = {})
     super
     normalize_repository_url
+    normalize_project_link
     self.public_fields = parse_public_fields(public_fields)
     set_defaults
   end
@@ -205,6 +209,27 @@ class ProjectForm < ApplicationForm
     else
       # Already in owner/repo format - just clean it
       self.repository_url = url.gsub(/\.git$/i, "").gsub(%r{/+$}, "")
+    end
+  end
+
+  def normalize_project_link
+    self.project_link = normalize_url_for_storage(project_link)
+  end
+
+  def project_link_is_valid_url
+    return if project_link.blank?
+
+    # Build a full URL for validation
+    test_url = "https://#{project_link}"
+
+    begin
+      uri = URI.parse(test_url)
+      # Must have a valid host with at least one dot (e.g., example.com)
+      unless uri.host.present? && uri.host.include?(".")
+        errors.add(:project_link, "must be a valid website URL (e.g., example.com)")
+      end
+    rescue URI::InvalidURIError
+      errors.add(:project_link, "must be a valid website URL (e.g., example.com)")
     end
   end
 end

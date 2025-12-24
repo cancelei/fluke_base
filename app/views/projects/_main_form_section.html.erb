@@ -4,7 +4,6 @@
 %>
 
 <div id="main-project-form" class="<%= "hidden" unless show_form %>" data-stealth-mode-target="mainForm">
-  <%= render "privacy_info" %>
 
   <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
     <!-- Project Name -->
@@ -99,18 +98,18 @@
                  placeholder: "https://github.com/username/repo or username/repo"
                } %>
 
-    <!-- Project Link -->
+    <!-- Website Link -->
     <%= render "form_field",
                form:,
                field_name: :project_link,
                project:,
-               label: "Project Link",
+               label: "Website Link",
                field_type: :url_field,
                col_span: 6,
-               help_text: "Add hosted project link",
+               help_text: "Any URL works - homepage, subpage, or specific link (e.g., example.com/about)",
                options: {
                  prefix: "https://",
-                 placeholder: "example.com"
+                 placeholder: "example.com or example.com/subpage"
                } %>
 
     <!-- Section Header -->

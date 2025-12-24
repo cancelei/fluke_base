@@ -1,5 +1,28 @@
 # frozen_string_literal: true
 
+# == Schema Information
+#
+# Table name: ratings
+#
+#  id            :bigint           not null, primary key
+#  rateable_type :string           not null
+#  review        :text
+#  value         :integer          not null
+#  created_at    :datetime         not null
+#  updated_at    :datetime         not null
+#  rateable_id   :bigint           not null
+#  rater_id      :bigint           not null
+#
+# Indexes
+#
+#  index_ratings_on_rateable  (rateable_type,rateable_id)
+#  index_ratings_on_rater_id  (rater_id)
+#  index_ratings_uniqueness   (rater_id,rateable_type,rateable_id) UNIQUE
+#
+# Foreign Keys
+#
+#  fk_rails_...  (rater_id => users.id)
+#
 class Rating < ApplicationRecord
   # Associations
   belongs_to :rater, class_name: "User"

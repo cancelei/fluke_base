@@ -13,9 +13,20 @@
       Team Permissions
     </h2>
 
-    <p class="text-sm text-base-content/60 mb-4">
-      Manage who can access this project and what they can do.
-    </p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+      <p class="text-sm text-base-content/60">
+        Manage who can access this project and what they can do.
+      </p>
+      <%# Quick team preview %>
+      <% if memberships.any? %>
+        <%= render Ui::AvatarGroupComponent.new(
+          users: memberships.map(&:user),
+          size: :xs,
+          max_visible: 5,
+          show_popover: true
+        ) %>
+      <% end %>
+    </div>
 
     <%# Members Table %>
     <% if memberships.any? %>

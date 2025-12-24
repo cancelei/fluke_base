@@ -1,3 +1,36 @@
+# == Schema Information
+#
+# Table name: agreements
+#
+#  id                :bigint           not null, primary key
+#  agreement_type    :string           not null
+#  end_date          :date             not null
+#  equity_percentage :decimal(5, 2)
+#  hourly_rate       :decimal(10, 2)
+#  milestone_ids     :integer          default([]), is an Array
+#  payment_type      :string           not null
+#  start_date        :date             not null
+#  status            :string           not null
+#  tasks             :text             not null
+#  terms             :text
+#  weekly_hours      :integer
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  project_id        :bigint           not null
+#
+# Indexes
+#
+#  index_agreements_on_agreement_type             (agreement_type)
+#  index_agreements_on_created_at                 (created_at)
+#  index_agreements_on_payment_type               (payment_type)
+#  index_agreements_on_project_id                 (project_id)
+#  index_agreements_on_status                     (status)
+#  index_agreements_on_status_and_agreement_type  (status,agreement_type)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (project_id => projects.id)
+#
 require 'rails_helper'
 
 RSpec.describe Agreement, type: :model do

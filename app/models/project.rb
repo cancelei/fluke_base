@@ -1,6 +1,52 @@
 # frozen_string_literal: true
 
+# == Schema Information
+#
+# Table name: projects
+#
+#  id                    :bigint           not null, primary key
+#  category              :string
+#  collaboration_type    :string
+#  current_stage         :string
+#  description           :text             not null
+#  funding_status        :string
+#  github_last_polled_at :datetime
+#  name                  :string           not null
+#  project_link          :string
+#  public_fields         :string           default([]), not null, is an Array
+#  repository_url        :string
+#  slug                  :string
+#  stage                 :string           not null
+#  stealth_category      :string
+#  stealth_description   :text
+#  stealth_mode          :boolean          default(FALSE), not null
+#  stealth_name          :string
+#  target_market         :text
+#  team_size             :string
+#  created_at            :datetime         not null
+#  updated_at            :datetime         not null
+#  user_id               :bigint           not null
+#
+# Indexes
+#
+#  index_projects_on_collaboration_type     (collaboration_type)
+#  index_projects_on_created_at             (created_at)
+#  index_projects_on_github_last_polled_at  (github_last_polled_at)
+#  index_projects_on_slug                   (slug) UNIQUE
+#  index_projects_on_stage                  (stage)
+#  index_projects_on_stealth_mode           (stealth_mode)
+#  index_projects_on_user_id                (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (user_id => users.id)
+#
 class Project < ApplicationRecord
+  extend FriendlyId
+  include UrlNormalizable
+
+  friendly_id :name, use: [:slugged, :finders]
+
   # Relationships
   belongs_to :user
   has_many :agreements, dependent: :destroy
@@ -23,9 +69,11 @@ class Project < ApplicationRecord
     with: /\A([a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+)?\z/,
     message: "must be a valid GitHub repository (e.g., username/repository)"
   }, allow_blank: true
+  validate :project_link_is_valid_url
 
   # Default values and lifecycle hooks
   before_validation :normalize_repository_url
+  before_validation :normalize_project_link
   before_save :set_defaults
 
   # Project stages
@@ -298,6 +346,20 @@ class Project < ApplicationRecord
     nil
   end
 
+  # Ransack configuration for search/filter functionality
+  def self.ransackable_attributes(auth_object = nil)
+    %w[name description category collaboration_type stage stealth_mode created_at updated_at user_id]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[user agreements milestones]
+  end
+
+  # FriendlyId: regenerate slug when name changes
+  def should_generate_new_friendly_id?
+    name_changed? || slug.blank?
+  end
+
   private
 
   def github_service
@@ -359,6 +421,27 @@ class Project < ApplicationRecord
     else
       # Already in owner/repo format - just clean it
       self.repository_url = url.gsub(/\.git$/i, "").gsub(%r{/+$}, "")
+    end
+  end
+
+  def normalize_project_link
+    self.project_link = normalize_url_for_storage(project_link)
+  end
+
+  def project_link_is_valid_url
+    return if project_link.blank?
+
+    # Build a full URL for validation
+    test_url = "https://#{project_link}"
+
+    begin
+      uri = URI.parse(test_url)
+      # Must have a valid host with at least one dot (e.g., example.com)
+      unless uri.host.present? && uri.host.include?(".")
+        errors.add(:project_link, "must be a valid website URL (e.g., example.com)")
+      end
+    rescue URI::InvalidURIError
+      errors.add(:project_link, "must be a valid website URL (e.g., example.com)")
     end
   end
 end

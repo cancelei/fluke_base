@@ -268,7 +268,7 @@ RSpec.describe "people/show", type: :view do
 
         render
 
-        expect(rendered).to have_link("https://flukebase.com")
+        expect(rendered).to have_link(href: "https://flukebase.com")
         expect(rendered).to have_css("a[target='_blank']")
       end
     end

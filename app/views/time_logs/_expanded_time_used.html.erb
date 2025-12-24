@@ -123,15 +123,26 @@
           <progress class="progress progress-primary w-full h-4" value="<%= percent_used %>" max="100"></progress>
         </div>
         <div tabindex="0" class="dropdown-content z-[1] card card-compact shadow-xl bg-base-100 w-80 p-4">
-          <div class="font-semibold mb-3">Agreement Participants</div>
+          <div class="flex items-center justify-between mb-3">
+            <div class="font-semibold">Agreement Participants</div>
+            <%= render Ui::AvatarGroupComponent.new(
+              users: agreement.agreement_participants.includes(:user).map(&:user),
+              size: :xs,
+              max_visible: 4,
+              show_popover: false
+            ) %>
+          </div>
           <ul class="space-y-2">
             <% agreement.agreement_participants.includes(:user).each do |participant| %>
               <% participant_used = project.time_logs.where(user_id: participant.user_id).where.not(status: "in_progress").sum(:hours_spent) + (project.time_logs.where(user_id: participant.user_id).in_progress.any? ? ((Time.zone.now - project.time_logs.where(user_id: participant.user_id).in_progress.last.started_at) / 1.hour).round(2) : 0) %>
               <% participant_total = agreement.weekly_hours * agreement.duration_in_weeks %>
               <% participant_percent = participant_total > 0 ? [(participant_used.to_f / participant_total * 100).round, 100].min : 0 %>
               <li class="flex justify-between items-center p-2 bg-base-200 rounded-lg">
-                <span class="font-medium"><%= participant.user&.full_name || participant.user&.email || "User" %></span>
-                <span class="badge badge-primary"><%= participant_used %> / <%= participant_total %>h (<%= participant_percent %>%)</span>
+                <div class="flex items-center gap-2">
+                  <%= render Ui::AvatarComponent.new(user: participant.user, size: :xs, placeholder: :initials) %>
+                  <span class="font-medium text-sm"><%= participant.user&.full_name || participant.user&.email || "User" %></span>
+                </div>
+                <span class="badge badge-primary badge-sm"><%= participant_used %> / <%= participant_total %>h</span>
               </li>
             <% end %>
           </ul>

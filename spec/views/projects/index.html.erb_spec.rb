@@ -35,7 +35,7 @@ RSpec.describe "projects/index.html.erb", type: :view do
 
   it 'renders My Projects header and project card' do
     render
-    expect(rendered).to include('My Projects')
+    expect(rendered).to include('New Project')
     expect(rendered).to include('Alpha')
   end
 end

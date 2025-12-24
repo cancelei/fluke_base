@@ -1,4 +1,39 @@
+# == Schema Information
+#
+# Table name: agreements
+#
+#  id                :bigint           not null, primary key
+#  agreement_type    :string           not null
+#  end_date          :date             not null
+#  equity_percentage :decimal(5, 2)
+#  hourly_rate       :decimal(10, 2)
+#  milestone_ids     :integer          default([]), is an Array
+#  payment_type      :string           not null
+#  start_date        :date             not null
+#  status            :string           not null
+#  tasks             :text             not null
+#  terms             :text
+#  weekly_hours      :integer
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  project_id        :bigint           not null
+#
+# Indexes
+#
+#  index_agreements_on_agreement_type             (agreement_type)
+#  index_agreements_on_created_at                 (created_at)
+#  index_agreements_on_payment_type               (payment_type)
+#  index_agreements_on_project_id                 (project_id)
+#  index_agreements_on_status                     (status)
+#  index_agreements_on_status_and_agreement_type  (status,agreement_type)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (project_id => projects.id)
+#
 class Agreement < ApplicationRecord
+  include AASM
+
   MENTORSHIP = "Mentorship"
   CO_FOUNDER = "Co-Founder"
 
@@ -13,6 +48,36 @@ class Agreement < ApplicationRecord
   EQUITY = "Equity"
   HYBRID = "Hybrid"
 
+  # State machine for agreement status transitions
+  aasm column: :status, whiny_transitions: false, no_direct_assignment: false do
+    state :Pending, initial: true
+    state :Accepted
+    state :Rejected
+    state :Completed
+    state :Cancelled
+    state :Countered
+
+    event :accept_agreement do
+      transitions from: :Pending, to: :Accepted
+    end
+
+    event :reject_agreement do
+      transitions from: :Pending, to: :Rejected
+    end
+
+    event :complete_agreement do
+      transitions from: :Accepted, to: :Completed
+    end
+
+    event :cancel_agreement do
+      transitions from: :Pending, to: :Cancelled
+    end
+
+    event :counter_agreement do
+      transitions from: :Pending, to: :Countered
+    end
+  end
+
   belongs_to :project
   has_many :agreement_participants, dependent: :destroy
   has_many :users, through: :agreement_participants
@@ -21,7 +86,7 @@ class Agreement < ApplicationRecord
 
   has_many :github_logs, dependent: :destroy
 
-  before_validation :init_status, :init_agreement_type
+  before_validation :init_agreement_type
 
   validates :project_id, presence: true
   validates :status, presence: true, inclusion: { in: [PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED, COUNTERED] }
@@ -51,10 +116,6 @@ class Agreement < ApplicationRecord
   scope :with_meetings, -> { includes(:meetings) }
   scope :recent_first, -> { order(created_at: :desc) }
   scope :for_user, ->(user_id) { joins(:agreement_participants).where(agreement_participants: { user_id: }) }
-
-  def init_status
-    self.status = PENDING if self.status.blank?
-  end
 
   def init_agreement_type
     return if self.agreement_type.present?
@@ -187,6 +248,15 @@ class Agreement < ApplicationRecord
   def has_counter_offers? = counter_offers.exists?
   def most_recent_counter_offer = counter_offers.order(created_at: :desc).first
   def latest_counter_offer = most_recent_counter_offer
+
+  # Ransack configuration for search/filter functionality
+  def self.ransackable_attributes(auth_object = nil)
+    %w[status agreement_type payment_type start_date end_date project_id created_at updated_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[project agreement_participants users]
+  end
 
   private
 

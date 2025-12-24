@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_18_140154) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_24_031232) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -118,6 +118,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_18_140154) do
     t.index ["sender_id"], name: "index_conversations_on_sender_id"
   end
 
+  create_table "friendly_id_slugs", force: :cascade do |t|
+    t.string "slug", null: false
+    t.integer "sluggable_id", null: false
+    t.string "sluggable_type", limit: 50
+    t.string "scope"
+    t.datetime "created_at"
+    t.index ["slug", "sluggable_type", "scope"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type_and_scope", unique: true
+    t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
+    t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
+  end
+
   create_table "github_branch_logs", force: :cascade do |t|
     t.bigint "github_branch_id", null: false
     t.bigint "github_log_id", null: false
@@ -215,8 +226,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_18_140154) do
     t.bigint "project_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "slug"
     t.index ["due_date"], name: "index_milestones_on_due_date", comment: "Improves due date queries and sorting"
     t.index ["project_id", "due_date"], name: "index_milestones_on_project_id_and_due_date", comment: "Composite index for project milestone timeline"
+    t.index ["project_id", "slug"], name: "index_milestones_on_project_id_and_slug", unique: true
     t.index ["project_id", "status"], name: "index_milestones_on_project_id_and_status", comment: "Composite index for project milestone progress"
     t.index ["project_id"], name: "index_milestones_on_project_id"
     t.index ["status"], name: "index_milestones_on_status", comment: "Improves filtering by milestone status"
@@ -302,9 +315,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_18_140154) do
     t.text "stealth_description"
     t.string "stealth_category"
     t.datetime "github_last_polled_at"
+    t.string "slug"
     t.index ["collaboration_type"], name: "index_projects_on_collaboration_type", comment: "Improves filtering by seeking mentor/co-founder"
     t.index ["created_at"], name: "index_projects_on_created_at", comment: "Improves ordering by project creation"
     t.index ["github_last_polled_at"], name: "index_projects_on_github_last_polled_at"
+    t.index ["slug"], name: "index_projects_on_slug", unique: true
     t.index ["stage"], name: "index_projects_on_stage", comment: "Improves filtering by project stage"
     t.index ["stealth_mode"], name: "index_projects_on_stealth_mode", comment: "Improves filtering of stealth vs public projects"
     t.index ["user_id"], name: "index_projects_on_user_id"
@@ -521,10 +536,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_18_140154) do
     t.string "theme_preference", default: "nord", null: false
     t.string "instagram"
     t.boolean "admin", default: false, null: false
+    t.string "slug"
     t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["selected_project_id"], name: "index_users_on_selected_project_id"
+    t.index ["slug"], name: "index_users_on_slug", unique: true
   end
 
   create_table "waiting_lists", force: :cascade do |t|

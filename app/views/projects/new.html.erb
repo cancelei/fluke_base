@@ -1,7 +1,1 @@
-<div class="py-6">
-  <%= render "form_header",
-             title: "Create New Project",
-             subtitle: "Start a new project to track your business idea and connect with mentors and co-founders." %>
-
-  <%= render "form", project: @project_form, submit_text: "Create Project", url: projects_path, method: :post %>
-</div>
+<%= render "form", project: @project_form, submit_text: "Create Project", url: projects_path, method: :post %>

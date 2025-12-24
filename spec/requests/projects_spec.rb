@@ -77,7 +77,7 @@ RSpec.describe "Projects", type: :request do
         project: { name: "Updated Project" }
       }
 
-      expect(response).to redirect_to(project_path(project))
+      expect(response).to redirect_to(project_path(project.reload))
       expect(project.reload.name).to eq("Updated Project")
     end
   end

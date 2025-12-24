@@ -1,43 +1,131 @@
+<%#
+  Shared Search Form Partial
+
+  Provides auto-submitting search with debounce for text inputs
+  and immediate submission for dropdowns.
+
+  Usage:
+    <%= search_form some_path,
+        search_placeholder: "Search...",
+        filters: [
+          { name: :category, type: :select, options: [["All", ""], ["Tech", "tech"]] },
+          { name: :status, type: :select, options: [["All", ""], ["Active", "active"]] }
+        ],
+        form_options: { data: { turbo_frame: "results_frame" } }
+%>
+%>
 <%
   # Setup defaults
   form_options = local_assigns[:form_options] || {}
-  form_class = form_options[:class] || "flex flex-wrap gap-2 mb-6"
+  form_class = form_options.delete(:class) || "flex flex-wrap items-end gap-3"
   search_placeholder = local_assigns[:search_placeholder] || "Search..."
   submit_text = local_assigns[:submit_text] || "Search"
   filters = local_assigns[:filters] || []
+  show_submit = local_assigns[:show_submit] || false
+  debounce = local_assigns[:debounce] || 400
+
+  # Merge live-search controller into form data
+  form_data = (form_options[:data] || {}).merge(
+    controller: "live-search",
+    "live-search-debounce-value": debounce
+  )
 %>
 
-<%= form_with url:, method: :get, class: form_class, **form_options do |f| %>
-  <!-- Search Input -->
-  <%= f.text_field :search,
-      value: params[:search],
-      placeholder: search_placeholder,
-      class: "form-input" %>
+<%= form_with url:, method: :get, class: form_class, data: form_data, **form_options.except(:data) do |f| %>
+  <%# Search Input with icon %>
+  <div class="form-control flex-1 min-w-[200px]">
+    <div class="relative">
+      <%= f.text_field :search,
+          value: params[:search],
+          placeholder: search_placeholder,
+          autocomplete: "off",
+          class: "input input-bordered w-full pr-10",
+          data: {
+            live_search_target: "input",
+            action: "input->live-search#search"
+          } %>
+      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+        <svg class="h-5 w-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+    </div>
+  </div>
 
-  <!-- Dynamic Filters -->
+  <%# Dynamic Filters %>
   <% filters.each do |filter| %>
-    <% if filter[:type] == :select %>
-      <%= f.select filter[:name],
-          filter[:options],
-          { selected: params[filter[:name]] },
-          { class: "form-input" } %>
-    <% elsif filter[:type] == :text %>
-      <%= f.text_field filter[:name],
-          value: params[filter[:name]],
-          placeholder: filter[:placeholder],
-          class: "form-input" %>
-    <% elsif filter[:type] == :date %>
-      <%= f.date_field filter[:name],
-          value: params[filter[:name]],
-          class: "form-input" %>
+    <% case filter[:type]&.to_sym %>
+    <% when :select %>
+      <div class="form-control">
+        <% if filter[:label] %>
+          <%= f.label filter[:name], filter[:label], class: "label label-text text-xs pb-1" %>
+        <% end %>
+        <%= f.select filter[:name],
+            filter[:options],
+            { selected: params[filter[:name]] },
+            {
+              class: "select select-bordered min-w-[150px]",
+              data: {
+                live_search_target: "input",
+                action: "change->live-search#submitNow"
+              }
+            } %>
+      </div>
+
+    <% when :text %>
+      <div class="form-control">
+        <% if filter[:label] %>
+          <%= f.label filter[:name], filter[:label], class: "label label-text text-xs pb-1" %>
+        <% end %>
+        <%= f.text_field filter[:name],
+            value: params[filter[:name]],
+            placeholder: filter[:placeholder] || filter[:label],
+            class: "input input-bordered min-w-[150px]",
+            data: {
+              live_search_target: "input",
+              action: "input->live-search#search"
+            } %>
+      </div>
+
+    <% when :date %>
+      <div class="form-control">
+        <% if filter[:label] %>
+          <%= f.label filter[:name], filter[:label], class: "label label-text text-xs pb-1" %>
+        <% end %>
+        <%= f.date_field filter[:name],
+            value: params[filter[:name]],
+            class: "input input-bordered",
+            data: {
+              live_search_target: "input",
+              action: "change->live-search#submitNow"
+            } %>
+      </div>
+
+    <% when :hidden %>
+      <%= f.hidden_field filter[:name], value: filter[:value] || params[filter[:name]] %>
     <% end %>
   <% end %>
 
-  <!-- Custom Filter Block -->
-  <% if block %>
+  <%# Custom Filter Block %>
+  <% if local_assigns[:block] %>
     <%= capture(f, &block) %>
   <% end %>
 
-  <!-- Submit Button -->
-  <%= f.submit submit_text, class: "btn btn-primary" %>
+  <%# Clear filters button %>
+  <% if params[:search].present? || filters.any? { |f| params[f[:name]].present? } %>
+    <button type="button"
+            class="btn btn-ghost btn-sm gap-1"
+            data-action="click->live-search#clear"
+            title="Clear all filters">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      <span class="hidden sm:inline">Clear</span>
+    </button>
+  <% end %>
+
+  <%# Submit Button (hidden by default) %>
+  <%= f.submit submit_text,
+      class: show_submit ? "btn btn-primary" : "hidden",
+      data: { live_search_target: "submitButton" } %>
 <% end %>

@@ -24,8 +24,10 @@ export default class extends Controller {
     // Update customization section
     if (this.hasCustomizationTarget) {
       if (isStealthMode) {
-        this.customizationTarget.classList.remove('hidden');
+        this.customizationTarget.classList.add('group-hover:block');
+        this.customizationTarget.classList.add('hidden'); // Ensure it stays hidden by default (non-hover)
       } else {
+        this.customizationTarget.classList.remove('group-hover:block');
         this.customizationTarget.classList.add('hidden');
       }
     }

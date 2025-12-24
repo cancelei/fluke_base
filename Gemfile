@@ -49,6 +49,15 @@ gem "ruby_llm"
 
 # Result types for explicit success/failure handling
 gem "dry-monads", "~> 1.6"
+
+# State machine for workflow management
+gem "aasm", "~> 5.5"
+
+# Advanced search and filtering
+gem "ransack", "~> 4.2"
+
+# SEO-friendly URLs with slugs
+gem "friendly_id", "~> 5.5"
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
@@ -110,6 +119,9 @@ group :development do
 
   # Database schema analysis and optimization
   gem "active_record_doctor"
+
+  # Schema annotations for models
+  gem "annotaterb"
 end
 
 group :test do

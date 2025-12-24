@@ -240,14 +240,14 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
 
       within("[data-controller='context-nav']") do
         find("details.dropdown summary", match: :first).click
-        expect(page).to have_content("Switch Project Context")
+        expect(page).to have_content("New Project")
       end
 
       # Click outside to close
       find("body").click
 
       within("[data-controller='context-nav']") do
-        expect(page).not_to have_content("Switch Project Context")
+        expect(page).not_to have_content("New Project")
       end
     end
 
@@ -275,13 +275,13 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
       within("[data-controller='context-nav']") do
         # Open project dropdown
         find("details.dropdown summary", match: :first).click
-        expect(page).to have_content("Switch Project Context")
+        expect(page).to have_content("New Project")
 
         # Open milestone dropdown
         click_button("Milestones")
 
         # Project dropdown should close
-        expect(page).not_to have_content("Switch Project Context")
+        expect(page).not_to have_content("New Project")
         expect(page).to have_content("Project Milestones")
       end
     end

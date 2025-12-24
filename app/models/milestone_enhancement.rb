@@ -1,3 +1,29 @@
+# == Schema Information
+#
+# Table name: milestone_enhancements
+#
+#  id                   :bigint           not null, primary key
+#  context_data         :json
+#  enhanced_description :text
+#  enhancement_style    :string
+#  original_description :text
+#  processing_time_ms   :integer
+#  status               :string
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  milestone_id         :bigint           not null
+#  user_id              :bigint           not null
+#
+# Indexes
+#
+#  index_milestone_enhancements_on_milestone_id  (milestone_id)
+#  index_milestone_enhancements_on_user_id       (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (milestone_id => milestones.id)
+#  fk_rails_...  (user_id => users.id)
+#
 class MilestoneEnhancement < ApplicationRecord
   belongs_to :milestone
   belongs_to :user

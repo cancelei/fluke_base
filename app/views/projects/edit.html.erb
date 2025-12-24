@@ -1,7 +1,1 @@
-<div class="py-6">
-  <%= render "form_header",
-             title: "Edit Project",
-             subtitle: "Update your project details and settings to keep your information current." %>
-
-  <%= render "form", project: @project_form, submit_text: "Update Project", url: project_path(@project), method: :patch %>
-</div>
+<%= render "form", project: @project_form, submit_text: "Update Project", url: project_path(@project), method: :patch %>

@@ -1,46 +1,53 @@
+# Query object for searching and filtering users (people)
+# Uses Ransack for declarative filtering
 class PeopleSearchQuery
   def initialize(current_user, params = {})
     @current_user = current_user
-    @params = params
+    @params = normalize_params(params)
+    @q = build_ransack_params
   end
+
+  attr_reader :q
 
   def results
     scope = base_scope
-    scope = filter_by_search_term(scope)
-    scope = filter_by_role(scope)
-    scope = filter_by_project(scope)
-    # Removed exclude_current_user to allow users to see their own profile
-    add_includes(scope)
+    scope = apply_project_filter(scope)
+    apply_ransack(scope)
+  end
+
+  def search_object(scope = User.all)
+    scope.ransack(@q)
   end
 
   private
+
+  def normalize_params(params)
+    hash = params.respond_to?(:to_unsafe_h) ? params.to_unsafe_h : params.to_h
+    hash.with_indifferent_access
+  end
+
+  def apply_ransack(scope)
+    scope.ransack(@q).result(distinct: true)
+         .includes(:projects, :initiated_agreements, :received_agreements)
+  end
 
   def base_scope
     User.all
   end
 
-  def filter_by_search_term(scope)
-    return scope unless @params[:search].present?
-
-    scope.where("(first_name ILIKE :q OR last_name ILIKE :q OR bio ILIKE :q)", q: "%#{@params[:search]}%")
-  end
-
-  def filter_by_role(scope)
-    # Role filtering removed with role system elimination
-    scope
-  end
-
-  def filter_by_project(scope)
+  def apply_project_filter(scope)
     return scope unless @params[:project_id].present?
-
     scope.joins(:projects).where(projects: { id: @params[:project_id] })
   end
 
-  def exclude_current_user(scope)
-    scope.where.not(id: @current_user.id)
-  end
+  def build_ransack_params
+    q = {}
 
-  def add_includes(scope)
-    scope.distinct.includes(:projects, :initiated_agreements, :received_agreements)
+    # Text search on name and bio
+    if @params[:search].present?
+      q[:first_name_or_last_name_or_bio_cont] = @params[:search]
+    end
+
+    q
   end
 end
