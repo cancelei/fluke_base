@@ -258,23 +258,57 @@ class User < ApplicationRecord
     installation_for_repo(repo_full_name).present?
   end
 
-  # OmniAuth callback for GitHub - link OAuth credentials to user
+  # OmniAuth callback for GitHub - find or create user from OAuth
+  # Returns { user:, created: } hash
   def self.from_github_omniauth(auth)
     # Find existing user by GitHub UID or email
     user = find_by(github_uid: auth.uid) || find_by(email: auth.info.email)
-    return nil unless user
 
-    # Update OAuth credentials
-    user.update!(
+    if user
+      # Update OAuth credentials for existing user
+      user.update!(github_oauth_attributes(auth))
+      { user:, created: false }
+    else
+      # Create new user from GitHub data
+      { user: create_from_github(auth), created: true }
+    end
+  end
+
+  # Create a new user from GitHub OAuth data
+  def self.create_from_github(auth)
+    # Extract name parts from GitHub
+    name_parts = extract_name_from_github(auth)
+
+    create!(
+      email: auth.info.email,
+      password: Devise.friendly_token[0, 20],
+      first_name: name_parts[:first_name],
+      last_name: name_parts[:last_name],
+      **github_oauth_attributes(auth)
+    )
+  end
+
+  # Extract first and last name from GitHub profile
+  def self.extract_name_from_github(auth)
+    full_name = auth.info.name.presence || auth.info.nickname
+    parts = full_name.to_s.split(" ", 2)
+
+    {
+      first_name: parts[0].presence || auth.info.nickname || "GitHub",
+      last_name: parts[1].presence || "User"
+    }
+  end
+
+  # Common GitHub OAuth attributes for update/create
+  def self.github_oauth_attributes(auth)
+    {
       github_uid: auth.uid,
       github_user_access_token: auth.credentials.token,
       github_refresh_token: auth.credentials.refresh_token,
       github_token_expires_at: auth.credentials.expires_at ? Time.at(auth.credentials.expires_at) : nil,
       github_username: auth.info.nickname,
       github_connected_at: Time.current
-    )
-
-    user
+    }
   end
 
   private

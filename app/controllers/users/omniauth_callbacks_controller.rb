@@ -3,8 +3,10 @@
 module Users
   # Handles GitHub OAuth callbacks from OmniAuth
   #
-  # This controller links GitHub accounts to existing FlukeBase users.
-  # Users must already have an account - we don't create accounts via OAuth.
+  # This controller handles:
+  # - New user signups via GitHub (creates account from GitHub data)
+  # - Existing user logins via GitHub
+  # - Linking GitHub to signed-in users
   #
   class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     skip_before_action :authenticate_user!, only: [:github, :failure]
@@ -14,22 +16,19 @@ module Users
     def github
       auth = request.env["omniauth.auth"]
 
+      # Validate we have required data from GitHub
+      unless auth&.info&.email.present?
+        flash[:error] = "Could not get your email from GitHub. Please ensure your email is public or try signing up with email."
+        redirect_to new_user_registration_path
+        return
+      end
+
       if current_user
         # User is signed in - link GitHub to their account
         link_github_to_current_user(auth)
       else
-        # User is not signed in - check if we can find them
-        user = User.from_github_omniauth(auth)
-
-        if user
-          # Found existing user by GitHub UID or email
-          sign_in_and_redirect user, event: :authentication
-          set_flash_message(:notice, :success, kind: "GitHub") if is_navigational_format?
-        else
-          # No existing user - redirect to sign up
-          flash[:error] = "Please create an account first, then connect your GitHub account from your profile."
-          redirect_to new_user_registration_path
-        end
+        # User is not signed in - find or create user
+        handle_github_signup_or_login(auth)
       end
     end
 
@@ -83,6 +82,36 @@ module Users
 
     def failure_message
       params[:message] || request.env["omniauth.error"]&.message
+    end
+
+    def handle_github_signup_or_login(auth)
+      result = User.from_github_omniauth(auth)
+      user = result[:user]
+      created = result[:created]
+
+      if user.persisted?
+        sign_in_and_redirect user, event: :authentication
+
+        if created
+          flash[:success] = "Welcome to FlukeBase! Your account has been created with GitHub."
+        else
+          set_flash_message(:notice, :success, kind: "GitHub") if is_navigational_format?
+        end
+      else
+        # User creation failed - show errors
+        session["devise.github_data"] = {
+          email: auth.info.email,
+          first_name: User.extract_name_from_github(auth)[:first_name],
+          last_name: User.extract_name_from_github(auth)[:last_name],
+          github_username: auth.info.nickname
+        }
+        flash[:error] = "Could not create account: #{user.errors.full_messages.join(', ')}"
+        redirect_to new_user_registration_path
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.error "[OmniAuth] Failed to create user from GitHub: #{e.message}"
+      flash[:error] = "Could not create account: #{e.record.errors.full_messages.join(', ')}"
+      redirect_to new_user_registration_path
     end
   end
 end
