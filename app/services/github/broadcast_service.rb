@@ -74,10 +74,10 @@ module Github
 
     # Broadcast filters section update (branches and users dropdowns)
     def broadcast_filters
-      # # Get available branches and users using the same logic as the controller
-      # logs_query = Github::LogsQuery.new(project:, params: {})
-      # available_branches = logs_query.available_branches
-      # available_users = logs_query.available_users
+      # Get available branches and users using the same logic as the controller
+      logs_query = Github::LogsQuery.new(project:, params: {})
+      available_branches = logs_query.available_branches
+      available_users = logs_query.available_users
 
       broadcast_update("github_filters", "github_logs/filters_section", {
         available_branches:,
