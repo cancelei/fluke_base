@@ -3,6 +3,11 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Allow Cloudflare Tunnel domains and flukebase domains
+  config.hosts << /.*\.trycloudflare\.com/
+  config.hosts << "dev.flukebase.me"
+  config.hosts << "staging.flukebase.me"
+
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 

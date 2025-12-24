@@ -23,12 +23,19 @@ module Users
         return
       end
 
-      # Validate we have required data from GitHub
-      unless auth.info&.email.present?
-        flash[:error] = "Could not get your email from GitHub. Please ensure your email is public or try signing up with email."
+      # Get a valid email address from GitHub
+      # Handles private emails by checking verified emails list
+      email = extract_verified_email(auth)
+
+      unless email.present?
+        flash[:error] = "Could not get a verified email from GitHub. Please ensure you have " \
+                        "at least one verified email on your GitHub account, or sign up with email."
         redirect_to new_user_registration_path
         return
       end
+
+      # Store the resolved email for downstream processing
+      auth.info.email = email
 
       if current_user
         # User is signed in - link GitHub to their account
@@ -120,6 +127,56 @@ module Users
 
       flash[:error] = friendly_error_message(raw_error)
       redirect_to new_user_registration_path
+    end
+
+    # Extract a usable email from GitHub OAuth response
+    # Handles private emails by:
+    # 1. Using primary email from auth.info.email if valid
+    # 2. Falling back to verified emails from auth.extra.all_emails
+    # 3. Rejecting noreply@github.com addresses for account creation
+    #
+    # The user:email scope provides access to verified emails even when
+    # the user has "Keep my email address private" enabled.
+    def extract_verified_email(auth)
+      # First try the primary email
+      primary_email = auth.info&.email
+
+      # Check if it's a valid, non-noreply email
+      if primary_email.present? && !github_noreply_email?(primary_email)
+        return primary_email
+      end
+
+      # If primary is noreply or missing, check verified emails
+      # (requires user:email scope)
+      all_emails = auth.extra&.all_emails || auth.extra&.raw_info&.emails || []
+
+      # Find the first verified, non-noreply email
+      # Prefer primary if available
+      verified_email = all_emails
+        .select { |e| e[:verified] || e["verified"] }
+        .reject { |e| github_noreply_email?(e[:email] || e["email"]) }
+        .sort_by { |e| (e[:primary] || e["primary"]) ? 0 : 1 }
+        .first
+
+      email = verified_email&.dig(:email) || verified_email&.dig("email")
+
+      if email.blank? && primary_email.present?
+        # Fall back to noreply if that's all we have
+        # This allows login for existing users, but new signups will need to
+        # provide an email manually
+        Rails.logger.info "[OmniAuth] Using GitHub noreply email as fallback: #{primary_email}"
+        return primary_email
+      end
+
+      email
+    end
+
+    # Check if email is a GitHub noreply address
+    def github_noreply_email?(email)
+      return false if email.blank?
+
+      email.end_with?("@users.noreply.github.com") ||
+        email == "noreply@github.com"
     end
 
     def handle_github_signup_or_login(auth)

@@ -2,44 +2,45 @@
 #
 # Table name: users
 #
-#  id                       :bigint           not null, primary key
-#  admin                    :boolean          default(FALSE), not null
-#  avatar                   :string
-#  bio                      :text
-#  business_info            :text
-#  business_stage           :string
-#  email                    :string           default(""), not null
-#  encrypted_password       :string           default(""), not null
-#  facebook                 :string
-#  first_name               :string           not null
-#  github_connected_at      :datetime
-#  github_refresh_token     :string
-#  github_token             :string(255)
-#  github_token_expires_at  :datetime
-#  github_uid               :string
-#  github_user_access_token :string
-#  github_username          :string
-#  help_seekings            :string           default([]), is an Array
-#  hourly_rate              :float
-#  industries               :string           default([]), is an Array
-#  instagram                :string
-#  last_name                :string           not null
-#  linkedin                 :string
-#  multi_project_tracking   :boolean          default(FALSE), not null
-#  remember_created_at      :datetime
-#  reset_password_sent_at   :datetime
-#  reset_password_token     :string
-#  show_project_context_nav :boolean          default(FALSE), not null
-#  skills                   :string           default([]), is an Array
-#  slug                     :string
-#  theme_preference         :string           default("nord"), not null
-#  tiktok                   :string
-#  x                        :string
-#  years_of_experience      :float
-#  youtube                  :string
-#  created_at               :datetime         not null
-#  updated_at               :datetime         not null
-#  selected_project_id      :bigint
+#  id                              :bigint           not null, primary key
+#  admin                           :boolean          default(FALSE), not null
+#  avatar                          :string
+#  bio                             :text
+#  business_info                   :text
+#  business_stage                  :string
+#  email                           :string           default(""), not null
+#  encrypted_password              :string           default(""), not null
+#  facebook                        :string
+#  first_name                      :string           not null
+#  github_connected_at             :datetime
+#  github_refresh_token            :text
+#  github_refresh_token_expires_at :datetime
+#  github_token                    :text
+#  github_token_expires_at         :datetime
+#  github_uid                      :string
+#  github_user_access_token        :text
+#  github_username                 :string
+#  help_seekings                   :string           default([]), is an Array
+#  hourly_rate                     :float
+#  industries                      :string           default([]), is an Array
+#  instagram                       :string
+#  last_name                       :string           not null
+#  linkedin                        :string
+#  multi_project_tracking          :boolean          default(FALSE), not null
+#  remember_created_at             :datetime
+#  reset_password_sent_at          :datetime
+#  reset_password_token            :string
+#  show_project_context_nav        :boolean          default(FALSE), not null
+#  skills                          :string           default([]), is an Array
+#  slug                            :string
+#  theme_preference                :string           default("nord"), not null
+#  tiktok                          :string
+#  x                               :string
+#  years_of_experience             :float
+#  youtube                         :string
+#  created_at                      :datetime         not null
+#  updated_at                      :datetime         not null
+#  selected_project_id             :bigint
 #
 # Indexes
 #

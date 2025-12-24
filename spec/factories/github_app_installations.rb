@@ -1,5 +1,29 @@
 # frozen_string_literal: true
 
+# == Schema Information
+#
+# Table name: github_app_installations
+#
+#  id                   :bigint           not null, primary key
+#  account_login        :string
+#  account_type         :string
+#  installed_at         :datetime
+#  permissions          :jsonb
+#  repository_selection :jsonb
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  installation_id      :string           not null
+#  user_id              :bigint           not null
+#
+# Indexes
+#
+#  index_github_app_installations_on_installation_id  (installation_id) UNIQUE
+#  index_github_app_installations_on_user_id          (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (user_id => users.id)
+#
 FactoryBot.define do
   factory :github_app_installation do
     user

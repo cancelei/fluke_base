@@ -30,8 +30,8 @@
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
-    <%# Cloudflare Turnstile script - only load in production if enabled %>
-    <% if Rails.env.production? && RailsCloudflareTurnstile.configuration.enabled %>
+    <%# Cloudflare Turnstile script - load when enabled %>
+    <% if RailsCloudflareTurnstile.configuration.enabled %>
       <%= cloudflare_turnstile_script_tag %>
     <% end %>
   </head>

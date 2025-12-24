@@ -1,3 +1,10 @@
+# Cloudflare Turnstile Configuration
+#
+# Enable Turnstile in all environments except test when keys are configured.
+# For development with dev.flukebase.me and staging.flukebase.me, Turnstile
+# provides bot protection while still allowing local development to fall back
+# to test keys if real keys aren't available.
+
 RailsCloudflareTurnstile.configure do |c|
   # Get keys from credentials or environment variables
   site_key = Rails.application.credentials.turnstile&.dig(:site_key) || ENV["TURNSTILE_SITE_KEY"]
@@ -6,15 +13,14 @@ RailsCloudflareTurnstile.configure do |c|
   c.site_key = site_key
   c.secret_key = secret_key
 
-  # Environment-specific configuration
-  case Rails.env
-  when "test", "development"
-    # In test and development environments, disable Turnstile and allow requests to pass
+  if Rails.env.test?
+    # Test environment: disable Turnstile entirely
     c.enabled = false
     c.fail_open = true
   else
-    # Production and other environments: strict validation
-    c.fail_open = false # Don't allow requests to pass if Turnstile fails
-    c.enabled = site_key.present? && secret_key.present? # Enable if keys are configured
+    # Development, staging, and production: enable if keys are configured
+    keys_configured = site_key.present? && secret_key.present?
+    c.enabled = keys_configured
+    c.fail_open = Rails.env.development? # Graceful degradation only in development
   end
 end

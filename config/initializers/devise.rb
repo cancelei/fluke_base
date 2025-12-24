@@ -273,8 +273,11 @@ Devise.setup do |config|
   # up on your models and hooks.
   #
   # GitHub App OAuth configuration
-  # Note: Scope is empty because GitHub Apps use fine-grained permissions
-  # set during app registration, not OAuth scopes.
+  # Security features enabled:
+  # - PKCE (Proof Key for Code Exchange) per RFC 7636 - protects authorization codes
+  # - user:email scope - minimal permissions needed
+  #
+  # See: https://github.blog/changelog/2025-07-14-pkce-support-for-oauth-and-github-app-authentication/
   #
   # Reads from ENV first, falls back to Rails credentials
   github_client_id = ENV["GITHUB_APP_CLIENT_ID"].presence ||
@@ -286,7 +289,8 @@ Devise.setup do |config|
     config.omniauth :github,
       github_client_id,
       github_client_secret,
-      scope: "user:email"
+      scope: "user:email",
+      pkce: true  # Enable PKCE for enhanced authorization code security
   end
 
   # ==> Warden configuration

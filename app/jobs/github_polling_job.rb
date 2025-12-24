@@ -3,6 +3,13 @@
 # Recurring job that polls all eligible GitHub repositories for new commits and new branches.
 # Runs every 60 seconds via Solid Queue recurring jobs.
 # Uses the existing GithubCommitRefreshJob for commit fetching and Github::BranchesFetcher for branch discovery.
+#
+# Token Strategy (per GitHub best practices):
+# - Prefers Installation Access Tokens for background tasks (app-attributed, higher rate limits)
+# - Falls back to User Access Tokens if no installation is available
+# - Falls back to legacy PAT as last resort
+#
+# See: https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app
 class GithubPollingJob < ApplicationJob
   queue_as :default
 
@@ -28,7 +35,7 @@ class GithubPollingJob < ApplicationJob
 
   # Find projects that are eligible for polling:
   # - Have a repository_url configured
-  # - Owner has a valid GitHub token (OAuth or PAT)
+  # - Owner has a valid GitHub token (OAuth or PAT) OR has GitHub App installation
   # - Haven't been polled in the last 50 seconds (prevents overlap)
   # - Either have branches already OR have no branches (to discover initial branches)
   def find_eligible_projects
@@ -45,7 +52,19 @@ class GithubPollingJob < ApplicationJob
 
   # Poll a single project for new commits and new branches
   def poll_project(project)
-    token = project.user.effective_github_token
+    # Get the best available token for this project
+    # Prefers installation tokens for background tasks per GitHub best practices
+    token_info = get_access_token_for_project(project)
+
+    if token_info.nil?
+      Rails.logger.warn "[GithubPolling] No valid token available for project #{project.id}"
+      return
+    end
+
+    token = token_info[:token]
+    token_type = token_info[:type]
+
+    Rails.logger.debug "[GithubPolling] Using #{token_type} token for project #{project.id}"
 
     # Update polling timestamp before starting to prevent concurrent polls
     project.update_column(:github_last_polled_at, Time.current)
@@ -66,9 +85,49 @@ class GithubPollingJob < ApplicationJob
       GithubCommitRefreshJob.perform_later(project.id, token, branch.branch_name)
     end
 
-    Rails.logger.info "[GithubPolling] Enqueued refresh for project #{project.id} (#{branches.count} branches)"
+    Rails.logger.info "[GithubPolling] Enqueued refresh for project #{project.id} (#{branches.count} branches, using #{token_type})"
   rescue => e
     Rails.logger.error "[GithubPolling] Error polling project #{project.id}: #{e.message}"
+  end
+
+  # Get the best available access token for a project
+  # Priority:
+  # 1. Installation Access Token (app-attributed, best for automation)
+  # 2. User Access Token (refreshed if needed)
+  # 3. Legacy PAT
+  def get_access_token_for_project(project)
+    user = project.user
+    repo_full_name = Github::Base.new.send(:extract_repo_name, project.repository_url)
+
+    # Try to get an installation token first (preferred for background tasks)
+    installation_token = get_installation_token(user, repo_full_name)
+    return { token: installation_token, type: :installation } if installation_token
+
+    # Fall back to user token
+    user_token = user.effective_github_token
+    if user_token.present?
+      return { token: user_token, type: user.github_app_connected? ? :user_oauth : :legacy_pat }
+    end
+
+    nil
+  end
+
+  # Get an installation access token for a repository
+  def get_installation_token(user, repo_full_name)
+    return nil unless repo_full_name.present?
+
+    installation = user.installation_for_repo(repo_full_name)
+    return nil unless installation
+
+    result = Github::InstallationTokenService.call(
+      installation_id: installation.installation_id,
+      use_cache: true
+    )
+
+    result.success? ? result.value![:token] : nil
+  rescue => e
+    Rails.logger.warn "[GithubPolling] Failed to get installation token: #{e.message}"
+    nil
   end
 
   # Check if we should look for new branches (every 10 minutes to avoid API rate limits)

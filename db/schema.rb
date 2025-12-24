@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_24_095023) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -539,7 +539,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_095023) do
     t.string "help_seekings", default: [], array: true
     t.text "business_info"
     t.string "github_username"
-    t.string "github_token", limit: 255
+    t.text "github_token"
     t.boolean "show_project_context_nav", default: false, null: false
     t.string "linkedin"
     t.string "x"
@@ -551,11 +551,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_095023) do
     t.string "instagram"
     t.boolean "admin", default: false, null: false
     t.string "slug"
-    t.string "github_user_access_token"
-    t.string "github_refresh_token"
+    t.text "github_user_access_token"
+    t.text "github_refresh_token"
     t.datetime "github_token_expires_at"
     t.string "github_uid"
     t.datetime "github_connected_at"
+    t.datetime "github_refresh_token_expires_at"
     t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["github_uid"], name: "index_users_on_github_uid", unique: true

@@ -73,7 +73,7 @@
           </div>
         <% end %>
 
-# Clear GitHub data from session after rendering %>
+<%# Clear GitHub data from session after rendering %>
         <% session.delete("devise.github_data") if session["devise.github_data"] %>
 
         <div class="divider my-6"></div>

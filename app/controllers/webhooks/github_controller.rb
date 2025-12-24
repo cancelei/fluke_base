@@ -43,17 +43,33 @@ module Webhooks
 
     private
 
+    # Verify GitHub webhook signature using X-Hub-Signature-256 header
+    # Per GitHub's security best practices:
+    # "Set webhook secrets and verify signature matches for incoming events"
+    # See: https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/best-practices-for-creating-a-github-app
     def verify_webhook_signature
       secret = Github::AppConfig.webhook_secret
-      return true if secret.blank? # Skip verification if no secret configured (dev mode)
+
+      # In production, require webhook secret to be configured
+      if secret.blank?
+        if Rails.env.production?
+          Rails.logger.error "[Webhooks::Github] SECURITY: Webhook secret not configured in production!"
+          head :internal_server_error
+          return false
+        else
+          Rails.logger.warn "[Webhooks::Github] Skipping signature verification (no secret configured)"
+          return true
+        end
+      end
 
       signature = request.headers["X-Hub-Signature-256"]
-      unless signature
-        Rails.logger.warn "[Webhooks::Github] Missing signature header"
+      unless signature.present?
+        Rails.logger.warn "[Webhooks::Github] Missing X-Hub-Signature-256 header"
         head :unauthorized
         return false
       end
 
+      # Compute expected signature using HMAC-SHA256
       payload_body = request.raw_post
       expected_signature = "sha256=" + OpenSSL::HMAC.hexdigest(
         OpenSSL::Digest.new("sha256"),
@@ -61,8 +77,9 @@ module Webhooks
         payload_body
       )
 
+      # Use timing-safe comparison to prevent timing attacks
       unless Rack::Utils.secure_compare(expected_signature, signature)
-        Rails.logger.warn "[Webhooks::Github] Invalid signature"
+        Rails.logger.warn "[Webhooks::Github] Invalid webhook signature"
         head :unauthorized
         return false
       end
