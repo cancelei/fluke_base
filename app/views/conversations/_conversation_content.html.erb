@@ -58,7 +58,7 @@
   </div>
 
   <!-- Messages container -->
-  <div class="flex-1 overflow-y-auto p-4 bg-base-200/30" style="height: calc(75vh - 180px)">
+  <div class="flex-1 overflow-y-auto p-4 bg-base-200/30 no-scrollbar" style="height: calc(75vh - 180px)">
     <div id="conversation_<%= conversation.id %>_messages" class="space-y-3" data-controller="scroll-into-view">
       <% if messages.present? %>
         <% messages.each do |message| %>

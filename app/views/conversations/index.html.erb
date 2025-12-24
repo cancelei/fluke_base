@@ -13,7 +13,7 @@
     </div>
 
     <!-- Conversation list -->
-    <div class="flex-1 overflow-y-auto w-full" id="conversation_list">
+    <div class="flex-1 overflow-y-auto w-full no-scrollbar" id="conversation_list">
       <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: %>
     </div>
   </div>
@@ -38,7 +38,7 @@
       </div>
 
       <!-- Conversation list -->
-      <div class="flex-1 overflow-y-auto">
+      <div class="flex-1 overflow-y-auto no-scrollbar">
         <%= render "conversations/conversation_list", conversations: @conversations, current_conversation: @conversation, current_user: %>
       </div>
     </div>

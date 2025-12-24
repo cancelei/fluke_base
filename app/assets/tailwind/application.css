@@ -1058,3 +1058,33 @@ h4, .text-xl {
     overflow-x: visible;
   }
 }
+
+/* Pagy + daisyUI */
+
+.pagy.nav {
+  @apply join;
+}
+
+.pagy.nav a {
+  @apply btn btn-sm join-item;
+}
+
+/* Active page */
+.pagy.nav a.current,
+.pagy.nav a[aria-current="page"] {
+  @apply btn-active;
+}
+
+/* Disabled links */
+.pagy.nav a[aria-disabled="true"]:not(.current) {
+  @apply btn-disabled;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari */
+}
