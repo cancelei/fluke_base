@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # Ignore Cloudflare internal paths (handled by Cloudflare, not Rails)
+  match "/cdn-cgi/*path", to: proc { [204, {}, [""]] }, via: :all
+
   # System and health check routes
   get "up" => "rails/health#show", as: :rails_health_check
 

@@ -97,7 +97,7 @@ class GithubPollingJob < ApplicationJob
   # 3. Legacy PAT
   def get_access_token_for_project(project)
     user = project.user
-    repo_full_name = Github::Base.new.send(:extract_repo_name, project.repository_url)
+    repo_full_name = Github::Base.new.send(:extract_repo_path, project.repository_url)
 
     # Try to get an installation token first (preferred for background tasks)
     installation_token = get_installation_token(user, repo_full_name)
