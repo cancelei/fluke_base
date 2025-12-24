@@ -43,17 +43,18 @@ module Users
 
     # OAuth failure callback
     def failure
-      error_message = failure_message || "Unknown error"
-      Rails.logger.warn "[OmniAuth] GitHub authentication failed: #{error_message}"
+      raw_error = failure_message || "Unknown error"
+      Rails.logger.warn "[OmniAuth] GitHub authentication failed: #{raw_error}"
 
-      flash[:error] = "GitHub connection failed: #{error_message}"
+      # Parse the error and show user-friendly message
+      flash[:error] = friendly_error_message(raw_error)
       redirect_to after_omniauth_failure_path_for(resource_name)
     end
 
     protected
 
     def after_omniauth_failure_path_for(_scope)
-      root_path
+      new_user_registration_path
     end
 
     private
@@ -93,18 +94,31 @@ module Users
       params[:message] || request.env["omniauth.error"]&.message
     end
 
-    def handle_oauth_error(error)
-      Rails.logger.error "[OmniAuth] GitHub OAuth error: #{error&.message || 'Unknown error'}"
+    def friendly_error_message(raw_error)
+      error_string = raw_error.to_s.downcase
 
-      error_message = if error&.message&.include?("rate limit")
-        "GitHub API rate limit exceeded. Please wait a few minutes and try again."
-      elsif error&.message&.include?("403")
+      if error_string.include?("rate limit")
+        "GitHub API rate limit exceeded. Please wait a few minutes and try again, or sign up with email."
+      elsif error_string.include?("403") || error_string.include?("forbidden")
         "GitHub access was denied. Please try again or sign up with email."
+      elsif error_string.include?("401") || error_string.include?("unauthorized")
+        "GitHub authentication failed. Please try again."
+      elsif error_string.include?("timeout") || error_string.include?("timed out")
+        "GitHub is taking too long to respond. Please try again."
+      elsif error_string.include?("invalid_credentials")
+        "Invalid GitHub credentials. Please try again."
+      elsif error_string.include?("access_denied")
+        "You denied access to your GitHub account. Sign up with email instead."
       else
         "GitHub connection failed. Please try again or sign up with email."
       end
+    end
 
-      flash[:error] = error_message
+    def handle_oauth_error(error)
+      raw_error = error&.message || "Unknown error"
+      Rails.logger.error "[OmniAuth] GitHub OAuth error: #{raw_error}"
+
+      flash[:error] = friendly_error_message(raw_error)
       redirect_to new_user_registration_path
     end
 
