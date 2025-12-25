@@ -40,6 +40,14 @@ module Github
         ENV.fetch("GITHUB_APP_WEBHOOK_SECRET") { credentials(:webhook_secret) }
       end
 
+      def slug
+        ENV.fetch("GITHUB_APP_SLUG") { credentials(:slug) || "flukebase" }
+      end
+
+      def install_url
+        "https://github.com/apps/#{slug}/installations/new"
+      end
+
       def configured?
         app_id.present? && client_id.present? && client_secret.present?
       end

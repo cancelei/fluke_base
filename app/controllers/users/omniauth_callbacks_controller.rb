@@ -93,8 +93,7 @@ module Users
     end
 
     def github_app_install_url
-      app_slug = Rails.application.credentials.dig(:github_app, :slug) || "flukebase"
-      "https://github.com/apps/#{app_slug}/installations/new"
+      Github::AppConfig.install_url
     end
 
     def failure_message

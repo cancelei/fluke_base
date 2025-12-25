@@ -1,3 +1,4 @@
-web: bin/rails server
+web: bin/rails server -p 3006
 css: ./bin/tailwindcss -i ./app/assets/tailwind/application.css -o ./app/assets/builds/tailwind.css --watch=always
 queue: bin/rails solid_queue:start
+tunnel: cloudflared tunnel run fluke-dev

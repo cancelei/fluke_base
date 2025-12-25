@@ -4,8 +4,9 @@ module Github
   # Checks if a user has access to a specific GitHub repository
   #
   # This service validates repository access through:
-  # 1. GitHub App installation (checks if repo is in user's installations)
-  # 2. Legacy PAT token (validates via API call)
+  # 1. Public repository check (no auth needed)
+  # 2. GitHub App installation (checks if repo is in user's installations)
+  # 3. Legacy PAT token (validates via API call)
   #
   # Usage:
   #   result = Github::RepositoryAccessChecker.call(user: current_user, repository_url: "owner/repo")
@@ -16,29 +17,68 @@ module Github
   #   end
   #
   class RepositoryAccessChecker < Base
-    GITHUB_APP_INSTALL_URL = "https://github.com/apps/flukebase/installations/new"
-
     def initialize(user:, repository_url:)
       @user = user
       @repository_url = repository_url
     end
 
     def call
-      return failure_result(:no_connection, "No GitHub connection available") unless @user.github_connected?
-
       repo_path = extract_repo_path(@repository_url)
       return failure_result(:invalid_url, "Invalid repository URL") if repo_path.blank?
 
-      # Check GitHub App installation first (preferred method)
+      # Step 1: Check if repo is public (no auth needed)
+      public_check = check_public_repository(repo_path)
+      return public_check if public_check.success? && public_check.value![:public] == true
+
+      # Step 2: For private repos or unknown, user needs GitHub connection
+      return failure_result(
+        :no_connection,
+        "Private repository detected. Connect your GitHub account to access it.",
+        needs_install: true,
+        install_url: AppConfig.install_url
+      ) unless @user.github_connected?
+
+      # Step 3: Check private access via GitHub App or PAT
       if @user.github_app_connected?
         check_installation_access(repo_path)
       else
-        # Fall back to PAT-based access check
         check_pat_access(repo_path)
       end
     end
 
     private
+
+    # Check if repository is public using unauthenticated API call
+    # This allows public repos to be added without requiring GitHub auth
+    def check_public_repository(repo_path)
+      client = Octokit::Client.new  # No authentication
+      repo = client.repository(repo_path)
+
+      if repo.private?
+        # Repo exists but is private - needs auth
+        Success({ public: false, private: true, needs_auth: true })
+      else
+        # Public repo - no auth needed
+        Success({
+          accessible: true,
+          public: true,
+          private: false,
+          access_type: :public,
+          message: "Public repository - no authentication needed"
+        })
+      end
+    rescue Octokit::NotFound
+      # Repo doesn't exist OR is private (GitHub returns 404 for private repos without auth)
+      Success({ public: false, private: true, needs_auth: true })
+    rescue Octokit::TooManyRequests => e
+      # Rate limited - fall through to authenticated check
+      log("Public check rate limited, falling back to auth check", level: :warn)
+      Success({ public: false, needs_auth: true, rate_limited: true })
+    rescue Octokit::Error => e
+      # Other errors - fall through to authenticated check
+      log("Public check failed: #{e.message}", level: :warn)
+      Success({ public: false, needs_auth: true, error: e.message })
+    end
 
     def check_installation_access(repo_path)
       installation = @user.installation_for_repo(repo_path)
@@ -55,7 +95,7 @@ module Github
           :no_installation,
           "This repository is not accessible. Install FlukeBase on your GitHub account to grant access.",
           needs_install: true,
-          install_url: GITHUB_APP_INSTALL_URL
+          install_url: AppConfig.install_url
         )
       end
     end
@@ -78,14 +118,14 @@ module Github
         :not_found,
         "Repository not found. It may be private and require a GitHub connection with access.",
         needs_install: true,
-        install_url: GITHUB_APP_INSTALL_URL
+        install_url: AppConfig.install_url
       )
     rescue Octokit::Forbidden
       failure_result(
         :forbidden,
         "Access denied. You may need to install FlukeBase on this repository.",
         needs_install: true,
-        install_url: GITHUB_APP_INSTALL_URL
+        install_url: AppConfig.install_url
       )
     end
   end

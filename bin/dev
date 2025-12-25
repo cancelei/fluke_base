@@ -5,8 +5,8 @@ if ! gem list foreman -i --silent; then
   gem install foreman
 fi
 
-# Default to port 3001 if not specified
-export PORT="${PORT:-3001}"
+# Default to port 3006 to match Cloudflare tunnel config
+export PORT="${PORT:-3006}"
 
 # Let the debug gem allow remote connections,
 # but avoid loading until `debugger` is called

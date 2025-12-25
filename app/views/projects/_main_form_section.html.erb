@@ -85,18 +85,30 @@
                  placeholder: project.stealth_description.presence || "Early-stage venture in development. Details available after connection."
                } : { rows: 4 } %>
 
-    <!-- GitHub Repository URL -->
-    <%= render "form_field",
-               form:,
-               field_name: :repository_url,
-               project:,
-               label: "GitHub Repository URL",
-               field_type: :text_field,
-               col_span: 6,
-               help_text: "Paste a GitHub URL or enter username/repository. Full URLs, .git links, and branch URLs all work.",
-               options: {
-                 placeholder: "https://github.com/username/repo or username/repo"
-               } %>
+    <!-- GitHub Repository URL with Real-time Validation -->
+    <fieldset class="fieldset sm:col-span-6">
+      <%= form.label :repository_url, "GitHub Repository URL", class: "fieldset-legend" %>
+      <div class="flex items-center gap-2">
+        <%= form.text_field :repository_url,
+                            class: "input input-bordered w-full",
+                            placeholder: "https://github.com/username/repo or username/repo",
+                            data: {
+                              repository_validator_target: "input",
+                              action: "input->repository-validator#validate"
+                            } %>
+        <%= render_public_field_checkbox(form, :repository_url, project) %>
+      </div>
+
+      <%# Validation status message %>
+      <div data-repository-validator-target="status" class="hidden"></div>
+
+      <%# GitHub App authentication button (shown when needed for private repos) %>
+      <div data-repository-validator-target="authButton" class="hidden"></div>
+
+      <p class="text-xs text-base-content/60 mt-1">
+        Paste a GitHub URL or enter username/repository. Full URLs, .git links, and branch URLs all work.
+      </p>
+    </fieldset>
 
     <!-- Website Link -->
     <%= render "form_field",
