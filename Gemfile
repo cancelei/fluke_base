@@ -31,7 +31,7 @@ gem "omniauth-rails_csrf_protection", "~> 1.0"
 gem "httparty"
 
 # JWT for GitHub App authentication
-gem "jwt", "~> 2.8"
+gem "jwt", "~> 3.1"
 
 # Cloudflare Turnstile integration
 gem "rails_cloudflare_turnstile"
