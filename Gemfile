@@ -143,7 +143,7 @@ end
 
 # cssbundling-rails removed - tailwindcss-rails v4 handles CSS natively
 
-gem "pagy", "~> 9.0"
+gem "pagy", "~> 43.2"
 
 gem "pundit"
 
