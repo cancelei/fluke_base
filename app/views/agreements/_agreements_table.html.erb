@@ -2,7 +2,7 @@
   <%= render Ui::FlexTableComponent.new(
     columns: [
       { span: 2, header: columns[0][:label] },
-      { span: 2, header: columns[1][:label] },
+      { span: 2, header: columns[1][:label], responsive: " gap-1 flex-wrap" },
       { span: 2, header: columns[2][:label] },
       { span: 1, header: columns[3][:label] },
       { span: 1, header: columns[4][:label] },
