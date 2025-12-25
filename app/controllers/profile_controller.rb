@@ -22,7 +22,8 @@ class ProfileController < ApplicationController
     @user.instagram = user_params[:instagram]
 
     if @user.update(user_params)
-      redirect_to profile_show_path, notice: "Profile was successfully updated."
+      # Use status: :see_other (303) for Turbo to properly follow the redirect after PATCH
+      redirect_to profile_show_path, notice: "Profile was successfully updated.", status: :see_other
     else
       render :edit, status: :unprocessable_content
     end
@@ -31,6 +32,6 @@ class ProfileController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email, :avatar, :bio, :industry, :github_username, :github_token, :multi_project_tracking, :linkedin, :x, :youtube, :facebook, :tiktok, :instagram, expertise: [])
+    params.require(:user).permit(:first_name, :last_name, :email, :avatar, :bio, :industry, :github_username, :github_token, :multi_project_tracking, :linkedin, :x, :youtube, :facebook, :tiktok, :instagram, skills: [])
   end
 end

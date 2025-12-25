@@ -1,0 +1,25 @@
+<div class="flex items-center justify-center min-h-screen">
+  <div class="text-center p-8">
+    <div class="loading loading-spinner loading-lg text-primary mb-4"></div>
+    <h2 class="text-xl font-semibold mb-2">Restoring your session...</h2>
+    <p class="text-base-content/60">Please wait while we sign you back in with GitHub.</p>
+
+    <%# Auto-submit form to GitHub OAuth - OmniAuth requires POST for CSRF protection %>
+    <%= form_with url: user_github_omniauth_authorize_path, method: :post, id: "github-restore-form", data: { turbo: false } do %>
+      <noscript>
+        <p class="mt-4 text-warning">JavaScript is required for automatic sign-in.</p>
+        <%= submit_tag "Sign in with GitHub", class: "btn btn-primary mt-2" %>
+      </noscript>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  // Auto-submit the form when the page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('github-restore-form');
+    if (form) {
+      form.submit();
+    }
+  });
+</script>

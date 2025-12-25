@@ -293,19 +293,30 @@ class User < ApplicationRecord
   end
 
   # OmniAuth callback for GitHub - find or create user from OAuth
-  # Returns { user:, created: } hash
+  # Returns { user:, created:, linked: } hash
+  # - created: true if a new user was created
+  # - linked: true if an existing email account was linked to GitHub for the first time
   def self.from_github_omniauth(auth)
-    # Find existing user by GitHub UID or email
-    user = find_by(github_uid: auth.uid) || find_by(email: auth.info.email)
+    # First, try to find by GitHub UID (returning GitHub user)
+    user = find_by(github_uid: auth.uid)
 
     if user
-      # Update OAuth credentials for existing user
+      # Existing GitHub user - just update tokens
       user.update!(github_oauth_attributes(auth))
-      { user:, created: false }
-    else
-      # Create new user from GitHub data
-      { user: create_from_github(auth), created: true }
+      return { user:, created: false, linked: false }
     end
+
+    # Try to find by email (existing account not yet linked to GitHub)
+    user = find_by(email: auth.info.email)
+
+    if user
+      # Found existing user by email - link their account to GitHub
+      user.update!(github_oauth_attributes(auth))
+      return { user:, created: false, linked: true }
+    end
+
+    # No existing user - create new account
+    { user: create_from_github(auth), created: true, linked: false }
   end
 
   # Create a new user from GitHub OAuth data

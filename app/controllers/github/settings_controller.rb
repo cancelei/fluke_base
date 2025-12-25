@@ -7,9 +7,11 @@ module Github
   # - Disconnecting GitHub account
   # - Viewing connected installations
   # - Checking repository access
+  # - Session restoration for returning GitHub users
   #
   class SettingsController < ApplicationController
-    before_action :authenticate_user!
+    skip_before_action :authenticate_user!, only: [:session_restore]
+    skip_before_action :attempt_github_session_restore, only: [:session_restore]
 
     # DELETE /github/disconnect
     # Disconnects the user's GitHub account and removes all installations
@@ -19,7 +21,8 @@ module Github
       respond_to do |format|
         format.html do
           flash[:success] = "GitHub account disconnected successfully."
-          redirect_to edit_profile_path
+          # Use status: :see_other (303) for Turbo to properly follow the redirect
+          redirect_to edit_profile_path, status: :see_other
         end
         format.json { render json: { status: "disconnected" } }
       end
@@ -67,6 +70,20 @@ module Github
       else
         render json: result.failure, status: :unprocessable_entity
       end
+    end
+
+    # GET /github/session_restore
+    # Renders an intermediate page that auto-submits the GitHub OAuth form
+    # This is needed because OmniAuth requires POST for CSRF protection
+    def session_restore
+      # If user is already signed in, redirect to dashboard
+      if user_signed_in?
+        redirect_to dashboard_path
+        return
+      end
+
+      # Render the auto-submit form page
+      render layout: "minimal"
     end
   end
 end

@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   include Pagy::Backend
   include Pundit::Authorization
   include RailsCloudflareTurnstile::ControllerHelpers
+  include GithubSessionRestoration
   # Allow browsers with reasonable modern feature support while not being overly restrictive
   # More lenient for mobile browsers - block only IE
   allow_browser versions: { chrome: 90, safari: 13, firefox: 90, opera: 75, ie: false }

@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     delete :disconnect, to: "settings#disconnect"
     get :installations, to: "settings#installations"
     get :check_access, to: "settings#check_access"
+    get :session_restore, to: "settings#session_restore"
   end
 
   # Root and main pages

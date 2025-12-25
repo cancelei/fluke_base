@@ -7,9 +7,13 @@ module Users
   # - New user signups via GitHub (creates account from GitHub data)
   # - Existing user logins via GitHub
   # - Linking GitHub to signed-in users
+  # - Session restoration for returning GitHub users
   #
   class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     skip_before_action :authenticate_user!, only: [:github, :failure]
+
+    # Cookie name for tracking GitHub auth preference
+    GITHUB_AUTH_COOKIE = :github_auth_preferred
 
     # GitHub OAuth callback
     # Called after user authorizes FlukeBase on GitHub
@@ -182,12 +186,24 @@ module Users
       result = User.from_github_omniauth(auth)
       user = result[:user]
       created = result[:created]
+      linked = result[:linked]
+      session_restored = session.delete(:github_session_restore)
 
       if user.persisted?
+        # Set persistent cookie to remember GitHub auth preference (30 days)
+        set_github_auth_cookie
+
         sign_in_and_redirect user, event: :authentication
 
         if created
           flash[:success] = "Welcome to FlukeBase! Your account has been created with GitHub."
+        elsif linked
+          # Existing email account was linked to GitHub for the first time
+          flash[:info] = "Your GitHub account has been linked to your existing FlukeBase account. " \
+                         "You can now sign in with either your email or GitHub."
+        elsif session_restored
+          # Session was automatically restored
+          flash[:success] = "Welcome back! You've been automatically signed in with GitHub."
         else
           set_flash_message(:notice, :success, kind: "GitHub") if is_navigational_format?
         end
@@ -206,6 +222,16 @@ module Users
       Rails.logger.error "[OmniAuth] Failed to create user from GitHub: #{e.message}"
       flash[:error] = "Could not create account: #{e.record.errors.full_messages.join(', ')}"
       redirect_to new_user_registration_path
+    end
+
+    def set_github_auth_cookie
+      cookies.signed[GITHUB_AUTH_COOKIE] = {
+        value: true,
+        expires: 30.days.from_now,
+        httponly: true,
+        secure: Rails.env.production?,
+        same_site: :lax
+      }
     end
   end
 end
