@@ -57,27 +57,102 @@
         <%= form.email_field :email, class: "input input-bordered w-full" %>
       </fieldset>
 
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <fieldset class="fieldset">
-          <%= form.label :github_username, "GitHub Username", class: "fieldset-legend" %>
-          <label class="input input-bordered flex items-center gap-2">
-            <span class="text-base-content/60">github.com/</span>
-            <%= form.text_field :github_username, autocomplete: "github-username", class: "grow border-0 focus:ring-0 bg-transparent" %>
-          </label>
-        </fieldset>
+      <div class="divider"></div>
 
-        <fieldset class="fieldset">
-          <%= form.label :github_token, "GitHub Personal Access Token", class: "fieldset-legend" %>
-          <%= form.text_field :github_token, autocomplete: "off", class: "input input-bordered w-full" %>
-          <p class="text-xs text-base-content/60 mt-1">
-            <% if @user.github_token.present? %>
-              <span class="text-success">✓ Token saved</span> •
-            <% else %>
-              <span class="text-warning">No token saved</span> •
+      <div id="github-connection">
+        <h3 class="text-base font-semibold mb-2">GitHub Integration</h3>
+        <p class="text-sm text-base-content/60 mb-4">Connect your GitHub account to enable repository tracking on your projects.</p>
+
+        <div class="card bg-base-200 p-4">
+          <% if @user.github_app_connected? %>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="avatar">
+                  <div class="w-10 rounded-full">
+                    <img src="https://github.com/<%= @user.github_username %>.png" alt="GitHub Avatar">
+                  </div>
+                </div>
+                <div>
+                  <p class="font-medium">
+                    <a href="https://github.com/<%= @user.github_username %>" target="_blank" class="link link-primary">
+                      @<%= @user.github_username %>
+                    </a>
+                  </p>
+                  <p class="text-xs text-success">Connected via GitHub App</p>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <%= link_to "Manage Installations", Github::AppConfig.install_url, target: "_blank", class: "btn btn-sm btn-outline" %>
+                <%= button_to "Disconnect", github_disconnect_path, method: :delete, class: "btn btn-sm btn-error btn-outline", data: { turbo_confirm: "Are you sure you want to disconnect your GitHub account?" } %>
+              </div>
+            </div>
+            <% if @user.github_app_installations.any? %>
+              <div class="mt-4 pt-4 border-t border-base-300">
+                <p class="text-sm font-medium mb-2">Installed on:</p>
+                <div class="flex flex-wrap gap-2">
+                  <% @user.github_app_installations.each do |installation| %>
+                    <span class="badge badge-outline gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z" />
+                      </svg>
+                      <%= installation.account_login %>
+                    </span>
+                  <% end %>
+                </div>
+              </div>
             <% end %>
-            <a href="https://github.com/settings/tokens/new?scopes=repo&description=FlukeBase" target="_blank" class="link link-primary">Generate new token</a> (select 'repo' scope)
+          <% else %>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium">Connect with GitHub</p>
+                <p class="text-sm text-base-content/60">Authorize FlukeBase to access your repositories.</p>
+              </div>
+              <%= button_to user_github_omniauth_authorize_path, method: :post, class: "btn btn-primary gap-2", data: { turbo: false } do %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z" />
+                </svg>
+                Connect GitHub
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="mt-4 p-3 bg-base-200/50 rounded-lg">
+          <p class="text-xs text-base-content/60">
+            <strong>Recommended:</strong> Use GitHub App connection for automatic token refresh and better security.
+            The personal access token below is only needed as a fallback.
           </p>
-        </fieldset>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="github-fallback">
+        <h3 class="text-base font-semibold mb-2">GitHub Fallback (Optional)</h3>
+        <p class="text-sm text-base-content/60 mb-4">Only needed if GitHub App connection is not available.</p>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <fieldset class="fieldset">
+            <%= form.label :github_username, "GitHub Username", class: "fieldset-legend" %>
+            <label class="input input-bordered flex items-center gap-2">
+              <span class="text-base-content/60">github.com/</span>
+              <%= form.text_field :github_username, autocomplete: "github-username", class: "grow border-0 focus:ring-0 bg-transparent" %>
+            </label>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <%= form.label :github_token, "GitHub Personal Access Token", class: "fieldset-legend" %>
+            <%= form.text_field :github_token, autocomplete: "off", class: "input input-bordered w-full" %>
+            <p class="text-xs text-base-content/60 mt-1">
+              <% if @user.github_token.present? %>
+                <span class="text-success">Token saved</span> |
+              <% else %>
+                <span class="text-base-content/40">No token saved</span> |
+              <% end %>
+              <a href="https://github.com/settings/tokens/new?scopes=repo&description=FlukeBase" target="_blank" class="link link-primary">Generate new token</a> (select 'repo' scope)
+            </p>
+          </fieldset>
+        </div>
       </div>
 
       <fieldset class="fieldset">

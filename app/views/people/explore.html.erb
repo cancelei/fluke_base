@@ -47,7 +47,7 @@
     <%= render partial: "shared/explore_users", locals: {
         users: @users,
         pagy: @pagy,
-        title: @propose_for_project ? "Select a Collaborator" : "",
+        title: @propose_for_project ? "Select a Collaborator" : "Discover Amazing People",
         description: @propose_for_project ? "" : "Connect with #{@pagy ? @pagy.count : User.count} talented people in our community",
         propose_for_project: @propose_for_project
       } %>

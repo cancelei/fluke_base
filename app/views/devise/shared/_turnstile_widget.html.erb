@@ -1,7 +1,11 @@
-<% if Rails.env.production? && RailsCloudflareTurnstile.configuration.enabled && Rails.application.config.turnstile[:site_key].present? %>
+<%# Cloudflare Turnstile Widget - renders when enabled and configured %>
+<% turnstile_enabled = RailsCloudflareTurnstile.configuration.enabled %>
+<% site_key = Rails.application.config.turnstile[:site_key] %>
+
+<% if turnstile_enabled && site_key.present? %>
   <!-- Cloudflare Turnstile widget -->
   <div class="cf-turnstile"
-       data-sitekey="<%= Rails.application.config.turnstile[:site_key] %>"
+       data-sitekey="<%= site_key %>"
        data-callback="onTurnstileSuccess"
        data-error-callback="onTurnstileError"
        data-expired-callback="onTurnstileExpired"
@@ -21,13 +25,9 @@
     }
 
     window.onTurnstileSuccess = function(token) {
-      // Set the token in the hidden input
       const responseInput = document.getElementById('cf-turnstile-response');
-      if (responseInput) {
-        responseInput.value = token;
-      }
+      if (responseInput) responseInput.value = token;
 
-      // Enable the submit button in the containing form
       const form = findTurnstileForm();
       if (form) {
         const submitButton = form.querySelector('input[type="submit"]');
@@ -40,14 +40,9 @@
 
     window.onTurnstileError = function(error) {
       console.error('Turnstile verification error:', error);
-
-      // Clear the token on error
       const responseInput = document.getElementById('cf-turnstile-response');
-      if (responseInput) {
-        responseInput.value = '';
-      }
+      if (responseInput) responseInput.value = '';
 
-      // Disable form submission on error
       const form = findTurnstileForm();
       if (form) {
         const submitButton = form.querySelector('input[type="submit"]');
@@ -59,13 +54,9 @@
     };
 
     window.onTurnstileExpired = function() {
-      // Clear the token on expiration
       const responseInput = document.getElementById('cf-turnstile-response');
-      if (responseInput) {
-        responseInput.value = '';
-      }
+      if (responseInput) responseInput.value = '';
 
-      // Disable form submission when token expires
       const form = findTurnstileForm();
       if (form) {
         const submitButton = form.querySelector('input[type="submit"]');
@@ -88,11 +79,9 @@
       }
 
       // Fallback: If Turnstile doesn't initialize within 5 seconds, enable the button anyway
-      // This prevents users from being locked out if Turnstile fails to load
       setTimeout(function() {
         const responseInput = document.getElementById('cf-turnstile-response');
         const turnstileContainer = document.querySelector('.cf-turnstile');
-        // Only enable if Turnstile hasn't already succeeded
         if (!responseInput || !responseInput.value) {
           const fallbackForm = findTurnstileForm();
           if (fallbackForm) {
@@ -101,8 +90,6 @@
               console.warn('Turnstile failed to initialize. Enabling form submission as fallback.');
               btn.disabled = false;
               btn.classList.remove('opacity-50', 'cursor-not-allowed');
-
-              // Show a message to the user
               if (turnstileContainer) {
                 turnstileContainer.innerHTML = '<div class="text-sm text-warning bg-warning/10 p-3 rounded-md">Security check unavailable. You can still submit the form.</div>';
               }
@@ -112,12 +99,10 @@
       }, 5000);
     });
   </script>
-<% elsif Rails.env.development? %>
-  <div class="text-sm text-info bg-info/10 p-3 rounded-md">
-    Turnstile is disabled in development for easier local testing.
-  </div>
+<% elsif Rails.env.test? %>
+  <%# No widget in test environment %>
 <% else %>
   <div class="text-sm text-warning bg-warning/10 p-3 rounded-md">
-    Turnstile is not configured. Please set TURNSTILE_SITE_KEY environment variable.
+    Turnstile is not configured. Please add turnstile keys to Rails credentials or set TURNSTILE_SITE_KEY environment variable.
   </div>
 <% end %>

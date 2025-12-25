@@ -8,5 +8,5 @@
 %>
 
 <% if pagy && pagy.pages > 1 %>
-  <%= render Ui::PaginationComponent.new(pagy: pagy, remote: local_assigns[:remote], css_class: local_assigns[:class_name]) %>
+  <%= render Ui::PaginationComponent.new(pagy:, remote: local_assigns[:remote], css_class: local_assigns[:class_name]) %>
 <% end %>

@@ -6,26 +6,20 @@ class Users::SessionsController < Devise::SessionsController
 
   private
 
-  # Only validate Turnstile if:
-  # 1. We're in production
-  # 2. Turnstile is enabled in the gem config
-  # 3. A Turnstile response token was actually submitted (meaning the widget loaded)
+  # Validate Turnstile when enabled and a token is present
   def should_validate_turnstile?
-    return false unless Rails.env.production?
     return false unless RailsCloudflareTurnstile.configuration.enabled
 
-    # If no token was submitted, Turnstile likely failed to load on the client
-    # Allow form submission in this case (graceful degradation)
+    # If no token was submitted, allow graceful degradation in development
     turnstile_response = params["cf-turnstile-response"]
     if turnstile_response.blank?
-      Rails.logger.warn "Turnstile token missing - widget may have failed to load for user"
+      Rails.logger.warn "Turnstile token missing - widget may have failed to load"
       return false
     end
 
     true
   end
 
-  # Handle Turnstile validation failure
   def handle_turnstile_failure
     self.resource = resource_class.new(sign_in_params)
     resource.errors.add(:base, "Security verification failed. Please try again.")
@@ -38,7 +32,6 @@ class Users::SessionsController < Devise::SessionsController
     end
   end
 
-  # Rescue from the gem's exception
   rescue_from RailsCloudflareTurnstile::Forbidden do
     handle_turnstile_failure
   end
