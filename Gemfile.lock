@@ -371,7 +371,9 @@ GEM
     orm_adapter (0.5.0)
     os (1.1.4)
     ostruct (0.6.3)
-    pagy (9.4.0)
+    pagy (43.2.2)
+      json
+      yaml
     parallel (1.27.0)
     parser (3.3.10.0)
       ast (~> 2.4.1)
@@ -673,6 +675,7 @@ GEM
     websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
+    yaml (0.4.0)
     zeitwerk (2.7.4)
 
 PLATFORMS
@@ -714,7 +717,7 @@ DEPENDENCIES
   octokit (~> 6.1)
   omniauth-github (~> 2.0)
   omniauth-rails_csrf_protection (~> 1.0)
-  pagy (~> 9.0)
+  pagy (~> 43.2)
   pay (~> 6.8)
   pg (~> 1.1)
   propshaft
