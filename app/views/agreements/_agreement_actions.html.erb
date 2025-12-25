@@ -1,10 +1,10 @@
-<div id="<%= "#{dom_id(agreement)}_actions" %>">
+<div id="<%= "#{dom_id(agreement)}_actions" %>" class="flex items-center justify-end">
   <% presenter = present(agreement) %>
-  <%= link_to "View", agreement, class: "link link-primary", data: { turbo_frame: "_top" } %>
+  <%= button_to "View", agreement, method: :patch, class: "link link-primary", data: { turbo_frame: "_top" } %>
 
   <% if agreement.pending? %>
     <% if agreement.initiator&.id == current_user.id %>
-      <%= link_to "Edit", edit_agreement_path(agreement), class: "ml-3 link link-primary", data: { turbo_frame: "_top" } %>
+      <%= button_to "Edit", edit_agreement_path(agreement), method: :get, class: "ml-3 link link-primary", data: { turbo_frame: "_top" } %>
       <%= button_to "Cancel", cancel_agreement_path(agreement),
           method: :patch,
           class: "ml-3 link link-error",

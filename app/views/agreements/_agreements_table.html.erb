@@ -47,7 +47,7 @@
       sixth_cell = presenter.time_remaining
 
       # Actions column
-      actions_cell = link_to("View", agreement_path(agreement), class: "link link-primary", data: { turbo_frame: "_top" }).to_s
+      actions_cell = render("agreement_actions", agreement:)
 
       [project_cell, type_cell, third_cell, status_cell, fifth_cell, sixth_cell, actions_cell]
     end,
