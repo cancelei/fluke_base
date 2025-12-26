@@ -1,6 +1,6 @@
 class ErrorsController < ApplicationController
   skip_before_action :authenticate_user!, if: :devise_controller?
-  layout false
+  layout "error"
 
   def not_found
     render "errors/404", status: :not_found

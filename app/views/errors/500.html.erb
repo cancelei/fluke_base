@@ -1,71 +1,59 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="nord">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Server Error - FlukeBase</title>
-  <%= csrf_meta_tags %>
-  <%= csp_meta_tag %>
-  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-</head>
+<% content_for :title, "Server Error" %>
 
-<body class="bg-base-200">
-  <div class="hero min-h-screen">
-    <div class="hero-content text-center">
-      <div class="max-w-2xl">
-        <div class="text-9xl font-bold text-error mb-8">500</div>
+<div class="hero min-h-screen">
+  <div class="hero-content text-center">
+    <div class="max-w-2xl">
+      <div class="text-9xl font-bold text-error mb-8">500</div>
 
-        <h2 class="text-5xl font-bold mb-4">Internal Server Error</h2>
-        <p class="text-lg text-base-content/70 mb-8">
-          Oops! Something went wrong on our end. Our team has been notified and is working to fix the issue.
-        </p>
+      <h2 class="text-5xl font-bold mb-4">Internal Server Error</h2>
+      <p class="text-lg text-base-content/70 mb-8">
+        Oops! Something went wrong on our end. Our team has been notified and is working to fix the issue.
+      </p>
 
-        <div class="alert alert-error shadow-lg mb-8">
-          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <div class="alert alert-error shadow-lg mb-8">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div class="text-left">
+          <h3 class="font-bold">Error Details</h3>
+          <div class="text-sm">The server encountered an unexpected condition that prevented it from fulfilling your request.</div>
+        </div>
+      </div>
+
+      <div class="flex gap-4 justify-center flex-wrap">
+        <a href="/" class="btn btn-primary min-h-[44px] sm:min-h-[48px]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          <div class="text-left">
-            <h3 class="font-bold">Error Details</h3>
-            <div class="text-sm">The server encountered an unexpected condition that prevented it from fulfilling your request.</div>
-          </div>
-        </div>
+          Return Home
+        </a>
+        <button onclick="location.reload()" class="btn btn-outline min-h-[44px] sm:min-h-[48px]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Try Again
+        </button>
+      </div>
 
-        <div class="flex gap-4 justify-center flex-wrap">
-          <a href="/" class="btn btn-primary min-h-[44px] sm:min-h-[48px]">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      <div class="divider my-8"></div>
+
+      <div class="stats shadow bg-base-100">
+        <div class="stat">
+          <div class="stat-figure text-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
             </svg>
-            Return Home
-          </a>
-          <button onclick="location.reload()" class="btn btn-outline min-h-[44px] sm:min-h-[48px]">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Try Again
-          </button>
-        </div>
-
-        <div class="divider my-8"></div>
-
-        <div class="stats shadow bg-base-100">
-          <div class="stat">
-            <div class="stat-figure text-secondary">
-              <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-              </svg>
-            </div>
-            <div class="stat-title">Error Code</div>
-            <div class="stat-value text-error">500</div>
-            <div class="stat-desc">Internal Server Error</div>
           </div>
+          <div class="stat-title">Error Code</div>
+          <div class="stat-value text-error">500</div>
+          <div class="stat-desc">Internal Server Error</div>
         </div>
+      </div>
 
-        <div class="mt-8 text-sm text-base-content/60">
-          <p class="mb-2">Need help? Contact our support team:</p>
-          <a href="mailto:support@flukebase.com" class="link link-primary">support@flukebase.com</a>
-        </div>
+      <div class="mt-8 text-sm text-base-content/60">
+        <p class="mb-2">Need help? Contact our support team:</p>
+        <a href="mailto:support@flukebase.com" class="link link-primary">support@flukebase.com</a>
       </div>
     </div>
   </div>
-</body>
-</html>
+</div>
