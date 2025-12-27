@@ -1,6 +1,6 @@
-<div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
   <!-- Branch Filter -->
-  <div class="flex items-center mb-2 lg:mb-0">
+  <div class="flex items-center justify-between md:justify-start mb-2 lg:mb-0">
     <label for="branch" class="mr-2 text-sm font-medium text-base-content/70">Branch:</label>
     <div class="relative">
       <details class="dropdown">
@@ -21,7 +21,7 @@
   </div>
 
   <!-- Agreement Toggle -->
-  <div class="flex items-center mb-2 lg:mb-0">
+  <div class="flex items-center justify-between md:justify-start mb-2 lg:mb-0">
     <a href="<%= agreement_toggle_path %>" class="flex items-center">
       <div class="flex items-center justify-center w-full">
         <label for="toggleB" class="flex items-center cursor-pointer">
@@ -35,7 +35,7 @@
   </div>
 
   <!-- User Filter -->
-  <div class="flex items-center mb-2 lg:mb-0">
+  <div class="flex items-center justify-between md:justify-start mb-2 lg:mb-0">
     <label for="user_filter" class="mr-2 text-sm font-medium text-base-content/70">User:</label>
     <div class="relative">
       <details class="dropdown">

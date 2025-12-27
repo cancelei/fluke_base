@@ -62,7 +62,7 @@
   <!-- Contributions Summary -->
   <div class="card bg-base-100 shadow-xl mb-8 overflow-hidden">
     <div class="px-4 py-5 sm:px-6 border-b border-base-200">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col md:flex-row items-start justify-start md:items-center md:justify-between gap-1">
         <div>
           <h3 class="text-lg leading-6 font-medium text-base-content">Contributions Summary</h3>
           <p class="mt-1 max-w-2xl text-sm text-base-content/60">
@@ -89,8 +89,8 @@
 
   <!-- Recent Commits -->
   <div class="card bg-base-100 shadow-xl overflow-hidden">
-    <div class="px-4 py-5 sm:px-6">
-      <div class="flex items-center justify-between">
+    <div class="px-3 py-3 md:px-4 md:py-5 sm:px-6">
+      <div class="flex flex-col md:flex-row items-start justify-start md:items-center md:justify-between gap-1">
         <h3 class="text-lg leading-6 font-medium text-base-content">Recent Commits</h3>
         <% if @pagy && @recent_commits&.any? %>
           <div class="text-sm text-base-content/60">

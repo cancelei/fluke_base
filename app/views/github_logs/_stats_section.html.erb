@@ -1,5 +1,5 @@
 <% if total_commits > 0 %>
-  <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-6">
+  <div class="stats bg-base-100 stats-vertical lg:stats-horizontal shadow w-full mb-6">
     <div class="stat flex items-center justify-between">
       <div class="stat-title">Total Commits</div>
       <div class="stat-value"><%= number_with_delimiter(total_commits) %></div>
@@ -14,7 +14,7 @@
     </div>
   </div>
 <% else %>
-  <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-6">
+  <div class="stats bg-base-100 stats-vertical lg:stats-horizontal shadow w-full mb-6">
     <div class="stat flex items-center justify-between">
       <div class="stat-title">Total Commits</div>
       <div class="stat-value animate-pulse">-</div>

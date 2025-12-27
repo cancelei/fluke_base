@@ -1173,3 +1173,23 @@ h4, .text-xl {
     border-left-width: 2px; /* Thinner border on mobile */
   }
 }
+
+.dropdown-content {
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #9e9e9e #9e9e9e;
+}
+
+.dropdown-content::-webkit-scrollbar {
+  width: 3px;
+}
+
+.dropdown-content::-webkit-scrollbar-track {
+  background: #9e9e9e;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+  background-color: #9e9e9e;
+  border-radius: 3px;
+}
