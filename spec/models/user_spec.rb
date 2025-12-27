@@ -85,7 +85,7 @@ RSpec.describe User, type: :model do
     it { should validate_presence_of(:password) }
     # Devise handles password validation
 
-    it { should validate_length_of(:github_token).is_at_most(255) }
+    # Note: github_token length validation removed - encrypted values are longer
     it { should allow_value("").for(:github_username) }
     it { should allow_value("valid-username").for(:github_username) }
     it { should allow_value("valid123").for(:github_username) }

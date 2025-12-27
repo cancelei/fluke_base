@@ -39,7 +39,7 @@ module GithubSessionRestoration
     session[:github_session_restore] = true
 
     # Store the intended destination
-    session[:user_return_to] = request.fullpath if request.get?
+    session[:user_return_to] = request.fullpath if get_like_request?
 
     Rails.logger.info "[GithubSessionRestoration] Attempting session restore for returning GitHub user"
 
@@ -49,7 +49,7 @@ module GithubSessionRestoration
 
   def should_attempt_github_restore?
     # Only for HTML GET requests
-    return false unless request.format.html? && request.get?
+    return false unless request.format.html? && get_like_request?
 
     # Don't restore if we already attempted (prevents loops)
     return false if session[RESTORE_ATTEMPTED_KEY]
@@ -80,5 +80,9 @@ module GithubSessionRestoration
     cookies.delete(GITHUB_AUTH_COOKIE)
     session.delete(RESTORE_ATTEMPTED_KEY)
     session.delete(:github_session_restore)
+  end
+
+  def get_like_request?
+    request.get? || request.head?
   end
 end

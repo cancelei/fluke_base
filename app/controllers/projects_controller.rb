@@ -51,7 +51,7 @@ class ProjectsController < ApplicationController
 
     if @project_form.save
       @project = @project_form.project
-      GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
+      GithubFetchBranchesJob.perform_later(@project.id, current_user.effective_github_token)
       redirect_to @project, notice: "Project was successfully created."
     else
       # Maintain stealth mode state on validation errors
@@ -74,7 +74,7 @@ class ProjectsController < ApplicationController
 
     if @project_form.valid?
       @project_form.update_project(@project)
-      GithubFetchBranchesJob.perform_later(@project.id, current_user.github_token)
+      GithubFetchBranchesJob.perform_later(@project.id, current_user.effective_github_token)
       redirect_to @project, notice: "Project was successfully updated."
     else
       render :edit, status: :unprocessable_content

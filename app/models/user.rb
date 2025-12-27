@@ -234,18 +234,41 @@ class User < ApplicationRecord
   # Returns the most appropriate GitHub token
   # Priority: GitHub App OAuth token (with auto-refresh) > Legacy PAT
   def effective_github_token
-    return refreshed_github_token if github_user_access_token.present?
-    github_token.presence # Legacy PAT fallback
+    return refreshed_github_token if safe_github_user_access_token.present?
+    safe_github_token.presence # Legacy PAT fallback
   end
 
   # Check if user has connected via GitHub App OAuth
   def github_app_connected?
-    github_user_access_token.present? && github_uid.present?
+    safe_github_user_access_token.present? && github_uid.present?
   end
 
   # Check if user has any GitHub connection (OAuth or PAT)
   def github_connected?
     effective_github_token.present?
+  end
+
+  # Safe accessors for encrypted GitHub fields - handle decryption errors gracefully
+  # This can happen if encryption keys change or are missing in production
+  def safe_github_user_access_token
+    github_user_access_token
+  rescue ActiveRecord::Encryption::Errors::Decryption => e
+    Rails.logger.error("Failed to decrypt github_user_access_token for user #{id}: #{e.message}")
+    nil
+  end
+
+  def safe_github_refresh_token
+    github_refresh_token
+  rescue ActiveRecord::Encryption::Errors::Decryption => e
+    Rails.logger.error("Failed to decrypt github_refresh_token for user #{id}: #{e.message}")
+    nil
+  end
+
+  def safe_github_token
+    github_token
+  rescue ActiveRecord::Encryption::Errors::Decryption => e
+    Rails.logger.error("Failed to decrypt github_token for user #{id}: #{e.message}")
+    nil
   end
 
   # Disconnect GitHub App and remove all installations
@@ -370,13 +393,16 @@ class User < ApplicationRecord
 
   # Get GitHub token, refreshing if expired
   def refreshed_github_token
-    return nil unless github_user_access_token.present?
+    token = safe_github_user_access_token
+    return nil unless token.present?
 
     if token_needs_refresh?
       Github::TokenRefreshService.call(user: self)
+      # Re-fetch after refresh attempt
+      token = safe_github_user_access_token
     end
 
-    github_user_access_token
+    token
   end
 
   # Check if the OAuth token needs refreshing (expires within 5 minutes)

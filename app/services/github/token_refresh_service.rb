@@ -38,7 +38,8 @@ module Github
     end
 
     def call
-      return failure_result(:no_refresh_token, "No refresh token available") unless @user.github_refresh_token
+      refresh_token = @user.safe_github_refresh_token
+      return failure_result(:no_refresh_token, "No refresh token available") unless refresh_token
 
       # Check if refresh token is known to be expired
       if refresh_token_expired?
@@ -46,7 +47,7 @@ module Github
         return failure_result(:refresh_token_expired, "GitHub connection has expired. Please reconnect your GitHub account.")
       end
 
-      response = exchange_refresh_token
+      response = exchange_refresh_token(refresh_token)
 
       # Handle expired token errors from GitHub
       if expired_token_error?(response)
@@ -58,7 +59,10 @@ module Github
 
       update_user_tokens(response)
 
-      Success(@user.github_user_access_token)
+      Success(@user.safe_github_user_access_token)
+    rescue ActiveRecord::Encryption::Errors::Decryption => e
+      Rails.logger.error "[Github::TokenRefreshService] Failed to decrypt token for user #{@user.id}: #{e.message}"
+      failure_result(:decryption_error, "Failed to access GitHub credentials. Please reconnect your GitHub account.")
     rescue StandardError => e
       Rails.logger.error "[Github::TokenRefreshService] Failed to refresh token: #{e.message}"
       failure_result(:refresh_error, e.message)
@@ -91,7 +95,7 @@ module Github
       )
     end
 
-    def exchange_refresh_token
+    def exchange_refresh_token(refresh_token)
       response = HTTParty.post(
         GITHUB_TOKEN_URL,
         headers: {
@@ -102,7 +106,7 @@ module Github
           client_id:,
           client_secret:,
           grant_type: "refresh_token",
-          refresh_token: @user.github_refresh_token
+          refresh_token:
         }
       )
 

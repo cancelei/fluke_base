@@ -101,7 +101,7 @@ module Github
     end
 
     def check_pat_access(repo_path)
-      client = build_client(@user.github_token)
+      client = build_client(@user.effective_github_token)
 
       with_api_error_handling do
         repo = client.repository(repo_path)
