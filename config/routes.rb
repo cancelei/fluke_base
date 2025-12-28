@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   if Rails.env.development?
     get "test/turbo" => "test#turbo_test", as: :turbo_test
     get "test/agreements" => "test#agreements", as: :test_agreements
+    get "test/context_navbar" => "test#context_navbar", as: :test_context_navbar
   end
 
   # Authentication

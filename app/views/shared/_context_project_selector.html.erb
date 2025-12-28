@@ -8,18 +8,18 @@
   <% available_projects = available_projects.unshift(selected_project) %>
 <% end %>
 
-<details class="dropdown" data-context-nav-target="projectDropdown">
-  <summary class="btn btn-ghost btn-sm gap-2">
-    <svg class="w-4 h-4 text-base-content/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<details class="dropdown min-w-0 flex-shrink" data-context-nav-target="projectDropdown">
+  <summary class="btn btn-ghost btn-sm gap-1 sm:gap-2 px-2 sm:px-3 min-w-0">
+    <svg class="w-4 h-4 text-base-content/70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
     </svg>
     <% if selected_project %>
-      <span class="badge badge-ghost badge-sm text-xs">Active</span>
-      <span class="font-medium truncate max-w-[150px]"><%= present(selected_project).display_name(current_user) %></span>
+      <span class="badge badge-ghost badge-sm text-xs hidden sm:inline-flex">Active</span>
+      <span class="font-medium truncate max-w-[80px] sm:max-w-[150px]"><%= present(selected_project).display_name(current_user) %></span>
     <% else %>
-      <span class="text-base-content/60">Select Project</span>
+      <span class="text-base-content/60 truncate">Select Project</span>
     <% end %>
-    <svg class="w-4 h-4 text-base-content/60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+    <svg class="w-4 h-4 text-base-content/60 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
     </svg>
   </summary>

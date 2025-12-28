@@ -9,16 +9,16 @@
 <% milestones = selected_project.milestones.order(due_date: :asc, id: :asc) %>
 <% active_milestones = milestones.reject(&:completed?) %>
 
-<details class="dropdown dropdown-end" data-context-nav-target="milestoneDropdown">
-  <summary class="btn btn-ghost btn-sm gap-2">
-    <svg class="w-4 h-4 text-base-content/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<details class="dropdown dropdown-end min-w-0 flex-shrink" data-context-nav-target="milestoneDropdown">
+  <summary class="btn btn-ghost btn-sm gap-1 sm:gap-2 px-2 sm:px-3 min-w-0">
+    <svg class="w-4 h-4 text-base-content/70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
     </svg>
-    <span>Milestones</span>
+    <span class="hidden sm:inline">Milestones</span>
     <% if active_milestones.any? %>
       <span class="badge badge-primary badge-xs"><%= active_milestones.count %></span>
     <% end %>
-    <svg class="w-4 h-4 text-base-content/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="w-4 h-4 text-base-content/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
     </svg>
   </summary>
