@@ -1,0 +1,92 @@
+# Docker Compose for local development
+#
+# This file configures services for local development with environment
+# variables synced by FlukeBase Connect.
+#
+# Usage:
+#   # Sync environment first
+#   fbc sync  # or use fb_sync MCP tool
+#
+#   # Start all services
+#   docker-compose -f docker-compose.dev.yml up
+#
+#   # Start specific service
+#   docker-compose -f docker-compose.dev.yml up postgres redis
+#
+#   # Run with rebuild
+#   docker-compose -f docker-compose.dev.yml up --build
+#
+# Note: The Rails app itself runs directly on host (not in Docker) for
+# faster development iteration. This compose file provides dependencies.
+
+version: "3.8"
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    container_name: fluke_base_postgres
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-fluke_base_development}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and Action Cable
+  redis:
+    image: redis:7-alpine
+    container_name: fluke_base_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Full Rails app in Docker (slower but isolated)
+  # Uncomment if you prefer containerized development
+  # web:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: build  # Use build stage for dev dependencies
+  #   container_name: fluke_base_web
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     RAILS_ENV: development
+  #     DATABASE_URL: postgresql://postgres:postgres@postgres/fluke_base_development
+  #     REDIS_URL: redis://redis:6379/0
+  #   ports:
+  #     - "3006:3006"
+  #   volumes:
+  #     - .:/rails:cached
+  #     - bundle_cache:/usr/local/bundle
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   command: ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3006"]
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  # bundle_cache:
+  #   driver: local
