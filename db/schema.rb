@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_29_195428) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -98,6 +98,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
     t.check_constraint "weekly_hours IS NULL OR weekly_hours > 0 AND weekly_hours <= 40", name: "agreements_weekly_hours_check"
   end
 
+  create_table "api_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "token_digest", null: false
+    t.string "prefix", limit: 8, null: false
+    t.text "scopes", default: [], array: true
+    t.datetime "last_used_at"
+    t.string "last_used_ip"
+    t.datetime "expires_at"
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["prefix"], name: "index_api_tokens_on_prefix"
+    t.index ["token_digest"], name: "index_api_tokens_on_token_digest", unique: true
+    t.index ["user_id", "revoked_at"], name: "index_api_tokens_on_user_id_and_revoked_at"
+    t.index ["user_id"], name: "index_api_tokens_on_user_id"
+  end
+
   create_table "contact_requests", force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -116,6 +134,40 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
     t.datetime "updated_at", null: false
     t.index ["recipient_id", "sender_id"], name: "index_conversations_on_recipient_and_sender", unique: true
     t.index ["sender_id"], name: "index_conversations_on_sender_id"
+  end
+
+  create_table "environment_configs", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "environment", null: false
+    t.text "description"
+    t.datetime "last_synced_at"
+    t.integer "sync_count", default: 0
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "environment"], name: "index_environment_configs_on_project_id_and_environment", unique: true
+    t.index ["project_id"], name: "index_environment_configs_on_project_id"
+  end
+
+  create_table "environment_variables", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "created_by_id", null: false
+    t.bigint "updated_by_id"
+    t.string "key", null: false
+    t.text "value_ciphertext"
+    t.text "description"
+    t.string "environment", default: "development", null: false
+    t.boolean "is_secret", default: false, null: false
+    t.boolean "is_required", default: false, null: false
+    t.string "validation_regex"
+    t.text "example_value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_environment_variables_on_created_by_id"
+    t.index ["project_id", "environment", "key"], name: "idx_env_vars_project_env_key", unique: true
+    t.index ["project_id", "environment"], name: "index_environment_variables_on_project_id_and_environment"
+    t.index ["project_id"], name: "index_environment_variables_on_project_id"
+    t.index ["updated_by_id"], name: "index_environment_variables_on_updated_by_id"
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
@@ -183,6 +235,45 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
     t.index ["project_id"], name: "index_github_logs_on_project_id"
     t.index ["user_id", "commit_date"], name: "index_github_logs_on_user_id_and_commit_date", comment: "Composite index for user commit activity"
     t.index ["user_id"], name: "index_github_logs_on_user_id"
+  end
+
+  create_table "mcp_plugins", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.string "version", null: false
+    t.text "description"
+    t.string "plugin_type", null: false
+    t.string "maturity", null: false
+    t.string "author"
+    t.string "homepage"
+    t.string "icon_name"
+    t.jsonb "features", default: {}
+    t.jsonb "configuration_schema", default: {}
+    t.string "required_scopes", default: [], array: true
+    t.boolean "built_in", default: false
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_mcp_plugins_on_active"
+    t.index ["maturity"], name: "index_mcp_plugins_on_maturity"
+    t.index ["plugin_type"], name: "index_mcp_plugins_on_plugin_type"
+    t.index ["slug"], name: "index_mcp_plugins_on_slug", unique: true
+  end
+
+  create_table "mcp_presets", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.text "description"
+    t.string "target_role", null: false
+    t.jsonb "enabled_plugins", default: []
+    t.jsonb "token_scopes", default: []
+    t.jsonb "context_level", default: {}
+    t.boolean "system_preset", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_mcp_presets_on_slug", unique: true
+    t.index ["system_preset"], name: "index_mcp_presets_on_system_preset"
+    t.index ["target_role"], name: "index_mcp_presets_on_target_role"
   end
 
   create_table "meetings", force: :cascade do |t|
@@ -291,6 +382,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
     t.index ["project_id"], name: "index_project_agents_on_project_id"
   end
 
+  create_table "project_mcp_configurations", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "preset", default: "developer"
+    t.jsonb "enabled_plugins", default: []
+    t.jsonb "plugin_settings", default: {}
+    t.jsonb "context_options", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_project_mcp_configurations_on_project_id", unique: true
+  end
+
   create_table "project_memberships", force: :cascade do |t|
     t.bigint "project_id", null: false
     t.bigint "user_id", null: false
@@ -306,6 +408,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
     t.index ["user_id", "role"], name: "index_project_memberships_on_user_id_and_role"
     t.index ["user_id"], name: "index_project_memberships_on_user_id"
     t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'admin'::character varying::text, 'member'::character varying::text, 'guest'::character varying::text])", name: "project_memberships_role_check"
+  end
+
+  create_table "project_memories", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "user_id", null: false
+    t.string "memory_type", default: "fact", null: false
+    t.text "content", null: false
+    t.string "key"
+    t.text "rationale"
+    t.jsonb "tags", default: []
+    t.jsonb "references", default: {}
+    t.string "external_id"
+    t.datetime "synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_project_memories_on_external_id", unique: true, where: "(external_id IS NOT NULL)"
+    t.index ["project_id", "key"], name: "index_project_memories_on_project_id_and_key", unique: true, where: "(key IS NOT NULL)"
+    t.index ["project_id", "memory_type"], name: "index_project_memories_on_project_id_and_memory_type"
+    t.index ["project_id"], name: "index_project_memories_on_project_id"
+    t.index ["user_id"], name: "index_project_memories_on_user_id"
+    t.check_constraint "memory_type::text = ANY (ARRAY['fact'::character varying, 'convention'::character varying, 'gotcha'::character varying, 'decision'::character varying]::text[])", name: "project_memories_memory_type_check"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -579,6 +702,40 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
     t.index ["email"], name: "index_waiting_lists_on_email", unique: true
   end
 
+  create_table "webhook_deliveries", force: :cascade do |t|
+    t.bigint "webhook_subscription_id", null: false
+    t.string "event_type", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.string "idempotency_key", null: false
+    t.integer "status_code"
+    t.text "response_body"
+    t.integer "attempt_count", default: 0, null: false
+    t.datetime "delivered_at"
+    t.datetime "next_retry_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["idempotency_key"], name: "index_webhook_deliveries_on_idempotency_key", unique: true
+    t.index ["next_retry_at"], name: "index_webhook_deliveries_on_next_retry_at", where: "(delivered_at IS NULL)"
+    t.index ["webhook_subscription_id", "created_at"], name: "idx_on_webhook_subscription_id_created_at_199b16efdc"
+    t.index ["webhook_subscription_id"], name: "index_webhook_deliveries_on_webhook_subscription_id"
+  end
+
+  create_table "webhook_subscriptions", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.bigint "api_token_id", null: false
+    t.string "callback_url", null: false
+    t.text "events", default: ["env.updated"], array: true
+    t.string "secret"
+    t.boolean "active", default: true, null: false
+    t.integer "failure_count", default: 0, null: false
+    t.datetime "last_failure_at", precision: nil
+    t.datetime "last_success_at", precision: nil
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
+    t.index ["api_token_id"], name: "index_webhook_subscriptions_on_api_token_id"
+    t.index ["project_id", "active"], name: "index_webhook_subscriptions_on_project_id_and_active"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agreement_participants", "agreements"
@@ -587,8 +744,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
   add_foreign_key "agreement_participants", "users"
   add_foreign_key "agreement_participants", "users", column: "accept_or_counter_turn_id"
   add_foreign_key "agreements", "projects"
+  add_foreign_key "api_tokens", "users"
   add_foreign_key "conversations", "users", column: "recipient_id"
   add_foreign_key "conversations", "users", column: "sender_id"
+  add_foreign_key "environment_configs", "projects"
+  add_foreign_key "environment_variables", "projects"
+  add_foreign_key "environment_variables", "users", column: "created_by_id"
+  add_foreign_key "environment_variables", "users", column: "updated_by_id"
   add_foreign_key "github_app_installations", "users"
   add_foreign_key "github_branch_logs", "github_branches", on_delete: :cascade
   add_foreign_key "github_branch_logs", "github_logs", on_delete: :cascade
@@ -605,9 +767,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
   add_foreign_key "milestones", "projects"
   add_foreign_key "notifications", "users"
   add_foreign_key "project_agents", "projects"
+  add_foreign_key "project_mcp_configurations", "projects"
   add_foreign_key "project_memberships", "projects"
   add_foreign_key "project_memberships", "users"
   add_foreign_key "project_memberships", "users", column: "invited_by_id"
+  add_foreign_key "project_memories", "projects"
+  add_foreign_key "project_memories", "users"
   add_foreign_key "projects", "users"
   add_foreign_key "ratings", "users", column: "rater_id"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
@@ -622,6 +787,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_24_213259) do
   add_foreign_key "time_logs", "projects"
   add_foreign_key "time_logs", "users"
   add_foreign_key "users", "projects", column: "selected_project_id", on_delete: :nullify
+  add_foreign_key "webhook_deliveries", "webhook_subscriptions"
+  add_foreign_key "webhook_subscriptions", "api_tokens", name: "webhook_subscriptions_api_token_id_fkey"
+  add_foreign_key "webhook_subscriptions", "projects", name: "webhook_subscriptions_project_id_fkey"
 
   create_view "dashboard_stats", materialized: true, sql_definition: <<-SQL
       SELECT u.id AS user_id,
