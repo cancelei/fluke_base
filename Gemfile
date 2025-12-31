@@ -149,7 +149,7 @@ gem "pundit"
 
 gem "letter_avatar"
 
-gem "faraday-retry", "~> 2.3"
+gem "faraday-retry", "~> 2.4"
 
 # Materialized views for performance
 gem "scenic", "~> 1.8"
