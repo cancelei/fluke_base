@@ -40,7 +40,7 @@ gem "rails_cloudflare_turnstile"
 gem "rack-attack"
 
 # Payments
-gem "pay", "~> 6.8"
+gem "pay", "~> 11.4"
 gem "stripe", "~> 9.0"
 
 # Calendar integration``
