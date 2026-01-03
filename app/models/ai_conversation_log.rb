@@ -53,10 +53,10 @@ class AiConversationLog < ApplicationRecord
   validates :role, presence: true, inclusion: { in: %w[user assistant system tool] }
 
   # Scopes for filtering
-  scope :by_provider, ->(provider) { where(provider: provider) }
-  scope :by_session, ->(session_id) { where(session_id: session_id) }
-  scope :by_project, ->(project_id) { where(project_id: project_id) }
-  scope :by_role, ->(role) { where(role: role) }
+  scope :by_provider, ->(provider) { where(provider:) }
+  scope :by_session, ->(session_id) { where(session_id:) }
+  scope :by_project, ->(project_id) { where(project_id:) }
+  scope :by_role, ->(role) { where(role:) }
   scope :recent, ->(limit = 100) { order(exchanged_at: :desc).limit(limit) }
   scope :today, -> { where("exchanged_at >= ?", Time.current.beginning_of_day) }
   scope :assistant_messages, -> { where(role: "assistant") }

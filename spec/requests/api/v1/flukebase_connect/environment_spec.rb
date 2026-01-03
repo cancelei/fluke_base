@@ -33,8 +33,8 @@ RSpec.describe 'FlukeBase Connect Environment API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:environment']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:environment']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -74,8 +74,8 @@ RSpec.describe 'FlukeBase Connect Environment API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:environment']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:environment']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -111,8 +111,8 @@ RSpec.describe 'FlukeBase Connect Environment API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:environment']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:environment']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:sync_data) { { environment: 'development' } }
@@ -165,7 +165,7 @@ RSpec.describe 'FlukeBase Connect Environment API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:environment']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:environment']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:all) { true }
 

@@ -110,7 +110,7 @@ module Api
           end
 
           render_success({
-            contexts: contexts,
+            contexts:,
             meta: {
               count: contexts.count,
               successful: contexts.count { |c| !c[:error] },

@@ -4,38 +4,38 @@ module GithubLogsHelper
   # @return [String] HTML-formatted diff with proper styling
   def format_github_diff(patch)
     return "" if patch.blank?
-    
+
     # Convert escaped newlines to actual newlines
     formatted_patch = patch.gsub('\n', "\n")
-    
+
     # Split into lines and process each line
     lines = formatted_patch.split("\n")
     html_lines = []
-    
+
     current_block = []
     current_block_type = nil
-    
+
     lines.each do |line|
       cleaned_line = line.strip.gsub(" ", "")
       next if cleaned_line.length == 0
-      
+
       css_class = case line
-                  when /^\+\+\+/
+      when /^\+\+\+/
                     "diff-header"
-                  when /^---/
+      when /^---/
                     "diff-header"
-                  when /^@@/
+      when /^@@/
                     "diff-hunk"
-                  when /^\+/
+      when /^\+/
                     "diff-added"
-                  when /^-/
+      when /^-/
                     "diff-removed"
-                  when /^ /
+      when /^ /
                     "diff-unchanged"
-                  else
+      else
                     "diff-neutral"
-                  end
-      
+      end
+
       # Handle block grouping for added/removed lines
       if css_class == "diff-added" || css_class == "diff-removed"
         if current_block_type == css_class
@@ -56,18 +56,18 @@ module GithubLogsHelper
           current_block = []
           current_block_type = nil
         end
-        
+
         # Handle other line types normally
         escaped_line = h(line)
         html_lines << "<div class=\"#{css_class}\">#{escaped_line}</div>"
       end
     end
-    
+
     # Flush any remaining block
     if current_block.any?
       html_lines << "<div class=\"#{current_block_type}\">#{current_block.map { |l| h(l) }.join("\n")}</div>"
     end
-    
-    html_lines.join("\n")
+
+    html_lines.join("\n").html_safe
   end
 end

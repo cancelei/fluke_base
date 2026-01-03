@@ -34,12 +34,12 @@
     <h3 class="text-lg font-medium text-error"><%= title %></h3>
   <% end %>
 
-  <p class="<%= variant == :inline ? 'text-sm text-error' : 'mt-1 text-sm text-base-content/70' %>">
+  <p class="<%= variant == :inline ? "text-sm text-error" : "mt-1 text-sm text-base-content/70" %>">
     <%= message %>
   </p>
 
   <% if retry_action.present? || retry_url.present? %>
-    <div class="<%= variant == :inline ? 'ml-auto' : 'mt-4' %>">
+    <div class="<%= variant == :inline ? "ml-auto" : "mt-4" %>">
       <% if retry_action.present? %>
         <button type="button"
                 class="btn btn-sm btn-error btn-outline"

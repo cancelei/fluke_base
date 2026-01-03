@@ -53,7 +53,7 @@
       <% if task.due_date %>
         <div>
           <span class="text-base-content/60">Due date:</span>
-          <span class="<%= task.due_date < Date.current ? 'text-error' : '' %>"><%= task.due_date.strftime("%b %d, %Y") %></span>
+          <span class="<%= task.due_date < Date.current ? "text-error" : "" %>"><%= task.due_date.strftime("%b %d, %Y") %></span>
         </div>
       <% end %>
     </div>
@@ -99,13 +99,13 @@
         <% if task.artifact_path.present? %>
           <span class="badge badge-outline gap-1">
             <%= render Ui::IconComponent.new(name: :document, size: :xs) %>
-            <%= task.artifact_path.split('/').last %>
+            <%= task.artifact_path.split("/").last %>
           </span>
         <% end %>
         <% if task.remote_url.present? %>
           <%= link_to task.remote_url, target: "_blank", class: "badge badge-outline gap-1 hover:badge-primary" do %>
             <%= render Ui::IconComponent.new(name: :link, size: :xs) %>
-            <%= task.remote_url.gsub(/^https?:\/\//, '').truncate(30) %>
+            <%= task.remote_url.gsub(/^https?:\/\//, "").truncate(30) %>
           <% end %>
         <% end %>
       </div>
@@ -114,7 +114,7 @@
     <%# Subtasks %>
     <% if task.subtasks.any? %>
       <div class="collapse collapse-arrow bg-base-200">
-        <input type="checkbox" />
+        <input type="checkbox">
         <div class="collapse-title font-medium">
           Subtasks (<%= task.subtasks.completed.count %>/<%= task.subtasks.count %>)
         </div>
@@ -132,7 +132,7 @@
                   <%= render Ui::IconComponent.new(name: :clock, size: :xs, css_class: "text-warning") %>
                 <% end %>
                 <code class="text-xs font-mono"><%= subtask.task_id %></code>
-                <span class="<%= subtask.completed? ? 'line-through text-base-content/40' : '' %>">
+                <span class="<%= subtask.completed? ? "line-through text-base-content/40" : "" %>">
                   <%= subtask.description.truncate(50) %>
                 </span>
               </li>
@@ -145,7 +145,7 @@
     <%# Synthesis Report (Audit Trail) %>
     <% if task.synthesis_report.present? %>
       <div class="collapse collapse-arrow bg-base-200">
-        <input type="checkbox" />
+        <input type="checkbox">
         <div class="collapse-title font-medium">
           Audit Trail
         </div>

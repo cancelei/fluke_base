@@ -45,7 +45,7 @@ class GithubStatsEnrichmentJob < ApplicationJob
     # Run the enrichment
     result = Github::CommitStatsEnricher.new(
       project: @project,
-      access_token: access_token,
+      access_token:,
       batch_size: BATCH_SIZE
     ).call
 

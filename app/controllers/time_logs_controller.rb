@@ -56,7 +56,7 @@ class TimeLogsController < ApplicationController
             owner: @owner,
             milestones_pending_confirmation: @milestones_pending_confirmation
           }
-          
+
           render turbo_stream: [
             turbo_stream.update("manual_time_log_form",
               partial: "time_logs/manual_form",

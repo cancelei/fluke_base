@@ -71,7 +71,7 @@ class UnifiedLogsChannel < ApplicationCable::Channel
     # Forward to flukebase_connect via HTTP API (WebSocket filter would be per-connection)
     transmit({
       type: "filter_set",
-      filter: filter,
+      filter:,
       timestamp: Time.current.iso8601
     })
 
@@ -84,7 +84,7 @@ class UnifiedLogsChannel < ApplicationCable::Channel
     limit = 100 if limit <= 0
 
     # Fetch from flukebase_connect API
-    logs = fetch_log_history(limit: limit, filter: @current_filter)
+    logs = fetch_log_history(limit:, filter: @current_filter)
 
     transmit({
       type: "history",
@@ -121,7 +121,7 @@ class UnifiedLogsChannel < ApplicationCable::Channel
   end
 
   def fetch_log_history(limit:, filter: nil)
-    FlukebaseConnect::Client.get_logs(limit: limit, filter: filter)
+    FlukebaseConnect::Client.get_logs(limit:, filter:)
   rescue StandardError => e
     Rails.logger.error "[UnifiedLogsChannel] Failed to fetch history: #{e.message}"
     []
@@ -249,7 +249,7 @@ class UnifiedLogsChannel < ApplicationCable::Channel
     def broadcast_stats(stats)
       ActionCable.server.broadcast("unified_logs:stats", {
         type: "stats",
-        stats: stats,
+        stats:,
         timestamp: Time.current.iso8601
       })
     end

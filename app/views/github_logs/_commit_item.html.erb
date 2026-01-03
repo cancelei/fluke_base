@@ -98,7 +98,7 @@
                 <% if change['patch'].present? %>
                   <div class="mt-2 border border-base-300 rounded-lg overflow-hidden bg-base-100">
                     <div class="diff-container text-xs font-mono overflow-x-auto">
-                      <pre class="m-0 p-0"><code class="block"><%= raw format_github_diff(change["patch"]) %></code></pre>
+                      <pre class="m-0 p-0"><code class="block"><%= format_github_diff(change["patch"]) %></code></pre>
                     </div>
                   </div>
                 <% end %>

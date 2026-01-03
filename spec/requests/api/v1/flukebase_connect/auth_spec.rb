@@ -26,7 +26,7 @@ RSpec.describe 'FlukeBase Connect Authentication API', type: :request do
                required: %w[valid user_id scopes]
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user) }
+        let(:api_token) { create(:api_token, user:) }
         let(:Authorization) { "Bearer #{api_token.token}" }
 
         run_test!
@@ -65,7 +65,7 @@ RSpec.describe 'FlukeBase Connect Authentication API', type: :request do
                required: %w[id email]
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user) }
+        let(:api_token) { create(:api_token, user:) }
         let(:Authorization) { "Bearer #{api_token.token}" }
 
         run_test!

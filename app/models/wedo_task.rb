@@ -141,7 +141,7 @@ class WedoTask < ApplicationRecord
   # Dependency management
   def blocking_tasks
     return WedoTask.none if blocked_by.blank?
-    WedoTask.where(task_id: blocked_by, project_id: project_id)
+    WedoTask.where(task_id: blocked_by, project_id:)
   end
 
   def dependencies_met?
@@ -163,34 +163,34 @@ class WedoTask < ApplicationRecord
   # API serialization
   def to_api_hash(include_subtasks: false)
     hash = {
-      id: id,
-      task_id: task_id,
-      description: description,
-      status: status,
-      dependency: dependency,
-      scope: scope,
-      priority: priority,
-      synthesis_report: synthesis_report,
-      artifact_path: artifact_path,
-      remote_url: remote_url,
+      id:,
+      task_id:,
+      description:,
+      status:,
+      dependency:,
+      scope:,
+      priority:,
+      synthesis_report:,
+      artifact_path:,
+      remote_url:,
       completed_at: completed_at&.iso8601,
       blocked_by: blocked_by || [],
       tags: tags || [],
-      version: version,
-      external_id: external_id,
+      version:,
+      external_id:,
       parent_task_id: parent_task&.task_id,
-      template_id: template_id,
+      template_id:,
       assignee: assignee&.full_name,
-      assignee_id: assignee_id,
+      assignee_id:,
       due_date: due_date&.iso8601,
       created_by: created_by&.full_name,
-      created_by_id: created_by_id,
+      created_by_id:,
       updated_by: updated_by&.full_name,
-      updated_by_id: updated_by_id,
+      updated_by_id:,
       progress_percent: progress_percentage,
       subtask_count: subtasks.count,
       completed_subtask_count: subtasks.completed.count,
-      project_id: project_id,
+      project_id:,
       created_at: created_at&.iso8601,
       updated_at: updated_at&.iso8601
     }
@@ -245,7 +245,7 @@ class WedoTask < ApplicationRecord
       project,
       event_type,
       self,
-      agent_id: agent_id,
+      agent_id:,
       include_milestone: true
     )
   rescue StandardError => e

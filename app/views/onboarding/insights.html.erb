@@ -79,7 +79,7 @@
 
       <div class="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t border-base-200">
         <% UserOnboardingProgress::MILESTONE_KEYS.each do |milestone| %>
-          <div class="flex items-center gap-2 text-sm <%= @onboarding[:milestones_completed].include?(milestone) ? 'text-success' : 'text-base-content/50' %>">
+          <div class="flex items-center gap-2 text-sm <%= @onboarding[:milestones_completed].include?(milestone) ? "text-success" : "text-base-content/50" %>">
             <% if @onboarding[:milestones_completed].include?(milestone) %>
               <%= heroicon "check-circle", variant: :solid, class: "w-5 h-5" %>
             <% else %>

@@ -43,21 +43,20 @@ RSpec.describe ProjectCardComponent, type: :component do
   describe "variants" do
     it "renders grid variant by default" do
       render_inline(described_class.new(project:, current_user: user))
-      
+
       expect(rendered_content).to include("View Details")
     end
 
     it "renders list variant" do
       render_inline(described_class.new(project:, current_user: user, variant: :list))
-      
+
       expect(rendered_content).to include("interactive-card")
     end
 
     it "renders compact variant" do
       render_inline(described_class.new(project:, current_user: user, variant: :compact))
-      
+
       expect(rendered_content).to include("card-compact")
     end
   end
 end
-

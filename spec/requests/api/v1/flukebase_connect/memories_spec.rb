@@ -5,9 +5,9 @@ require 'swagger_helper'
 RSpec.describe 'FlukeBase Connect Memories API', type: :request do
   # Shared setup for all tests
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
+  let(:project) { create(:project, user:) }
   # Default token with read:memories scope for most tests
-  let(:api_token) { create(:api_token, user: user, scopes: %w[read:memories read:projects]) }
+  let(:api_token) { create(:api_token, user:, scopes: %w[read:memories read:projects]) }
   let(:Authorization) { "Bearer #{api_token.token}" }
   let(:project_id) { project.id }
 
@@ -60,8 +60,8 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
         let(:type) { 'convention' }
 
         before do
-          create(:project_memory, project: project, user: user, memory_type: 'fact')
-          create(:project_memory, project: project, user: user, memory_type: 'convention')
+          create(:project_memory, project:, user:, memory_type: 'fact')
+          create(:project_memory, project:, user:, memory_type: 'convention')
         end
 
         run_test! do |response|
@@ -121,7 +121,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
                },
                required: ['memory']
 
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:memories read:projects]) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:memories read:projects]) }
         let(:memory) { { content: 'Test memory', memory_type: 'fact' } }
 
         run_test! do |response|
@@ -132,7 +132,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
       end
 
       response '201', 'Memory created with all fields' do
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:memories read:projects]) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:memories read:projects]) }
         let(:memory) do
           {
             content: 'Use snake_case for Ruby methods',
@@ -152,7 +152,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
       end
 
       response '422', 'Validation error - missing content' do
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:memories read:projects]) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:memories read:projects]) }
         let(:memory) { { memory_type: 'fact' } }
 
         run_test! do |response|
@@ -169,7 +169,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
       end
 
       response '403', 'Forbidden - missing write:memories scope' do
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:memories']) }
         let(:memory) { { content: 'Test', memory_type: 'fact' } }
 
         run_test!
@@ -181,7 +181,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
     parameter name: :project_id, in: :path, type: :integer, description: 'Project ID'
     parameter name: :id, in: :path, type: :integer, description: 'Memory ID'
 
-    let(:existing_memory) { create(:project_memory, project: project, user: user) }
+    let(:existing_memory) { create(:project_memory, project:, user:) }
     let(:id) { existing_memory.id }
 
     get 'Get a specific memory' do
@@ -239,7 +239,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
                  memory: { '$ref' => '#/components/schemas/memory' }
                }
 
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:memories']) }
         let(:memory) { { content: 'Updated content' } }
 
         run_test! do |response|
@@ -255,13 +255,13 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
       end
 
       response '403', 'Forbidden - missing write:memories scope' do
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:memories']) }
         let(:memory) { { content: 'Updated' } }
         run_test!
       end
 
       response '404', 'Memory not found' do
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:memories']) }
         let(:id) { 999999 }
         let(:memory) { { content: 'Updated' } }
         run_test!
@@ -281,7 +281,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
                  deleted: { type: :boolean }
                }
 
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:memories']) }
 
         run_test! do |response|
           data = JSON.parse(response.body)
@@ -296,12 +296,12 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
       end
 
       response '403', 'Forbidden - missing write:memories scope' do
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:memories']) }
         run_test!
       end
 
       response '404', 'Memory not found' do
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:memories']) }
         let(:id) { 999999 }
         run_test!
       end
@@ -336,7 +336,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
                }
 
         before do
-          create(:project_memory, :convention, project: project, user: user,
+          create(:project_memory, :convention, project:, user:,
                  key: 'naming', content: 'Use snake_case', rationale: 'Ruby standard')
         end
 
@@ -408,7 +408,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
                  }
                }
 
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:memories']) }
         let(:memories) do
           {
             memories: [
@@ -426,9 +426,9 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
       end
 
       response '200', 'Sync completed - existing memories updated' do
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:memories']) }
         let!(:existing_memory) do
-          create(:project_memory, project: project, user: user, external_id: 'mem_existing', content: 'Original')
+          create(:project_memory, project:, user:, external_id: 'mem_existing', content: 'Original')
         end
         let(:memories) do
           {
@@ -448,7 +448,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
       end
 
       response '200', 'Sync with errors - missing external_id' do
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:memories']) }
         let(:memories) do
           {
             memories: [
@@ -470,7 +470,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
       end
 
       response '403', 'Forbidden - missing write:memories scope' do
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:memories']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:memories']) }
         let(:memories) { { memories: [] } }
         run_test!
       end
@@ -514,7 +514,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
                }
 
         before do
-          create(:project_memory, project: project, user: user, content: 'Ruby coding standard')
+          create(:project_memory, project:, user:, content: 'Ruby coding standard')
         end
 
         run_test! do |response|
@@ -528,8 +528,8 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
         let(:q) { 'ruby' }
 
         before do
-          create(:project_memory, project: project, user: user, content: 'Ruby coding standard')
-          create(:project_memory, project: project, user: user, content: 'Python style guide')
+          create(:project_memory, project:, user:, content: 'Ruby coding standard')
+          create(:project_memory, project:, user:, content: 'Python style guide')
         end
 
         run_test! do |response|
@@ -542,8 +542,8 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
         let(:type) { 'convention' }
 
         before do
-          create(:project_memory, project: project, user: user, memory_type: 'fact')
-          create(:project_memory, project: project, user: user, memory_type: 'convention')
+          create(:project_memory, project:, user:, memory_type: 'fact')
+          create(:project_memory, project:, user:, memory_type: 'convention')
         end
 
         run_test! do |response|
@@ -606,8 +606,8 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
                }
 
         before do
-          create(:project_memory, project: project, user: user, content: 'Memory 1')
-          create(:project_memory, project: project, user: user, content: 'Memory 2')
+          create(:project_memory, project:, user:, content: 'Memory 1')
+          create(:project_memory, project:, user:, content: 'Memory 2')
         end
 
         # Use direct request with all=true parameter
@@ -627,7 +627,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
         let(:'project_ids[]') { [project.id] }
 
         before do
-          create(:project_memory, project: project, user: user, content: 'Memory 1')
+          create(:project_memory, project:, user:, content: 'Memory 1')
         end
 
         run_test! do |response|
@@ -639,8 +639,8 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
 
       response '200', 'Batch pull with type filter' do
         before do
-          create(:project_memory, project: project, user: user, memory_type: 'fact')
-          create(:project_memory, project: project, user: user, memory_type: 'convention')
+          create(:project_memory, project:, user:, memory_type: 'fact')
+          create(:project_memory, project:, user:, memory_type: 'convention')
         end
 
         it 'returns only conventions' do
@@ -658,7 +658,7 @@ RSpec.describe 'FlukeBase Connect Memories API', type: :request do
 
       response '200', 'Batch pull with since filter for incremental sync' do
         before do
-          create(:project_memory, project: project, user: user, content: 'Recent', updated_at: 30.minutes.ago)
+          create(:project_memory, project:, user:, content: 'Recent', updated_at: 30.minutes.ago)
         end
 
         it 'returns memories updated since timestamp' do

@@ -92,7 +92,7 @@
         <dd class="mt-1 text-sm text-base-content sm:col-span-2 sm:mt-0">
           <% token_count = current_user.api_tokens.active.count %>
           <% if token_count > 0 %>
-            <span class="badge badge-success gap-1"><%= token_count %> active token<%= token_count == 1 ? '' : 's' %></span>
+            <span class="badge badge-success gap-1"><%= token_count %> active token<%= token_count == 1 ? "" : "s" %></span>
           <% else %>
             <span class="badge badge-ghost gap-1">No tokens</span>
           <% end %>

@@ -63,8 +63,8 @@ module Github
         allowed_calls: [fair_share, MIN_CALLS_PER_PROJECT].max,
         poll_interval_multiplier: multiplier,
         can_poll: fair_share >= MIN_CALLS_PER_PROJECT,
-        remaining: remaining,
-        limit: limit,
+        remaining:,
+        limit:,
         consumption_percent: consumption,
         projects_sharing: project_count
       }
@@ -116,13 +116,13 @@ module Github
       projects = projects_using_token
 
       {
-        token_hash: token_hash,
+        token_hash:,
         remaining: status[:remaining],
         limit: status[:limit],
         resets_at: status[:resets_at],
         consumption_percent: rate_limit_tracker.consumption_percent,
         project_count: projects.count,
-        projects: projects,
+        projects:,
         recommended_interval: recommended_poll_interval,
         threshold_exceeded: rate_limit_tracker.threshold_exceeded?
       }

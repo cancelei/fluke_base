@@ -191,7 +191,7 @@ module Github
     def default_status
       limit = token.present? ? DEFAULT_LIMITS[:authenticated] : DEFAULT_LIMITS[:unauthenticated]
       {
-        limit: limit,
+        limit:,
         remaining: nil, # Unknown until first API response
         resets_at: nil,
         recorded_at: nil
@@ -203,13 +203,13 @@ module Github
 
       # Handle different response types
       raw_headers = case response
-                    when Sawyer::Response
+      when Sawyer::Response
                       response.headers
-                    when Hash
+      when Hash
                       response[:headers] || response["headers"] || {}
-                    else
+      else
                       return headers
-                    end
+      end
 
       # Extract rate limit headers (case-insensitive)
       limit = raw_headers["x-ratelimit-limit"] || raw_headers["X-RateLimit-Limit"]
@@ -229,11 +229,11 @@ module Github
 
       level = if percent >= THRESHOLD_PERCENT
                 :warn
-              elsif percent >= 75
+      elsif percent >= 75
                 :info
-              else
+      else
                 :debug
-              end
+      end
 
       message = "[RateLimitTracker] Rate limit: #{status[:remaining]}/#{status[:limit]} " \
                 "(#{percent}% consumed, resets at #{status[:resets_at]&.strftime('%H:%M:%S')})"

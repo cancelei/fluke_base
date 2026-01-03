@@ -76,7 +76,7 @@ class AiProductivityMetric < ApplicationRecord
 
   # Aggregate metrics for a project
   def self.aggregate_for_project(project_id, since: 30.days.ago)
-    metrics = where(project_id: project_id).since(since)
+    metrics = where(project_id:).since(since)
 
     {
       time_saved: aggregate_time_saved(metrics.time_saved),
@@ -132,7 +132,7 @@ class AiProductivityMetric < ApplicationRecord
     end
 
     {
-      total_commits: total_commits,
+      total_commits:,
       total_lines_added: total_added,
       total_lines_removed: total_removed,
       total_files_changed: total_files,
@@ -183,7 +183,7 @@ class AiProductivityMetric < ApplicationRecord
     end
 
     {
-      total_tokens: total_tokens,
+      total_tokens:,
       total_input_tokens: total_input,
       total_output_tokens: total_output,
       total_cost_usd: total_cost.round(4),

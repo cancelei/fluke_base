@@ -113,7 +113,7 @@ class GithubCommitRefreshJob < ApplicationJob
     # Reschedule the job with incremented retry count
     self.class.set(wait: delay).perform_later(
       project_id, access_token, branch,
-      fetch_stats: fetch_stats,
+      fetch_stats:,
       retry_count: @retry_count + 1
     )
   end

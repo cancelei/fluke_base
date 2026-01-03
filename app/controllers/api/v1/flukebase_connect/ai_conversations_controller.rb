@@ -86,13 +86,13 @@ module Api
                 end
               rescue ActiveRecord::RecordInvalid => e
                 results[:errors] << {
-                  index: index,
+                  index:,
                   external_id: log_data[:external_id],
                   error: e.message
                 }
               rescue StandardError => e
                 results[:errors] << {
-                  index: index,
+                  index:,
                   external_id: log_data[:external_id],
                   error: e.message
                 }

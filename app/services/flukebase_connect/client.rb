@@ -3,9 +3,9 @@
 module FlukebaseConnect
   class Client
     include HTTParty
-    
+
     # Default to localhost if not configured, derived from WebSocket URL if possible
-    base_uri ENV.fetch("FLUKEBASE_API_URL") { 
+    base_uri ENV.fetch("FLUKEBASE_API_URL") {
       ws_url = ENV.fetch("FLUKEBASE_WS_URL", "ws://localhost:8766")
       ws_url.gsub("ws://", "http://").gsub("wss://", "https://")
     }
@@ -17,7 +17,7 @@ module FlukebaseConnect
 
     def self.get_sandboxes
       response = get("/api/v1/sandboxes")
-      
+
       if response.success?
         response.parsed_response["sandboxes"] || []
       else
@@ -30,8 +30,8 @@ module FlukebaseConnect
     end
 
     def self.get_logs(limit: 100, filter: nil)
-      options = { query: { limit: limit } }
-      
+      options = { query: { limit: } }
+
       if filter.present?
         # Flatten filter params for query string if needed, or send as JSON body if POST
         # Assuming GET with query params for now

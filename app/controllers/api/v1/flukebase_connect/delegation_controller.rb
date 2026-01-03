@@ -24,7 +24,7 @@ module Api
             pool: @pool.to_api_hash,
             sessions: @pool.container_sessions.active.map(&:to_api_hash),
             pending_tasks: pending_delegable_tasks,
-            active_delegations: active_delegations,
+            active_delegations:,
             stats: delegation_stats
           })
         end
@@ -231,7 +231,7 @@ module Api
         def broadcast_delegation_event(event_type, data)
           TeamBoardChannel.broadcast_to(@project, {
             type: event_type,
-            data: data,
+            data:,
             timestamp: Time.current.iso8601
           })
         end

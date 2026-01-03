@@ -4,7 +4,7 @@ require "rails_helper"
 
 RSpec.describe UnifiedLogsController, type: :controller do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
+  let(:project) { create(:project, user:) }
 
   describe "GET #index" do
     context "when not authenticated" do

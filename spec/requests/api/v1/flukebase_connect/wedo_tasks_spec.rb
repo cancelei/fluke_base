@@ -47,8 +47,8 @@ RSpec.describe 'FlukeBase Connect WeDo Tasks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:tasks read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:tasks read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -96,8 +96,8 @@ RSpec.describe 'FlukeBase Connect WeDo Tasks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:tasks read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:tasks read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:body_params) { { task: { task_id: 'TEST-001', description: 'Test task' } } }
@@ -125,9 +125,9 @@ RSpec.describe 'FlukeBase Connect WeDo Tasks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:task_record) { create(:wedo_task, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:tasks read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:task_record) { create(:wedo_task, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:tasks read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { task_record.task_id }
@@ -167,9 +167,9 @@ RSpec.describe 'FlukeBase Connect WeDo Tasks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:task_record) { create(:wedo_task, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:tasks read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:task_record) { create(:wedo_task, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:tasks read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { task_record.task_id }
@@ -187,9 +187,9 @@ RSpec.describe 'FlukeBase Connect WeDo Tasks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:task_record) { create(:wedo_task, project: project, version: 5) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:tasks read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:task_record) { create(:wedo_task, project:, version: 5) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:tasks read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { task_record.task_id }
@@ -213,9 +213,9 @@ RSpec.describe 'FlukeBase Connect WeDo Tasks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:task_record) { create(:wedo_task, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:tasks read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:task_record) { create(:wedo_task, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:tasks read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { task_record.task_id }
@@ -282,8 +282,8 @@ RSpec.describe 'FlukeBase Connect WeDo Tasks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:tasks read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:tasks read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:body_params) do

@@ -50,7 +50,7 @@
 
           <%# Dependency indicator %>
           <% if task.blocked_by.present? %>
-            <span class="tooltip tooltip-left" data-tip="Blocked by: <%= task.blocked_by.join(', ') %>">
+            <span class="tooltip tooltip-left" data-tip="Blocked by: <%= task.blocked_by.join(", ") %>">
               <%= render Ui::IconComponent.new(name: :link, size: :xs, css_class: "text-warning") %>
             </span>
           <% end %>

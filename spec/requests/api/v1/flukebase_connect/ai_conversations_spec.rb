@@ -35,8 +35,8 @@ RSpec.describe 'FlukeBase Connect AI Conversations API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:metrics']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -63,9 +63,9 @@ RSpec.describe 'FlukeBase Connect AI Conversations API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:log_record) { create(:ai_conversation_log, project: project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:metrics']) }
+        let(:project) { create(:project, user:) }
+        let(:log_record) { create(:ai_conversation_log, project:, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { log_record.id }
@@ -135,8 +135,8 @@ RSpec.describe 'FlukeBase Connect AI Conversations API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:metrics']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:sync_data) do

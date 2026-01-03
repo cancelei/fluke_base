@@ -57,7 +57,7 @@ class MilestonesController < ApplicationController
               milestones_pending_confirmation: @milestones_pending_confirmation,
               time_logs_completed: @time_logs_completed
             }
-            
+
             render turbo_stream: [
               turbo_stream.remove("milestone_#{@milestone.id}_pending_row"),
               *update_milestone_data_streams(@project, data),

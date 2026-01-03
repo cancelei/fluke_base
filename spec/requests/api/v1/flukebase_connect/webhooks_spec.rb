@@ -30,8 +30,8 @@ RSpec.describe 'FlukeBase Connect Webhooks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:webhooks']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:webhooks']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -65,8 +65,8 @@ RSpec.describe 'FlukeBase Connect Webhooks API', type: :request do
         schema '$ref' => '#/components/schemas/webhook'
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:webhooks']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:webhooks']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:webhook) { { callback_url: 'https://example.com/webhook', events: ['env.updated'] } }
@@ -94,9 +94,9 @@ RSpec.describe 'FlukeBase Connect Webhooks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:webhook_record) { create(:webhook_subscription, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:webhooks']) }
+        let(:project) { create(:project, user:) }
+        let(:webhook_record) { create(:webhook_subscription, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:webhooks']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { webhook_record.id }
@@ -126,9 +126,9 @@ RSpec.describe 'FlukeBase Connect Webhooks API', type: :request do
         schema '$ref' => '#/components/schemas/webhook'
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:webhook_record) { create(:webhook_subscription, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:webhooks']) }
+        let(:project) { create(:project, user:) }
+        let(:webhook_record) { create(:webhook_subscription, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:webhooks']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { webhook_record.id }
@@ -151,9 +151,9 @@ RSpec.describe 'FlukeBase Connect Webhooks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:webhook_record) { create(:webhook_subscription, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:webhooks']) }
+        let(:project) { create(:project, user:) }
+        let(:webhook_record) { create(:webhook_subscription, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:webhooks']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { webhook_record.id }
@@ -206,9 +206,9 @@ RSpec.describe 'FlukeBase Connect Webhooks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:webhook_record) { create(:webhook_subscription, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:webhooks']) }
+        let(:project) { create(:project, user:) }
+        let(:webhook_record) { create(:webhook_subscription, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:webhooks']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { webhook_record.id }
@@ -243,8 +243,8 @@ RSpec.describe 'FlukeBase Connect Webhooks API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:webhooks']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:webhooks']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 

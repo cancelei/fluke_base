@@ -17,8 +17,8 @@
       <select class="select select-bordered select-sm"
               data-action="change->team-board#filterByScope">
         <option value="">All Scopes</option>
-        <option value="global" <%= 'selected' if params[:scope] == 'global' %>>Global</option>
-        <option value="session" <%= 'selected' if params[:scope] == 'session' %>>Session</option>
+        <option value="global" <%= "selected" if params[:scope] == "global" %>>Global</option>
+        <option value="session" <%= "selected" if params[:scope] == "session" %>>Session</option>
       </select>
 
       <%# Connection status indicator %>
@@ -118,7 +118,7 @@
       </h3>
       <div class="space-y-3" data-team-board-target="pendingColumn">
         <% @tasks_by_status[:pending].each do |task| %>
-          <%= render "task_card", task: task %>
+          <%= render "task_card", task: %>
         <% end %>
         <% if @tasks_by_status[:pending].empty? %>
           <p class="text-base-content/40 text-sm text-center py-4">No pending tasks</p>
@@ -135,7 +135,7 @@
       </h3>
       <div class="space-y-3" data-team-board-target="inProgressColumn">
         <% @tasks_by_status[:in_progress].each do |task| %>
-          <%= render "task_card", task: task %>
+          <%= render "task_card", task: %>
         <% end %>
         <% if @tasks_by_status[:in_progress].empty? %>
           <p class="text-base-content/40 text-sm text-center py-4">No tasks in progress</p>
@@ -152,7 +152,7 @@
       </h3>
       <div class="space-y-3" data-team-board-target="blockedColumn">
         <% @tasks_by_status[:blocked].each do |task| %>
-          <%= render "task_card", task: task %>
+          <%= render "task_card", task: %>
         <% end %>
         <% if @tasks_by_status[:blocked].empty? %>
           <p class="text-base-content/40 text-sm text-center py-4">No blocked tasks</p>
@@ -169,7 +169,7 @@
       </h3>
       <div class="space-y-3" data-team-board-target="completedColumn">
         <% @tasks_by_status[:completed].each do |task| %>
-          <%= render "task_card", task: task %>
+          <%= render "task_card", task: %>
         <% end %>
         <% if @tasks_by_status[:completed].empty? %>
           <p class="text-base-content/40 text-sm text-center py-4">No completed tasks</p>

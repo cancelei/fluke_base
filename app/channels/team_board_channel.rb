@@ -82,7 +82,7 @@ class TeamBoardChannel < ApplicationCable::Channel
         type: "conflict",
         task_id: task.task_id,
         server_version: task.version,
-        client_version: client_version,
+        client_version:,
         server_task: task.to_api_hash
       })
       return
@@ -163,7 +163,7 @@ class TeamBoardChannel < ApplicationCable::Channel
         timestamp: Time.current.iso8601,
         activity: {
           last_activity: Time.current.iso8601,
-          event_type: event_type
+          event_type:
         }
       }
 

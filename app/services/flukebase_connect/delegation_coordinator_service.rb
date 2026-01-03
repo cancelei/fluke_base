@@ -142,7 +142,7 @@ module FlukebaseConnect
       return {} unless pool
 
       agent_tasks = project.wedo_tasks.where(dependency: "AGENT_CAPABLE")
-      delegations = DelegationRequest.where(project: project)
+      delegations = DelegationRequest.where(project:)
 
       {
         pool_status: pool.status,
@@ -206,7 +206,7 @@ module FlukebaseConnect
     def broadcast_event(event_type, data)
       TeamBoardChannel.broadcast_to(project, {
         type: event_type,
-        data: data,
+        data:,
         timestamp: Time.current.iso8601
       })
     end

@@ -72,7 +72,7 @@ module AiInsights
         title: @title,
         value: @value,
         icon: icon_name,
-        color: color,
+        color:,
         description: @description,
         id: dom_id,
         data: stimulus_data

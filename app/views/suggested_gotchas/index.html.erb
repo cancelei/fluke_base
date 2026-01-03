@@ -34,7 +34,7 @@
     <div class="alert alert-info mb-6">
       <%= render Ui::IconComponent.new(name: :information_circle, size: :sm) %>
       <span>
-        You have <strong><%= pending_count %></strong> pending suggestion<%= pending_count == 1 ? '' : 's' %> waiting for review.
+        You have <strong><%= pending_count %></strong> pending suggestion<%= pending_count == 1 ? "" : "s" %> waiting for review.
         Approve to save as a gotcha, or dismiss if not useful.
       </span>
     </div>
@@ -144,5 +144,5 @@
 
 <%# Helper definitions %>
 <% content_for :head do %>
-  <% # Helpers could be extracted to a helper module %>
+# Helpers could be extracted to a helper module %>
 <% end %>

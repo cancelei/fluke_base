@@ -81,7 +81,7 @@ class AgreementsQuery
     AgreementDuplicateChecker.new(
       user1_id: @current_user.id,
       user2_id: other_party_id,
-      project_id: project_id
+      project_id:
     ).find_duplicate
   end
 
