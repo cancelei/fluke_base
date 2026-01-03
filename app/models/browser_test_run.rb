@@ -1,5 +1,40 @@
 # frozen_string_literal: true
 
+# == Schema Information
+#
+# Table name: browser_test_runs
+#
+#  id                   :bigint           not null, primary key
+#  assertions           :json
+#  completed_at         :datetime
+#  duration_ms          :integer
+#  results              :json
+#  screenshot_base64    :text
+#  started_at           :datetime
+#  status               :string           default("pending"), not null
+#  suite_name           :string
+#  test_type            :string           not null
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  cloudflare_worker_id :bigint           not null
+#  project_id           :bigint
+#  user_id              :bigint
+#
+# Indexes
+#
+#  index_browser_test_runs_on_cloudflare_worker_id  (cloudflare_worker_id)
+#  index_browser_test_runs_on_created_at            (created_at)
+#  index_browser_test_runs_on_project_id            (project_id)
+#  index_browser_test_runs_on_status                (status)
+#  index_browser_test_runs_on_test_type             (test_type)
+#  index_browser_test_runs_on_user_id               (user_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (cloudflare_worker_id => cloudflare_workers.id)
+#  fk_rails_...  (project_id => projects.id)
+#  fk_rails_...  (user_id => users.id)
+#
 class BrowserTestRun < ApplicationRecord
   # =============================================================================
   # Constants

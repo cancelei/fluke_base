@@ -1,5 +1,28 @@
 # frozen_string_literal: true
 
+# == Schema Information
+#
+# Table name: cloudflare_workers
+#
+#  id                   :bigint           not null, primary key
+#  configuration        :json
+#  environment          :string           default("development"), not null
+#  last_deployed_at     :datetime
+#  last_health_check_at :datetime
+#  name                 :string           not null
+#  script_hash          :string
+#  status               :string           default("unknown"), not null
+#  worker_url           :string
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  account_id           :string           not null
+#
+# Indexes
+#
+#  index_cloudflare_workers_on_environment  (environment)
+#  index_cloudflare_workers_on_name         (name) UNIQUE
+#  index_cloudflare_workers_on_status       (status)
+#
 class CloudflareWorker < ApplicationRecord
   # =============================================================================
   # Constants

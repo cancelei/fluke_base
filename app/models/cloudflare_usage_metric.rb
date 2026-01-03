@@ -1,5 +1,31 @@
 # frozen_string_literal: true
 
+# == Schema Information
+#
+# Table name: cloudflare_usage_metrics
+#
+#  id                   :bigint           not null, primary key
+#  browser_sessions     :integer          default(0)
+#  estimated_cost_usd   :decimal(10, 4)
+#  execution_time_ms    :integer          default(0)
+#  period_type          :string           default("daily"), not null
+#  raw_metrics          :json
+#  recorded_date        :date             not null
+#  requests_count       :integer          default(0)
+#  created_at           :datetime         not null
+#  updated_at           :datetime         not null
+#  cloudflare_worker_id :bigint           not null
+#
+# Indexes
+#
+#  idx_cloudflare_usage_metrics_unique                     (cloudflare_worker_id,recorded_date,period_type) UNIQUE
+#  index_cloudflare_usage_metrics_on_cloudflare_worker_id  (cloudflare_worker_id)
+#  index_cloudflare_usage_metrics_on_recorded_date         (recorded_date)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (cloudflare_worker_id => cloudflare_workers.id)
+#
 class CloudflareUsageMetric < ApplicationRecord
   # =============================================================================
   # Constants
