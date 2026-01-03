@@ -1,0 +1,94 @@
+<%# Full AI Insights Overview Page %>
+
+<div class="max-w-6xl mx-auto py-6">
+  <%# Page Header %>
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+      <%= link_to dashboard_path, class: "btn btn-ghost btn-sm btn-circle" do %>
+        <%= heroicon "arrow-left", class: "w-5 h-5" %>
+      <% end %>
+      <h1 class="text-2xl font-bold">AI Productivity Insights</h1>
+    </div>
+    <p class="text-base-content/60 ml-12">
+      Track how AI assistance helps accelerate your development workflow
+    </p>
+  </div>
+
+  <%# Period Selector %>
+  <div class="flex justify-end mb-6">
+    <div class="btn-group">
+      <%= link_to "Day", onboarding_insights_path(period: :day),
+          class: "btn btn-sm #{params[:period] == 'day' ? 'btn-active' : ''}" %>
+      <%= link_to "Week", onboarding_insights_path(period: :week),
+          class: "btn btn-sm #{params[:period].blank? || params[:period] == 'week' ? 'btn-active' : ''}" %>
+      <%= link_to "Month", onboarding_insights_path(period: :month),
+          class: "btn btn-sm #{params[:period] == 'month' ? 'btn-active' : ''}" %>
+      <%= link_to "All Time", onboarding_insights_path(period: :all),
+          class: "btn btn-sm #{params[:period] == 'all' ? 'btn-active' : ''}" %>
+    </div>
+  </div>
+
+  <%# Insight Cards Grid %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <%# Time Saved Card %>
+    <%= render_insight_detail_card(
+      type: :time_saved,
+      title: "Time Saved by AI",
+      icon: "clock",
+      color: "primary",
+      summary: @insights[:time_saved]
+    ) %>
+
+    <%# Code Contribution Card %>
+    <%= render_insight_detail_card(
+      type: :code_contribution,
+      title: "Code Contributions",
+      icon: "code-bracket",
+      color: "success",
+      summary: @insights[:code_contribution]
+    ) %>
+
+    <%# Task Velocity Card %>
+    <%= render_insight_detail_card(
+      type: :task_velocity,
+      title: "Task Velocity",
+      icon: "rocket-launch",
+      color: "secondary",
+      summary: @insights[:task_velocity]
+    ) %>
+
+    <%# Token Efficiency Card %>
+    <%= render_insight_detail_card(
+      type: :token_efficiency,
+      title: "Token Usage",
+      icon: "currency-dollar",
+      color: "accent",
+      summary: @insights[:token_efficiency]
+    ) %>
+  </div>
+
+  <%# Onboarding Progress %>
+  <% unless @onboarding[:complete] %>
+    <%= render Ui::StatCardComponent.new(title: "Setup Progress", value: "#{@onboarding[:progress_percentage]}%", color: "primary") do %>
+      <div class="mt-2 mb-4">
+        <div class="w-full h-3 bg-base-200 rounded-full overflow-hidden">
+          <div class="h-full bg-primary rounded-full transition-all duration-500"
+               style="width: <%= @onboarding[:progress_percentage] %>%"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t border-base-200">
+        <% UserOnboardingProgress::MILESTONE_KEYS.each do |milestone| %>
+          <div class="flex items-center gap-2 text-sm <%= @onboarding[:milestones_completed].include?(milestone) ? 'text-success' : 'text-base-content/50' %>">
+            <% if @onboarding[:milestones_completed].include?(milestone) %>
+              <%= heroicon "check-circle", variant: :solid, class: "w-5 h-5" %>
+            <% else %>
+              <%= heroicon "circle", class: "w-5 h-5" %>
+            <% end %>
+            <span><%= milestone.titleize %></span>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

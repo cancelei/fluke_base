@@ -50,7 +50,7 @@ class AgreementParticipant < ApplicationRecord
   scope :for_agreement, ->(agreement) { where(agreement_id: agreement.id) }
 
   def self.find_initiator(agreement) = find_by(agreement:, is_initiator: true)
-  def self.find_other_party(agreement, current_user) = where(agreement:).where.not(user_id: current_user.id).first
+  def self.find_other_party(agreement, current_user) = where(agreement:).where.not(user_id: current_user.id).take
   def self.find_participants(agreement) = where(agreement:)
 
   def initiator? = is_initiator

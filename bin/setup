@@ -58,6 +58,38 @@ def check_node_version
   end
 end
 
+def check_postgres
+  log "Checking PostgreSQL availability...", color: :blue
+
+  # Try to connect to PostgreSQL using pg_isready (if available) or psql
+  pg_ready = system("pg_isready -q 2>/dev/null")
+
+  unless pg_ready
+    # Fallback: try psql connection test
+    pg_ready = system("psql -c 'SELECT 1' postgres > /dev/null 2>&1")
+  end
+
+  if pg_ready
+    log "✓ PostgreSQL is running", color: :green
+    true
+  else
+    log "✗ PostgreSQL is not available", color: :red
+    log "  Please start PostgreSQL before running setup:", color: :yellow
+    log "    macOS:   brew services start postgresql", color: :yellow
+    log "    Linux:   sudo systemctl start postgresql", color: :yellow
+    log "    Docker:  docker-compose up -d postgres", color: :yellow
+    log "", color: :none
+    log "  Or set SKIP_DB_CHECK=1 to bypass this check", color: :yellow
+
+    if ENV["SKIP_DB_CHECK"]
+      log "  (Bypassing PostgreSQL check due to SKIP_DB_CHECK)", color: :yellow
+      true
+    else
+      false
+    end
+  end
+end
+
 FileUtils.chdir APP_ROOT do
   log "== Setting up Fluke Base ==\n", color: :blue
 
@@ -70,9 +102,20 @@ FileUtils.chdir APP_ROOT do
   system("bundle check") || system!("bundle install")
   system!("npm install") if File.exist?("package.json")
 
+  # Check PostgreSQL before database operations
+  puts
+  unless check_postgres
+    log "Setup aborted: PostgreSQL is required", color: :red
+    exit 1
+  end
+
   puts
   log "== Preparing database ==", color: :blue
   system! "bin/rails db:prepare"
+
+  puts
+  log "== Seeding database ==", color: :blue
+  system! "bin/rails db:seed"
 
   puts
   log "== Removing old logs and tempfiles ==", color: :blue
@@ -80,12 +123,16 @@ FileUtils.chdir APP_ROOT do
 
   puts
   log "✓ Setup complete!", color: :green
-  log "  Run 'bin/dev' to start the development server", color: :blue
 
-  unless ARGV.include?("--skip-server")
+  # Server start is opt-in (use --start flag)
+  # This makes bin/setup CI-friendly by default
+  if ARGV.include?("--start")
     puts
     log "== Starting development server ==", color: :blue
     STDOUT.flush
     exec "bin/dev"
+  else
+    log "  Run 'bin/dev' to start the development server", color: :blue
+    log "  Or run 'bin/setup --start' to setup and start in one command", color: :blue
   end
 end

@@ -1,4 +1,13 @@
 import { Controller } from '@hotwired/stimulus';
+import { createLogger } from '../utils/logger';
+import { jsonFetch } from '../utils/network';
+import {
+  debounced,
+  logConnect,
+  logDisconnect
+} from '../utils/stimulus_helpers';
+
+const logger = window.FlukeLogger || createLogger('FlukeBase');
 
 /**
  * Repository Validator Controller
@@ -6,20 +15,6 @@ import { Controller } from '@hotwired/stimulus';
  * Validates GitHub repository URLs in real-time and controls form submission
  * based on access permissions. Public repos allow submission without GitHub auth,
  * while private repos require the user to install the GitHub App.
- *
- * Usage:
- *   <div data-controller="repository-validator"
- *        data-repository-validator-check-url-value="/github/check_access"
- *        data-repository-validator-install-url-value="<%= Github::AppConfig.install_url %>">
- *     <input data-repository-validator-target="input"
- *            data-action="input->repository-validator#validate">
- *     <div data-repository-validator-target="status"></div>
- *     <div data-repository-validator-target="authButton"></div>
- *     <button data-repository-validator-target="submitButton">Submit</button>
- *   </div>
- *
- * Note: install-url-value should be set from the server via Github::AppConfig.install_url
- * to use the correct GitHub App for the current environment (development vs production).
  */
 export default class extends Controller {
   static targets = ['input', 'status', 'authButton', 'submitButton'];
@@ -34,13 +29,18 @@ export default class extends Controller {
   };
 
   connect() {
-    this.timeout = null;
+    logConnect(logger, 'RepositoryValidatorController', this);
+
+    this.debouncedCheck = debounced(
+      value => this.checkRepository(value),
+      this.debounceValue
+    );
     this.abortController = null;
     this.lastCheckedValue = '';
   }
 
   disconnect() {
-    this.clearTimeout();
+    logDisconnect(logger, 'RepositoryValidatorController');
     this.abortRequest();
   }
 
@@ -49,9 +49,6 @@ export default class extends Controller {
    */
   validate(event) {
     const value = event.target.value.trim();
-
-    // Clear pending timeout
-    this.clearTimeout();
 
     // Reset state if input is empty
     if (value === '') {
@@ -65,10 +62,7 @@ export default class extends Controller {
       return;
     }
 
-    // Debounce the API call
-    this.timeout = setTimeout(() => {
-      this.checkRepository(value);
-    }, this.debounceValue);
+    this.debouncedCheck(value);
   }
 
   /**
@@ -91,26 +85,25 @@ export default class extends Controller {
 
     try {
       const url = `${this.checkUrlValue}?repository_url=${encodeURIComponent(repoUrl)}`;
-      const response = await fetch(url, {
+      const data = await jsonFetch(url, {
         method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'X-CSRF-Token': this.csrfToken
-        },
         signal: this.abortController.signal
       });
 
       this.lastCheckedValue = repoUrl;
-
-      const data = await response.json();
-
-      if (response.ok) {
-        this.handleSuccess(data);
-      } else {
-        this.handleError(data);
-      }
+      this.handleSuccess(data);
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error.name === 'AbortError') {
+        return;
+      }
+
+      if (error.status && error.data) {
+        this.handleError(error.data);
+      } else {
+        logger?.error('RepositoryValidatorController', error, {
+          action: 'checkRepository',
+          repoUrl
+        });
         this.handleNetworkError(error);
       }
     }
@@ -281,13 +274,6 @@ export default class extends Controller {
   /**
    * Clear the debounce timeout
    */
-  clearTimeout() {
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-      this.timeout = null;
-    }
-  }
-
   /**
    * Abort pending fetch request
    */
@@ -296,14 +282,5 @@ export default class extends Controller {
       this.abortController.abort();
       this.abortController = null;
     }
-  }
-
-  /**
-   * Get CSRF token from meta tag
-   */
-  get csrfToken() {
-    return document
-      .querySelector('meta[name="csrf-token"]')
-      ?.getAttribute('content');
   }
 }

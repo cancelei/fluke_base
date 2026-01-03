@@ -12,6 +12,7 @@ if Rails.env.development? || Rails.env.staging?
   # Clear existing data to avoid conflicts (only in development)
   if Rails.env.development?
     puts "Clearing existing data..."
+    ApiToken.destroy_all
     TimeLog.destroy_all
     Message.destroy_all
     Conversation.destroy_all
@@ -127,6 +128,18 @@ if Rails.env.development? || Rails.env.staging?
     users << user
     puts "  Created #{user.full_name} (#{user_data[:desc]})"
   end
+
+  # Create API token for primary test user (Alice) for flukebase-connect
+  alice = users.find { |u| u.first_name == "Alice" }
+  puts "\n🔑 Creating API token for #{alice.full_name}..."
+  api_token_result = ApiToken.generate_for(
+    alice,
+    name: "Development Token",
+    scopes: ApiToken::SCOPES,  # All scopes for development
+    expires_in: nil  # Never expires
+  )
+  seeded_api_token = api_token_result.raw_token
+  puts "  ✓ API token created (will be displayed at end of seeding)"
 
   # Add more random users to reach 55 total
   puts "Creating additional random users..."
@@ -532,6 +545,7 @@ if Rails.env.development? || Rails.env.staging?
   puts "   ⏰ Time Logs: #{TimeLog.count}"
   puts "   💬 Messages: #{Message.count}"
   puts "   📅 Meetings: #{Meeting.count}"
+  puts "   🔑 API Tokens: #{ApiToken.count}"
 
   puts "\n🧪 Test User Scenarios Created:"
   puts "   • alice.entrepreneur@flukebase.me - Project owner with multiple agreement types"
@@ -552,5 +566,20 @@ if Rails.env.development? || Rails.env.staging?
   puts "   📊 Mixed intensities: Light, normal, and heavy time logging"
 
   puts "\n🔑 Login with any test user using password: 'password123'"
+
+  puts "\n" + "=" * 60
+  puts "🔐 FLUKEBASE API TOKEN (for flukebase-connect MCP)"
+  puts "=" * 60
+  puts "User: alice.entrepreneur@flukebase.me"
+  puts "Token: #{seeded_api_token}"
+  puts "=" * 60
+  puts "To authenticate, run: export FLUKEBASE_API_TOKEN=#{seeded_api_token}"
+  puts "Or use fb_login with this token"
+  puts "=" * 60
+
   puts "\n🎉 Ready to test Flukebase with predictable scenarios!"
+
+  # Load MCP plugins seed
+  puts "\n🔌 Loading MCP plugins..."
+  load Rails.root.join('db/seeds/mcp_plugins.rb')
 end

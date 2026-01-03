@@ -1,0 +1,148 @@
+<%# Suggested Gotchas - Auto-detected patterns for review %>
+<div class="max-w-4xl mx-auto">
+  <%# Header %>
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold flex items-center gap-2">
+        <%= render Ui::IconComponent.new(name: :light_bulb, size: :md) %>
+        Suggested Gotchas
+      </h1>
+      <p class="text-base-content/60 mt-1">
+        <%= @project.name %> &mdash; Auto-detected patterns from your AI sessions
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%# Status filter %>
+      <div class="join">
+        <%= link_to "Pending",
+            project_suggested_gotchas_path(@project, status: "pending"),
+            class: "btn btn-sm join-item #{params[:status].blank? || params[:status] == 'pending' ? 'btn-active' : ''}" %>
+        <%= link_to "Reviewed",
+            project_suggested_gotchas_path(@project, status: "approved"),
+            class: "btn btn-sm join-item #{params[:status] == 'approved' ? 'btn-active' : ''}" %>
+        <%= link_to "Dismissed",
+            project_suggested_gotchas_path(@project, status: "dismissed"),
+            class: "btn btn-sm join-item #{params[:status] == 'dismissed' ? 'btn-active' : ''}" %>
+      </div>
+    </div>
+  </div>
+
+  <%# Stats summary %>
+  <% pending_count = @project.suggested_gotchas.pending.count %>
+  <% if pending_count > 0 %>
+    <div class="alert alert-info mb-6">
+      <%= render Ui::IconComponent.new(name: :information_circle, size: :sm) %>
+      <span>
+        You have <strong><%= pending_count %></strong> pending suggestion<%= pending_count == 1 ? '' : 's' %> waiting for review.
+        Approve to save as a gotcha, or dismiss if not useful.
+      </span>
+    </div>
+  <% end %>
+
+  <%# Suggestions grouped by trigger type %>
+  <% if @grouped_gotchas.any? %>
+    <div class="space-y-6">
+      <% @grouped_gotchas.each do |trigger_type, gotchas| %>
+        <div class="bg-base-200 rounded-lg p-4">
+          <h3 class="font-semibold flex items-center gap-2 mb-4">
+            <%= trigger_type_icon(trigger_type) %>
+            <%= trigger_type_label(trigger_type) %>
+            <span class="badge badge-neutral badge-sm"><%= gotchas.count %></span>
+          </h3>
+
+          <div class="space-y-3">
+            <% gotchas.each do |gotcha| %>
+              <%= turbo_frame_tag gotcha do %>
+                <div class="card bg-base-100 shadow-sm">
+                  <div class="card-body p-4">
+                    <%# Header with status and occurrence count %>
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex-1">
+                        <% if gotcha.suggested_title.present? %>
+                          <h4 class="font-medium"><%= gotcha.suggested_title %></h4>
+                        <% end %>
+                        <p class="text-sm text-base-content/80 mt-1">
+                          <%= gotcha.suggested_content %>
+                        </p>
+                      </div>
+
+                      <div class="flex items-center gap-2 flex-shrink-0">
+                        <% if gotcha.pending? %>
+                          <span class="badge badge-warning badge-sm">Pending</span>
+                        <% elsif gotcha.approved? || gotcha.edited? %>
+                          <span class="badge badge-success badge-sm">Approved</span>
+                        <% elsif gotcha.dismissed? %>
+                          <span class="badge badge-ghost badge-sm">Dismissed</span>
+                        <% end %>
+                      </div>
+                    </div>
+
+                    <%# Metadata %>
+                    <div class="flex flex-wrap items-center gap-2 mt-3 text-xs text-base-content/60">
+                      <% if gotcha.tool_name.present? %>
+                        <span class="badge badge-outline badge-xs"><%= gotcha.tool_name %></span>
+                      <% end %>
+                      <% if gotcha.error_category.present? %>
+                        <span class="badge badge-outline badge-xs"><%= gotcha.error_category %></span>
+                      <% end %>
+                      <span><%= gotcha.occurrence_count %> occurrences</span>
+                      <span>&bull;</span>
+                      <span><%= time_ago_in_words(gotcha.created_at) %> ago</span>
+                    </div>
+
+                    <%# Actions %>
+                    <% if gotcha.reviewable? %>
+                      <div class="card-actions justify-end mt-4">
+                        <%= button_to dismiss_project_suggested_gotcha_path(@project, gotcha),
+                            method: :post,
+                            class: "btn btn-sm btn-ghost",
+                            data: { turbo_confirm: "Dismiss this suggestion?" } do %>
+                          <%= render Ui::IconComponent.new(name: :x_mark, size: :xs) %>
+                          Dismiss
+                        <% end %>
+
+                        <%= link_to project_suggested_gotcha_path(@project, gotcha),
+                            class: "btn btn-sm btn-outline" do %>
+                          <%= render Ui::IconComponent.new(name: :pencil, size: :xs) %>
+                          Edit & Approve
+                        <% end %>
+
+                        <%= button_to approve_project_suggested_gotcha_path(@project, gotcha),
+                            method: :post,
+                            class: "btn btn-sm btn-primary" do %>
+                          <%= render Ui::IconComponent.new(name: :check, size: :xs) %>
+                          Approve
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="card bg-base-200">
+      <div class="card-body items-center text-center py-12">
+        <%= render Ui::IconComponent.new(name: :light_bulb, size: :lg, css_class: "text-base-content/30") %>
+        <h3 class="card-title mt-4">No suggestions yet</h3>
+        <p class="text-base-content/60 max-w-md">
+          <% if params[:status].blank? || params[:status] == 'pending' %>
+            When patterns are detected in your AI sessions, suggestions will appear here for review.
+          <% else %>
+            No <%= params[:status] %> suggestions found.
+          <% end %>
+        </p>
+        <%= link_to "Back to Project", project_path(@project), class: "btn btn-ghost mt-4" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<%# Helper definitions %>
+<% content_for :head do %>
+  <% # Helpers could be extracted to a helper module %>
+<% end %>

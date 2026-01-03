@@ -134,6 +134,8 @@ module Ui
       when :navbar then render_navbar
       when :page_header then render_page_header
       when :dashboard_widget then render_dashboard_widget
+      when :insight_card then render_insight_card
+      when :insight_card_compact then render_insight_card_compact
       else render_simple
       end
     end
@@ -666,6 +668,66 @@ module Ui
                 ])
               end
             end)
+          ])
+        end
+      end
+    end
+
+    # AI Insight card skeleton (matches InsightCardComponent layout)
+    def render_insight_card
+      tag.div(class: "card bg-base-100 shadow-md #{@css_class}", role: "status", "aria-label": "Loading insight") do
+        safe_join([
+          # Card body with icon and title
+          tag.div(class: "card-body pb-0") do
+            tag.div(class: "flex items-center gap-2") do
+              safe_join([
+                # Icon container
+                tag.div(class: "skeleton h-9 w-9 rounded-lg #{animation_class}"),
+                # Title
+                tag.div(class: "skeleton h-4 w-32 #{animation_class}")
+              ])
+            end
+          end,
+          # Value and description section
+          tag.div(class: "px-4 py-3") do
+            safe_join([
+              # Value
+              tag.div(class: "skeleton h-8 w-24 mb-2 #{animation_class}"),
+              # Description
+              tag.div(class: "skeleton h-4 w-20 mb-2 #{animation_class}"),
+              # Trend indicator
+              tag.div(class: "flex items-center gap-1 mt-2") do
+                safe_join([
+                  tag.div(class: "skeleton h-4 w-4 #{animation_class}"),
+                  tag.div(class: "skeleton h-3 w-10 #{animation_class}")
+                ])
+              end
+            ])
+          end,
+          # Card actions
+          tag.div(class: "card-actions justify-end px-4 pb-4") do
+            tag.div(class: "skeleton h-4 w-20 #{animation_class}")
+          end
+        ])
+      end
+    end
+
+    # Compact AI Insight card skeleton
+    def render_insight_card_compact
+      tag.div(class: "card card-compact bg-base-100 shadow-md #{@css_class}", role: "status", "aria-label": "Loading insight") do
+        tag.div(class: "card-body") do
+          safe_join([
+            # Header with icon and title
+            tag.div(class: "flex items-center gap-2 mb-2") do
+              safe_join([
+                tag.div(class: "skeleton h-7 w-7 rounded-lg #{animation_class}"),
+                tag.div(class: "skeleton h-3 w-28 #{animation_class}")
+              ])
+            end,
+            # Value
+            tag.div(class: "skeleton h-6 w-20 mb-1 #{animation_class}"),
+            # Description
+            tag.div(class: "skeleton h-3 w-16 #{animation_class}")
           ])
         end
       end

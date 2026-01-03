@@ -1,11 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Agreements', type: :request do
-  let(:user) { create(:user) }
-
-  before do
-    sign_in user
-  end
+  include_context 'authenticated user'
 
   describe 'GET /agreements' do
     it 'renders the full index page' do

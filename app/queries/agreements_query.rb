@@ -78,15 +78,11 @@ class AgreementsQuery
   end
 
   def check_duplicate_agreement(other_party_id, project_id)
-    Agreement.joins(:agreement_participants)
-      .where(
-        project_id:,
-        status: [Agreement::ACCEPTED, Agreement::PENDING]
-      )
-      .where(agreement_participants: { user_id: [@current_user.id, other_party_id] })
-      .group("agreements.id")
-      .having("COUNT(agreement_participants.id) = 2")
-      .first
+    AgreementDuplicateChecker.new(
+      user1_id: @current_user.id,
+      user2_id: other_party_id,
+      project_id: project_id
+    ).find_duplicate
   end
 
   def existing_agreements_for_project(project)

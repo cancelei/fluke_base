@@ -82,6 +82,7 @@ class DashboardQuery
            .where.not(id: Agreement.joins(:agreement_participants)
                                     .where(agreement_participants: { user_id: @current_user.id })
                                     .select(:project_id))
+           .order(created_at: :desc)
            .limit(6)
   end
 

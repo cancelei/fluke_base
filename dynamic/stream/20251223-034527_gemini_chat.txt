@@ -1,4 +1,0 @@
-Script started on 2025-12-23 03:45:27-03:00 [COMMAND="gemini what is the project about?" TERM="screen" TTY="/dev/pts/9" COLUMNS="185" LINES="44"]
-zsh:1: no matches found: about?
-
-Script done on 2025-12-23 03:45:27-03:00 [COMMAND_EXIT_CODE="1"]

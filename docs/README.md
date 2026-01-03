@@ -78,6 +78,8 @@ Schema, migrations, and performance:
 
 Third-party APIs and services:
 
+- **[FlukeBase Connect API](guides/integrations/flukebase-connect-api.md)** 🎯 - Environment sync for AI coding assistants
+  > **MCP**: Use `fb_sync` for full context, `env_*` tools for environment management
 - **[GitHub API Integration](guides/integrations/github-api-integration.md)** 🎯 - Commit tracking and branch management
 - **[Stripe Payments](guides/integrations/stripe-payments.md)** - Pay gem integration
 - **[Google Calendar](guides/integrations/google-calendar.md)** - Meeting scheduling
@@ -150,6 +152,36 @@ Clearly marked incorrect approaches:
 Every guide ends with a "For AI Agents" section containing:
 - **Files to Check**: Relevant code file paths
 - **Common Tasks**: Step-by-step instructions
+
+### MCP Tools Integration
+
+FlukeBase documentation is optimized for AI agents using flukebase-connect MCP tools:
+
+| Context | Recommended MCP Tool |
+|---------|---------------------|
+| Starting work on project | `fb_sync` |
+| Environment setup issues | `env_validate` → `env_diff` → `env_sync` |
+| Remembering conventions | `remember` with scope: project name |
+| Finding past decisions | `recall` with query |
+| Understanding why | `why` with convention key |
+
+**Decision Tree: MCP Tool Selection**
+```
+Need to work with FlukeBase project?
+│
+├── First time in session?
+│   ├── `fb_status` → check connection
+│   └── `fb_sync` → load context
+│
+├── Debugging environment?
+│   ├── `env_show` → view current
+│   ├── `env_diff` → compare with FlukeBase
+│   └── `env_validate` → check required
+│
+└── Learning project patterns?
+    ├── `recall` "convention" → search memories
+    └── `why` → get rationale
+```
 
 ---
 
@@ -295,6 +327,8 @@ This documentation follows these principles:
 - **AI Agents Guide**: [../README_AI_AGENTS.md](../README_AI_AGENTS.md) - Codebase analysis for AI
 - **Claude Code Config**: [../CLAUDE.md](../CLAUDE.md) - Testing commands
 - **Agents Guide**: [../AGENTS.md](../AGENTS.md) - Repository guidelines
+- **MCP Server**: [flukebase-connect](https://pypi.org/project/flukebase-connect/) - Python MCP server for AI assistants
+- **API Token Setup**: [guides/development/api-token-setup.md](guides/development/api-token-setup.md) - Token generation for development
 
 ---
 

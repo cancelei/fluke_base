@@ -2,31 +2,22 @@ require 'rails_helper'
 
 RSpec.describe 'Projects', type: :request do
   describe 'GET /projects/:id' do
-    let(:owner) { create(:user) }
-    let(:project) do
-      create(:project,
-             user: owner,
-             name: 'Owner Project',
-             description: 'Owner description',
-             public_fields: ['name', 'description'])
-    end
-
     context 'when signed in as the project owner' do
-      before do
-        sign_in owner
-      end
+      include_context 'with project'
 
       it 'renders the project and updates the selected project context' do
         expect {
           get project_path(project)
-        }.to change { owner.reload.selected_project_id }.from(nil).to(project.id)
+        }.to change { user.reload.selected_project_id }.from(nil).to(project.id)
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('Owner Project')
+        expect(response.body).to include(project.name)
       end
     end
 
     context 'when signed in as a collaborator' do
+      let(:owner) { create(:user) }
+      let(:project) { create(:project, user: owner, name: 'Collaborator Visible') }
       let(:collaborator) { create(:user) }
 
       before do
@@ -44,7 +35,7 @@ RSpec.describe 'Projects', type: :request do
         }.not_to change { collaborator.reload.selected_project_id }
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('Owner Project')
+        expect(response.body).to include('Collaborator Visible')
       end
     end
   end

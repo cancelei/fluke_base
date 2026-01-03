@@ -1,12 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe 'Agreements Integration', type: :request do
-  let(:alice) { create(:user) }
-  let(:bob) { create(:user) }
-  let(:project) { create(:project, user: alice) }
-  let(:milestone) { create(:milestone, project:) }
+  include_context 'active agreement context'
+  let(:milestone) { create(:milestone, project: project) }
 
-  before { sign_in alice }
+  before do
+    # active agreement context creates an agreement which might block new ones for the same project/users
+    agreement.destroy
+  end
 
   describe 'Agreement workflow' do
     it 'completes full agreement lifecycle using the test DB' do

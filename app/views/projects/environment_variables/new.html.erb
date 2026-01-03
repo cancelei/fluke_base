@@ -1,0 +1,33 @@
+<div>
+  <%# Breadcrumbs %>
+  <div class="breadcrumbs text-sm mb-4">
+    <ul>
+      <li>
+        <%= link_to project_path(@project) do %>
+          <%= render Ui::IconComponent.new(name: :folder, size: :sm) %>
+          <%= @project.name %>
+        <% end %>
+      </li>
+      <li>
+        <%= link_to project_environment_variables_path(@project) do %>
+          <%= render Ui::IconComponent.new(name: :cog_6_tooth, size: :sm) %>
+          Environment Variables
+        <% end %>
+      </li>
+      <li class="font-semibold">New Variable</li>
+    </ul>
+  </div>
+
+  <div class="py-5">
+    <h1 class="text-2xl font-bold tracking-tight">New Environment Variable</h1>
+    <p class="mt-1 text-sm text-base-content/60">
+      Add a new environment variable for <strong><%= @project.name %></strong>
+    </p>
+  </div>
+
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <%= render "form" %>
+    </div>
+  </div>
+</div>

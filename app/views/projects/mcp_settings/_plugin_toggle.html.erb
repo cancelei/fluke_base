@@ -1,0 +1,37 @@
+<%# locals: (plugin:, f:, enabled:) %>
+<div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
+  <div class="flex items-center gap-4">
+    <input type="checkbox"
+           name="project_mcp_configuration[enabled_plugins][]"
+           value="<%= plugin.slug %>"
+           <%= "checked" if enabled %>
+           class="checkbox checkbox-primary">
+
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="font-medium"><%= plugin.name %></span>
+        <span class="badge badge-sm <%= badge_class_for_maturity(plugin.maturity) %>">
+          <%= plugin.maturity.titleize %>
+        </span>
+        <% if plugin.built_in %>
+          <span class="badge badge-ghost badge-xs">Built-in</span>
+        <% end %>
+      </div>
+      <p class="text-sm text-base-content/70"><%= plugin.description %></p>
+    </div>
+  </div>
+
+  <!-- Maturity features checklist -->
+  <div class="text-sm hidden md:block">
+    <% plugin.maturity_features.each do |feature, complete| %>
+      <div class="flex items-center gap-1">
+        <% if complete %>
+          <%= heroicon "check-circle", variant: :mini, class: "w-4 h-4 text-success" %>
+        <% else %>
+          <%= heroicon "x-circle", variant: :mini, class: "w-4 h-4 text-base-content/30" %>
+        <% end %>
+        <span class="<%= complete ? "" : "text-base-content/50" %>"><%= feature.to_s.humanize %></span>
+      </div>
+    <% end %>
+  </div>
+</div>

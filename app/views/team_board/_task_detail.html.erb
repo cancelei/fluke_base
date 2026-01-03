@@ -1,0 +1,170 @@
+<%# Task detail panel/modal content %>
+<div class="space-y-4">
+  <%# Header %>
+  <div class="flex items-start justify-between">
+    <div>
+      <code class="text-sm font-mono text-base-content/60"><%= task.task_id %></code>
+      <h2 class="text-xl font-bold mt-1"><%= task.description.truncate(100) %></h2>
+    </div>
+    <form method="dialog">
+      <button class="btn btn-ghost btn-sm btn-circle" type="submit">
+        <%= render Ui::IconComponent.new(name: :x_mark, size: :sm) %>
+      </button>
+    </form>
+  </div>
+
+    <%# Status and priority %>
+    <div class="flex flex-wrap gap-2">
+      <%= render_status_badge(task.status) %>
+      <%= render_priority_badge_full(task.priority) %>
+      <span class="badge badge-outline"><%= task.dependency %></span>
+      <span class="badge badge-ghost"><%= task.scope %></span>
+    </div>
+
+    <%# Description %>
+    <div class="prose prose-sm max-w-none">
+      <p><%= task.description %></p>
+    </div>
+
+    <%# Metadata grid %>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <span class="text-base-content/60">Created by:</span>
+        <span class="font-medium"><%= task.created_by&.full_name || "Unknown" %></span>
+      </div>
+      <div>
+        <span class="text-base-content/60">Updated by:</span>
+        <span class="font-medium"><%= task.updated_by&.full_name || "Unknown" %></span>
+      </div>
+      <div>
+        <span class="text-base-content/60">Created:</span>
+        <span><%= task.created_at.strftime("%b %d, %Y %H:%M") %></span>
+      </div>
+      <div>
+        <span class="text-base-content/60">Updated:</span>
+        <span><%= task.updated_at.strftime("%b %d, %Y %H:%M") %></span>
+      </div>
+      <% if task.completed_at %>
+        <div>
+          <span class="text-base-content/60">Completed:</span>
+          <span class="text-success"><%= task.completed_at.strftime("%b %d, %Y %H:%M") %></span>
+        </div>
+      <% end %>
+      <% if task.due_date %>
+        <div>
+          <span class="text-base-content/60">Due date:</span>
+          <span class="<%= task.due_date < Date.current ? 'text-error' : '' %>"><%= task.due_date.strftime("%b %d, %Y") %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Assignee %>
+    <div class="flex items-center gap-2">
+      <span class="text-base-content/60 text-sm">Assigned to:</span>
+      <% if task.assignee %>
+        <div class="flex items-center gap-2">
+          <%= render Ui::AvatarComponent.new(user: task.assignee, size: :sm, placeholder: :initials) %>
+          <span class="font-medium"><%= task.assignee.full_name %></span>
+        </div>
+      <% else %>
+        <span class="text-base-content/40 italic">Unassigned</span>
+      <% end %>
+    </div>
+
+    <%# Tags %>
+    <% if task.tags.present? %>
+      <div>
+        <span class="text-base-content/60 text-sm">Tags:</span>
+        <div class="flex flex-wrap gap-1 mt-1">
+          <% task.tags.each do |tag| %>
+            <span class="badge badge-outline badge-sm"><%= tag %></span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Blocked by %>
+    <% if task.blocked_by.present? %>
+      <div class="alert alert-warning">
+        <span class="text-sm">
+          <strong>Blocked by:</strong>
+          <%= task.blocked_by.join(", ") %>
+        </span>
+      </div>
+    <% end %>
+
+    <%# Artifact and remote URL %>
+    <% if task.artifact_path.present? || task.remote_url.present? %>
+      <div class="flex flex-wrap gap-2">
+        <% if task.artifact_path.present? %>
+          <span class="badge badge-outline gap-1">
+            <%= render Ui::IconComponent.new(name: :document, size: :xs) %>
+            <%= task.artifact_path.split('/').last %>
+          </span>
+        <% end %>
+        <% if task.remote_url.present? %>
+          <%= link_to task.remote_url, target: "_blank", class: "badge badge-outline gap-1 hover:badge-primary" do %>
+            <%= render Ui::IconComponent.new(name: :link, size: :xs) %>
+            <%= task.remote_url.gsub(/^https?:\/\//, '').truncate(30) %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Subtasks %>
+    <% if task.subtasks.any? %>
+      <div class="collapse collapse-arrow bg-base-200">
+        <input type="checkbox" />
+        <div class="collapse-title font-medium">
+          Subtasks (<%= task.subtasks.completed.count %>/<%= task.subtasks.count %>)
+        </div>
+        <div class="collapse-content">
+          <ul class="space-y-1">
+            <% task.subtasks.by_status_order.each do |subtask| %>
+              <li class="flex items-center gap-2 text-sm">
+                <% if subtask.completed? %>
+                  <%= render Ui::IconComponent.new(name: :check_circle, size: :xs, css_class: "text-success") %>
+                <% elsif subtask.blocked? %>
+                  <%= render Ui::IconComponent.new(name: :exclamation_triangle, size: :xs, css_class: "text-error") %>
+                <% elsif subtask.in_progress? %>
+                  <%= render Ui::IconComponent.new(name: :play, size: :xs, css_class: "text-info") %>
+                <% else %>
+                  <%= render Ui::IconComponent.new(name: :clock, size: :xs, css_class: "text-warning") %>
+                <% end %>
+                <code class="text-xs font-mono"><%= subtask.task_id %></code>
+                <span class="<%= subtask.completed? ? 'line-through text-base-content/40' : '' %>">
+                  <%= subtask.description.truncate(50) %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Synthesis Report (Audit Trail) %>
+    <% if task.synthesis_report.present? %>
+      <div class="collapse collapse-arrow bg-base-200">
+        <input type="checkbox" />
+        <div class="collapse-title font-medium">
+          Audit Trail
+        </div>
+        <div class="collapse-content">
+          <pre class="text-xs whitespace-pre-wrap font-mono bg-base-300 p-3 rounded-lg overflow-x-auto"><%= task.synthesis_report %></pre>
+        </div>
+      </div>
+    <% end %>
+
+  <%# Quick actions %>
+  <div class="flex justify-end gap-2 pt-4 border-t border-base-200">
+    <% unless task.completed? %>
+      <%= button_to project_team_board_path(@project, task.task_id),
+          method: :patch,
+          params: { wedo_task: { status: next_status(task.status) } },
+          data: { turbo: false },
+          class: "btn btn-primary btn-sm" do %>
+        Move to <%= next_status(task.status).humanize %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

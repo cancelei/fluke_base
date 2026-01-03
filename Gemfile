@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.4"
+gem "rails", "~> 8.1.1"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use postgresql as the database for Active Record
@@ -18,6 +18,10 @@ gem "stimulus-rails"
 gem "turbo_boost-commands", "~> 0.3"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
+
+# API documentation with OpenAPI/Swagger
+gem "rswag-api"
+gem "rswag-ui"
 # Use Tailwind CSS for styling
 gem "tailwindcss-rails", "~> 4.0"
 
@@ -89,6 +93,10 @@ gem "image_processing", "~> 1.2"
 # AWS S3 SDK for Active Storage (iDrive e2 S3-compatible storage in production)
 gem "aws-sdk-s3", require: false
 
+# WebSocket client for connecting to flukebase_connect log streaming
+gem "faye-websocket"
+gem "eventmachine"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -107,6 +115,9 @@ group :development, :test do
   gem "rspec-rails"
   gem "factory_bot_rails"
   gem "pundit-matchers"
+
+  # API documentation with OpenAPI/Swagger
+  gem "rswag-specs"
 
   # Code coverage
   gem "simplecov", require: false

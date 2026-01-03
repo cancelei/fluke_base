@@ -1,4 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
+import { formatTime } from '../utils/format';
+import { createLogger } from '../utils/logger';
+import { logConnect, logDisconnect } from '../utils/stimulus_helpers';
+
+const logger = window.FlukeLogger || createLogger('FlukeBase');
 
 export default class extends Controller {
   static targets = [
@@ -15,6 +20,10 @@ export default class extends Controller {
   static values = { src: String };
 
   connect() {
+    logConnect(logger, 'AudioPlayerController', this, {
+      src: this.srcValue
+    });
+
     this.isPlaying = false;
     this.duration = 0;
     this.currentTime = 0;
@@ -25,6 +34,20 @@ export default class extends Controller {
       this.setupAudio();
       this.generateWaveform();
     }, 100);
+  }
+
+  disconnect() {
+    logDisconnect(logger, 'AudioPlayerController');
+
+    if (this.hasAudioTarget) {
+      this.audioTarget.removeEventListener(
+        'loadedmetadata',
+        this.onLoadedMetadata
+      );
+      this.audioTarget.removeEventListener('timeupdate', this.onTimeUpdate);
+      this.audioTarget.removeEventListener('ended', this.onAudioEnded);
+      this.audioTarget.removeEventListener('error', this.onAudioError);
+    }
   }
 
   setupAudio() {
@@ -48,28 +71,24 @@ export default class extends Controller {
 
       // Set the source if provided via data attribute
       if (this.srcValue) {
-        window.FlukeLogger?.mediaEvent('source set', { src: this.srcValue });
+        logger?.mediaEvent('source set', { src: this.srcValue });
         this.audioTarget.src = this.srcValue;
         this.audioTarget.load(); // Force load the audio
       }
     } else {
-      window.FlukeLogger?.error(
-        'AudioPlayer',
-        new Error('Audio target not found'),
-        {
-          action: 'connect',
-          hasAudioTarget: !!this.audioTarget
-        }
-      );
+      logger?.error('AudioPlayer', new Error('Audio target not found'), {
+        action: 'connect',
+        hasAudioTarget: false
+      });
     }
   }
 
   onLoadStart() {
-    window.FlukeLogger?.mediaEvent('loading started');
+    logger?.mediaEvent('loading started');
   }
 
   onCanPlay() {
-    window.FlukeLogger?.mediaEvent('can play', {
+    logger?.mediaEvent('can play', {
       duration: this.audioTarget.duration,
       readyState: this.audioTarget.readyState
     });
@@ -77,9 +96,9 @@ export default class extends Controller {
 
   onLoadedMetadata() {
     this.duration = this.audioTarget.duration;
-    window.FlukeLogger?.mediaEvent('metadata loaded', {
+    logger?.mediaEvent('metadata loaded', {
       duration: this.duration,
-      durationFormatted: this.formatTime(this.duration)
+      durationFormatted: formatTime(this.duration)
     });
     this.updateDurationDisplay();
   }
@@ -100,7 +119,7 @@ export default class extends Controller {
   }
 
   onAudioError(event) {
-    window.FlukeLogger?.error('AudioPlayer', event, {
+    logger?.error('AudioPlayer', event, {
       action: 'playback',
       error: this.audioTarget.error,
       networkState: this.audioTarget.networkState,
@@ -129,7 +148,7 @@ export default class extends Controller {
           this.animateWaveform();
         })
         .catch(error => {
-          window.FlukeLogger?.error('AudioPlayer', error, {
+          logger?.error('AudioPlayer', error, {
             action: 'playback'
           });
           this.showError('Playback failed');
@@ -165,30 +184,19 @@ export default class extends Controller {
 
   updateDurationDisplay() {
     if (this.hasDurationTarget) {
-      this.durationTarget.textContent = this.formatTime(this.duration);
+      this.durationTarget.textContent = formatTime(this.duration);
     }
   }
 
   updateCurrentTimeDisplay() {
     if (this.hasCurrentTimeTarget) {
-      this.currentTimeTarget.textContent = this.formatTime(this.currentTime);
+      this.currentTimeTarget.textContent = formatTime(this.currentTime);
     }
-  }
-
-  formatTime(seconds) {
-    if (isNaN(seconds)) {
-      return '0:00';
-    }
-
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
   generateWaveform() {
     if (!this.hasWaveformTarget) {
-      window.FlukeLogger?.warning('AudioPlayer', 'Waveform target not found', {
+      logger?.warning('AudioPlayer', 'Waveform target not found', {
         action: 'generateWaveform'
       });
 
@@ -216,7 +224,7 @@ export default class extends Controller {
       waveformContainer.appendChild(bar);
     }
 
-    window.FlukeLogger?.mediaEvent('waveform generated', {
+    logger?.mediaEvent('waveform generated', {
       barCount: this.waveformBars.length,
       duration: this.duration
     });
@@ -255,21 +263,9 @@ export default class extends Controller {
   }
 
   showError(message) {
-    window.FlukeLogger?.error('AudioPlayer', new Error(message), {
+    logger?.error('AudioPlayer', new Error(message), {
       action: 'showError'
     });
     // You could integrate with your flash message system here
-  }
-
-  disconnect() {
-    if (this.hasAudioTarget) {
-      this.audioTarget.removeEventListener(
-        'loadedmetadata',
-        this.onLoadedMetadata
-      );
-      this.audioTarget.removeEventListener('timeupdate', this.onTimeUpdate);
-      this.audioTarget.removeEventListener('ended', this.onAudioEnded);
-      this.audioTarget.removeEventListener('error', this.onAudioError);
-    }
   }
 }

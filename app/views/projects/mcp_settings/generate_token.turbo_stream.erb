@@ -1,0 +1,36 @@
+<%= turbo_stream.replace "token_display" do %>
+  <div class="alert alert-success">
+    <div>
+      <h3 class="font-bold">Token Created Successfully!</h3>
+      <p class="text-sm mt-1">Copy this token now - it won't be shown again.</p>
+    </div>
+  </div>
+
+  <div class="mt-4 p-4 bg-base-200 rounded-lg">
+    <div class="flex items-center justify-between gap-4">
+      <code class="font-mono text-sm break-all flex-1"><%= @raw_token %></code>
+      <button type="button"
+              onclick="navigator.clipboard.writeText('<%= @raw_token %>').then(() => alert('Token copied!'))"
+              class="btn btn-sm btn-ghost">
+        <%= heroicon "clipboard-document", variant: :outline, class: "w-5 h-5" %>
+        Copy
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-4 prose prose-sm">
+    <p><strong>Next steps:</strong></p>
+    <ol>
+      <li>Set the environment variable: <code>export FLUKEBASE_API_TOKEN=<%= @raw_token.truncate(20) %></code></li>
+      <li>Run <code>fbc sync</code> in your project directory</li>
+    </ol>
+  </div>
+
+  <div class="mt-4">
+    <%= link_to "Generate Another Token",
+        generate_token_project_mcp_settings_path(@project),
+        method: :post,
+        class: "btn btn-outline btn-sm",
+        data: { turbo_method: :post, turbo_frame: "token_display" } %>
+  </div>
+<% end %>

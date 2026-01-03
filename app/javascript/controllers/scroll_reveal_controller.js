@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import { createRevealObserver } from '../utils/observers';
 
 export default class extends Controller {
   static targets = ['element'];
@@ -14,27 +15,17 @@ export default class extends Controller {
   }
 
   setupIntersectionObserver() {
-    const options = {
-      root: null,
-      rootMargin: '-100px',
-      threshold: 0.1
-    };
+    this.observer = createRevealObserver(
+      target => {
+        // Add staggered delay for multiple elements
+        const delay = Array.from(this.elementTargets).indexOf(target) * 100;
 
-    this.observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Add staggered delay for multiple elements
-          const delay =
-            Array.from(this.elementTargets).indexOf(entry.target) * 100;
-
-          setTimeout(() => {
-            this.revealElement(entry.target);
-          }, delay);
-
-          this.observer.unobserve(entry.target);
-        }
-      });
-    }, options);
+        setTimeout(() => {
+          this.revealElement(target);
+        }, delay);
+      },
+      { rootMargin: '-100px', threshold: 0.1 }
+    );
 
     // Initially hide all elements and observe them
     this.elementTargets.forEach(element => {

@@ -1,0 +1,15 @@
+<%# Task detail page %>
+<div class="max-w-2xl mx-auto">
+  <div class="mb-4">
+    <%= link_to project_team_board_index_path(@project), class: "btn btn-ghost btn-sm gap-1" do %>
+      <%= render Ui::IconComponent.new(name: :arrow_left, size: :sm) %>
+      Back to Board
+    <% end %>
+  </div>
+
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <%= render "task_detail", task: @task %>
+    </div>
+  </div>
+</div>

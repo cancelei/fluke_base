@@ -1,29 +1,28 @@
 import { Controller } from '@hotwired/stimulus';
+import { qsa } from '../utils/dom';
+import { createLogger } from '../utils/logger';
+import { jsonFetch } from '../utils/network';
+import {
+  logConnect,
+  logDisconnect,
+  safeAsync
+} from '../utils/stimulus_helpers';
+
+const logger = window.FlukeLogger || createLogger('FlukeBase');
 
 // Simplified conversation controller - sidebar toggle now handled by DaisyUI drawer
 export default class extends Controller {
   connect() {
-    window.FlukeLogger?.controllerLifecycle(
-      'ConversationController',
-      'connected',
-      {
-        element: this.element.tagName
-      }
-    );
+    logConnect(logger, 'ConversationController', this);
   }
 
   disconnect() {
-    window.FlukeLogger?.controllerLifecycle(
-      'ConversationController',
-      'disconnected'
-    );
+    logDisconnect(logger, 'ConversationController');
   }
 
   selectConversation(event) {
     this.markAsRead(event, this.element.dataset.conversationId);
-    const allConversationItems = document.querySelectorAll(
-      '[data-conversation-id]'
-    );
+    const allConversationItems = qsa(document, '[data-conversation-id]');
 
     allConversationItems.forEach(item => {
       item.classList.remove('bg-primary/20', 'text-primary');
@@ -47,38 +46,26 @@ export default class extends Controller {
     }
   }
 
-  markAsRead(event, conversationId) {
-    event.preventDefault();
+  async markAsRead(event, conversationId) {
+    event?.preventDefault();
 
-    fetch(`/conversations/${conversationId}/mark_as_read`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': document
-          .querySelector("meta[name='csrf-token']")
-          .getAttribute('content')
-      },
-      body: JSON.stringify({})
-    })
-      .then(response => {
-        if (response.ok) {
-          this.updateConversationIdInPath(conversationId);
-        } else {
-          window.FlukeLogger?.error(
-            'ConversationController',
-            new Error('Failed to mark as read'),
-            {
-              action: 'markAsRead',
-              status: response.status
-            }
-          );
-        }
-      })
-      .catch(error => {
-        window.FlukeLogger?.error('ConversationController', error, {
-          action: 'markAsRead'
+    await safeAsync(
+      async () => {
+        await jsonFetch(`/conversations/${conversationId}/mark_as_read`, {
+          method: 'POST',
+          body: JSON.stringify({})
         });
-      });
+        this.updateConversationIdInPath(conversationId);
+      },
+      {
+        onError: error => {
+          logger?.error('ConversationController', error, {
+            action: 'markAsRead',
+            conversationId
+          });
+        }
+      }
+    );
   }
 
   updateConversationIdInPath(newId) {

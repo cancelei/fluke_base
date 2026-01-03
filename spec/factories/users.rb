@@ -75,5 +75,11 @@ FactoryBot.define do
       email { "bob.johnson@example.com" }
       years_of_experience { 10.0 }
     end
+
+    trait :charlie do
+      first_name { "Charlie" }
+      last_name { "Brown" }
+      email { "charlie.brown@example.com" }
+    end
   end
 end

@@ -1,0 +1,66 @@
+<%# Error state component for failed async operations %>
+<%# Usage: render "shared/error_state", message: "Failed to load", retry_action: "controller#retry" %>
+
+<% message ||= "Something went wrong" %>
+<% title ||= "Error" %>
+<% retry_action ||= nil %>
+<% retry_url ||= nil %>
+<% variant ||= :default %>
+<% icon ||= "exclamation-circle" %>
+
+<%
+  container_classes = case variant
+  when :inline then "flex items-center gap-2 p-2 text-error"
+  when :compact then "text-center py-4"
+  when :card then "card bg-error/10 border border-error/20"
+  else "text-center py-8"
+  end
+%>
+
+<div class="<%= container_classes %>" role="alert" aria-live="polite">
+  <% if variant == :card %>
+    <div class="card-body items-center text-center">
+  <% end %>
+
+  <% unless variant == :inline %>
+    <div class="mx-auto h-12 w-12 text-error mb-2">
+      <%= heroicon icon, class: "w-12 h-12" %>
+    </div>
+  <% else %>
+    <%= heroicon icon, class: "w-5 h-5 text-error shrink-0" %>
+  <% end %>
+
+  <% unless variant == :inline %>
+    <h3 class="text-lg font-medium text-error"><%= title %></h3>
+  <% end %>
+
+  <p class="<%= variant == :inline ? 'text-sm text-error' : 'mt-1 text-sm text-base-content/70' %>">
+    <%= message %>
+  </p>
+
+  <% if retry_action.present? || retry_url.present? %>
+    <div class="<%= variant == :inline ? 'ml-auto' : 'mt-4' %>">
+      <% if retry_action.present? %>
+        <button type="button"
+                class="btn btn-sm btn-error btn-outline"
+                data-action="<%= retry_action %>">
+          <% unless variant == :inline %>
+            <%= heroicon "arrow-path", class: "w-4 h-4 mr-1" %>
+          <% end %>
+          Retry
+        </button>
+      <% elsif retry_url.present? %>
+        <%= link_to retry_url, class: "btn btn-sm btn-error btn-outline", data: { turbo_frame: "_self" } do %>
+          <% unless variant == :inline %>
+            <%= heroicon "arrow-path", class: "w-4 h-4 mr-1" %>
+          <% end %>
+          Retry
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if variant == :card %>
+    </div>
+  <% end %>
+</div>

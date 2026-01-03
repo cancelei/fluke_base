@@ -41,9 +41,49 @@
 #
 #  fk_rails_...  (user_id => users.id)
 #
+
+# Project model representing a software project on FlukeBase.
+#
+# Projects are the central entity around which agreements, milestones,
+# time tracking, and GitHub integration revolve. Each project has one owner
+# but can have multiple collaborators via agreements.
+#
+# @example Creating a project with GitHub repository
+#   project = user.projects.create!(
+#     name: 'My App',
+#     description: 'A Rails application',
+#     stage: 'development',
+#     repository_url: 'https://github.com/user/my-app'
+#   )
+#
+# @example Stealth mode (hide details from public)
+#   project.update!(stealth_mode: true, stealth_name: 'Project X')
+#
+# == Associations
+# - +user+ - Owner of this project
+# - +milestones+ - Deliverable milestones for tracking progress
+# - +agreements+ - Collaboration agreements with other users
+# - +environment_variables+ - Stored env vars for sync
+# - +project_memories+ - Stored knowledge (facts, conventions, gotchas)
+# - +github_logs+ - Synced GitHub activity
+#
+# == Key Features
+# - Stealth mode: Hide real project details behind aliases
+# - GitHub integration: Sync commits, PRs, and activity
+# - Environment sync: Store and sync .env variables securely
+# - Memory storage: Persist project knowledge for AI agents
+#
+# == Scopes
+# - +published+ - Non-stealth projects visible to public
+# - +by_stage+ - Filter by development stage
+#
+# @see Milestone
+# @see Agreement
+# @see EnvironmentVariable
 class Project < ApplicationRecord
   extend FriendlyId
   include UrlNormalizable
+  include AccessControl
 
   friendly_id :name, use: [:slugged, :finders]
 
@@ -59,6 +99,39 @@ class Project < ApplicationRecord
   # Membership associations for tiered access control
   has_many :project_memberships, dependent: :destroy
   has_many :team_members, through: :project_memberships, source: :user
+
+  # Environment variables for flukebase_connect
+  has_many :environment_variables, dependent: :destroy
+  has_many :environment_configs, dependent: :destroy
+
+  # MCP plugin configuration
+  has_one :mcp_configuration, class_name: "ProjectMcpConfiguration", dependent: :destroy
+
+  # Project memories for flukebase_connect sync
+  has_many :project_memories, dependent: :destroy
+
+  # AI Productivity metrics
+  has_many :ai_productivity_metrics, dependent: :destroy
+  has_one :ai_productivity_stat
+
+  # AI Conversation logs from flukebase_connect
+  has_many :ai_conversation_logs, dependent: :destroy
+
+  # Auto-generated gotcha suggestions from pattern analysis
+  has_many :suggested_gotchas, dependent: :destroy
+
+  # Webhook subscriptions for real-time notifications
+  has_many :webhook_subscriptions, dependent: :destroy
+
+  # WeDo tasks for team board
+  has_many :wedo_tasks, dependent: :destroy
+
+  # Agent sessions from flukebase_connect
+  has_many :agent_sessions, dependent: :destroy
+
+  # Container pool for smart delegation
+  has_one :container_pool, dependent: :destroy
+  has_many :delegation_requests, dependent: :destroy
 
   # Validations
   validates :name, presence: true
@@ -233,117 +306,28 @@ class Project < ApplicationRecord
   def github_connected? = github_service.connected?
 
   # ============================================================================
-  # Membership-based Access Control Methods
+  # Environment Variable Helper Methods (for flukebase_connect)
   # ============================================================================
 
-  # Find membership for a specific user
-  # @param user [User] The user to find membership for
-  # @return [ProjectMembership, nil] The membership record or nil
-  def membership_for(user)
-    return nil unless user
-    project_memberships.find_by(user_id: user.id)
+  # Get environment variables for a specific environment
+  # @param environment [String] The environment (development, staging, production)
+  # @return [ActiveRecord::Relation] Environment variables for that environment
+  def env_vars_for(environment = "development")
+    environment_variables.for_environment(environment)
   end
 
-  # Get the role for a specific user
-  # @param user [User] The user to get role for
-  # @return [String, nil] The role name or nil if no membership
-  def role_for(user) = membership_for(user)&.role
-
-  # Check if user is the project owner (original owner or owner role)
-  # @param user [User] The user to check
-  # @return [Boolean]
-  def user_is_owner?(user)
-    return false unless user
-    user_id == user.id || membership_for(user)&.owner?
+  # Check if project has environment variables configured
+  # @param environment [String] The environment to check
+  # @return [Boolean] True if environment has variables
+  def has_environment?(environment = "development")
+    environment_variables.for_environment(environment).any?
   end
 
-  # Check if user has admin or higher access
-  # @param user [User] The user to check
-  # @return [Boolean]
-  def user_is_admin?(user)
-    return false unless user
-    user_is_owner?(user) || membership_for(user)&.admin?
-  end
-
-  # Check if user has member or higher access
-  # @param user [User] The user to check
-  # @return [Boolean]
-  def user_is_member?(user)
-    return false unless user
-    membership = membership_for(user)
-    membership&.member? || has_active_agreement_with?(user)
-  end
-
-  # Check if user is a guest
-  # @param user [User] The user to check
-  # @return [Boolean]
-  def user_is_guest?(user)
-    return false unless user
-    membership_for(user)&.guest?
-  end
-
-  # Check if user has any access to the project
-  # @param user [User] The user to check
-  # @return [Boolean]
-  def user_has_access?(user)
-    return false unless user
-    membership_for(user).present? || has_active_agreement_with?(user)
-  end
-
-  # Check if user has an active agreement with this project
-  # @param user [User] The user to check
-  # @return [Boolean]
-  def has_active_agreement_with?(user)
-    return false unless user
-    agreements.joins(:agreement_participants)
-              .where(agreement_participants: { user_id: user.id })
-              .where(status: %w[Accepted Completed])
-              .exists?
-  end
-
-  # Get fields visible to a specific role
-  # @param role [String] The role to check
-  # @return [Array<String>] List of visible field names
-  def fields_visible_to_role(role)
-    case role.to_s
-    when "owner"
-      # Owners see everything
-      PUBLIC_FIELD_OPTIONS + %w[repository_url stealth_name stealth_description stealth_category milestones agreements time_logs github_logs]
-    when "admin"
-      # Admins see most fields plus internal data
-      PUBLIC_FIELD_OPTIONS + %w[milestones agreements time_logs]
-    when "member"
-      # Members see public fields plus shared project info
-      (public_fields || DEFAULT_PUBLIC_FIELDS)
-    when "guest"
-      # Guests see only explicitly public fields, respecting stealth mode
-      return [] if stealth?
-      (public_fields || []).select { |f| f.in?(%w[name category stage]) }
-    else
-      []
-    end
-  end
-
-  # Determine effective role for a user (considers agreements too)
-  # @param user [User] The user to check
-  # @return [String, nil] The effective role
-  def effective_role_for(user)
-    return nil unless user
-
-    # Check if user is the original owner
-    return "owner" if user_id == user.id
-
-    # Check explicit membership
-    membership = membership_for(user)
-    return membership.role if membership
-
-    # Check if user has access via agreements
-    return "member" if has_active_agreement_with?(user)
-
-    # Check if project is publicly discoverable
-    return "guest" if publicly_discoverable?
-
-    nil
+  # Get or create environment config for tracking sync
+  # @param environment [String] The environment
+  # @return [EnvironmentConfig] The config record
+  def environment_config_for(environment = "development")
+    environment_configs.find_or_create_by!(environment:)
   end
 
   # Ransack configuration for search/filter functionality

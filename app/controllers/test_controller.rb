@@ -31,4 +31,10 @@ class TestController < ApplicationController
       ]
     }
   end
+
+  def context_navbar
+    # Test endpoint for context navbar mobile styling
+    # Simulates logged-in user view for testing
+    render "test/context_navbar", layout: "application"
+  end
 end

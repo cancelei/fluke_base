@@ -55,6 +55,39 @@
 #
 #  fk_rails_...  (selected_project_id => projects.id) ON DELETE => nullify
 #
+
+# User model representing registered users on FlukeBase.
+#
+# Users can own projects, participate in agreements with other users,
+# track time on milestones, and connect GitHub accounts for repository access.
+#
+# @example Creating a new user
+#   user = User.create!(
+#     email: 'dev@example.com',
+#     first_name: 'Jane',
+#     last_name: 'Doe',
+#     password: 'secure123'
+#   )
+#
+# @example Finding accessible projects
+#   user.accessible_projects # => projects user owns or has agreements with
+#
+# == Associations
+# - +projects+ - Projects owned by this user
+# - +agreements+ - Agreements where user is initiator or other party
+# - +milestones+ - Milestones on user's projects
+# - +time_logs+ - Time tracking entries
+# - +github_logs+ - GitHub activity synced from repositories
+#
+# == Key Methods
+# - +accessible_projects+ - All projects user can access (owned + via agreements)
+# - +full_name+ - Combined first and last name
+# - +github_connected?+ - Whether GitHub account is linked
+# - +selected_project+ - Currently selected project for context navigation
+#
+# @see Project
+# @see Agreement
+# @see TimeLog
 class User < ApplicationRecord
   extend FriendlyId
 
@@ -129,12 +162,22 @@ class User < ApplicationRecord
   # GitHub App installations
   has_many :github_app_installations, dependent: :destroy
 
+  # API tokens for Connect API
+  has_many :api_tokens, dependent: :destroy
+
+  # AI Productivity tracking
+  has_many :ai_productivity_metrics, dependent: :destroy
+  has_one :onboarding_progress, class_name: "UserOnboardingProgress", dependent: :destroy
+
+  # AI Conversation logs from flukebase_connect
+  has_many :ai_conversation_logs, dependent: :nullify
+
   # Class methods
   def self.find_by_github_identifier(identifier)
     return nil if identifier.blank?
 
     # Try to find by GitHub username (case insensitive)
-    user = where("LOWER(github_username) = ?", identifier.downcase).first
+    user = where("LOWER(github_username) = ?", identifier.downcase).take
     return user if user
 
     # Try to find by email

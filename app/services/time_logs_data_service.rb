@@ -93,6 +93,7 @@ class TimeLogsDataService < ApplicationService
     @current_tracking_log ||= @project.time_logs
                                       .where(user_id: @user.id)
                                       .in_progress
+                                      .order(:created_at)
                                       .last
   end
 

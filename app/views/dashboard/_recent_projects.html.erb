@@ -1,37 +1,34 @@
-<div class="card bg-base-100 shadow-xl">
-  <div class="card-body p-0">
-    <!-- Header -->
-    <div class="flex items-center justify-between p-4 pb-0">
-      <div class="flex items-center gap-2">
-        <h3 class="card-title text-lg">My Projects</h3>
-        <span class="badge badge-ghost badge-sm text-base-content/50">by activity</span>
-      </div>
-      <%= link_to "View all", projects_path, class: "btn btn-ghost btn-sm" %>
+<%= render Ui::CardComponent.new(variant: :default, padding: false) do |card| %>
+  <!-- Header -->
+  <div class="flex items-center justify-between p-4 pb-0">
+    <div class="flex items-center gap-2">
+      <h3 class="card-title text-lg">My Projects</h3>
+      <span class="badge badge-ghost badge-sm text-base-content/50">by activity</span>
     </div>
-
-      <!-- Content -->
-      <div class="divider my-2"></div>
-
-      <% if @projects.present? %>
-        <ul class="menu p-0" style="width: 100%;">
-          <% @projects.each do |project| %>
-            <% cache([project, current_user]) do %>
-              <%= render "shared/project_summary", project:, current_user: %>
-            <% end %>
-          <% end %>
-        </ul>
-      <% else %>
-        <%= render "shared/empty_state",
-            title: "No projects yet",
-            description: "Create your first project to get started.",
-            action_text: "Create a project",
-            action_url: new_project_path,
-            options: {
-              container_class: "text-center p-6",
-              action_class: "btn btn-primary btn-sm",
-              icon: "folder"
-            } %>
-      <% end %>
-
-    </div>
+    <%= link_to "View all", projects_path, class: "btn btn-ghost btn-sm" %>
   </div>
+
+  <!-- Content -->
+  <div class="divider my-2"></div>
+
+  <% if @projects.present? %>
+    <ul class="menu p-0" style="width: 100%;">
+      <% @projects.each do |project| %>
+        <% cache([project, current_user]) do %>
+          <%= render "shared/project_summary", project:, current_user: %>
+        <% end %>
+      <% end %>
+    </ul>
+  <% else %>
+    <%= render "shared/empty_state",
+        title: "No projects yet",
+        description: "Create your first project to get started.",
+        action_text: "Create a project",
+        action_url: new_project_path,
+        options: {
+          container_class: "text-center p-6",
+          action_class: "btn btn-primary btn-sm",
+          icon: "folder"
+        } %>
+  <% end %>
+<% end %>

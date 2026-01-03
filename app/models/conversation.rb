@@ -65,6 +65,6 @@ class Conversation < ApplicationRecord
 
   # Get the last message of the conversation
   def last_message
-    messages.last
+    messages.order(created_at: :desc).first
   end
 end

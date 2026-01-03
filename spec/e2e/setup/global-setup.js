@@ -6,12 +6,12 @@ import { execSync } from 'child_process';
  * Runs before all tests to prepare the test environment
  *
  * Features:
- * - Saves authenticated session state for faster tests (always runs)
- * - Optional: Seeds test data via rake task
+ * - Seeds test data via FactoryBot (always runs for consistency)
+ * - Saves authenticated session state for faster tests
  *
  * Environment Variables:
- * - SEED_TEST_DATA: Set to '1' to seed test data before tests
- * - RAILS_ENV: Rails environment (default: test)
+ * - RAILS_ENV: Rails environment (must be 'test')
+ * - SKIP_SEED: Set to '1' to skip seeding (not recommended)
  */
 export default async function globalSetup(config) {
   console.log('\n🧪 Setting up E2E test environment for Fluke_base...\n');
@@ -20,17 +20,19 @@ export default async function globalSetup(config) {
   const storagePath = 'tmp/playwright/auth.json';
 
   try {
-    // Optional: Seed test data via rake task
-    if (process.env.SEED_TEST_DATA === '1') {
-      console.log('📦 Seeding test data...');
+    // Seed test data via FactoryBot (unless explicitly skipped)
+    if (process.env.SKIP_SEED !== '1') {
+      console.log('📦 Seeding test data with FactoryBot...');
       execSync('bundle exec rake e2e:seed_test_data', {
         cwd: process.cwd(),
         stdio: 'inherit',
         env: {
           ...process.env,
-          RAILS_ENV: process.env.RAILS_ENV || 'test'
+          RAILS_ENV: 'test'
         }
       });
+    } else {
+      console.log('⏭️  Skipping seed (SKIP_SEED=1)');
     }
 
     // Always save authenticated session state

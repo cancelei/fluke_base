@@ -1,5 +1,4 @@
-  <div>
-    <% presenter = present(@project) %>
+<% presenter = present(@project) %>
 
     <%# Breadcrumbs %>
     <div class="breadcrumbs text-sm mb-4">
@@ -21,121 +20,119 @@
     </div>
 
     <%# Header Card %>
-    <div class="card bg-base-100 shadow-xl mb-6">
-      <div class="card-body">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div class="flex-1">
-            <div class="flex items-start gap-4">
-              <%# Project Icon %>
-              <div class="flex-shrink-0">
-                <div class="avatar placeholder">
-                    <div class="bg-primary/10 text-primary rounded-xl w-16 h-16 flex items-center justify-center">
-                      <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <%# Project Info %>
-                <div class="flex-1 min-w-0">
-                  <h1 class="card-title text-3xl">
-                    <%= presenter.display_name(current_user) %>
-                  </h1>
-                  <p class="mt-2 text-sm text-base-content/70">
-                    <%= presenter.owner_display %> · <%= presenter.created_timeframe %>
-                  </p>
-                  <div class="flex flex-wrap gap-2 mt-3">
-                    <% if @project.category.present? && field_visible_to_user?(@project, :category, current_user) %>
-                      <div class="badge badge-info badge-sm"><%= @project.category %></div>
-                    <% end %>
-
-                    <%= presenter.collaboration_badges %>
-                    <%= presenter.stage_badge %>
-                    <%= presenter.funding_status_badge %>
-                  </div>
+    <%= render Ui::CardComponent.new(variant: :default, css_class: "mb-6") do %>
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="flex-1">
+          <div class="flex items-start gap-4">
+            <%# Project Icon %>
+            <div class="flex-shrink-0">
+              <div class="avatar placeholder">
+                <div class="bg-primary/10 text-primary rounded-xl w-16 h-16 flex items-center justify-center">
+                  <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                  </svg>
                 </div>
               </div>
             </div>
 
-            <%# Action Buttons %>
-            <div class="flex flex-col gap-3 lg:gap-2">
-              <%# First Row: View/Info Buttons %>
-              <div class="flex flex-wrap gap-2">
-                <% if @has_agreement || current_user.id == @project.user_id %>
-                  <% if @project.repository_url.present? %>
-                    <%= link_to project_github_logs_path(@project), class: "btn btn-ghost btn-sm gap-2" do %>
-                      <%= render Ui::IconComponent.new(name: :github, size: :sm) %>
-                      GitHub Activity
-                    <% end %>
-                  <% else %>
-                    <div class="tooltip" data-tip="Add GitHub repository link to see activity">
-                      <button type="button" disabled class="btn btn-ghost btn-sm btn-disabled gap-2">
-                        <%= render Ui::IconComponent.new(name: :github, size: :sm) %>
-                        GitHub Activity
-                      </button>
-                    </div>
-                  <% end %>
-
-                  <%= link_to time_logs_path(@project), class: "btn btn-ghost btn-sm gap-2" do %>
-                    <%= render Ui::IconComponent.new(name: :clock, size: :sm) %>
-                    Time Logs
-                  <% end %>
-                <% end %>
-              </div>
-
-              <%# Second Row: Action Buttons %>
-              <div class="flex flex-wrap gap-2">
-                <% if current_user.id == @project.user_id %>
-                  <%= link_to edit_project_path(@project), class: "btn btn-ghost btn-sm gap-2" do %>
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit Project
-                  <% end %>
-
-                  <%= link_to new_project_milestone_path(@project), class: "btn btn-ghost btn-sm gap-2" do %>
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Add Milestone
-                  <% end %>
+            <%# Project Info %>
+            <div class="flex-1 min-w-0">
+              <h1 class="card-title text-3xl">
+                <%= presenter.display_name(current_user) %>
+              </h1>
+              <p class="mt-2 text-sm text-base-content/70">
+                <%= presenter.owner_display %> · <%= presenter.created_timeframe %>
+              </p>
+              <div class="flex flex-wrap gap-2 mt-3">
+                <% if @project.category.present? && field_visible_to_user?(@project, :category, current_user) %>
+                  <div class="badge badge-info badge-sm"><%= @project.category %></div>
                 <% end %>
 
-                <%# Agreement Actions (Primary CTAs) %>
-                <% if current_user.id == @project.user_id %>
-                  <%= link_to explore_people_path(propose_for_project: @project.id), class: "btn btn-primary btn-sm gap-2" do %>
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                    </svg>
-                    Find Collaborator
-                  <% end %>
-                <% elsif !@has_agreement %>
-                  <%= link_to new_agreement_path(project_id: @project.id, other_party_id: @project.user.id), class: "btn btn-primary btn-sm gap-2" do %>
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Initiate Agreement
-                  <% end %>
-                <% end %>
+                <%= presenter.collaboration_badges %>
+                <%= presenter.stage_badge %>
+                <%= presenter.funding_status_badge %>
               </div>
             </div>
           </div>
         </div>
+
+        <%# Action Buttons %>
+        <div class="flex flex-col gap-3 lg:gap-2">
+          <%# First Row: View/Info Buttons %>
+          <div class="flex flex-wrap gap-2">
+            <% if @has_agreement || current_user.id == @project.user_id %>
+              <% if @project.repository_url.present? %>
+                <%= link_to project_github_logs_path(@project), class: "btn btn-ghost btn-sm gap-2" do %>
+                  <%= render Ui::IconComponent.new(name: :github, size: :sm) %>
+                  GitHub Activity
+                <% end %>
+              <% else %>
+                <div class="tooltip" data-tip="Add GitHub repository link to see activity">
+                  <button type="button" disabled class="btn btn-ghost btn-sm btn-disabled gap-2">
+                    <%= render Ui::IconComponent.new(name: :github, size: :sm) %>
+                    GitHub Activity
+                  </button>
+                </div>
+              <% end %>
+
+              <%= link_to time_logs_path(@project), class: "btn btn-ghost btn-sm gap-2" do %>
+                <%= render Ui::IconComponent.new(name: :clock, size: :sm) %>
+                Time Logs
+              <% end %>
+
+              <% if current_user.id == @project.user_id %>
+                <%= link_to project_environment_variables_path(@project), class: "btn btn-ghost btn-sm gap-2" do %>
+                  <%= render Ui::IconComponent.new(name: :cog_6_tooth, size: :sm) %>
+                  Env Variables
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+
+          <%# Second Row: Action Buttons %>
+          <div class="flex flex-wrap gap-2">
+            <% if current_user.id == @project.user_id %>
+              <%= link_to edit_project_path(@project), class: "btn btn-ghost btn-sm gap-2" do %>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Project
+              <% end %>
+
+              <%= link_to new_project_milestone_path(@project), class: "btn btn-ghost btn-sm gap-2" do %>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Milestone
+              <% end %>
+            <% end %>
+
+            <%# Agreement Actions (Primary CTAs) %>
+            <% if current_user.id == @project.user_id %>
+              <%= link_to explore_people_path(propose_for_project: @project.id), class: "btn btn-primary btn-sm gap-2" do %>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                Find Collaborator
+              <% end %>
+            <% elsif !@has_agreement %>
+              <%= link_to new_agreement_path(project_id: @project.id, other_party_id: @project.user.id), class: "btn btn-primary btn-sm gap-2" do %>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Initiate Agreement
+              <% end %>
+            <% end %>
+          </div>
+        </div>
       </div>
+    <% end %>
 
-      <%= turbo_frame_tag "project-details" do %>
-        <div class="card bg-base-100 shadow-xl">
-          <div class="card-body p-0">
-            <%# Card Header %>
-            <div class="px-6 py-4 border-b border-base-200 bg-base-200/30">
-              <h3 class="card-title text-lg">Project Information</h3>
-              <p class="text-sm text-base-content/70">
-                <%= presenter.owner_display %> · <%= presenter.created_timeframe %>
-              </p>
-            </div>
+    <%= turbo_frame_tag "project-details" do %>
+        <%= render Ui::CardComponent.new(variant: :default, padding: false) do |card| %>
+          <% card.with_header(title: "Project Information", subtitle: "#{presenter.owner_display} · #{presenter.created_timeframe}") %>
 
-            <div class="divide-y divide-base-200">
+          <div class="divide-y divide-base-200">
               <%# Description %>
               <div class="px-6 py-4 hover:bg-base-200/30 transition-colors" id="project-description-field">
                 <div class="sm:grid sm:grid-cols-3 sm:gap-6">
@@ -327,114 +324,111 @@
       <% if @has_agreement || current_user.id == @project.user_id %>
         <%# Milestones section %>
         <div class="mt-6">
-          <div class="card bg-base-100 shadow-xl">
-            <div class="card-body p-0">
-              <%# Card Header %>
-              <div class="px-6 py-4 border-b border-base-200 bg-base-200/30">
-                <div class="flex justify-between items-center">
-                  <h2 class="card-title text-lg gap-2">
-                    <svg class="h-5 w-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                    </svg>
-                    Milestones
-                  </h2>
+          <%= render Ui::CardComponent.new(variant: :default, padding: false) do |card| %>
+            <% card.with_header do %>
+              <div class="flex justify-between items-center">
+                <h2 class="card-title text-lg gap-2">
+                  <svg class="h-5 w-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                  Milestones
+                </h2>
 
-                  <% if current_user.id == @project.user_id %>
+                <% if current_user.id == @project.user_id %>
+                  <%= link_to new_project_milestone_path(@project), class: "btn btn-success btn-sm gap-2" do %>
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add Milestone
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+
+            <% if @milestones&.any? %>
+              <div class="divide-y divide-base-200">
+                <% @milestones.each do |milestone| %>
+                  <div class="px-6 py-4 hover:bg-base-200/30 transition-colors">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <% if milestone.completed? %>
+                          <div class="badge badge-success badge-lg p-3">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                        <% elsif milestone.in_progress? %>
+                          <div class="badge badge-warning badge-lg p-3">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                        <% else %>
+                          <div class="badge badge-ghost badge-lg p-3">
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                        <% end %>
+                        <div class="ml-3">
+                          <p class="text-sm font-semibold"><%= milestone.title %></p>
+                          <p class="text-xs text-base-content/70 flex items-center mt-0.5">
+                            <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Due: <%= milestone.due_date.strftime("%b %d, %Y") %>
+                          </p>
+                        </div>
+                      </div>
+                      <div class="ml-4 flex items-center gap-2">
+                        <div class="badge <%= milestone.completed? ? "badge-success" : milestone.in_progress? ? "badge-warning" : "badge-ghost" %> badge-sm">
+                          <%= milestone.completed? ? "Completed" : milestone.in_progress? ? "In Progress" : "Not Started" %>
+                        </div>
+
+                        <% if current_user.id == @project.user_id %>
+                          <div class="flex items-center gap-1">
+                            <%= link_to edit_project_milestone_path(@project, milestone), class: "btn btn-ghost btn-xs btn-square" do %>
+                              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            <% end %>
+
+                            <button type="button"
+                                    onclick="confirmDelete(<%= milestone.id.to_json %>, <%= milestone.title.to_json %>)"
+                                    class="btn btn-ghost btn-xs btn-square text-error">
+                              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="px-6 py-12 text-center">
+                <div class="text-base-content/30 mb-4">
+                  <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                </div>
+                <h3 class="text-sm font-medium">No milestones yet</h3>
+                <p class="mt-2 text-sm text-base-content/70">Get started by adding your first milestone to track project progress.</p>
+                <% if current_user.id == @project.user_id %>
+                  <div class="mt-6">
                     <%= link_to new_project_milestone_path(@project), class: "btn btn-success btn-sm gap-2" do %>
                       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                       </svg>
-                      Add Milestone
+                      Add Your First Milestone
                     <% end %>
-                  <% end %>
-                </div>
-              </div>
-
-              <% if @milestones&.any? %>
-                <div class="divide-y divide-base-200">
-                  <% @milestones.each do |milestone| %>
-                    <div class="px-6 py-4 hover:bg-base-200/30 transition-colors">
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                          <% if milestone.completed? %>
-                            <div class="badge badge-success badge-lg p-3">
-                              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                              </svg>
-                            </div>
-                          <% elsif milestone.in_progress? %>
-                            <div class="badge badge-warning badge-lg p-3">
-                              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-                              </svg>
-                            </div>
-                          <% else %>
-                            <div class="badge badge-ghost badge-lg p-3">
-                              <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                              </svg>
-                            </div>
-                          <% end %>
-                          <div class="ml-3">
-                            <p class="text-sm font-semibold"><%= milestone.title %></p>
-                            <p class="text-xs text-base-content/70 flex items-center mt-0.5">
-                              <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              Due: <%= milestone.due_date.strftime("%b %d, %Y") %>
-                            </p>
-                          </div>
-                        </div>
-                        <div class="ml-4 flex items-center gap-2">
-                          <div class="badge <%= milestone.completed? ? "badge-success" : milestone.in_progress? ? "badge-warning" : "badge-ghost" %> badge-sm">
-                            <%= milestone.completed? ? "Completed" : milestone.in_progress? ? "In Progress" : "Not Started" %>
-                          </div>
-
-                          <% if current_user.id == @project.user_id %>
-                            <div class="flex items-center gap-1">
-                              <%= link_to edit_project_milestone_path(@project, milestone), class: "btn btn-ghost btn-xs btn-square" do %>
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                              <% end %>
-
-                              <button type="button"
-                                      onclick="confirmDelete(<%= milestone.id.to_json %>, <%= milestone.title.to_json %>)"
-                                      class="btn btn-ghost btn-xs btn-square text-error">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
-                          <% end %>
-                        </div>
-                      </div>
-                    </div>
-                  <% end %>
-                </div>
-              <% else %>
-                <div class="px-6 py-12 text-center">
-                  <div class="text-base-content/30 mb-4">
-                    <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                    </svg>
                   </div>
-                  <h3 class="text-sm font-medium">No milestones yet</h3>
-                  <p class="mt-2 text-sm text-base-content/70">Get started by adding your first milestone to track project progress.</p>
-                  <% if current_user.id == @project.user_id %>
-                    <div class="mt-6">
-                      <%= link_to new_project_milestone_path(@project), class: "btn btn-success btn-sm gap-2" do %>
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Add Your First Milestone
-                      <% end %>
-                    </div>
-                  <% end %>
-                </div>
-              <% end %>
-            </div>
-          </div>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
         </div>
       <% end %>
 
@@ -445,14 +439,10 @@
 
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <% @suggested_mentors.each do |mentor| %>
-              <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
-                <div class="card-body p-4 flex-row items-center gap-3">
-                  <div class="avatar placeholder">
-                    <div class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
-                      <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                    </div>
+              <%= render Ui::CardComponent.new(variant: :interactive, padding: true) do %>
+                <div class="flex items-center gap-3">
+                  <div class="flex-shrink-0">
+                    <%= render Ui::AvatarComponent.new(user: mentor, size: :sm, placeholder: :initials) %>
                   </div>
                   <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium truncate"><%= mentor.full_name %></p>
@@ -464,14 +454,14 @@
                       <% end %>
                     </p>
                   </div>
-                  <%= link_to new_agreement_path(project_id: @project.id, other_party_id: mentor.id), class: "btn btn-primary btn-sm gap-1" do %>
+                  <%= link_to new_agreement_path(project_id: @project.id, other_party_id: mentor.id), class: "btn btn-primary btn-xs gap-1" do %>
                     Propose
-                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                   <% end %>
                 </div>
-              </div>
+              <% end %>
             <% end %>
           </div>
         </div>
@@ -537,3 +527,4 @@
       }
     }
   </script>
+<%# No trailing div here if it wasn't opened properly %>

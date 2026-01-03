@@ -1,7 +1,9 @@
 class MilestonesController < ApplicationController
+  include MilestoneDataLoader
+  include TurboStreamActions
+
   before_action :set_project
   before_action :set_milestone, only: [:show, :edit, :update, :destroy, :confirm, :enhancement_status, :enhancement_display]
-  before_action :set_project_for_ai, only: [:ai_enhance, :apply_ai_enhancement, :revert_ai_enhancement, :discard_ai_enhancement]
 
   def index
     @milestones = @project.milestones.order(due_date: :asc)
@@ -50,35 +52,20 @@ class MilestonesController < ApplicationController
           if request.referer&.include?("time_logs")
             # Update relevant sections for time_logs page
             reload_time_logs_data
+            data = {
+              owner: @owner,
+              milestones_pending_confirmation: @milestones_pending_confirmation,
+              time_logs_completed: @time_logs_completed
+            }
+            
             render turbo_stream: [
               turbo_stream.remove("milestone_#{@milestone.id}_pending_row"),
-              turbo_stream.update("completed_tasks_section",
-                partial: "time_logs/completed_tasks_section",
-                locals: {
-                  time_logs_completed: @time_logs_completed,
-                  project: @project,
-                  owner: @owner
-                }
-              ),
-              turbo_stream.update("pending_confirmation_section",
-                partial: "time_logs/pending_confirmation_section",
-                locals: {
-                  milestones_pending_confirmation: @milestones_pending_confirmation,
-                  project: @project,
-                  owner: @owner
-                }
-              ),
-              turbo_stream.update("flash_messages",
-                partial: "shared/flash",
-                locals: { notice: "Milestone confirmed successfully." }
-              )
+              *update_milestone_data_streams(@project, data),
+              update_flash_stream(notice: "Milestone confirmed successfully.")
             ]
           else
-                         # For other contexts, just show success message
-                         render turbo_stream: turbo_stream.update("flash_messages",
-               partial: "shared/flash_messages",
-               locals: { notice: "Milestone confirmed successfully." }
-             )
+             # For other contexts, just show success message
+             render turbo_stream: update_flash_stream(notice: "Milestone confirmed successfully.")
           end
         end
         format.html { redirect_back fallback_location: project_path(@project), notice: "Milestone confirmed successfully." }
@@ -319,12 +306,6 @@ class MilestonesController < ApplicationController
     redirect_to projects_path, alert: "Project not found or you don't have access to it."
   end
 
-  def set_project_for_ai
-    @project = current_user.projects.find(params[:project_id])
-  rescue ActiveRecord::RecordNotFound
-    redirect_to projects_path, alert: "Project not found or you don't have access to it."
-  end
-
   def set_milestone
     @milestone = @project.milestones.find(params[:id])
   rescue ActiveRecord::RecordNotFound
@@ -336,13 +317,10 @@ class MilestonesController < ApplicationController
   end
 
    def reload_time_logs_data
-    @owner = current_user.id == @project.user_id
-    @milestones = (@owner ? @project.milestones : Milestone.where(id: @project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).pluck(:milestone_ids).flatten))
-    @milestones_pending_confirmation = @milestones
-                                         .includes(:time_logs)
-                                         .where(status: "in_progress", time_logs: { status: "completed" })
-    @time_logs_completed = @milestones
-                            .includes(:time_logs)
-                            .where(status: Milestone::COMPLETED, time_logs: { status: "completed" })
+    data = load_milestone_data(@project, current_user)
+    @owner = data[:owner]
+    @milestones = data[:milestones]
+    @milestones_pending_confirmation = data[:milestones_pending_confirmation]
+    @time_logs_completed = data[:time_logs_completed]
   end
 end

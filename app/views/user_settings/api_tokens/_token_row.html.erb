@@ -1,0 +1,42 @@
+<tr id="<%= dom_id(token) %>">
+  <td>
+    <div class="font-medium"><%= token.name %></div>
+    <% if token.revoked? %>
+      <span class="badge badge-error badge-sm">Revoked</span>
+    <% elsif token.expired? %>
+      <span class="badge badge-warning badge-sm">Expired</span>
+    <% end %>
+  </td>
+  <td>
+    <code class="text-sm bg-base-200 px-2 py-1 rounded"><%= token.prefix %>...</code>
+  </td>
+  <td>
+    <div class="flex flex-wrap gap-1">
+      <% token.scopes.first(3).each do |scope| %>
+        <span class="badge badge-ghost badge-sm"><%= scope %></span>
+      <% end %>
+      <% if token.scopes.count > 3 %>
+        <span class="badge badge-ghost badge-sm">+<%= token.scopes.count - 3 %></span>
+      <% end %>
+    </div>
+  </td>
+  <td>
+    <% if token.last_used_at %>
+      <span class="text-sm"><%= time_ago_in_words(token.last_used_at) %> ago</span>
+    <% else %>
+      <span class="text-sm text-base-content/50">Never</span>
+    <% end %>
+  </td>
+  <td>
+    <span class="text-sm"><%= time_ago_in_words(token.created_at) %> ago</span>
+  </td>
+  <td>
+    <% unless token.revoked? %>
+      <%= button_to "Revoke",
+          user_settings_api_token_path(token),
+          method: :delete,
+          class: "btn btn-ghost btn-sm text-error",
+          data: { turbo_confirm: "Revoke this token? This cannot be undone." } %>
+    <% end %>
+  </td>
+</tr>

@@ -1,6 +1,22 @@
 import { Controller } from '@hotwired/stimulus';
+import { qs } from '../utils/dom';
+import { formatTime } from '../utils/format';
+import { createLogger } from '../utils/logger';
+import { logConnect, logDisconnect } from '../utils/stimulus_helpers';
 
+const logger = window.FlukeLogger || createLogger('FlukeBase');
+
+/**
+ * Stimulus controller for audio message recording and playback.
+ *
+ * Enables voice message recording in chat conversations with waveform
+ * visualization, playback preview, and form submission handling.
+ */
 export default class extends Controller {
+  /**
+   * Stimulus targets for DOM element references.
+   * @static
+   */
   static targets = [
     'recordBtn',
     'micIcon',
@@ -20,6 +36,8 @@ export default class extends Controller {
   ];
 
   connect() {
+    logConnect(logger, 'MessageRecorderController', this);
+
     this.mediaRecorder = null;
     this.audioChunks = [];
     this.recordingStartTime = null;
@@ -29,6 +47,19 @@ export default class extends Controller {
     this.waveformBars = [];
 
     this.setupEventListeners();
+  }
+
+  disconnect() {
+    logDisconnect(logger, 'MessageRecorderController');
+
+    // Clean up when controller is disconnected
+    if (this.audioPlayerTarget && this.audioPlayerTarget.src) {
+      URL.revokeObjectURL(this.audioPlayerTarget.src);
+    }
+
+    if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+      this.mediaRecorder.stop();
+    }
   }
 
   setupEventListeners() {
@@ -297,7 +328,11 @@ export default class extends Controller {
   }
 
   updateRecordingUI(isRecording) {
-    const micSvg = this.micIconTarget.querySelector('svg');
+    const micSvg = qs(this.micIconTarget, 'svg');
+
+    if (!micSvg) {
+      return;
+    }
 
     if (isRecording) {
       micSvg.setAttribute('fill', 'currentColor');
@@ -317,10 +352,7 @@ export default class extends Controller {
   }
 
   updateDurationDisplay(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-
-    this.durationTarget.textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    this.durationTarget.textContent = formatTime(seconds);
   }
 
   showError(message) {
@@ -328,7 +360,7 @@ export default class extends Controller {
   }
 
   displayFlashMessage(message, type = 'info') {
-    const flashContainer = document.getElementById('flash_messages');
+    const flashContainer = qs(document, '#flash_messages');
 
     if (!flashContainer) {
       return;
@@ -413,17 +445,6 @@ export default class extends Controller {
       this.sendBtnTarget.textContent = 'Send';
       this.sendBtnTarget.classList.remove('btn-secondary');
       this.sendBtnTarget.classList.add('btn-primary');
-    }
-  }
-
-  disconnect() {
-    // Clean up when controller is disconnected
-    if (this.audioPlayerTarget && this.audioPlayerTarget.src) {
-      URL.revokeObjectURL(this.audioPlayerTarget.src);
-    }
-
-    if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-      this.mediaRecorder.stop();
     }
   }
 }

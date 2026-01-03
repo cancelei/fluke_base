@@ -1,0 +1,45 @@
+# Cloudflare Browser Rendering Worker for FlukeBase E2E Tests
+#
+# This worker runs Playwright tests against dev.flukebase.me using
+# Cloudflare's hosted browser infrastructure.
+#
+# Usage:
+#   cd workers/browser-tests
+#   npx wrangler dev           # Local development
+#   npx wrangler deploy        # Deploy to Cloudflare
+#
+# Endpoints:
+#   GET /health               - Health check
+#   GET /screenshot?url=...   - Take screenshot of URL
+#   POST /test/login          - Test login flow
+#   POST /test/oauth          - Test OAuth redirect
+#   GET /sessions             - List active browser sessions
+
+name = "flukebase-browser-tests"
+main = "src/index.ts"
+account_id = "7f0d181aabe1f5c6ddb1733f9328a25a"
+workers_dev = true
+compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2025-09-17"
+
+# Browser Rendering binding
+[browser]
+binding = "BROWSER"
+
+# Environment variables
+[vars]
+BASE_URL = "https://dev.flukebase.me"
+ENVIRONMENT = "development"
+
+# KV namespace for storing test state/auth tokens
+# Uncomment after creating: npx wrangler kv namespace create "TEST_STATE"
+# [[kv_namespaces]]
+# binding = "TEST_STATE"
+# id = "<your-kv-namespace-id>"
+
+# Production environment overrides
+[env.production]
+vars = { BASE_URL = "https://flukebase.me", ENVIRONMENT = "production" }
+
+[env.staging]
+vars = { BASE_URL = "https://staging.flukebase.me", ENVIRONMENT = "staging" }

@@ -1,11 +1,11 @@
 # FlukeBase
 
-FlukeBase is a Rails 8.0.4 collaborative platform connecting entrepreneurs, mentors, and co-founders through structured agreements, project management, and integrated time tracking.
+FlukeBase is a Rails 8.1.1 collaborative platform connecting entrepreneurs, mentors, and co-founders through structured agreements, project management, and integrated time tracking.
 
 ## 🚀 Quick Start
 
 ### Requirements
-- Ruby 3.4.4 (managed via asdf)
+- Ruby 3.4.7 (managed via asdf)
 - Node.js 24.8.0 (managed via asdf)
 - PostgreSQL 16+
 - Git
@@ -94,6 +94,12 @@ The application uses Rails 8.0's multi-database support:
 - `ProjectGithubService` - GitHub integration and commit tracking
 - `ProjectVisibilityService` - Field-level privacy controls
 - `UserOnboardingService` - Role-based user workflows
+
+### FlukeBase Connect API
+FlukeBase provides a Connect API for AI coding assistants to sync environment variables and project context:
+- **Python CLI**: `pip install flukebase-connect` then `fbc sync`
+- **MCP Server**: Works with Claude Code, Cline, and other MCP-compatible tools
+- **API Docs**: See `docs/guides/integrations/flukebase-connect-api.md`
 
 ## 💼 Core Features
 

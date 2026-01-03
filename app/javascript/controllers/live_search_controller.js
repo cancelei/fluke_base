@@ -1,16 +1,18 @@
 import { Controller } from '@hotwired/stimulus';
+import { createLogger } from '../utils/logger';
+import {
+  debounced,
+  logConnect,
+  logDisconnect
+} from '../utils/stimulus_helpers';
+
+const logger = window.FlukeLogger || createLogger('FlukeBase');
 
 /**
  * Live Search Controller
  *
  * Provides debounced auto-submit functionality for search forms.
  * Text inputs are debounced, while selects and dates submit immediately.
- *
- * Usage:
- *   <form data-controller="live-search" data-live-search-debounce-value="500">
- *     <input type="text" data-live-search-target="input" data-action="input->live-search#search">
- *     <select data-action="change->live-search#submitNow">
- *   </form>
  */
 export default class extends Controller {
   static targets = ['input', 'form', 'submitButton'];
@@ -20,7 +22,9 @@ export default class extends Controller {
   };
 
   connect() {
-    this.timeout = null;
+    logConnect(logger, 'LiveSearchController', this);
+
+    this.debouncedSubmit = debounced(() => this.submit(), this.debounceValue);
 
     // Hide submit button if it exists and auto-submit is enabled
     if (this.hasSubmitButtonTarget) {
@@ -29,9 +33,7 @@ export default class extends Controller {
   }
 
   disconnect() {
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
+    logDisconnect(logger, 'LiveSearchController');
   }
 
   /**
@@ -41,20 +43,12 @@ export default class extends Controller {
   search(event) {
     const value = event.target.value;
 
-    // Clear any pending submission
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
-
     // Check minimum length requirement
     if (value.length > 0 && value.length < this.minLengthValue) {
       return;
     }
 
-    // Debounce the submission
-    this.timeout = setTimeout(() => {
-      this.submit();
-    }, this.debounceValue);
+    this.debouncedSubmit();
   }
 
   /**
@@ -62,10 +56,6 @@ export default class extends Controller {
    * Use with: data-action="change->live-search#submitNow"
    */
   submitNow() {
-    // Clear any pending debounced submission
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
     this.submit();
   }
 

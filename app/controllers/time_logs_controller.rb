@@ -1,4 +1,6 @@
 class TimeLogsController < ApplicationController
+  include MilestoneDataLoader
+  include TurboStreamActions
   include ResultHandling
 
   before_action :authenticate_user!
@@ -50,6 +52,11 @@ class TimeLogsController < ApplicationController
 
       respond_to do |format|
         format.turbo_stream do
+          data = {
+            owner: @owner,
+            milestones_pending_confirmation: @milestones_pending_confirmation
+          }
+          
           render turbo_stream: [
             turbo_stream.update("manual_time_log_form",
               partial: "time_logs/manual_form",
@@ -59,22 +66,12 @@ class TimeLogsController < ApplicationController
               partial: "time_logs/milestone_row",
               locals: { milestone: @milestone, project: @project, active_log: nil }
             ),
-            turbo_stream.update("pending_confirmation_section",
-              partial: "time_logs/pending_confirmation_section",
-              locals: {
-                milestones_pending_confirmation: @milestones_pending_confirmation,
-                project: @project,
-                owner: @owner
-              }
-            ),
+            *update_milestone_data_streams(@project, data),
             turbo_stream.update("remaining_time_progress",
               partial: "remaining_time_progress",
               locals: { project: @project, current_log: nil, owner: @owner, project_wide: true }
             ),
-                        turbo_stream.update("flash_messages",
-              partial: "shared/flash_messages",
-              locals: { notice: "Time log created successfully." }
-            )
+            update_flash_stream(notice: "Time log created successfully.")
           ]
         end
         format.html { redirect_to time_logs_path(@project), notice: "Time log created successfully." }
@@ -99,47 +96,32 @@ class TimeLogsController < ApplicationController
   end
 
   def index
-    @owner = current_user.id == @project.user_id
-
-    # Get milestones for the current project's project
-    @milestones = (@owner ? @project.milestones : Milestone.where(id: @project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).pluck(:milestone_ids).flatten))
+    data = load_milestone_data(@project, current_user, order: true) # Consistent ordering
+    @owner = data[:owner]
+    @milestones = data[:milestones]
+    @milestones_pending_confirmation = data[:milestones_pending_confirmation]
+    @time_logs_completed = data[:time_logs_completed]
 
     # Get all time logs for the project
     @time_logs = @project.time_logs
                            .includes(:milestone)
                            .order(started_at: :desc)
 
-    @milestones_pending_confirmation = @milestones
-                                         .includes(:time_logs)
-                                         .where(status: "in_progress", time_logs: { status: "completed" })
-    @time_logs_completed = @milestones
-                            .includes(:time_logs)
-                            .where(status: Milestone::COMPLETED, time_logs: { status: "completed" })
-
     respond_to do |format|
       format.html
       format.turbo_stream do
+        data = {
+          owner: @owner,
+          milestones_pending_confirmation: @milestones_pending_confirmation,
+          time_logs_completed: @time_logs_completed
+        }
+
         render turbo_stream: [
           turbo_stream.update("milestones_section",
             partial: "time_logs/milestones_section",
             locals: { milestones: @milestones, project: @project }
           ),
-          turbo_stream.update("pending_confirmation_section",
-            partial: "time_logs/pending_confirmation_section",
-            locals: {
-              milestones_pending_confirmation: @milestones_pending_confirmation,
-              project: @project,
-              owner: @owner
-            }
-          ),
-          turbo_stream.update("completed_tasks_section",
-            partial: "time_logs/completed_tasks_section",
-            locals: {
-              time_logs_completed: @time_logs_completed,
-              project: @project,
-              owner: @owner
-            }
-          ),
+          *update_milestone_data_streams(@project, data),
           turbo_stream.update("remaining_time_progress",
             partial: "remaining_time_progress",
             locals: { project: @project, current_log: current_tracking_log, owner: @owner, project_wide: true }
@@ -392,14 +374,13 @@ class TimeLogsController < ApplicationController
   end
 
   def current_tracking_log
-    @project.time_logs.where(user_id: current_user.id).in_progress.last
+    @project.time_logs.where(user_id: current_user.id).in_progress.order(:created_at).last
   end
 
   def reload_data_for_views
-    @owner = current_user.id == @project.user_id
-    @milestones = (@owner ? @project.milestones.order(due_date: :asc, id: :asc) : Milestone.where(id: @project.agreements.joins(:agreement_participants).where(agreement_participants: { user_id: current_user.id }).pluck(:milestone_ids).flatten).order(due_date: :asc, id: :asc))
-    @milestones_pending_confirmation = @milestones
-                                         .includes(:time_logs)
-                                         .where(status: "in_progress", time_logs: { status: "completed" })
+    data = load_milestone_data(@project, current_user, order: true)
+    @owner = data[:owner]
+    @milestones = data[:milestones]
+    @milestones_pending_confirmation = data[:milestones_pending_confirmation]
   end
 end

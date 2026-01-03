@@ -1,4 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
+import { qs, qsa } from '../utils/dom';
+import { createLogger } from '../utils/logger';
+import { logConnect, logDisconnect } from '../utils/stimulus_helpers';
+
+const logger = window.FlukeLogger || createLogger('FlukeBase');
 
 /**
  * Navbar Controller
@@ -8,6 +13,8 @@ import { Controller } from '@hotwired/stimulus';
  */
 export default class extends Controller {
   connect() {
+    logConnect(logger, 'NavbarController', this);
+
     // Bind methods for proper event listener removal
     this.handleClick = this.handleClick.bind(this);
     this.handleEscape = this.handleEscape.bind(this);
@@ -24,6 +31,8 @@ export default class extends Controller {
   }
 
   disconnect() {
+    logDisconnect(logger, 'NavbarController');
+
     document.removeEventListener('click', this.handleClick);
     document.removeEventListener('keydown', this.handleEscape);
     window.removeEventListener('resize', this.handleResize);
@@ -38,21 +47,17 @@ export default class extends Controller {
 
       // Use setTimeout to run after the native details toggle
       setTimeout(() => {
-        this.element
-          .querySelectorAll('details.dropdown[open]')
-          .forEach(dropdown => {
-            if (dropdown !== clickedDropdown) {
-              dropdown.removeAttribute('open');
-            }
-          });
+        qsa(this.element, 'details.dropdown[open]').forEach(dropdown => {
+          if (dropdown !== clickedDropdown) {
+            dropdown.removeAttribute('open');
+          }
+        });
       }, 0);
     } else if (!event.target.closest('details.dropdown')) {
       // Clicked outside all dropdowns - close all
-      this.element
-        .querySelectorAll('details.dropdown[open]')
-        .forEach(dropdown => {
-          dropdown.removeAttribute('open');
-        });
+      qsa(this.element, 'details.dropdown[open]').forEach(dropdown => {
+        dropdown.removeAttribute('open');
+      });
     }
   }
 
@@ -61,11 +66,11 @@ export default class extends Controller {
       return;
     }
 
-    this.element.querySelectorAll('details.dropdown[open]').forEach(d => {
+    qsa(this.element, 'details.dropdown[open]').forEach(d => {
       d.removeAttribute('open');
     });
 
-    const drawer = document.getElementById('mobile-drawer');
+    const drawer = qs(document, '#mobile-drawer');
 
     if (drawer) {
       drawer.checked = false;
@@ -75,7 +80,7 @@ export default class extends Controller {
 
   handleResize() {
     if (window.innerWidth >= 1024) {
-      const drawer = document.getElementById('mobile-drawer');
+      const drawer = qs(document, '#mobile-drawer');
 
       if (drawer) {
         drawer.checked = false;
@@ -85,8 +90,8 @@ export default class extends Controller {
   }
 
   setupSwapLink() {
-    const drawer = document.getElementById('mobile-drawer');
-    const swap = document.getElementById('mobile-drawer-swap');
+    const drawer = qs(document, '#mobile-drawer');
+    const swap = qs(document, '#mobile-drawer-swap');
 
     if (!drawer || !swap) {
       return;
@@ -102,8 +107,8 @@ export default class extends Controller {
   }
 
   syncSwapWithDrawer() {
-    const drawer = document.getElementById('mobile-drawer');
-    const swap = document.getElementById('mobile-drawer-swap');
+    const drawer = qs(document, '#mobile-drawer');
+    const swap = qs(document, '#mobile-drawer-swap');
 
     if (drawer && swap) {
       swap.checked = drawer.checked;

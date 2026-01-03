@@ -1,6 +1,5 @@
 require 'rails_helper'
 
-# TODO: Rewrite this test to properly test nested meetings routes
 RSpec.describe "Meetings", type: :request do
   let(:initiator) { create(:user) }
   let(:other) { create(:user) }

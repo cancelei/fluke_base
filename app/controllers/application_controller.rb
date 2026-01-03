@@ -25,6 +25,7 @@ class ApplicationController < ActionController::Base
   # Role requirement methods removed - all users have access to all features
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  rescue_from ActionController::InvalidAuthenticityToken, with: :handle_csrf_error
 
   helper_method :selected_project, :present
 
@@ -42,56 +43,7 @@ class ApplicationController < ActionController::Base
   private
 
   def set_selected_project
-    return unless user_signed_in? && current_user
-
-    # Determine project id from nested routes (project_id) or direct project routes (id)
-    incoming_project_id = if params[:project_id].present?
-                            params[:project_id]
-    elsif controller_name == "projects" && params[:id].present?
-                            params[:id]
-    else
-                            nil
-    end
-
-    if incoming_project_id.present?
-      # Use friendly_id finder to support both numeric IDs and slugs
-      project = Project.friendly.find(incoming_project_id) rescue nil
-      if project
-        involved_as_owner = current_user.projects.include?(project)
-        involved_via_initiated = current_user.initiated_agreements.where(project_id: project.id, status: "Accepted").exists?
-        involved_via_received = current_user.received_agreements.where(project_id: project.id, status: "Accepted").exists?
-
-        if involved_as_owner || involved_via_initiated || involved_via_received
-          # Only call ProjectSelectionService for project owners
-          if involved_as_owner
-            ProjectSelectionService.new(current_user, session, project.id).call
-          end
-          @selected_project = project
-        end
-      end
-    else
-      # Set @selected_project from session if not set by params
-      selected_project_id = current_user.selected_project_id || session[:selected_project_id]
-
-      # Enhanced project resolution for mentors and entrepreneurs
-      if selected_project_id.present?
-        # Find project through ownership or agreements (unified logic for all users)
-        # Include both Accepted and Completed agreement statuses
-        @selected_project = current_user.projects.find_by(id: selected_project_id) ||
-                           current_user.initiated_agreements
-                                      .where(project_id: selected_project_id, status: %w[Accepted Completed])
-                                      .first&.project ||
-                           current_user.received_agreements
-                                      .where(project_id: selected_project_id, status: %w[Accepted Completed])
-                                      .first&.project
-      end
-
-      # Fallback: set first available project if none selected
-      if @selected_project.nil? && current_user.projects.any?
-        @selected_project = current_user.projects.first
-        ProjectSelectionService.new(current_user, session, @selected_project.id).call if @selected_project
-      end
-    end
+    @selected_project = ProjectResolutionService.new(current_user, params, session).call
   end
 
   def selected_project
@@ -114,6 +66,19 @@ class ApplicationController < ActionController::Base
         flash[:alert] = "You are not authorized to perform this action."
         redirect_back(fallback_location: root_path)
       end
+    end
+  end
+
+  def handle_csrf_error
+    Rails.logger.warn "[ApplicationController] CSRF Token verification failed. Redirecting user to refresh token."
+    # Don't reset entire session - the redirect will generate a fresh CSRF token
+    # Resetting session here can cause cascading CSRF failures on retry
+    respond_to do |format|
+      format.html do
+        flash[:alert] = "Your session has expired. Please try again."
+        redirect_to new_user_session_path
+      end
+      format.any { head :unprocessable_content }
     end
   end
 

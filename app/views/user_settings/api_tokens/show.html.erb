@@ -1,0 +1,14 @@
+<div>
+  <div class="py-5">
+    <h1 class="text-2xl font-bold tracking-tight">Token Created</h1>
+    <p class="mt-1 text-sm text-base-content/60">
+      Your new API token has been created.
+    </p>
+  </div>
+
+  <div class="card bg-base-100 shadow-xl max-w-2xl">
+    <div class="card-body">
+      <%= render "settings/api_tokens/token_created", raw_token: @raw_token, api_token: @api_token %>
+    </div>
+  </div>
+</div>

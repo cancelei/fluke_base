@@ -1,0 +1,123 @@
+<% content_for :title, "Quick Start - FlukeBase Connect" %>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 text-center">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        Quick Start
+      </h1>
+      <p class="mt-2 text-gray-600 dark:text-gray-400">
+        Get up and running in under a minute
+      </p>
+    </div>
+
+    <!-- One-Click Install -->
+    <div class="bg-gradient-to-r from-green-600 to-teal-600 rounded-lg shadow-lg p-8 mb-8 text-white">
+      <div class="text-center">
+        <h2 class="text-2xl font-bold mb-2">One-Command Setup</h2>
+        <p class="text-green-100 mb-6">
+          This command installs FlukeBase Connect and authenticates you automatically
+        </p>
+      </div>
+
+      <div class="bg-black/30 rounded-lg p-4 font-mono text-green-300 flex items-center justify-between">
+        <code id="quick-command" class="text-sm break-all"><%= @install_command %></code>
+        <button onclick="copyQuickCommand()" class="ml-4 px-3 py-1 bg-white/20 rounded hover:bg-white/30 flex-shrink-0">
+          Copy
+        </button>
+      </div>
+
+      <% if @quick_token %>
+        <div class="mt-4 text-center text-green-200 text-sm">
+          Token expires in 10 minutes
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Steps -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+      <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-4">
+        What happens when you run this:
+      </h3>
+      <div class="space-y-4">
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">1</span>
+          <div>
+            <div class="font-medium text-gray-900 dark:text-white">Detects your system</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Identifies OS, architecture, and available Python tools
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">2</span>
+          <div>
+            <div class="font-medium text-gray-900 dark:text-white">Installs FlukeBase Connect</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Uses pipx, uv, or pip depending on what's available
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">3</span>
+          <div>
+            <div class="font-medium text-gray-900 dark:text-white">Authenticates with your token</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Links the CLI to your FlukeBase account automatically
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">4</span>
+          <div>
+            <div class="font-medium text-gray-900 dark:text-white">Configures MCP clients</div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Sets up Claude Code, Cursor, Windsurf, and other AI tools
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- After Setup -->
+    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
+      <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-4">
+        After Setup
+      </h3>
+      <div class="space-y-3">
+        <div class="bg-gray-900 rounded p-3 font-mono text-sm">
+          <span class="text-gray-500"># Navigate to your project</span>
+          <br>
+          <span class="text-green-400">cd</span> <span class="text-yellow-300">your-project</span>
+        </div>
+        <div class="bg-gray-900 rounded p-3 font-mono text-sm">
+          <span class="text-gray-500"># Sync environment and context</span>
+          <br>
+          <span class="text-green-400">fbc sync</span>
+        </div>
+        <div class="bg-gray-900 rounded p-3 font-mono text-sm">
+          <span class="text-gray-500"># Start your AI assistant</span>
+          <br>
+          <span class="text-green-400">claude</span> <span class="text-gray-300"># or cursor, windsurf, etc.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-8 flex justify-between">
+      <%= link_to connect_path, class: "text-blue-600 hover:text-blue-800" do %>
+        &larr; Back to Connect Portal
+      <% end %>
+      <%= link_to "Download Options", connect_download_path, class: "text-blue-600 hover:text-blue-800" %>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyQuickCommand() {
+  const command = document.getElementById('quick-command').textContent;
+  navigator.clipboard.writeText(command);
+  alert('Copied to clipboard!');
+}
+</script>
