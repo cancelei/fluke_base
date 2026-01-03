@@ -142,7 +142,7 @@ module Logs
     end
 
     def render_entry(entry)
-      render Logs::LogEntryComponent.new(entry: entry)
+      render Logs::LogEntryComponent.new(entry:)
     end
 
     def render_empty_state

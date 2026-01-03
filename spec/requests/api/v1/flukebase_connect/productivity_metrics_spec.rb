@@ -44,8 +44,8 @@ RSpec.describe 'FlukeBase Connect Productivity Metrics API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:metrics']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -85,8 +85,8 @@ RSpec.describe 'FlukeBase Connect Productivity Metrics API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:metrics']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:metric) do
@@ -125,9 +125,9 @@ RSpec.describe 'FlukeBase Connect Productivity Metrics API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:metric_record) { create(:ai_productivity_metric, project: project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:metrics']) }
+        let(:project) { create(:project, user:) }
+        let(:metric_record) { create(:ai_productivity_metric, project:, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { metric_record.id }
@@ -173,8 +173,8 @@ RSpec.describe 'FlukeBase Connect Productivity Metrics API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:metrics']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -238,8 +238,8 @@ RSpec.describe 'FlukeBase Connect Productivity Metrics API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:metrics']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:sync_data) do

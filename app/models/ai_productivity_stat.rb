@@ -61,7 +61,7 @@ class AiProductivityStat < ApplicationRecord
 
   # Refresh if needed
   def self.refresh_if_stale!(threshold: 1.hour)
-    refresh! if needs_refresh?(threshold: threshold)
+    refresh! if needs_refresh?(threshold:)
   end
 
   # Time saved in hours
@@ -100,7 +100,7 @@ class AiProductivityStat < ApplicationRecord
       code_contribution: {
         lines_added: total_lines_added || 0,
         lines_removed: total_lines_removed || 0,
-        net_lines: net_lines,
+        net_lines:,
         files_changed: total_files_changed || 0,
         commits: total_commits || 0
       },
@@ -117,8 +117,8 @@ class AiProductivityStat < ApplicationRecord
         first_activity: first_activity_at,
         last_activity: last_activity_at
       },
-      efficiency_score: efficiency_score,
-      calculated_at: calculated_at
+      efficiency_score:,
+      calculated_at:
     }
   end
 end

@@ -7,7 +7,7 @@ module MilestoneDataLoader
 
   def load_milestone_data(project, user, order: false)
     owner = user.id == project.user_id
-    
+
     milestones_scope = if owner
       project.milestones
     else
@@ -31,10 +31,10 @@ module MilestoneDataLoader
                             .where(status: Milestone::COMPLETED, time_logs: { status: "completed" })
 
     {
-      owner: owner,
+      owner:,
       milestones: milestones_scope,
-      milestones_pending_confirmation: milestones_pending_confirmation,
-      time_logs_completed: time_logs_completed
+      milestones_pending_confirmation:,
+      time_logs_completed:
     }
   end
 end

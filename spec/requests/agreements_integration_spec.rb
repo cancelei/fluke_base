@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Agreements Integration', type: :request do
   include_context 'active agreement context'
-  let(:milestone) { create(:milestone, project: project) }
+  let(:milestone) { create(:milestone, project:) }
 
   before do
     # active agreement context creates an agreement which might block new ones for the same project/users

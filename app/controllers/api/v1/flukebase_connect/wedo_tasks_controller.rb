@@ -51,9 +51,9 @@ module Api
           render_success({
             tasks: tasks.map(&:to_api_hash),
             meta: {
-              total: total,
-              page: page,
-              per_page: per_page,
+              total:,
+              page:,
+              per_page:,
               pages: (total.to_f / per_page).ceil,
               max_version: @project.wedo_tasks.maximum(:version) || 0
             }
@@ -105,7 +105,7 @@ module Api
           # Append synthesis note if provided
           if params.dig(:task, :synthesis_note).present?
             agent_id = params.dig(:task, :agent_id)
-            @task.append_synthesis_note(params[:task][:synthesis_note], agent_id: agent_id)
+            @task.append_synthesis_note(params[:task][:synthesis_note], agent_id:)
           end
 
           if @task.update(task_update_params)
@@ -120,7 +120,7 @@ module Api
         def destroy
           task_id = @task.task_id
           @task.destroy!
-          render_success({ deleted: true, task_id: task_id })
+          render_success({ deleted: true, task_id: })
         end
 
         # POST /api/v1/flukebase_connect/projects/:project_id/wedo_tasks/bulk_sync
@@ -206,8 +206,8 @@ module Api
           task_id = task_data[:task_id]
 
           # Find existing task by external_id or task_id
-          existing = @project.wedo_tasks.find_by(external_id: external_id) if external_id.present?
-          existing ||= @project.wedo_tasks.find_by(task_id: task_id) if task_id.present?
+          existing = @project.wedo_tasks.find_by(external_id:) if external_id.present?
+          existing ||= @project.wedo_tasks.find_by(task_id:) if task_id.present?
 
           if existing
             sync_existing_task(existing, task_data, results)

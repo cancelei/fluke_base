@@ -1,6 +1,6 @@
 <% if available_branches&.any? %>
-  <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="flex items-center mb-2 lg:mb-0">
+  <div class="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="flex items-center justify-between md:justify-start mb-2 lg:mb-0">
       <label for="branch" class="mr-2 text-sm font-medium text-base-content/70">Branch:</label>
       <div class="relative">
         <details class="dropdown">
@@ -15,7 +15,7 @@
                 clip-rule="evenodd" />
             </svg>
           </summary>
-          <div class="dropdown-content absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-base-100 py-1 shadow-lg ring-1 ring-base-content ring-opacity-5">
+          <div class="dropdown-content absolute right-0 md:left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-base-100 py-1 shadow-lg ring-1 ring-base-content ring-opacity-5">
             <%= link_to "All Branches", Rails.application.routes.url_helpers.project_github_logs_path(project, branch: nil, user_name:,
               agreement_only:), class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200" %>
               <% available_branches.each do |id, branch| %>
@@ -28,19 +28,19 @@
       </div>
     </div>
 
-    <div class="flex items-center mb-2 lg:mb-0">
+    <div class="flex items-center justify-between md:justify-start mb-2 lg:mb-0">
       <a href="<%= Rails.application.routes.url_helpers.project_github_logs_path(project, branch: selected_branch, user_name:, agreement_only: agreement_only ? nil : true) %>"
-        class="flex items-center" data-turbo-frame="_top">
-        <div class="flex items-center justify-center w-full">
+        class="flex items-center w-full" data-turbo-frame="_top">
+        <div class="flex items-center justify-between md:justify-center w-full">
 
-          <label for="toggleB" class="flex items-center cursor-pointer">
+          <label for="toggleB" class="flex flex-row-reverse md:flex-row justify-between md:items-center cursor-pointer w-full">
             <!-- toggle -->
             <div class="relative">
               <!-- input -->
               <input type="checkbox" id="toggleB" class="toggle toggle-success toggle-xl" <%= "checked" if agreement_only %>>
             </div>
             <!-- label -->
-            <div class="ml-3 text-base-content/70 font-medium">
+            <div class="md:ml-3 text-base-content/70 font-medium">
               Agreement Only
             </div>
           </label>
@@ -48,7 +48,7 @@
       </a>
     </div>
 
-    <div class="flex items-center mb-2 lg:mb-0">
+    <div class="flex items-center justify-between md:justify-start mb-2 lg:mb-0">
       <label for="user_filter" class="mr-2 text-sm font-medium text-base-content/70">User:</label>
       <div class="relative">
         <details class="dropdown">
@@ -62,7 +62,7 @@
                 clip-rule="evenodd" />
             </svg>
           </summary>
-          <div class="dropdown-content absolute left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-base-100 py-1 shadow-lg ring-1 ring-base-content ring-opacity-5">
+          <div class="dropdown-content absolute right-0 md:left-0 z-10 mt-2 w-auto origin-top-left rounded-md bg-base-100 py-1 shadow-lg ring-1 ring-base-content ring-opacity-5">
             <%= link_to "All Users", Rails.application.routes.url_helpers.project_github_logs_path(project, branch: selected_branch, user_name: nil,
               agreement_only:),
               class: "block px-4 py-2 text-sm text-base-content/70 hover:bg-base-200 truncate",

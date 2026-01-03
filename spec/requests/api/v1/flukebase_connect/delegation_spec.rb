@@ -42,9 +42,9 @@ RSpec.describe 'FlukeBase Connect Delegation API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let!(:pool) { create(:container_pool, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:delegation']) }
+        let(:project) { create(:project, user:) }
+        let!(:pool) { create(:container_pool, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:delegation']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -60,8 +60,8 @@ RSpec.describe 'FlukeBase Connect Delegation API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:delegation']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:delegation']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -100,8 +100,8 @@ RSpec.describe 'FlukeBase Connect Delegation API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:delegation']) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:delegation']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:pool_config) { { warm_pool_size: 2, max_pool_size: 5 } }
@@ -140,11 +140,11 @@ RSpec.describe 'FlukeBase Connect Delegation API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let!(:pool) { create(:container_pool, project: project) }
+        let(:project) { create(:project, user:) }
+        let!(:pool) { create(:container_pool, project:) }
         let!(:session) { create(:container_session, container_pool: pool) }
-        let!(:task) { create(:wedo_task, project: project, dependency: 'AGENT_CAPABLE', status: 'pending') }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:delegation']) }
+        let!(:task) { create(:wedo_task, project:, dependency: 'AGENT_CAPABLE', status: 'pending') }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:delegation']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:claim_request) { { task_id: task.task_id, session_id: session.session_id } }
@@ -198,10 +198,10 @@ RSpec.describe 'FlukeBase Connect Delegation API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let!(:pool) { create(:container_pool, project: project) }
+        let(:project) { create(:project, user:) }
+        let!(:pool) { create(:container_pool, project:) }
         let!(:session) { create(:container_session, container_pool: pool) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:delegation']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:delegation']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:context_report) { { session_id: session.session_id, used_tokens: 50000, max_tokens: 100000 } }
@@ -242,10 +242,10 @@ RSpec.describe 'FlukeBase Connect Delegation API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let!(:pool) { create(:container_pool, project: project) }
+        let(:project) { create(:project, user:) }
+        let!(:pool) { create(:container_pool, project:) }
         let!(:old_session) { create(:container_session, container_pool: pool) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['write:delegation']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['write:delegation']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:handoff_data) do
@@ -279,9 +279,9 @@ RSpec.describe 'FlukeBase Connect Delegation API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let!(:pool) { create(:container_pool, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:delegation']) }
+        let(:project) { create(:project, user:) }
+        let!(:pool) { create(:container_pool, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:delegation']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 

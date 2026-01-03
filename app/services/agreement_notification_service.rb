@@ -28,7 +28,7 @@ class AgreementNotificationService < ApplicationService
     # Create message in conversation
     conversation = Conversation.between(@current_user.id, other_party.id)
     Message.create!(
-      conversation: conversation,
+      conversation:,
       user: @current_user,
       body: message_body
     )

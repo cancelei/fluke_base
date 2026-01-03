@@ -175,7 +175,7 @@ RSpec.describe "Complete User Journey", type: :system, js: true do
 
       expect(page).to have_content("Status: Countered")
       click_link "View Latest Counter Offer" # Click the link to go to the counter offer agreement
-      
+
       expect(page).to have_content("Counter Offer") # Ensure we are on the counter offer page
       click_button "Accept Agreement" # Accept the counter offer (which is a new agreement)
 
@@ -188,7 +188,7 @@ RSpec.describe "Complete User Journey", type: :system, js: true do
       bob = create(:user, :bob)
       charlie = create(:user, :charlie)
       project = create(:project, user: alice)
-      create(:milestone, project: project) # Ensure project has milestones
+      create(:milestone, project:) # Ensure project has milestones
 
       # Alice creates agreements with both Bob and Charlie
       sign_in alice

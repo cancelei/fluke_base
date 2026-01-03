@@ -23,7 +23,7 @@ RSpec.describe 'FlukeBase Connect Projects API', type: :request do
                required: ['projects']
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user) }
+        let(:api_token) { create(:api_token, user:) }
         let(:Authorization) { "Bearer #{api_token.token}" }
 
         run_test!
@@ -63,7 +63,7 @@ RSpec.describe 'FlukeBase Connect Projects API', type: :request do
                required: ['project']
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:projects read:projects]) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:projects read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project) { { name: 'Test Project', description: 'A test project', stage: 'prototype' } }
 
@@ -83,7 +83,7 @@ RSpec.describe 'FlukeBase Connect Projects API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:projects read:projects]) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:projects read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project) { { name: '' } }
 
@@ -110,8 +110,8 @@ RSpec.describe 'FlukeBase Connect Projects API', type: :request do
                required: ['project']
 
         let(:user) { create(:user) }
-        let(:project_record) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:projects]) }
+        let(:project_record) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:id) { project_record.id }
 
@@ -122,7 +122,7 @@ RSpec.describe 'FlukeBase Connect Projects API', type: :request do
         schema '$ref' => '#/components/schemas/error'
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:projects]) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:id) { 999_999 }
 
@@ -150,8 +150,8 @@ RSpec.describe 'FlukeBase Connect Projects API', type: :request do
                required: %w[context]
 
         let(:user) { create(:user) }
-        let(:project_record) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:projects read:context]) }
+        let(:project_record) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:projects read:context]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:id) { project_record.id }
 
@@ -181,8 +181,8 @@ RSpec.describe 'FlukeBase Connect Projects API', type: :request do
                required: ['project']
 
         let(:user) { create(:user) }
-        let(:project_record) { create(:project, user: user, repository_url: 'https://github.com/test/repo') }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:projects]) }
+        let(:project_record) { create(:project, user:, repository_url: 'https://github.com/test/repo') }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:repository_url) { 'https://github.com/test/repo' }
 
@@ -198,7 +198,7 @@ RSpec.describe 'FlukeBase Connect Projects API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:projects]) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:repository_url) { 'https://github.com/nonexistent/repo' }
 
@@ -211,7 +211,7 @@ RSpec.describe 'FlukeBase Connect Projects API', type: :request do
   describe 'GET /api/v1/flukebase_connect/batch/context' do
     it 'returns batch context for all accessible projects' do
       user = create(:user)
-      api_token = create(:api_token, user: user, scopes: %w[read:projects read:context])
+      api_token = create(:api_token, user:, scopes: %w[read:projects read:context])
 
       get '/api/v1/flukebase_connect/batch/context',
           params: { all: true },

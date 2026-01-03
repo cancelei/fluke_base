@@ -113,19 +113,19 @@ class ContainerPool < ApplicationRecord
   # API serialization
   def to_api_hash
     {
-      id: id,
-      project_id: project_id,
-      status: status,
-      warm_pool_size: warm_pool_size,
-      max_pool_size: max_pool_size,
-      context_threshold_percent: context_threshold_percent,
-      auto_delegate_enabled: auto_delegate_enabled,
-      skip_user_required: skip_user_required,
+      id:,
+      project_id:,
+      status:,
+      warm_pool_size:,
+      max_pool_size:,
+      context_threshold_percent:,
+      auto_delegate_enabled:,
+      skip_user_required:,
       active_sessions: active_session_count,
       idle_sessions: idle_session_count,
       can_spawn: can_spawn_new_session?,
       last_activity_at: last_activity_at&.iso8601,
-      config: config
+      config:
     }
   end
 

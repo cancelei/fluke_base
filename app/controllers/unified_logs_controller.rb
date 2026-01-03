@@ -97,7 +97,7 @@ class UnifiedLogsController < ApplicationController
     limit = [params[:limit].to_i, 10_000].min
     limit = 1000 if limit <= 0
 
-    FlukebaseConnect::Client.get_logs(limit: limit, filter: {
+    FlukebaseConnect::Client.get_logs(limit:, filter: {
       project_id: @project&.id,
       sandbox_id: @sandbox_id
     }.compact)

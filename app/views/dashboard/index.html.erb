@@ -31,7 +31,7 @@
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <% @explorable_projects.each do |project| %>
-            <%= render ProjectCardComponent.new(project: project, current_user: current_user, variant: :compact) %>
+            <%= render ProjectCardComponent.new(project:, current_user:, variant: :compact) %>
           <% end %>
         </div>
       </div>

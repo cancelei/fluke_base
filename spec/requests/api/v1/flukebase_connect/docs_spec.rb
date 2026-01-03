@@ -5,7 +5,7 @@ require 'swagger_helper'
 RSpec.describe 'FlukeBase Connect Docs API', type: :request do
   let(:user) { create(:user) }
   let(:raw_token) { "fbk_#{SecureRandom.urlsafe_base64(32)}" }
-  let(:api_token) { create(:api_token, user: user, raw_token: raw_token) }
+  let(:api_token) { create(:api_token, user:, raw_token:) }
 
   path '/api/v1/flukebase_connect/docs/llms.txt' do
     get 'Get llms.txt navigation file' do

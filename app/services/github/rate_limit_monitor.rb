@@ -71,8 +71,8 @@ module Github
           consumption_percent: tracker.consumption_percent,
           threshold_exceeded: tracker.threshold_exceeded?,
           approaching_threshold: tracker.approaching_threshold?,
-          hourly_calls: hourly_calls,
-          daily_calls: daily_calls,
+          hourly_calls:,
+          daily_calls:,
           limit_per_hour: status[:limit] || 5000,
           remaining: status[:remaining],
           resets_at: status[:resets_at],
@@ -187,11 +187,11 @@ module Github
 
         level = if consumption >= CRITICAL_THRESHOLD
                   :warn
-                elsif consumption >= WARNING_THRESHOLD
+        elsif consumption >= WARNING_THRESHOLD
                   :info
-                else
+        else
                   :debug
-                end
+        end
 
         Rails.logger.public_send(level, message)
       end
@@ -209,8 +209,8 @@ module Github
 
       def build_alert(level, token_hash, consumption, status)
         {
-          level: level,
-          token_hash: token_hash,
+          level:,
+          token_hash:,
           consumption: consumption.round(1),
           remaining: status[:remaining],
           limit: status[:limit],

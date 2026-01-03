@@ -70,9 +70,9 @@ module Github
       log("Enriched #{enriched_count} commits, #{remaining_count} remaining")
 
       Success({
-        enriched_count: enriched_count,
-        remaining_count: remaining_count,
-        stopped_for_rate_limit: stopped_for_rate_limit
+        enriched_count:,
+        remaining_count:,
+        stopped_for_rate_limit:
       })
     end
 
@@ -114,7 +114,7 @@ module Github
       github_log.update!(
         lines_added: stats[:additions].to_i,
         lines_removed: stats[:deletions].to_i,
-        changed_files: changed_files
+        changed_files:
       )
 
       log("Enriched commit #{github_log.commit_sha[0..7]} with stats: +#{stats[:additions]}/-#{stats[:deletions]}")

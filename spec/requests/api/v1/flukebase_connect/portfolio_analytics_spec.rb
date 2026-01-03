@@ -41,7 +41,7 @@ RSpec.describe 'FlukeBase Connect Portfolio Analytics API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:metrics']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
 
         run_test!
@@ -90,7 +90,7 @@ RSpec.describe 'FlukeBase Connect Portfolio Analytics API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:metrics']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
 
         run_test!
@@ -134,7 +134,7 @@ RSpec.describe 'FlukeBase Connect Portfolio Analytics API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:api_token) { create(:api_token, user: user, scopes: ['read:metrics']) }
+        let(:api_token) { create(:api_token, user:, scopes: ['read:metrics']) }
         let(:Authorization) { "Bearer #{api_token.token}" }
 
         run_test!

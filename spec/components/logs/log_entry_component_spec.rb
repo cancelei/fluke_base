@@ -117,7 +117,7 @@ RSpec.describe Logs::LogEntryComponent, type: :component do
           source: { type: log_type.to_s }
         }
 
-        render_inline(described_class.new(entry: entry))
+        render_inline(described_class.new(entry:))
 
         # Each type should have its border color
         border_class = Logs::LogEntryComponent::LOG_TYPE_CONFIG[log_type][:border_class]
@@ -136,7 +136,7 @@ RSpec.describe Logs::LogEntryComponent, type: :component do
       it "displays #{level} as #{display}" do
         entry = { message: "test", level: level.to_s }
 
-        render_inline(described_class.new(entry: entry))
+        render_inline(described_class.new(entry:))
 
         expect(page).to have_text(display)
       end
@@ -145,7 +145,7 @@ RSpec.describe Logs::LogEntryComponent, type: :component do
     it "applies error background for error level" do
       entry = { message: "test", level: "error" }
 
-      render_inline(described_class.new(entry: entry))
+      render_inline(described_class.new(entry:))
 
       expect(page).to have_css("[class*='bg-error']")
     end
@@ -153,7 +153,7 @@ RSpec.describe Logs::LogEntryComponent, type: :component do
     it "applies error background for fatal level" do
       entry = { message: "test", level: "fatal" }
 
-      render_inline(described_class.new(entry: entry))
+      render_inline(described_class.new(entry:))
 
       expect(page).to have_css("[class*='bg-error']")
     end
@@ -167,7 +167,7 @@ RSpec.describe Logs::LogEntryComponent, type: :component do
         timestamp: "2025-12-31T23:59:59.999Z"
       }
 
-      render_inline(described_class.new(entry: entry))
+      render_inline(described_class.new(entry:))
 
       expect(page).to have_text("23:59:59.999")
     end
@@ -179,13 +179,13 @@ RSpec.describe Logs::LogEntryComponent, type: :component do
         timestamp: "not-a-timestamp"
       }
 
-      expect { render_inline(described_class.new(entry: entry)) }.not_to raise_error
+      expect { render_inline(described_class.new(entry:)) }.not_to raise_error
     end
 
     it "handles nil timestamp" do
       entry = { message: "test", level: "info", timestamp: nil }
 
-      expect { render_inline(described_class.new(entry: entry)) }.not_to raise_error
+      expect { render_inline(described_class.new(entry:)) }.not_to raise_error
     end
   end
 end

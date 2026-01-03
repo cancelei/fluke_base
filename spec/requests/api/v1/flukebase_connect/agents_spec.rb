@@ -45,8 +45,8 @@ RSpec.describe 'FlukeBase Connect Agents API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:agents read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:agents read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
 
@@ -86,8 +86,8 @@ RSpec.describe 'FlukeBase Connect Agents API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:agents read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:agents read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:agent) { { agent_id: 'test-session-123', agent_type: 'claude_code' } }
@@ -97,9 +97,9 @@ RSpec.describe 'FlukeBase Connect Agents API', type: :request do
 
       response '200', 'Agent updated (existing)' do
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:existing_agent) { create(:agent_session, project: project, agent_id: 'existing-123') }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:agents read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:existing_agent) { create(:agent_session, project:, agent_id: 'existing-123') }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:agents read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:agent) { { agent_id: 'existing-123', persona_name: 'ZION' } }
@@ -129,9 +129,9 @@ RSpec.describe 'FlukeBase Connect Agents API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:agent_record) { create(:agent_session, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:agents read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:agent_record) { create(:agent_session, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:agents read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { agent_record.agent_id }
@@ -161,9 +161,9 @@ RSpec.describe 'FlukeBase Connect Agents API', type: :request do
 
       response '200', 'Agent updated' do
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:agent_record) { create(:agent_session, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:agents read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:agent_record) { create(:agent_session, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:agents read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { agent_record.agent_id }
@@ -189,9 +189,9 @@ RSpec.describe 'FlukeBase Connect Agents API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:agent_record) { create(:agent_session, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:agents read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:agent_record) { create(:agent_session, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:agents read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { agent_record.agent_id }
@@ -230,9 +230,9 @@ RSpec.describe 'FlukeBase Connect Agents API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:agent_record) { create(:agent_session, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:agents read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:agent_record) { create(:agent_session, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:agents read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:id) { agent_record.agent_id }
@@ -265,9 +265,9 @@ RSpec.describe 'FlukeBase Connect Agents API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:agent_record) { create(:agent_session, project: project) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[read:agents read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:agent_record) { create(:agent_session, project:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[read:agents read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:agent_id) { agent_record.agent_id }
@@ -311,8 +311,8 @@ RSpec.describe 'FlukeBase Connect Agents API', type: :request do
                }
 
         let(:user) { create(:user) }
-        let(:project) { create(:project, user: user) }
-        let(:api_token) { create(:api_token, user: user, scopes: %w[write:agents read:projects]) }
+        let(:project) { create(:project, user:) }
+        let(:api_token) { create(:api_token, user:, scopes: %w[write:agents read:projects]) }
         let(:Authorization) { "Bearer #{api_token.token}" }
         let(:project_id) { project.id }
         let(:cleanup_options) { { disconnect_stale: true } }

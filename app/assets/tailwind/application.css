@@ -1088,3 +1088,108 @@ h4, .text-xl {
 .no-scrollbar::-webkit-scrollbar {
   display: none;             /* Chrome, Safari */
 }
+
+/* ============================================
+   GitHub Diff Styling
+   ============================================ */
+
+.diff-container {
+  font-family: 'ui-monospace', 'SFMono-Regular', 'SF Mono', 'Consolas', 'Liberation Mono', 'Menlo', monospace;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  /* white-space: pre; */
+  word-wrap: break-word;
+}
+
+/* Diff line styling */
+.diff-header {
+  background-color: var(--color-snow-storm-2);
+  color: var(--color-polar-night-2);
+  padding: 0.125rem 0.5rem;
+  border-left: 3px solid var(--color-frost-3);
+  margin-bottom: 0.03125rem;
+}
+
+.diff-hunk {
+  background-color: var(--color-snow-storm-1);
+  color: var(--color-polar-night-3);
+  padding: 0.125rem 0.5rem;
+  border-left: 3px solid var(--color-frost-4);
+  margin-bottom: 0.03125rem;
+}
+
+.diff-added {
+  background-color: rgba(163, 190, 140, 0.15); /* Aurora green with opacity */
+  color: var(--color-polar-night-1);
+  padding: 0.25rem;
+  border-left: 3px solid var(--color-aurora-green);
+  margin-bottom: 0.03125rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.diff-removed {
+  background-color: rgba(191, 97, 106, 0.15); /* Aurora red with opacity */
+  color: var(--color-polar-night-1);
+  padding: 0.25rem;
+  border-left: 3px solid var(--color-aurora-red);
+  margin-bottom: 0.03125rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.diff-unchanged {
+  background-color: transparent;
+  color: var(--color-polar-night-3);
+  padding: 0.125rem 0.5rem;
+  margin-bottom: 0.03125rem;
+}
+
+.diff-neutral {
+  background-color: var(--color-snow-storm-2);
+  color: var(--color-polar-night-3);
+  padding: 0.125rem 0.5rem;
+  margin-bottom: 0.03125rem;
+}
+
+/* Mobile responsive diff styling */
+@media (max-width: 640px) {
+  .diff-container {
+    font-size: 0.625rem; /* Smaller font on mobile */
+    line-height: 1.2;
+  }
+  
+  .diff-header,
+  .diff-hunk,
+  .diff-unchanged,
+  .diff-neutral {
+    padding: 0.125rem 0.25rem; /* Less padding on mobile */
+    border-left-width: 2px; /* Thinner border on mobile */
+  }
+  
+  .diff-added,
+  .diff-removed {
+    padding: 0.25rem; /* Less padding for grouped blocks on mobile */
+    border-left-width: 2px; /* Thinner border on mobile */
+  }
+}
+
+.dropdown-content {
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #9e9e9e #9e9e9e;
+}
+
+.dropdown-content::-webkit-scrollbar {
+  width: 3px;
+}
+
+.dropdown-content::-webkit-scrollbar-track {
+  background: #9e9e9e;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+  background-color: #9e9e9e;
+  border-radius: 3px;
+}

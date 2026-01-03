@@ -262,7 +262,7 @@ class AgreementForm < ApplicationForm
     checker = AgreementDuplicateChecker.new(
       user1_id: initiator_user_id,
       user2_id: other_party_user_id,
-      project_id: project_id,
+      project_id:,
       exclude_agreement_id: (@is_update && @agreement&.persisted?) ? @agreement.id : nil
     )
 

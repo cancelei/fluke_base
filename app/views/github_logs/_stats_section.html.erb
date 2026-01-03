@@ -1,29 +1,29 @@
 <% if total_commits > 0 %>
-  <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-6">
-    <div class="stat">
+  <div class="stats bg-base-100 stats-vertical lg:stats-horizontal shadow w-full mb-6">
+    <div class="stat flex items-center justify-between">
       <div class="stat-title">Total Commits</div>
       <div class="stat-value"><%= number_with_delimiter(total_commits) %></div>
     </div>
-    <div class="stat">
+    <div class="stat flex items-center justify-between">
       <div class="stat-title">Lines Added</div>
       <div class="stat-value text-success">+<%= number_with_delimiter(total_additions) %></div>
     </div>
-    <div class="stat">
+    <div class="stat flex items-center justify-between">
       <div class="stat-title">Lines Removed</div>
       <div class="stat-value text-error">-<%= number_with_delimiter(total_deletions) %></div>
     </div>
   </div>
 <% else %>
-  <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-6">
-    <div class="stat">
+  <div class="stats bg-base-100 stats-vertical lg:stats-horizontal shadow w-full mb-6">
+    <div class="stat flex items-center justify-between">
       <div class="stat-title">Total Commits</div>
       <div class="stat-value animate-pulse">-</div>
     </div>
-    <div class="stat">
+    <div class="stat flex items-center justify-between">
       <div class="stat-title">Lines Added</div>
       <div class="stat-value text-success animate-pulse">-</div>
     </div>
-    <div class="stat">
+    <div class="stat flex items-center justify-between">
       <div class="stat-title">Lines Removed</div>
       <div class="stat-value text-error animate-pulse">-</div>
     </div>

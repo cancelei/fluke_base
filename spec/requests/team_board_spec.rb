@@ -108,7 +108,6 @@ RSpec.describe "TeamBoard", type: :request do
         expect(urgent_pos).to be < low_pos
       end
     end
-
   end
 
   describe "GET /projects/:project_id/team_board/:id" do

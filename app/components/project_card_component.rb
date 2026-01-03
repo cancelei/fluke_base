@@ -31,7 +31,7 @@ class ProjectCardComponent < ApplicationComponent
 
     # Grid variant (used in explore projects)
     def render_grid_variant
-      helpers.link_to helpers.project_path(@project), 
+      helpers.link_to helpers.project_path(@project),
                       class: "card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] group overflow-hidden h-full",
                       style: "text-decoration: none; color: inherit; display: block;",
                       data: { turbo_frame: "_top" } do
@@ -64,7 +64,7 @@ class ProjectCardComponent < ApplicationComponent
     end
 
     def grid_description
-      tag.p(presenter.display_description(@current_user, truncate: true, length: 120), 
+      tag.p(presenter.display_description(@current_user, truncate: true, length: 120),
             class: "text-sm text-base-content/60 line-clamp-3 mb-4")
     end
 
@@ -135,7 +135,7 @@ class ProjectCardComponent < ApplicationComponent
 
     def list_description
       tag.div(class: "mb-4") do
-        tag.p(presenter.display_description(@current_user, truncate: true, length: 120), 
+        tag.p(presenter.display_description(@current_user, truncate: true, length: 120),
               class: "text-sm text-base-content/70 line-clamp-2 leading-relaxed")
       end
     end
@@ -239,4 +239,4 @@ class ProjectCardComponent < ApplicationComponent
         ])
           end
         end
-      end
+end

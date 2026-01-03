@@ -61,7 +61,7 @@ class DelegationRequest < ApplicationRecord
   scope :completed, -> { where(status: "completed") }
   scope :cancelled, -> { where(status: "cancelled") }
   scope :active, -> { where(status: %w[pending approved claimed]) }
-  scope :for_task, ->(task_id) { joins(:wedo_task).where(wedo_tasks: { task_id: task_id }) }
+  scope :for_task, ->(task_id) { joins(:wedo_task).where(wedo_tasks: { task_id: }) }
 
   # =============================================================================
   # Callbacks
@@ -140,17 +140,17 @@ class DelegationRequest < ApplicationRecord
   # API serialization
   def to_api_hash
     {
-      id: id,
+      id:,
       task_id: wedo_task.task_id,
-      project_id: project_id,
-      status: status,
-      container_session_id: container_session_id,
+      project_id:,
+      status:,
+      container_session_id:,
       session_id: container_session&.session_id,
-      requested_by_session: requested_by_session,
+      requested_by_session:,
       claimed_at: claimed_at&.iso8601,
       completed_at: completed_at&.iso8601,
       created_at: created_at.iso8601,
-      metadata: metadata
+      metadata:
     }
   end
 
@@ -163,7 +163,7 @@ class DelegationRequest < ApplicationRecord
         request_id: id,
         task_id: wedo_task.task_id,
         session_id: container_session&.session_id,
-        status: status
+        status:
       },
       timestamp: Time.current.iso8601
     })

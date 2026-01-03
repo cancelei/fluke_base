@@ -4,7 +4,7 @@ require "rails_helper"
 
 RSpec.describe UnifiedLogsChannel, type: :channel do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
+  let(:project) { create(:project, user:) }
 
   before do
     stub_connection current_user: user

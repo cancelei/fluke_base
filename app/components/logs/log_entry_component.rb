@@ -111,7 +111,7 @@ module Logs
     def entry_data
       {
         log_id: @entry[:id],
-        log_type: log_type,
+        log_type:,
         log_level: level,
         timestamp: @entry[:timestamp]
       }

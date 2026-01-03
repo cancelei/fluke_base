@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  mount Rswag::Ui::Engine => '/api-docs'
-  mount Rswag::Api::Engine => '/api-docs'
+  mount Rswag::Ui::Engine => "/api-docs"
+  mount Rswag::Api::Engine => "/api-docs"
   # Ignore Cloudflare internal paths (handled by Cloudflare, not Rails)
   match "/cdn-cgi/*path", to: proc { [204, {}, [""]] }, via: :all
 

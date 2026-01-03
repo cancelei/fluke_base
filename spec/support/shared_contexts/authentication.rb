@@ -7,7 +7,7 @@ end
 
 RSpec.shared_context 'with project' do
   include_context 'authenticated user'
-  let(:project) { create(:project, user: user) }
+  let(:project) { create(:project, user:) }
 end
 
 RSpec.shared_context 'active agreement context' do
@@ -16,7 +16,7 @@ RSpec.shared_context 'active agreement context' do
   let(:project) { create(:project, user: alice) }
   let!(:agreement) do
     create(:agreement, :with_participants,
-           project: project,
+           project:,
            initiator: alice,
            other_party: bob,
            status: Agreement::ACCEPTED)

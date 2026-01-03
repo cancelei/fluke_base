@@ -12,13 +12,13 @@ module TurboStreamActions
 
   def update_milestone_data_streams(project, data)
     streams = []
-    
+
     if data[:time_logs_completed]
       streams << turbo_stream.update("completed_tasks_section",
         partial: "time_logs/completed_tasks_section",
         locals: {
           time_logs_completed: data[:time_logs_completed],
-          project: project,
+          project:,
           owner: data[:owner]
         }
       )
@@ -29,7 +29,7 @@ module TurboStreamActions
         partial: "time_logs/pending_confirmation_section",
         locals: {
           milestones_pending_confirmation: data[:milestones_pending_confirmation],
-          project: project,
+          project:,
           owner: data[:owner]
         }
       )

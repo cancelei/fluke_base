@@ -77,13 +77,13 @@ module Api
           if projects.empty?
             return render_success({
               environments: [],
-              meta: { count: 0, environment: environment }
+              meta: { count: 0, environment: }
             })
           end
 
           # Eager load environment variables for all projects
           project_ids = projects.map(&:id)
-          all_vars = EnvironmentVariable.where(project_id: project_ids, environment: environment)
+          all_vars = EnvironmentVariable.where(project_id: project_ids, environment:)
                                         .order(:project_id, :key)
                                         .group_by(&:project_id)
 
@@ -92,17 +92,17 @@ module Api
             {
               project_id: project.id,
               project_name: project.name,
-              environment: environment,
+              environment:,
               variables: vars.map { |v| serialize_variable(v) },
               variables_count: vars.count
             }
           end
 
           render_success({
-            environments: environments,
+            environments:,
             meta: {
               count: environments.count,
-              environment: environment,
+              environment:,
               total_variables: environments.sum { |e| e[:variables_count] }
             }
           })

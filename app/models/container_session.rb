@@ -181,25 +181,25 @@ class ContainerSession < ApplicationRecord
   # API serialization
   def to_api_hash
     {
-      id: id,
-      session_id: session_id,
-      container_id: container_id,
-      status: status,
+      id:,
+      session_id:,
+      container_id:,
+      status:,
       context: {
         used_tokens: context_used_tokens,
         max_tokens: context_max_tokens,
         percent: context_percent.round(2),
         last_check: last_context_check_at&.iso8601
       },
-      current_task_id: current_task_id,
-      tasks_completed: tasks_completed,
+      current_task_id:,
+      tasks_completed:,
       last_activity_at: last_activity_at&.iso8601,
-      handoff_from_id: handoff_from_id,
+      handoff_from_id:,
       can_accept_task: can_accept_task?,
       approaching_threshold: approaching_threshold?,
       at_threshold: at_threshold?,
       created_at: created_at.iso8601,
-      metadata: metadata
+      metadata:
     }
   end
 
@@ -209,8 +209,8 @@ class ContainerSession < ApplicationRecord
     TeamBoardChannel.broadcast_to(project, {
       type: "container_session.status_changed",
       data: {
-        session_id: session_id,
-        status: status,
+        session_id:,
+        status:,
         previous_status: status_before_last_save
       },
       timestamp: Time.current.iso8601

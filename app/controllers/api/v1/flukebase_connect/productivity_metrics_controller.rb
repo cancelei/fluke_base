@@ -64,12 +64,12 @@ module Api
         def summary
           period = params[:period] || "week"
           since_date = case period
-                       when "day" then 1.day.ago
-                       when "week" then 7.days.ago
-                       when "month" then 30.days.ago
-                       when "year" then 1.year.ago
-                       else 7.days.ago
-                       end
+          when "day" then 1.day.ago
+          when "week" then 7.days.ago
+          when "month" then 30.days.ago
+          when "year" then 1.year.ago
+          else 7.days.ago
+          end
 
           aggregated = AiProductivityMetric.aggregate_for_project(@project.id, since: since_date)
 

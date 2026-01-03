@@ -132,7 +132,7 @@
         <% if @suggested_gotcha.approved? || @suggested_gotcha.edited? %>
           <div class="divider"></div>
           <div class="text-sm text-base-content/60">
-            Approved by <%= @suggested_gotcha.reviewed_by&.full_name || 'Unknown' %>
+            Approved by <%= @suggested_gotcha.reviewed_by&.full_name || "Unknown" %>
             <%= time_ago_in_words(@suggested_gotcha.reviewed_at) %> ago
             <% if @suggested_gotcha.approved_memory.present? %>
               &bull;
@@ -142,7 +142,7 @@
         <% elsif @suggested_gotcha.dismissed? %>
           <div class="divider"></div>
           <div class="text-sm text-base-content/60">
-            Dismissed by <%= @suggested_gotcha.reviewed_by&.full_name || 'Unknown' %>
+            Dismissed by <%= @suggested_gotcha.reviewed_by&.full_name || "Unknown" %>
             <%= time_ago_in_words(@suggested_gotcha.reviewed_at) %> ago
           </div>
         <% end %>
