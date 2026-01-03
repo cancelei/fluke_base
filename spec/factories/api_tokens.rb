@@ -32,9 +32,25 @@ FactoryBot.define do
   factory :api_token do
     user
     name { "Test Token" }
-    sequence(:token_digest) { |n| Digest::SHA256.hexdigest("fbk_test_token_#{n}") }
-    prefix { "fbk_test" }
     scopes { ApiToken::DEFAULT_SCOPES }
+
+    transient do
+      # Generate a unique raw token for each factory instance
+      generated_raw_token { "fbk_#{SecureRandom.urlsafe_base64(32)}" }
+    end
+
+    token_digest { Digest::SHA256.hexdigest(generated_raw_token) }
+    prefix { generated_raw_token[0, 8] }
+
+    # Store the raw token so tests can use it for authentication
+    after(:build) do |api_token, evaluator|
+      api_token.instance_variable_set(:@raw_token_for_testing, evaluator.generated_raw_token)
+
+      # Define a method to access the raw token in tests
+      api_token.define_singleton_method(:token) do
+        @raw_token_for_testing
+      end
+    end
 
     trait :with_memory_scopes do
       scopes { ApiToken::DEFAULT_SCOPES + %w[read:memories write:memories] }
@@ -50,18 +66,6 @@ FactoryBot.define do
 
     trait :revoked do
       revoked_at { Time.current }
-    end
-
-    # Helper to create token with raw value for testing
-    transient do
-      raw_token { nil }
-    end
-
-    after(:build) do |api_token, evaluator|
-      if evaluator.raw_token
-        api_token.token_digest = Digest::SHA256.hexdigest(evaluator.raw_token)
-        api_token.prefix = evaluator.raw_token[0, 8]
-      end
     end
   end
 end

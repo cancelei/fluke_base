@@ -97,4 +97,14 @@ module ProjectsHelper
       output
     end
   end
+
+  # Returns the appropriate badge class for plugin maturity level
+  def badge_class_for_maturity(maturity)
+    case maturity.to_s
+    when "production" then "badge-success"
+    when "mvp" then "badge-warning"
+    when "conceptual" then "badge-neutral"
+    else "badge-ghost"
+    end
+  end
 end

@@ -16,119 +16,48 @@ RSpec.describe ProjectCardComponent, type: :component do
     it "does not render when project is nil" do
       component = described_class.new(project: nil)
 
-      expect(component.render?).to be_falsey
+      expect(component.render?).to be false
     end
   end
 
-  describe "rendering" do
-    it "renders as li element" do
-      render_inline(described_class.new(project:))
+  describe "rendering content" do
+    it "renders project name" do
+      render_inline(described_class.new(project:, current_user: user))
 
-      expect(page).to have_css("li")
+      expect(rendered_content).to include("Test Project")
     end
 
-    it "renders with group class for hover effects" do
-      render_inline(described_class.new(project:))
+    it "renders project description" do
+      render_inline(described_class.new(project:, current_user: user))
 
-      expect(page).to have_css("li.group")
+      expect(rendered_content).to include("Test description")
     end
 
-    it "renders card with gradient background" do
-      render_inline(described_class.new(project:))
+    it "renders project stage badge" do
+      render_inline(described_class.new(project:, current_user: user))
 
-      expect(page).to have_css("div.bg-gradient-to-r")
-    end
-
-    it "renders with interactive styling" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_css("div.hover\\:shadow-lg")
-      expect(page).to have_css("div.transition-all")
+      expect(rendered_content).to include(project.stage.humanize)
     end
   end
 
-  describe "project name" do
-    it "displays project name as link" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_link(href: "/projects/#{project.friendly_id}")
+  describe "variants" do
+    it "renders grid variant by default" do
+      render_inline(described_class.new(project:, current_user: user))
+      
+      expect(rendered_content).to include("View Details")
     end
 
-    it "renders name in h3 with semibold styling" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_css("h3.font-semibold")
-    end
-  end
-
-  describe "updated time" do
-    it "displays time since update" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_text(/Updated.*ago/)
+    it "renders list variant" do
+      render_inline(described_class.new(project:, current_user: user, variant: :list))
+      
+      expect(rendered_content).to include("interactive-card")
     end
 
-    it "renders clock icon" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_css("svg.h-3.w-3")
-    end
-  end
-
-  describe "description" do
-    it "renders description section" do
-      render_inline(described_class.new(project:))
-
-      # Description is rendered with DaisyUI base-content styling
-      expect(page).to have_css("p.text-sm.line-clamp-2")
-    end
-
-    it "renders description with line clamp styling" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_css("p.line-clamp-2")
-    end
-  end
-
-  describe "stats section" do
-    it "renders stats with border" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_css("div.border-t")
-    end
-
-    it "displays milestones stat" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_css("div[title='Project milestones']")
-    end
-
-    it "displays agreements stat" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_css("a[data-tip='View project agreements']")
-    end
-
-    it "pluralizes agreement count" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_text("agreement")
-    end
-  end
-
-  describe "chevron indicator" do
-    it "renders chevron that appears on hover" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_css("svg.opacity-0.group-hover\\:opacity-100")
-    end
-  end
-
-  describe "stage badge" do
-    it "renders stage badge section" do
-      render_inline(described_class.new(project:))
-
-      expect(page).to have_css("div.ml-3.flex.flex-shrink-0")
+    it "renders compact variant" do
+      render_inline(described_class.new(project:, current_user: user, variant: :compact))
+      
+      expect(rendered_content).to include("card-compact")
     end
   end
 end
+

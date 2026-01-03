@@ -4,7 +4,9 @@ module Api
   module V1
     module FlukebaseConnect
       class EnvironmentController < BaseController
-        before_action :set_project
+        include BatchProjectResolvable
+
+        before_action :set_project, except: [:batch_variables]
         before_action :require_environment_scope
 
         VALID_ENVIRONMENTS = %w[development staging production].freeze
@@ -14,7 +16,7 @@ module Api
         def show
           environment = params[:environment] || "development"
           validate_environment!(environment)
-          config = @project.environment_configs.find_by(environment: environment)
+          config = @project.environment_configs.find_by(environment:)
 
           render_success({
             environment: {
@@ -23,7 +25,7 @@ module Api
               last_synced_at: config&.last_synced_at&.iso8601,
               sync_count: config&.sync_count || 0,
               variables_count: @project.environment_variables
-                                       .where(environment: environment)
+                                       .where(environment:)
                                        .count
             }
           })
@@ -37,13 +39,13 @@ module Api
           validate_environment!(environment)
 
           vars = @project.environment_variables
-                         .where(environment: environment)
+                         .where(environment:)
                          .order(:key)
 
           render_success({
             variables: vars.map { |v| serialize_variable(v) },
             meta: {
-              environment: environment,
+              environment:,
               count: vars.count
             }
           })
@@ -58,8 +60,51 @@ module Api
 
           render_success({
             synced: true,
-            environment: environment,
+            environment:,
             synced_at: Time.current.iso8601
+          })
+        end
+
+        # GET /api/v1/flukebase_connect/batch/environment
+        # Get environment variables for multiple projects at once
+        # Params: project_ids (array) or all=true, environment (default: development)
+        def batch_variables
+          environment = params[:environment] || "development"
+          validate_environment!(environment)
+
+          projects = resolve_batch_projects
+
+          if projects.empty?
+            return render_success({
+              environments: [],
+              meta: { count: 0, environment: environment }
+            })
+          end
+
+          # Eager load environment variables for all projects
+          project_ids = projects.map(&:id)
+          all_vars = EnvironmentVariable.where(project_id: project_ids, environment: environment)
+                                        .order(:project_id, :key)
+                                        .group_by(&:project_id)
+
+          environments = projects.map do |project|
+            vars = all_vars[project.id] || []
+            {
+              project_id: project.id,
+              project_name: project.name,
+              environment: environment,
+              variables: vars.map { |v| serialize_variable(v) },
+              variables_count: vars.count
+            }
+          end
+
+          render_success({
+            environments: environments,
+            meta: {
+              count: environments.count,
+              environment: environment,
+              total_variables: environments.sum { |e| e[:variables_count] }
+            }
           })
         end
 
@@ -102,7 +147,7 @@ module Api
 
         def track_sync(environment)
           config = @project.environment_configs
-                           .find_or_create_by!(environment: environment)
+                           .find_or_create_by!(environment:)
 
           config.record_sync!
         end

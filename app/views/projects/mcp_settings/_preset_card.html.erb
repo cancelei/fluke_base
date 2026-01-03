@@ -1,0 +1,40 @@
+<%# locals: (preset:, selected:) %>
+<div class="card bg-base-200 <%= "ring-2 ring-primary" if selected %>">
+  <div class="card-body p-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <%= heroicon preset.role_icon, variant: :outline, class: "w-5 h-5" %>
+        <h3 class="font-semibold"><%= preset.name %></h3>
+      </div>
+      <% if selected %>
+        <span class="badge badge-primary badge-sm">Active</span>
+      <% end %>
+    </div>
+
+    <p class="text-sm text-base-content/70 mt-2">
+      <%= preset.description %>
+    </p>
+
+    <div class="mt-3 space-y-1">
+      <div class="text-xs text-base-content/60">
+        <strong>Plugins:</strong>
+        <% (preset.enabled_plugins || []).each do |plugin_slug| %>
+          <span class="badge badge-ghost badge-xs"><%= plugin_slug %></span>
+        <% end %>
+      </div>
+      <div class="text-xs text-base-content/60">
+        <strong>Context:</strong>
+        <%= (preset.context_level || {})["max_context_tokens"] || 2000 %> tokens
+      </div>
+    </div>
+
+    <div class="card-actions justify-end mt-3">
+      <% unless selected %>
+        <%= button_to "Apply",
+            apply_preset_project_mcp_settings_path(@project, preset: preset.slug),
+            method: :post,
+            class: "btn btn-sm btn-outline btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+</div>

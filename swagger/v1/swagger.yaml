@@ -1,0 +1,3207 @@
+---
+openapi: 3.0.1
+info:
+  title: FlukeBase Connect API
+  version: v1
+  description: API for flukebase_connect MCP server integration. Provides authentication,
+    project management, environment variables, memories, and AI productivity metrics.
+  contact:
+    name: FlukeBase Support
+    email: support@flukebase.com
+paths:
+  "/api/v1/flukebase_connect/projects/{project_id}/agents":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List agent sessions
+      tags:
+      - Agents
+      description: Returns all agent sessions for multi-agent coordination on the
+        Team Board.
+      operationId: listAgents
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: status
+        in: query
+        required: false
+        enum:
+        - active
+        - idle
+        - disconnected
+        description: "Filter by status:\n * `active` \n * `idle` \n * `disconnected`
+          \n "
+        schema:
+          type: string
+      - name: agent_type
+        in: query
+        required: false
+        description: Filter by agent type (e.g., claude_code)
+        schema:
+          type: string
+      - name: connected_only
+        in: query
+        required: false
+        description: Only return active/idle agents
+        schema:
+          type: boolean
+      - name: with_persona
+        in: query
+        required: false
+        description: Only return named personas (ZION, KORE, etc.)
+        schema:
+          type: boolean
+      - name: refresh_status
+        in: query
+        required: false
+        description: Mark stale agents as idle before returning
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Agents retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/agent_session"
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      active_count:
+                        type: integer
+                      connected_count:
+                        type: integer
+  "/api/v1/flukebase_connect/projects/{project_id}/agents/register":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Register agent session
+      tags:
+      - Agents
+      description: Registers or updates an agent session for multi-agent coordination.
+      operationId: registerAgent
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Agent registered (new)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent:
+                    "$ref": "#/components/schemas/agent_session"
+        '200':
+          description: Agent updated (existing)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agent_id:
+                  type: string
+                  example: session-abc123
+                persona_name:
+                  type: string
+                  example: ZION
+                  nullable: true
+                agent_type:
+                  type: string
+                  example: claude_code
+                capabilities:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                  - memory
+                  - wedo
+                client_version:
+                  type: string
+                  example: 1.2.3
+                metadata:
+                  type: object
+              required:
+              - agent_id
+  "/api/v1/flukebase_connect/projects/{project_id}/agents/{id}":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    - name: id
+      in: path
+      description: Agent ID or database ID
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get agent session
+      tags:
+      - Agents
+      description: Returns detailed information about an agent session.
+      operationId: getAgent
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Agent retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent:
+                    "$ref": "#/components/schemas/agent_session"
+    put:
+      summary: Update agent session
+      tags:
+      - Agents
+      description: Updates agent session metadata.
+      operationId: updateAgent
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Agent updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                persona_name:
+                  type: string
+                agent_type:
+                  type: string
+                status:
+                  type: string
+                  enum:
+                  - active
+                  - idle
+                  - disconnected
+                capabilities:
+                  type: array
+                  items:
+                    type: string
+                metadata:
+                  type: object
+    delete:
+      summary: Disconnect agent
+      tags:
+      - Agents
+      description: Disconnects an agent session. Use hard_delete=true to permanently
+        remove.
+      operationId: disconnectAgent
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: hard_delete
+        in: query
+        required: false
+        description: Permanently delete instead of marking disconnected
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Agent disconnected
+  "/api/v1/flukebase_connect/projects/{project_id}/agents/{id}/heartbeat":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    - name: id
+      in: path
+      description: Agent ID
+      required: true
+      schema:
+        type: string
+    post:
+      summary: Send heartbeat
+      tags:
+      - Agents
+      description: Updates agent heartbeat to indicate the session is still active.
+      operationId: agentHeartbeat
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Heartbeat recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent:
+                    "$ref": "#/components/schemas/agent_session"
+                  server_time:
+                    type: string
+                    format: date-time
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tokens_used:
+                  type: integer
+                  description: Tokens used since last heartbeat
+                tools_executed:
+                  type: integer
+                  description: Tools executed since last heartbeat
+                metadata:
+                  type: object
+  "/api/v1/flukebase_connect/projects/{project_id}/agents/whoami":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get current agent
+      tags:
+      - Agents
+      description: Returns the agent session for the current X-Agent-ID header or
+        agent_id parameter.
+      operationId: agentWhoami
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: X-Agent-ID
+        in: header
+        required: false
+        description: Agent ID header
+        schema:
+          type: string
+      - name: agent_id
+        in: query
+        required: false
+        description: Agent ID parameter (alternative to header)
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Agent found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent:
+                    "$ref": "#/components/schemas/agent_session"
+  "/api/v1/flukebase_connect/projects/{project_id}/agents/cleanup":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Cleanup stale sessions
+      tags:
+      - Agents
+      description: Marks stale agents as idle and optionally disconnects/deletes old
+        sessions.
+      operationId: cleanupAgents
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Cleanup completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cleanup_results:
+                    type: object
+                    properties:
+                      marked_idle:
+                        type: integer
+                      disconnected:
+                        type: integer
+                      deleted:
+                        type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                disconnect_stale:
+                  type: boolean
+                  description: Disconnect long-idle sessions
+                delete_disconnected:
+                  type: boolean
+                  description: Hard delete old disconnected sessions
+                older_than_hours:
+                  type: integer
+                  description: 'Age threshold for deletion (default: 24)'
+  "/api/v1/flukebase_connect/projects/{project_id}/ai_conversations":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List AI conversation logs
+      tags:
+      - AI Conversations
+      description: Returns AI conversation logs for the Unified Logs dashboard.
+      operationId: listAiConversations
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: provider
+        in: query
+        required: false
+        description: Filter by AI provider (claude, openai, etc.)
+        schema:
+          type: string
+      - name: session_id
+        in: query
+        required: false
+        description: Filter by session ID
+        schema:
+          type: string
+      - name: role
+        in: query
+        required: false
+        enum:
+        - user
+        - assistant
+        - system
+        - tool
+        description: "Filter by message role:\n * `user` \n * `assistant` \n * `system`
+          \n * `tool` \n "
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        description: 'Maximum results (default: 100)'
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/ai_conversation_log"
+                  count:
+                    type: integer
+                  project_id:
+                    type: integer
+  "/api/v1/flukebase_connect/projects/{project_id}/ai_conversations/{id}":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    - name: id
+      in: path
+      description: Log ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get conversation log details
+      tags:
+      - AI Conversations
+      description: Returns detailed information about a specific AI conversation log
+        entry.
+      operationId: getAiConversation
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Log retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  log:
+                    "$ref": "#/components/schemas/ai_conversation_log"
+  "/api/v1/flukebase_connect/projects/{project_id}/ai_conversations/bulk_sync":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Bulk sync AI conversation logs
+      tags:
+      - AI Conversations
+      - Sync
+      description: Synchronizes AI conversation logs from flukebase_connect. Broadcasts
+        to UnifiedLogsChannel for real-time updates.
+      operationId: bulkSyncAiConversations
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  synced:
+                    type: integer
+                  created:
+                    type: integer
+                  updated:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: integer
+                        external_id:
+                          type: string
+                        error:
+                          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      external_id:
+                        type: string
+                        description: Unique identifier from client
+                      provider:
+                        type: string
+                        example: claude
+                      model:
+                        type: string
+                        example: claude-3-opus
+                      session_id:
+                        type: string
+                      message_index:
+                        type: integer
+                      role:
+                        type: string
+                        enum:
+                        - user
+                        - assistant
+                        - system
+                        - tool
+                      content:
+                        type: string
+                      input_tokens:
+                        type: integer
+                        nullable: true
+                      output_tokens:
+                        type: integer
+                        nullable: true
+                      duration_ms:
+                        type: integer
+                        nullable: true
+                      metadata:
+                        type: object
+                      exchanged_at:
+                        type: string
+                        format: date-time
+                    required:
+                    - provider
+                    - role
+                    - content
+                broadcast:
+                  type: boolean
+                  default: true
+                  description: Broadcast to UnifiedLogsChannel
+              required:
+              - logs
+  "/api/v1/flukebase_connect/auth/validate":
+    get:
+      summary: Validate API token
+      tags:
+      - Authentication
+      description: Validates the provided API token and returns authentication status.
+        Used by flukebase_connect to verify token validity before making API calls.
+      operationId: validateToken
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                    example: true
+                  user_id:
+                    type: integer
+                    example: 1
+                  scopes:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                    - read:projects
+                    - write:projects
+                    - read:memories
+                required:
+                - valid
+                - user_id
+                - scopes
+        '401':
+          description: Invalid or missing token
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/error"
+  "/api/v1/flukebase_connect/auth/me":
+    get:
+      summary: Get current user info
+      tags:
+      - Authentication
+      description: Returns information about the authenticated user based on the API
+        token. Includes user details and accessible projects.
+      operationId: getCurrentUser
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: User information retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  email:
+                    type: string
+                    format: email
+                  name:
+                    type: string
+                  projects:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/project"
+                required:
+                - id
+                - email
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/error"
+  "/api/v1/flukebase_connect/projects/{project_id}/delegation/status":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get delegation status
+      tags:
+      - Delegation
+      description: Returns container pool status, active sessions, and pending delegable
+        tasks.
+      operationId: getDelegationStatus
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pool:
+                    "$ref": "#/components/schemas/container_pool"
+                  sessions:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/container_session"
+                  pending_tasks:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/wedo_task"
+                  active_delegations:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/delegation_request"
+                  stats:
+                    type: object
+                    properties:
+                      total_tasks:
+                        type: integer
+                      agent_capable_tasks:
+                        type: integer
+                      pending_delegable:
+                        type: integer
+                      active_sessions:
+                        type: integer
+                      idle_sessions:
+                        type: integer
+        '404':
+          description: No pool configured
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: no_pool
+                  message:
+                    type: string
+                  create_pool_url:
+                    type: string
+  "/api/v1/flukebase_connect/projects/{project_id}/delegation/pool":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Create or update container pool
+      tags:
+      - Delegation
+      description: Configures the container pool for smart delegation.
+      operationId: createDelegationPool
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Pool configured
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pool:
+                    "$ref": "#/components/schemas/container_pool"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                warm_pool_size:
+                  type: integer
+                  description: Number of warm containers to maintain
+                max_pool_size:
+                  type: integer
+                  description: Maximum containers allowed
+                context_threshold_percent:
+                  type: integer
+                  description: Context % that triggers handoff
+                auto_delegate_enabled:
+                  type: boolean
+                  description: Enable automatic task delegation
+                skip_user_required:
+                  type: boolean
+                  description: Skip tasks requiring user input
+                config:
+                  type: object
+                  description: Additional configuration
+  "/api/v1/flukebase_connect/projects/{project_id}/delegation/claim":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Claim task for execution
+      tags:
+      - Delegation
+      description: Atomically claims a task for a container session to prevent double-delegation.
+      operationId: claimTask
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Task claimed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  claimed:
+                    type: boolean
+                  task:
+                    "$ref": "#/components/schemas/wedo_task"
+                  delegation:
+                    "$ref": "#/components/schemas/delegation_request"
+        '409':
+          description: Task already claimed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: already_claimed
+                  message:
+                    type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                task_id:
+                  type: string
+                  description: WeDo task ID to claim
+                session_id:
+                  type: string
+                  description: Container session ID
+              required:
+              - task_id
+              - session_id
+  "/api/v1/flukebase_connect/projects/{project_id}/delegation/report_context":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Report context usage
+      tags:
+      - Delegation
+      description: Reports context window usage and gets recommendations for handoff.
+      operationId: reportContext
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Context reported
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: boolean
+                  session:
+                    "$ref": "#/components/schemas/container_session"
+                  action:
+                    type: string
+                    enum:
+                    - continue
+                    - handoff_recommended
+                    - handoff_required
+                  reason:
+                    type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                used_tokens:
+                  type: integer
+                max_tokens:
+                  type: integer
+              required:
+              - session_id
+              - used_tokens
+              - max_tokens
+  "/api/v1/flukebase_connect/projects/{project_id}/delegation/handoff":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Record session handoff
+      tags:
+      - Delegation
+      description: Records a handoff from one session to another when context is full.
+      operationId: recordHandoff
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Handoff recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  handoff:
+                    type: boolean
+                  old_session:
+                    "$ref": "#/components/schemas/container_session"
+                  new_session:
+                    "$ref": "#/components/schemas/container_session"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                old_session_id:
+                  type: string
+                new_session_id:
+                  type: string
+                container_id:
+                  type: string
+                summary:
+                  type: string
+                  description: Handoff summary for context
+              required:
+              - old_session_id
+              - new_session_id
+  "/api/v1/flukebase_connect/projects/{project_id}/delegation/next_task":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get next delegable task
+      tags:
+      - Delegation
+      description: Returns the next AGENT_CAPABLE pending task that is not yet claimed.
+      operationId: getNextTask
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Task found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task:
+                    "$ref": "#/components/schemas/wedo_task"
+                    nullable: true
+                  message:
+                    type: string
+                    nullable: true
+  "/api/v1/flukebase_connect/docs/llms.txt":
+    get:
+      summary: Get llms.txt navigation file
+      tags:
+      - Documentation
+      description: Returns AI-friendly documentation navigation following the llms.txt
+        specification. Provides links to key documentation sections optimized for
+        LLM context windows.
+      operationId: getLlmsTxt
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Navigation file retrieved
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Markdown-formatted navigation file following llms.txt
+                  spec
+        '401':
+          description: Unauthorized - missing or invalid token
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/error"
+  "/api/v1/flukebase_connect/docs/llms-full.txt":
+    get:
+      summary: Get llms-full.txt complete documentation
+      tags:
+      - Documentation
+      description: Returns comprehensive AI-friendly documentation in a single file.
+        Includes complete API reference, MCP tools mapping, commands, and domain models.
+      operationId: getLlmsFullTxt
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Full documentation retrieved
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Complete markdown documentation optimized for LLM consumption
+        '401':
+          description: Unauthorized - missing or invalid token
+          content:
+            text/plain:
+              schema:
+                "$ref": "#/components/schemas/error"
+  "/api/v1/flukebase_connect/projects/{project_id}/environment":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get environment configuration
+      tags:
+      - Environment
+      description: Returns environment configuration metadata for a project.
+      operationId: getEnvironmentConfig
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: environment
+        in: query
+        required: false
+        enum:
+        - development
+        - staging
+        - production
+        description: "Environment name (default: development):\n * `development` \n
+          * `staging` \n * `production` \n "
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Environment config retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  environment:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: development
+                      description:
+                        type: string
+                        nullable: true
+                      last_synced_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      sync_count:
+                        type: integer
+                      variables_count:
+                        type: integer
+  "/api/v1/flukebase_connect/projects/{project_id}/environment/variables":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get environment variables
+      tags:
+      - Environment
+      description: Returns all environment variables for a project. Used by flukebase_connect
+        to sync .env files.
+      operationId: getEnvironmentVariables
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: environment
+        in: query
+        required: false
+        enum:
+        - development
+        - staging
+        - production
+        description: "Environment name (default: development):\n * `development` \n
+          * `staging` \n * `production` \n "
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Variables retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  variables:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/environment_variable"
+                  meta:
+                    type: object
+                    properties:
+                      environment:
+                        type: string
+                      count:
+                        type: integer
+  "/api/v1/flukebase_connect/projects/{project_id}/environment/sync":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Record environment sync
+      tags:
+      - Environment
+      description: Records that a sync occurred for analytics tracking.
+      operationId: recordEnvironmentSync
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Sync recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  synced:
+                    type: boolean
+                  environment:
+                    type: string
+                  synced_at:
+                    type: string
+                    format: date-time
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                environment:
+                  type: string
+                  enum:
+                  - development
+                  - staging
+                  - production
+  "/api/v1/flukebase_connect/batch/environment":
+    get:
+      summary: Get environment variables for multiple projects
+      tags:
+      - Environment
+      - Batch Operations
+      description: Returns environment variables for multiple projects in a single
+        request. Part of MPSYNC milestone.
+      operationId: batchEnvironment
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: project_ids
+        in: query
+        items:
+          type: integer
+        description: Array of project IDs
+        schema:
+          type: array
+      - name: all
+        in: query
+        required: false
+        description: If true, returns for all accessible projects
+        schema:
+          type: boolean
+      - name: environment
+        in: query
+        required: false
+        enum:
+        - development
+        - staging
+        - production
+        description: "Environment name (default: development):\n * `development` \n
+          * `staging` \n * `production` \n "
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Batch environment retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  environments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        project_id:
+                          type: integer
+                        project_name:
+                          type: string
+                        environment:
+                          type: string
+                        variables:
+                          type: array
+                          items:
+                            "$ref": "#/components/schemas/environment_variable"
+                        variables_count:
+                          type: integer
+                  meta:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                      environment:
+                        type: string
+                      total_variables:
+                        type: integer
+  "/api/v1/flukebase_connect/projects/{project_id}/memories":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List project memories
+      tags:
+      - Memories
+      description: Returns all memories (facts, conventions, gotchas, decisions) for
+        a project.
+      operationId: listMemories
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: type
+        in: query
+        required: false
+        enum:
+        - fact
+        - convention
+        - gotcha
+        - decision
+        description: "Filter by memory type:\n * `fact` \n * `convention` \n * `gotcha`
+          \n * `decision` \n "
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Memories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  memories:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/memory"
+                required:
+                - memories
+    post:
+      summary: Create a memory
+      tags:
+      - Memories
+      description: Creates a new memory for the project.
+      operationId: createMemory
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Memory created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/memory"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  example: Always use snake_case for Ruby methods
+                memory_type:
+                  type: string
+                  enum:
+                  - fact
+                  - convention
+                  - gotcha
+                  - decision
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                  - ruby
+                  - style
+              required:
+              - content
+              - memory_type
+  "/api/v1/flukebase_connect/projects/{project_id}/memories/bulk_sync":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Bulk sync memories
+      tags:
+      - Memories
+      - Sync
+      description: Synchronizes multiple memories in a single request for bi-directional
+        sync.
+      operationId: bulkSyncMemories
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: integer
+                  updated:
+                    type: integer
+                  deleted:
+                    type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                memories:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      local_id:
+                        type: string
+                      remote_id:
+                        type: integer
+                        nullable: true
+                      content:
+                        type: string
+                      memory_type:
+                        type: string
+                        enum:
+                        - fact
+                        - convention
+                        - gotcha
+                        - decision
+                      deleted:
+                        type: boolean
+                    required:
+                    - local_id
+                    - content
+                    - memory_type
+              required:
+              - memories
+  "/api/v1/flukebase_connect/memories/search":
+    get:
+      summary: Search memories across projects
+      tags:
+      - Memories
+      - Search
+      description: Searches memories across all accessible projects.
+      operationId: searchMemories
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: query
+        in: query
+        required: true
+        description: Search query string
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        description: Maximum number of results
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  memories:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/memory"
+                  total_count:
+                    type: integer
+  "/api/v1/flukebase_connect/portfolio/summary":
+    get:
+      summary: Get portfolio productivity summary
+      tags:
+      - Portfolio Analytics
+      description: Returns aggregated productivity metrics across all accessible projects.
+      operationId: getPortfolioSummary
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: period
+        in: query
+        required: false
+        description: 'Period in days (default: 30, max: 365)'
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Summary retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  portfolio:
+                    type: object
+                    properties:
+                      projects_count:
+                        type: integer
+                      total_time_saved_hours:
+                        type: number
+                      total_tasks_completed:
+                        type: integer
+                      total_tokens_used:
+                        type: integer
+                      total_sessions:
+                        type: integer
+                      estimated_cost_usd:
+                        type: number
+                      active_projects:
+                        type: integer
+                      top_project:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                          time_saved_hours:
+                            type: number
+                  generated_at:
+                    type: string
+                    format: date-time
+  "/api/v1/flukebase_connect/portfolio/compare":
+    get:
+      summary: Compare projects by productivity
+      tags:
+      - Portfolio Analytics
+      description: Returns a ranked list of projects by productivity metrics for comparison.
+      operationId: compareProjects
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: period
+        in: query
+        required: false
+        description: 'Period in days (default: 30)'
+        schema:
+          type: integer
+      - name: sort_by
+        in: query
+        required: false
+        enum:
+        - time_saved
+        - tasks_completed
+        - tokens_used
+        - sessions_count
+        - cost
+        description: "Sort metric (default: time_saved):\n * `time_saved` \n * `tasks_completed`
+          \n * `tokens_used` \n * `sessions_count` \n * `cost` \n "
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        description: 'Maximum projects to return (default: 10, max: 50)'
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Comparison retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        rank:
+                          type: integer
+                        time_saved_hours:
+                          type: number
+                        tasks_completed:
+                          type: integer
+                        tokens_used:
+                          type: integer
+                        sessions_count:
+                          type: integer
+                        estimated_cost_usd:
+                          type: number
+                        efficiency_score:
+                          type: number
+                  sort_by:
+                    type: string
+                  period_days:
+                    type: integer
+  "/api/v1/flukebase_connect/portfolio/trends":
+    get:
+      summary: Get productivity trends
+      tags:
+      - Portfolio Analytics
+      description: Returns time-series productivity data for trend analysis.
+      operationId: getPortfolioTrends
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: period
+        in: query
+        required: false
+        description: 'Period in days (default: 30, min: 7)'
+        schema:
+          type: integer
+      - name: granularity
+        in: query
+        required: false
+        enum:
+        - daily
+        - weekly
+        description: "Data point granularity (default: daily):\n * `daily` \n * `weekly`
+          \n "
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Trends retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trends:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        time_saved_hours:
+                          type: number
+                        tasks_completed:
+                          type: integer
+                        tokens_used:
+                          type: integer
+                        sessions_count:
+                          type: integer
+                        active_projects:
+                          type: integer
+                  granularity:
+                    type: string
+                  period_days:
+                    type: integer
+  "/api/v1/flukebase_connect/projects/{project_id}/productivity_metrics":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List productivity metrics
+      tags:
+      - Productivity Metrics
+      description: Returns AI productivity metrics synced from flukebase_connect sessions.
+      operationId: listProductivityMetrics
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: type
+        in: query
+        required: false
+        enum:
+        - time_saved
+        - code_contribution
+        - task_velocity
+        - token_efficiency
+        description: "Filter by metric type:\n * `time_saved` \n * `code_contribution`
+          \n * `task_velocity` \n * `token_efficiency` \n "
+        schema:
+          type: string
+      - name: period_type
+        in: query
+        required: false
+        enum:
+        - session
+        - daily
+        - weekly
+        - monthly
+        description: Filter by period type
+        schema:
+          type: string
+      - name: since
+        in: query
+        format: date-time
+        required: false
+        description: Only return metrics after this timestamp
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        description: 'Items per page (max: 100)'
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Metrics retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metrics:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/productivity_metric"
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      pages:
+                        type: integer
+    post:
+      summary: Create productivity metric
+      tags:
+      - Productivity Metrics
+      description: Creates a new productivity metric record from a flukebase_connect
+        session.
+      operationId: createProductivityMetric
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Metric created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/productivity_metric"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metric_type:
+                  type: string
+                  enum:
+                  - time_saved
+                  - code_contribution
+                  - task_velocity
+                  - token_efficiency
+                period_type:
+                  type: string
+                  enum:
+                  - session
+                  - daily
+                  - weekly
+                  - monthly
+                period_start:
+                  type: string
+                  format: date-time
+                period_end:
+                  type: string
+                  format: date-time
+                external_id:
+                  type: string
+                  description: Client-side unique identifier
+                metric_data:
+                  type: object
+                  description: Type-specific metric data
+                  example:
+                    ai_time_ms: 5000
+                    estimated_human_time_ms: 30000
+                    efficiency_ratio: 6.0
+              required:
+              - metric_type
+              - period_type
+              - metric_data
+  "/api/v1/flukebase_connect/projects/{project_id}/productivity_metrics/{id}":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    - name: id
+      in: path
+      description: Metric ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get metric details
+      tags:
+      - Productivity Metrics
+      description: Returns detailed information about a specific productivity metric.
+      operationId: getProductivityMetric
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Metric retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  metric:
+                    "$ref": "#/components/schemas/productivity_metric"
+  "/api/v1/flukebase_connect/projects/{project_id}/productivity_metrics/summary":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get productivity summary
+      tags:
+      - Productivity Metrics
+      description: Returns aggregated productivity summary for the dashboard.
+      operationId: getProductivitySummary
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: period
+        in: query
+        required: false
+        enum:
+        - day
+        - week
+        - month
+        - year
+        description: "Summary period (default: week):\n * `day` \n * `week` \n * `month`
+          \n * `year` \n "
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Summary retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      total_time_saved_ms:
+                        type: integer
+                      total_tasks_completed:
+                        type: integer
+                      total_tokens_used:
+                        type: integer
+                      session_count:
+                        type: integer
+                  stats:
+                    type: object
+                    nullable: true
+                    description: Materialized view stats if available
+                  period:
+                    type: string
+                  since:
+                    type: string
+                    format: date-time
+  "/api/v1/flukebase_connect/projects/{project_id}/productivity_metrics/bulk_sync":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Bulk sync productivity metrics
+      tags:
+      - Productivity Metrics
+      - Sync
+      description: Synchronizes multiple productivity metrics in a single request
+        for efficient batch updates.
+      operationId: bulkSyncProductivityMetrics
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sync_results:
+                    type: object
+                    properties:
+                      created:
+                        type: array
+                        items:
+                          "$ref": "#/components/schemas/productivity_metric"
+                      updated:
+                        type: array
+                        items:
+                          "$ref": "#/components/schemas/productivity_metric"
+                      errors:
+                        type: array
+                        items:
+                          type: object
+                  summary:
+                    type: object
+                    properties:
+                      created:
+                        type: integer
+                      updated:
+                        type: integer
+                      errors:
+                        type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metrics:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      external_id:
+                        type: string
+                        description: Required for sync
+                      metric_type:
+                        type: string
+                      period_type:
+                        type: string
+                      period_start:
+                        type: string
+                        format: date-time
+                      period_end:
+                        type: string
+                        format: date-time
+                      metric_data:
+                        type: object
+                    required:
+                    - external_id
+              required:
+              - metrics
+  "/api/v1/flukebase_connect/projects":
+    get:
+      summary: List accessible projects
+      tags:
+      - Projects
+      description: Returns all projects the authenticated user has access to. Includes
+        projects the user owns and projects they collaborate on.
+      operationId: listProjects
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Projects retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/project"
+                required:
+                - projects
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/error"
+    post:
+      summary: Create a new project
+      tags:
+      - Projects
+      description: Creates a new project for the authenticated user.
+      operationId: createProject
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Project created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/project"
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: My New Project
+                description:
+                  type: string
+                  example: A description of the project
+                repository_url:
+                  type: string
+                  example: https://github.com/user/repo
+                stage:
+                  type: string
+                  enum:
+                  - idea
+                  - prototype
+                  - mvp
+                  - growth
+                  - mature
+                  example: prototype
+              required:
+              - name
+  "/api/v1/flukebase_connect/projects/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get project details
+      tags:
+      - Projects
+      description: Returns detailed information about a specific project.
+      operationId: getProject
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Project retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/project"
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/error"
+  "/api/v1/flukebase_connect/projects/{id}/context":
+    parameters:
+    - name: id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get project context for AI agent
+      tags:
+      - Projects
+      description: Returns the project context including conventions, gotchas, and
+        recent decisions. This endpoint is used by flukebase_connect to provide context
+        to AI agents.
+      operationId: getProjectContext
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Context retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  project:
+                    "$ref": "#/components/schemas/project"
+                  conventions:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/memory"
+                  gotchas:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/memory"
+                  recent_decisions:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/memory"
+                required:
+                - project
+                - conventions
+                - gotchas
+                - recent_decisions
+  "/api/v1/flukebase_connect/projects/find":
+    get:
+      summary: Find project by repository URL
+      tags:
+      - Projects
+      description: Looks up a project by its Git repository URL. Used by flukebase_connect
+        to auto-detect the project based on the current working directory.
+      operationId: findProjectByRepository
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: repository_url
+        in: query
+        description: Git repository URL to search for
+        example: https://github.com/user/repo
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Project found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/project"
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/error"
+  "/api/v1/flukebase_connect/batch/context":
+    get:
+      summary: Get context for multiple projects
+      tags:
+      - Projects
+      - Batch Operations
+      description: Returns context for multiple projects in a single request. Part
+        of the Multi-Project Sync (MPSYNC) milestone for efficient cross-project operations.
+      operationId: batchContext
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: project_ids
+        in: query
+        items:
+          type: integer
+        description: Array of project IDs to fetch context for
+        example:
+        - 1
+        - 2
+        - 3
+        schema:
+          type: array
+      - name: all
+        in: query
+        description: If true, returns context for all accessible projects
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Batch context retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        project:
+                          "$ref": "#/components/schemas/project"
+                        conventions:
+                          type: array
+                          items:
+                            "$ref": "#/components/schemas/memory"
+                        gotchas:
+                          type: array
+                          items:
+                            "$ref": "#/components/schemas/memory"
+  "/api/v1/flukebase_connect/projects/{project_id}/webhooks":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List webhook subscriptions
+      tags:
+      - Webhooks
+      description: Returns all webhook subscriptions for a project.
+      operationId: listWebhooks
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Webhooks retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhooks:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/webhook"
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      active:
+                        type: integer
+    post:
+      summary: Create webhook subscription
+      tags:
+      - Webhooks
+      description: Creates a new webhook subscription for receiving real-time notifications.
+      operationId: createWebhook
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Webhook created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/webhook"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                callback_url:
+                  type: string
+                  format: uri
+                  example: https://example.com/webhook
+                events:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                  - env.updated
+                  - memory.created
+                active:
+                  type: boolean
+                  default: true
+              required:
+              - callback_url
+              - events
+  "/api/v1/flukebase_connect/projects/{project_id}/webhooks/{id}":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    - name: id
+      in: path
+      description: Webhook ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get webhook details
+      tags:
+      - Webhooks
+      description: Returns detailed information about a webhook subscription including
+        secret.
+      operationId: getWebhook
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Webhook retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhook:
+                    "$ref": "#/components/schemas/webhook"
+    put:
+      summary: Update webhook
+      tags:
+      - Webhooks
+      description: Updates a webhook subscription.
+      operationId: updateWebhook
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Webhook updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/webhook"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                callback_url:
+                  type: string
+                  format: uri
+                events:
+                  type: array
+                  items:
+                    type: string
+                active:
+                  type: boolean
+    delete:
+      summary: Delete webhook
+      tags:
+      - Webhooks
+      description: Deletes a webhook subscription.
+      operationId: deleteWebhook
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Webhook deleted
+  "/api/v1/flukebase_connect/projects/{project_id}/webhooks/{id}/deliveries":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    - name: id
+      in: path
+      description: Webhook ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get webhook delivery history
+      tags:
+      - Webhooks
+      description: Returns recent delivery attempts for a webhook.
+      operationId: getWebhookDeliveries
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        description: 'Maximum deliveries to return (default: 50)'
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Deliveries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deliveries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        event_type:
+                          type: string
+                        status_code:
+                          type: integer
+                          nullable: true
+                        attempt_count:
+                          type: integer
+                        delivered:
+                          type: boolean
+                        delivered_at:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        created_at:
+                          type: string
+                          format: date-time
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      pending:
+                        type: integer
+                      delivered:
+                        type: integer
+  "/api/v1/flukebase_connect/projects/{project_id}/webhooks/events":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List available webhook events
+      tags:
+      - Webhooks
+      description: Returns all available webhook event types and their descriptions.
+      operationId: listWebhookEvents
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Events listed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                    - env.created
+                    - env.updated
+                    - env.deleted
+                    - milestone.created
+                    - memory.created
+                  descriptions:
+                    type: object
+                    additionalProperties:
+                      type: string
+  "/api/v1/flukebase_connect/projects/{project_id}/wedo_tasks":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: List WeDo tasks
+      tags:
+      - WeDo Tasks
+      description: Returns WeDo tasks for the Team Board. Supports incremental sync
+        via since_version parameter.
+      operationId: listWedoTasks
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: status
+        in: query
+        required: false
+        enum:
+        - pending
+        - in_progress
+        - completed
+        - blocked
+        description: "Filter by status:\n * `pending` \n * `in_progress` \n * `completed`
+          \n * `blocked` \n "
+        schema:
+          type: string
+      - name: scope
+        in: query
+        required: false
+        description: 'Filter by scope (default: global)'
+        schema:
+          type: string
+      - name: assignee_id
+        in: query
+        required: false
+        description: Filter by assignee
+        schema:
+          type: integer
+      - name: root_only
+        in: query
+        required: false
+        description: Only return tasks without parent
+        schema:
+          type: boolean
+      - name: since_version
+        in: query
+        required: false
+        description: Only return tasks with version > N (for incremental sync)
+        schema:
+          type: integer
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Tasks retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/wedo_task"
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      pages:
+                        type: integer
+                      max_version:
+                        type: integer
+                        description: Highest version for sync
+    post:
+      summary: Create WeDo task
+      tags:
+      - WeDo Tasks
+      description: Creates a new WeDo task from flukebase_connect.
+      operationId: createWedoTask
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task:
+                    "$ref": "#/components/schemas/wedo_task"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                task_id:
+                  type: string
+                  example: FEAT-001
+                  description: Unique task identifier
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum:
+                  - pending
+                  - in_progress
+                  - completed
+                  - blocked
+                dependency:
+                  type: string
+                  enum:
+                  - USER_REQUIRED
+                  - AGENT_CAPABLE
+                  default: AGENT_CAPABLE
+                scope:
+                  type: string
+                  default: global
+                priority:
+                  type: integer
+                blocked_by:
+                  type: array
+                  items:
+                    type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+                artifact_path:
+                  type: string
+                  nullable: true
+                remote_url:
+                  type: string
+                  nullable: true
+                parent_task_id:
+                  type: string
+                  nullable: true
+                agent_id:
+                  type: string
+                  nullable: true
+              required:
+              - task_id
+              - description
+  "/api/v1/flukebase_connect/projects/{project_id}/wedo_tasks/{id}":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    - name: id
+      in: path
+      description: Task ID or database ID
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get task details
+      tags:
+      - WeDo Tasks
+      description: Returns detailed information about a WeDo task including subtasks.
+      operationId: getWedoTask
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Task retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task:
+                    "$ref": "#/components/schemas/wedo_task"
+    put:
+      summary: Update task
+      tags:
+      - WeDo Tasks
+      description: Updates a WeDo task with optimistic locking support.
+      operationId: updateWedoTask
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task:
+                    "$ref": "#/components/schemas/wedo_task"
+        '409':
+          description: Conflict - task modified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: conflict
+                  message:
+                    type: string
+                  server_task:
+                    "$ref": "#/components/schemas/wedo_task"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum:
+                  - pending
+                  - in_progress
+                  - completed
+                  - blocked
+                version:
+                  type: integer
+                  description: Client version for conflict detection
+                synthesis_note:
+                  type: string
+                  description: Note to append to synthesis report
+                agent_id:
+                  type: string
+    delete:
+      summary: Delete task
+      tags:
+      - WeDo Tasks
+      description: Deletes a WeDo task.
+      operationId: deleteWedoTask
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: Task deleted
+  "/api/v1/flukebase_connect/projects/{project_id}/wedo_tasks/bulk_sync":
+    parameters:
+    - name: project_id
+      in: path
+      description: Project ID
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Bulk sync tasks
+      tags:
+      - WeDo Tasks
+      - Sync
+      description: Synchronizes multiple tasks with conflict detection and resolution.
+      operationId: bulkSyncWedoTasks
+      security:
+      - bearer_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sync_results:
+                    type: object
+                    properties:
+                      created:
+                        type: array
+                        items:
+                          "$ref": "#/components/schemas/wedo_task"
+                      updated:
+                        type: array
+                        items:
+                          "$ref": "#/components/schemas/wedo_task"
+                      conflicts:
+                        type: array
+                        items:
+                          "$ref": "#/components/schemas/wedo_task"
+                      errors:
+                        type: array
+                        items:
+                          type: object
+                  summary:
+                    type: object
+                    properties:
+                      created:
+                        type: integer
+                      updated:
+                        type: integer
+                      conflicts:
+                        type: integer
+                      errors:
+                        type: integer
+                  max_version:
+                    type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tasks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      external_id:
+                        type: string
+                      task_id:
+                        type: string
+                      description:
+                        type: string
+                      status:
+                        type: string
+                      version:
+                        type: integer
+                      agent_id:
+                        type: string
+              required:
+              - tasks
+servers:
+- url: https://flukebase.com
+  description: Production server
+- url: http://localhost:3006
+  description: Development server
+components:
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Token
+      description: FlukeBase API token (starts with fbk_)
+  schemas:
+    error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+      required:
+      - error
+    project:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        repository_url:
+          type: string
+          nullable: true
+        stage:
+          type: string
+          enum:
+          - idea
+          - prototype
+          - mvp
+          - growth
+          - mature
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - name
+      - stage
+    memory:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        memory_type:
+          type: string
+          enum:
+          - fact
+          - convention
+          - gotcha
+          - decision
+        tags:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - content
+      - memory_type
+    environment_variable:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+        description:
+          type: string
+          nullable: true
+        is_secret:
+          type: boolean
+        is_required:
+          type: boolean
+        example_value:
+          type: string
+          nullable: true
+        environment:
+          type: string
+          enum:
+          - development
+          - staging
+          - production
+      required:
+      - key
+      - value
+      - environment
+    webhook:
+      type: object
+      properties:
+        id:
+          type: integer
+        callback_url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        healthy:
+          type: boolean
+        failure_count:
+          type: integer
+        secret:
+          type: string
+          nullable: true
+          description: Only included for show
+        last_success_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_failure_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - callback_url
+      - events
+      - active
+    productivity_metric:
+      type: object
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        user_id:
+          type: integer
+        metric_type:
+          type: string
+          enum:
+          - time_saved
+          - code_contribution
+          - task_velocity
+          - token_efficiency
+        period_type:
+          type: string
+          enum:
+          - session
+          - daily
+          - weekly
+          - monthly
+        period_start:
+          type: string
+          format: date-time
+          nullable: true
+        period_end:
+          type: string
+          format: date-time
+          nullable: true
+        metric_data:
+          type: object
+        external_id:
+          type: string
+          nullable: true
+        synced_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - metric_type
+      - period_type
+      - metric_data
+    wedo_task:
+      type: object
+      properties:
+        id:
+          type: integer
+        task_id:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum:
+          - pending
+          - in_progress
+          - completed
+          - blocked
+        dependency:
+          type: string
+          enum:
+          - USER_REQUIRED
+          - AGENT_CAPABLE
+        scope:
+          type: string
+        priority:
+          type: integer
+        version:
+          type: integer
+        blocked_by:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        artifact_path:
+          type: string
+          nullable: true
+        remote_url:
+          type: string
+          nullable: true
+        synthesis_report:
+          type: string
+          nullable: true
+        external_id:
+          type: string
+          nullable: true
+        parent_task_id:
+          type: string
+          nullable: true
+        assignee_id:
+          type: integer
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - task_id
+      - description
+      - status
+    agent_session:
+      type: object
+      properties:
+        id:
+          type: integer
+        agent_id:
+          type: string
+        persona_name:
+          type: string
+          nullable: true
+        agent_type:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum:
+          - active
+          - idle
+          - disconnected
+        capabilities:
+          type: array
+          items:
+            type: string
+        client_version:
+          type: string
+          nullable: true
+        tokens_used:
+          type: integer
+        tools_executed:
+          type: integer
+        last_heartbeat_at:
+          type: string
+          format: date-time
+          nullable: true
+        connected_at:
+          type: string
+          format: date-time
+        disconnected_at:
+          type: string
+          format: date-time
+          nullable: true
+        metadata:
+          type: object
+      required:
+      - id
+      - agent_id
+      - status
+    ai_conversation_log:
+      type: object
+      properties:
+        id:
+          type: integer
+        provider:
+          type: string
+        model:
+          type: string
+        session_id:
+          type: string
+          nullable: true
+        external_id:
+          type: string
+          nullable: true
+        message_index:
+          type: integer
+        role:
+          type: string
+          enum:
+          - user
+          - assistant
+          - system
+          - tool
+        content:
+          type: string
+        input_tokens:
+          type: integer
+          nullable: true
+        output_tokens:
+          type: integer
+          nullable: true
+        duration_ms:
+          type: integer
+          nullable: true
+        metadata:
+          type: object
+        exchanged_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - provider
+      - role
+      - content
+    container_pool:
+      type: object
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        warm_pool_size:
+          type: integer
+        max_pool_size:
+          type: integer
+        context_threshold_percent:
+          type: integer
+        auto_delegate_enabled:
+          type: boolean
+        skip_user_required:
+          type: boolean
+        active_session_count:
+          type: integer
+        idle_session_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - project_id
+    container_session:
+      type: object
+      properties:
+        id:
+          type: integer
+        session_id:
+          type: string
+        container_id:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum:
+          - starting
+          - active
+          - idle
+          - retired
+        context_percent:
+          type: integer
+        tasks_completed:
+          type: integer
+        handoff_summary:
+          type: string
+          nullable: true
+        last_activity_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - session_id
+      - status
+    delegation_request:
+      type: object
+      properties:
+        id:
+          type: integer
+        wedo_task_id:
+          type: integer
+        container_session_id:
+          type: integer
+        status:
+          type: string
+          enum:
+          - claimed
+          - executing
+          - completed
+          - failed
+        claimed_at:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        result:
+          type: object
+          nullable: true
+      required:
+      - id
+      - wedo_task_id
+      - container_session_id
+      - status
+security:
+- bearer_auth: []

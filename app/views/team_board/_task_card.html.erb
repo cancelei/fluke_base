@@ -1,0 +1,66 @@
+<%# Task card for Kanban board %>
+<%= turbo_frame_tag dom_id(task) do %>
+  <div class="card card-compact bg-base-100 shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing"
+       draggable="true"
+       data-action="click->team-board#showTaskDetail"
+       data-task-id="<%= task.task_id %>"
+       data-task-db-id="<%= task.id %>"
+       data-status="<%= task.status %>">
+    <div class="card-body">
+      <%# Header with ID and priority %>
+      <div class="flex items-start justify-between gap-2">
+        <code class="text-xs font-mono text-base-content/60"><%= task.task_id %></code>
+        <%= render_priority_badge(task.priority) %>
+      </div>
+
+      <%# Description %>
+      <p class="text-sm line-clamp-2"><%= task.description %></p>
+
+      <%# Tags %>
+      <% if task.tags.present? %>
+        <div class="flex flex-wrap gap-1 mt-1">
+          <% task.tags.first(3).each do |tag| %>
+            <span class="badge badge-ghost badge-xs"><%= tag %></span>
+          <% end %>
+          <% if task.tags.size > 3 %>
+            <span class="badge badge-ghost badge-xs">+<%= task.tags.size - 3 %></span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# Footer with assignee and metadata %>
+      <div class="flex items-center justify-between mt-2 pt-2 border-t border-base-200">
+        <div class="flex items-center gap-2">
+          <% if task.assignee %>
+            <%= render Ui::AvatarComponent.new(user: task.assignee, size: :xs, placeholder: :initials) %>
+            <span class="text-xs text-base-content/60 truncate max-w-20"><%= task.assignee.first_name %></span>
+          <% else %>
+            <span class="text-xs text-base-content/40 italic">Unassigned</span>
+          <% end %>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <%# Subtask count %>
+          <% if task.subtasks.any? %>
+            <span class="text-xs text-base-content/60 flex items-center gap-1">
+              <%= render Ui::IconComponent.new(name: :list_bullet, size: :xs) %>
+              <%= task.subtasks.completed.count %>/<%= task.subtasks.count %>
+            </span>
+          <% end %>
+
+          <%# Dependency indicator %>
+          <% if task.blocked_by.present? %>
+            <span class="tooltip tooltip-left" data-tip="Blocked by: <%= task.blocked_by.join(', ') %>">
+              <%= render Ui::IconComponent.new(name: :link, size: :xs, css_class: "text-warning") %>
+            </span>
+          <% end %>
+
+          <%# Age indicator %>
+          <span class="text-xs text-base-content/40">
+            <%= time_ago_in_words(task.updated_at) %>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

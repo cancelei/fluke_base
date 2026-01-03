@@ -9,7 +9,7 @@ RSpec.describe WebhookDispatchable, type: :model do
   let(:env_var) do
     create(
       :environment_variable,
-      project: project,
+      project:,
       created_by: user,
       key: "TEST_VAR",
       environment: "development"
@@ -30,7 +30,7 @@ RSpec.describe WebhookDispatchable, type: :model do
     context "when no webhook subscriptions exist" do
       it "does not raise errors on create" do
         expect {
-          create(:environment_variable, project: project, created_by: user, key: "NEW_VAR")
+          create(:environment_variable, project:, created_by: user, key: "NEW_VAR")
         }.not_to raise_error
       end
 
@@ -48,12 +48,12 @@ RSpec.describe WebhookDispatchable, type: :model do
     end
 
     context "when webhook subscriptions exist" do
-      let!(:api_token) { create(:api_token, user: user) }
+      let!(:api_token) { create(:api_token, user:) }
       let!(:subscription) do
         create(
           :webhook_subscription,
-          project: project,
-          api_token: api_token,
+          project:,
+          api_token:,
           events: ["env.created", "env.updated", "env.deleted"],
           callback_url: "https://example.com/webhooks"
         )
@@ -61,7 +61,7 @@ RSpec.describe WebhookDispatchable, type: :model do
 
       it "dispatches webhook on create" do
         expect {
-          create(:environment_variable, project: project, created_by: user, key: "WEBHOOK_VAR")
+          create(:environment_variable, project:, created_by: user, key: "WEBHOOK_VAR")
         }.to change(WebhookDelivery, :count).by(1)
       end
 
@@ -80,13 +80,13 @@ RSpec.describe WebhookDispatchable, type: :model do
       end
 
       it "creates delivery with correct event type" do
-        create(:environment_variable, project: project, created_by: user, key: "EVENT_TYPE_VAR")
+        create(:environment_variable, project:, created_by: user, key: "EVENT_TYPE_VAR")
         delivery = WebhookDelivery.last
         expect(delivery.event_type).to eq("env.created")
       end
 
       it "creates delivery with payload" do
-        create(:environment_variable, project: project, created_by: user, key: "PAYLOAD_VAR")
+        create(:environment_variable, project:, created_by: user, key: "PAYLOAD_VAR")
         delivery = WebhookDelivery.last
         expect(delivery.payload).to include("event" => "env.created", "project_id" => project.id)
       end

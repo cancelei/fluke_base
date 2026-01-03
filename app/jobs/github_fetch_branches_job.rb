@@ -100,8 +100,9 @@ class GithubFetchBranchesJob < ApplicationJob
   def process_single_branch(branch, index, total, project_id)
     Rails.logger.info "[#{index + 1}/#{total}] Processing branch: #{branch[:branch_name]}"
 
+    # Use full mode (fetch_stats: true) for manual refresh - user expects immediate stats
     job = GithubCommitRefreshJob.new
-    commits_processed = job.perform(project_id, @access_token, branch[:branch_name])
+    commits_processed = job.perform(project_id, @access_token, branch[:branch_name], fetch_stats: true)
 
     Rails.logger.info "Branch #{branch[:branch_name]} complete: #{commits_processed} commits processed"
   rescue => e

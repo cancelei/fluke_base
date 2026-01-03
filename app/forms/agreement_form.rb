@@ -259,21 +259,14 @@ class AgreementForm < ApplicationForm
     # Skip duplicate check for counter offers - they should be allowed
     return if is_counter_offer?
 
-    # Check for existing agreements using the new AgreementParticipants structure
-    query = Agreement.joins(:agreement_participants)
-      .where(project_id:, status: [Agreement::ACCEPTED, Agreement::PENDING])
-      .where(agreement_participants: { user_id: [initiator_user_id, other_party_user_id] })
-      .group("agreements.id")
-      .having("COUNT(agreement_participants.id) = 2")
+    checker = AgreementDuplicateChecker.new(
+      user1_id: initiator_user_id,
+      user2_id: other_party_user_id,
+      project_id: project_id,
+      exclude_agreement_id: (@is_update && @agreement&.persisted?) ? @agreement.id : nil
+    )
 
-    # Exclude the current agreement if we're updating
-    if @is_update && @agreement&.persisted?
-      query = query.where.not(id: @agreement.id)
-    end
-
-    existing_agreement = query.first
-
-    if existing_agreement.present?
+    if checker.exists?
       errors.add(:base, "An agreement already exists between these parties for this project")
     end
   end

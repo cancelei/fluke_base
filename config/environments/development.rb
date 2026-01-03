@@ -5,8 +5,15 @@ Rails.application.configure do
 
   # Allow Cloudflare Tunnel domains and flukebase domains
   config.hosts << /.*\.trycloudflare\.com/
-  config.hosts << "dev.flukebase.me"
-  config.hosts << "staging.flukebase.me"
+  config.hosts << /.*\.flukebase\.me/
+
+  # HTTPS preference: Use HTTPS for tunnel access, HTTP for localhost
+  # Set via environment variable or detected from request
+  tunnel_host = ENV.fetch("TUNNEL_HOST", "dev.flukebase.me")
+  if ENV["USE_TUNNEL"] == "true" || ENV["HTTPS_PREFERRED"] == "true"
+    config.force_ssl = false # Don't force, cloudflared handles SSL termination
+    Rails.application.default_url_options = { host: tunnel_host, protocol: "https" }
+  end
 
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true

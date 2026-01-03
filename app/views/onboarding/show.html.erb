@@ -1,0 +1,58 @@
+<%# Individual Insight Detail Page %>
+
+<div class="max-w-4xl mx-auto py-6">
+  <%# Page Header %>
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+      <%= link_to onboarding_insights_path, class: "btn btn-ghost btn-sm btn-circle" do %>
+        <%= heroicon "arrow-left", class: "w-5 h-5" %>
+      <% end %>
+      <div class="flex items-center gap-3">
+        <div class="p-3 rounded-lg bg-<%= insight_color(@type) %>/10 text-<%= insight_color(@type) %>">
+          <%= heroicon insight_icon(@type), class: "w-6 h-6" %>
+        </div>
+        <h1 class="text-2xl font-bold"><%= @insight[:title] %></h1>
+      </div>
+    </div>
+    <p class="text-base-content/60 ml-12 max-w-2xl">
+      <%= @insight[:description] %>
+    </p>
+  </div>
+
+  <%# Period Selector %>
+  <div class="flex justify-between items-center mb-6">
+    <div class="text-sm text-base-content/60">
+      Showing data since <%= @insight[:summary][:since]&.strftime("%b %d, %Y") || "the beginning" %>
+    </div>
+    <div class="btn-group">
+      <%= link_to "Day", onboarding_insight_path(@type, period: :day),
+          class: "btn btn-sm #{params[:period] == 'day' ? 'btn-active' : ''}" %>
+      <%= link_to "Week", onboarding_insight_path(@type, period: :week),
+          class: "btn btn-sm #{params[:period].blank? || params[:period] == 'week' ? 'btn-active' : ''}" %>
+      <%= link_to "Month", onboarding_insight_path(@type, period: :month),
+          class: "btn btn-sm #{params[:period] == 'month' ? 'btn-active' : ''}" %>
+      <%= link_to "All Time", onboarding_insight_path(@type, period: :all),
+          class: "btn btn-sm #{params[:period] == 'all' ? 'btn-active' : ''}" %>
+    </div>
+  </div>
+
+  <%# Main Stats Card %>
+  <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card-body">
+      <%= render_detailed_insight_stats(@type, @insight[:summary]) %>
+    </div>
+  </div>
+
+  <%# Explanation Card %>
+  <div class="card bg-base-200/50">
+    <div class="card-body">
+      <h3 class="card-title text-sm flex items-center gap-2">
+        <%= heroicon "information-circle", class: "w-5 h-5" %>
+        How this is calculated
+      </h3>
+      <div class="text-sm text-base-content/70 prose prose-sm max-w-none">
+        <%= render_insight_explanation(@type) %>
+      </div>
+    </div>
+  </div>
+</div>

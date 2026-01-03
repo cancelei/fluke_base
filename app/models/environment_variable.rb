@@ -110,14 +110,14 @@ class EnvironmentVariable < ApplicationRecord
   # Webhook payload (never expose actual secret values)
   def webhook_payload
     {
-      id: id,
-      key: key,
-      environment: environment,
-      description: description,
-      is_secret: is_secret,
-      is_required: is_required,
+      id:,
+      key:,
+      environment:,
+      description:,
+      is_secret:,
+      is_required:,
       value_changed: value_ciphertext.present?,
-      project_id: project_id
+      project_id:
     }
   end
 

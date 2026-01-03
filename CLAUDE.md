@@ -1,6 +1,9 @@
 # Claude Code Configuration
 
 ## Testing Commands
+
+> **MCP**: Use `fb_sync` to ensure project context is loaded before testing
+
 - `rails server` - Start development server (port 3006)
 - `rails console` - Start Rails console
 - `./bin/test` - Run essential tests (models + helpers)
@@ -24,6 +27,9 @@ Test the Turbo implementations using these endpoints:
 These endpoints work without authentication and confirm all Turbo implementations are working.
 
 ## Database Setup Commands
+
+> **MCP**: Use `env_sync` to fetch environment variables, `env_validate` to check completeness
+
 - `rails db:create` - Create database
 - `rails db:migrate` - Run migrations
 - `rails db:seed` - Seed initial data
@@ -61,7 +67,7 @@ These endpoints work without authentication and confirm all Turbo implementation
 ## Multi-Database Commands
 - `RAILS_ENV=test rails db:create` - Create test databases
 - `RAILS_ENV=test rails db:migrate` - Run test migrations
-- Rails 8.0 multi-database support: primary, cache, queue, cable databases
+- Rails 8.1 multi-database support: primary, cache, queue, cable databases
 - CI environment automatically disables additional databases via ENV["CI"] check
 
 ## Turbo Testing Notes
@@ -192,3 +198,140 @@ FlukeBase operates with a **unified user experience** without role-based restric
 - **Dashboard**: Direct access to dashboard with unified experience for all users
 - **User Discovery**: All users can explore and connect with other users
 - **Agreement Creation**: Any user can initiate agreements with any other user
+
+## AI Productivity Insights System
+
+FlukeBase provides AI productivity insights to help users understand the value of AI-assisted development. The system tracks metrics from flukebase-connect MCP sessions and displays them on the dashboard.
+
+### Metric Types
+
+| Type | Description | Key Data Points |
+|------|-------------|-----------------|
+| `time_saved` | Estimated time saved by AI | ai_time_ms, estimated_human_time_ms, efficiency_ratio |
+| `code_contribution` | Code changes from AI sessions | lines_added, lines_removed, commits, files_changed |
+| `task_velocity` | WeDo task completion rates | tasks_completed, tasks_created, completion_rate |
+| `token_efficiency` | Token usage and costs | total_tokens, input/output_tokens, estimated_cost_usd |
+
+### Key Models
+
+- **`AiProductivityMetric`** - Stores metrics synced from flukebase-connect
+  - Scopes: `time_saved`, `code_contributions`, `task_velocity`, `token_efficiency`
+  - Period types: `session`, `daily`, `weekly`, `monthly`
+  - Aggregation methods: `aggregate_for_project(project_id, since:)`
+
+- **`UserOnboardingProgress`** - Tracks progressive disclosure of insights
+  - Stages: `new_user` → `first_connection` → `first_ai_session` → `first_task_completed` → `insights_explored` → `onboarding_complete`
+  - Methods: `mark_insight_seen!`, `mark_milestone_completed!`, `advance_stage!`, `progress_percentage`
+
+- **`AiProductivityStat`** - Materialized view for fast aggregated queries
+  - Refresh: `AiProductivityStat.refresh_all` or via scheduled job
+
+### API Endpoints (flukebase-connect sync)
+
+All endpoints require API token with `read:metrics` or `write:metrics` scope.
+
+```
+GET    /api/v1/flukebase_connect/projects/:id/productivity_metrics
+GET    /api/v1/flukebase_connect/projects/:id/productivity_metrics/:id
+POST   /api/v1/flukebase_connect/projects/:id/productivity_metrics
+GET    /api/v1/flukebase_connect/projects/:id/productivity_metrics/summary
+POST   /api/v1/flukebase_connect/projects/:id/productivity_metrics/bulk_sync
+```
+
+### Dashboard Integration
+
+```ruby
+# In DashboardController
+@ai_insights = AiInsightsService.new(current_user, @project).dashboard_insights
+```
+
+```erb
+<%# In dashboard view %>
+<%= render "dashboard/ai_insights_section", insights: @ai_insights %>
+```
+
+### ViewComponents
+
+- **`AiInsights::InsightCardComponent`** - Dismissible insight card with icon, value, trend
+- Stimulus controller: `insight_card_controller.js` - handles dismiss, navigate, mark_seen
+
+### Service Layer
+
+```ruby
+# AiInsightsService provides all dashboard insight calculations
+service = AiInsightsService.new(user, project)
+
+service.dashboard_insights     # All insights for dashboard display
+service.time_saved_summary     # Detailed time saved breakdown
+service.code_contribution_summary
+service.task_velocity_summary
+service.token_efficiency_summary
+```
+
+### API Token Scopes
+
+The following scopes are available for AI productivity metrics:
+- `read:metrics` - Read productivity metrics and summaries
+- `write:metrics` - Create/update productivity metrics (for sync)
+
+## MCP Tools Integration (flukebase-connect)
+
+This project supports flukebase-connect MCP tools for AI agent assistance. See [API Token Setup](docs/guides/development/api-token-setup.md) for authentication.
+
+### Quick Reference
+
+| When you need to... | Use this MCP tool |
+|---------------------|-------------------|
+| Authenticate with FlukeBase | `fb_login` |
+| Check connection status | `fb_status` |
+| List your projects | `fb_projects` |
+| Sync project context + .env | `fb_sync` |
+| Sync only environment vars | `env_sync` |
+| View current env vars | `env_show` |
+| Compare local vs FlukeBase env | `env_diff` |
+| Validate required env vars | `env_validate` |
+| Store knowledge for later | `remember` |
+| Search stored knowledge | `recall` |
+| Remove stored memory | `forget` |
+| Get convention rationale | `why` |
+| View AI productivity summary | `ai_productivity_summary` (planned) |
+| Sync metrics to FlukeBase | `ai_sync_metrics` (planned) |
+
+### Decision Tree
+
+```
+Starting session?
+├── `fb_status` → check connection
+├── Not connected? → `fb_login`
+└── Connected? → `fb_sync` for context
+
+Environment issues?
+├── Missing vars? → `env_validate`
+├── Out of sync? → `env_diff` then `env_sync`
+└── View current? → `env_show`
+
+Remember something?
+├── Store → `remember` (type: fact/convention/gotcha/decision)
+├── Search → `recall`
+└── Understand why → `why`
+```
+
+### MCP Plugin Status
+
+**Production Ready:**
+- FlukeBase Core - Authentication, projects, sync
+- Environment Manager - Environment variable management
+- Memory Store - Persistent knowledge storage
+- AI Productivity Metrics API - Rails backend ready for sync
+
+**In Development:**
+- AI Productivity Plugin - MCP tools for productivity tracking (ONBOARD-003-007)
+  - `ai_productivity_summary` - Get session productivity metrics
+  - `ai_time_saved` - Detailed time saved breakdown
+  - `ai_code_attribution` - Code contributions from AI sessions
+  - `ai_sync_metrics` - Sync metrics to FlukeBase
+
+**Conceptual (Future):**
+- GitHub Integration - Direct PR/issue access
+- OpenAI Provider - GPT model integration
+- Anthropic Provider - Claude API integration

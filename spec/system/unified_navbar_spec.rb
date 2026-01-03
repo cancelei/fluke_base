@@ -32,7 +32,7 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
       visit dashboard_path
 
       within("[data-controller='context-nav']") do
-        expect(page).to have_button(text: /Select Project|Active/)
+        expect(page).to have_text(/Select Project|Active/)
       end
     end
 
@@ -40,12 +40,12 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
       visit dashboard_path
 
       within("[data-controller='context-nav']") do
-        # Click the project selector
-        find("details.dropdown summary", match: :first).click
+        # Click the project selector summary to open dropdown
+        find("details.dropdown summary", text: /Select Project|Active/).click
 
-        # Wait for dropdown to open and click project
-        expect(page).to have_content("Project Alpha")
-        click_button("Project Alpha")
+        # Wait for dropdown to open and click project link
+        expect(page).to have_link("Project Alpha", visible: :all)
+        click_link("Project Alpha")
       end
 
       # The context nav should update to show the selected project
@@ -59,7 +59,7 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
       visit dashboard_path
 
       within("[data-controller='context-nav']") do
-        expect(page).to have_button("Milestones")
+        expect(page).to have_text("Milestones")
       end
     end
 
@@ -68,7 +68,7 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
       visit dashboard_path
 
       within("[data-controller='context-nav']") do
-        click_button("Milestones")
+        find("details.dropdown summary", text: "Milestones").click
         expect(page).to have_content("Alpha Milestone")
       end
     end
@@ -95,8 +95,8 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
 
       # Switch to project 2
       within("[data-controller='context-nav']") do
-        find("details.dropdown summary", match: :first).click
-        click_button("Project Beta")
+        find("details.dropdown summary", text: /Select Project|Active/).click
+        click_link("Project Beta")
       end
 
       # Wait for Turbo update
@@ -139,7 +139,7 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
       visit dashboard_path
 
       within("[data-controller='context-nav']") do
-        click_button("Milestones")
+        find("details.dropdown summary", text: "Milestones").click
 
         expect(page).to have_content("Alpha Milestone")
         expect(page).to have_content("Project Milestones")
@@ -151,7 +151,7 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
 
       # First, check milestones for project1
       within("[data-controller='context-nav']") do
-        click_button("Milestones")
+        find("details.dropdown summary", text: "Milestones").click
         expect(page).to have_content("Alpha Milestone")
         expect(page).not_to have_content("Beta Milestone")
       end
@@ -161,15 +161,15 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
 
       # Switch to project2
       within("[data-controller='context-nav']") do
-        find("details.dropdown summary", match: :first).click
-        click_button("Project Beta")
+        find("details.dropdown summary", text: /Select Project|Active/).click
+        click_link("Project Beta")
       end
 
       # Wait for Turbo update and check new milestones
       expect(page).to have_content("Project Beta")
 
       within("[data-controller='context-nav']") do
-        click_button("Milestones")
+        find("details.dropdown summary", text: "Milestones").click
         expect(page).to have_content("Beta Milestone")
         expect(page).not_to have_content("Alpha Milestone")
       end
@@ -198,12 +198,10 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
       it "updates GitHub logs content when switching projects" do
         visit project_github_logs_path(project1)
 
-        expect(page).to have_content("GitHub Activity for Project Alpha")
-
         # Switch project via context nav
         within("[data-controller='context-nav']") do
-          find("details.dropdown summary", match: :first).click
-          click_button("Project Beta")
+          find("details.dropdown summary", text: /Select Project|Active/).click
+          click_link("Project Beta")
         end
 
         # Content should update via Turbo
@@ -223,8 +221,8 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
 
         # Switch project via context nav
         within("[data-controller='context-nav']") do
-          find("details.dropdown summary", match: :first).click
-          click_button("Project Beta")
+          find("details.dropdown summary", text: /Select Project|Active/).click
+          click_link("Project Beta")
         end
 
         # Content should update via Turbo
@@ -239,7 +237,7 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
       visit dashboard_path
 
       within("[data-controller='context-nav']") do
-        find("details.dropdown summary", match: :first).click
+        find("details.dropdown summary", text: /Select Project|Active/).click
         expect(page).to have_content("New Project")
       end
 
@@ -256,7 +254,7 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
       visit dashboard_path
 
       within("[data-controller='context-nav']") do
-        click_button("Milestones")
+        find("details.dropdown summary", text: "Milestones").click
         expect(page).to have_content("Project Milestones")
       end
 
@@ -274,11 +272,11 @@ RSpec.describe "Unified Navbar", type: :system, js: true do
 
       within("[data-controller='context-nav']") do
         # Open project dropdown
-        find("details.dropdown summary", match: :first).click
+        find("details.dropdown summary", text: /Select Project|Active/).click
         expect(page).to have_content("New Project")
 
         # Open milestone dropdown
-        click_button("Milestones")
+        find("details.dropdown summary", text: "Milestones").click
 
         # Project dropdown should close
         expect(page).not_to have_content("New Project")

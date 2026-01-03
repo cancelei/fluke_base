@@ -1,0 +1,90 @@
+<%# Unified Logs Dashboard - Real-time log streaming from flukebase_connect %>
+
+<%= turbo_stream_from "unified_logs:all" %>
+<%= turbo_stream_from "unified_logs:user_#{current_user.id}" %>
+<% if @project.present? %>
+  <%= turbo_stream_from "unified_logs:project_#{@project.id}" %>
+<% end %>
+
+<div class="container mx-auto px-4 py-6">
+  <%# Page Header %>
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content flex items-center gap-2">
+        <%= render Ui::IconComponent.new(name: "command-line", size: :md, css_class: "text-primary") %>
+        Unified Logs
+      </h1>
+      <p class="text-sm text-base-content/70 mt-1">
+        Real-time logs from MCP tools, containers, and applications
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 mt-4 md:mt-0">
+      <% if @project.present? %>
+        <span class="badge badge-outline badge-lg">
+          <%= @project.name %>
+        </span>
+      <% end %>
+
+      <%# Export dropdown %>
+      <div class="dropdown dropdown-end">
+        <label tabindex="0" class="btn btn-sm btn-outline gap-1">
+          <%= render Ui::IconComponent.new(name: "arrow-down-tray", size: :xs) %>
+          Export
+        </label>
+        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-40">
+          <li>
+            <%= link_to unified_logs_export_path(format: :json, project_id: @project&.id, sandbox_id: @sandbox_id),
+                        class: "flex items-center gap-2" do %>
+              <%= render Ui::IconComponent.new(name: "code-bracket", size: :xs) %>
+              JSON
+            <% end %>
+          </li>
+          <li>
+            <%= link_to unified_logs_export_path(format: :csv, project_id: @project&.id, sandbox_id: @sandbox_id),
+                        class: "flex items-center gap-2" do %>
+              <%= render Ui::IconComponent.new(name: "table-cells", size: :xs) %>
+              CSV
+            <% end %>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <%# Stats Row %>
+  <div class="mb-4">
+    <%= render Logs::LogStatsComponent.new %>
+  </div>
+
+  <%# Filter Bar %>
+  <div class="mb-4">
+    <%= render Logs::LogFilterComponent.new(
+      sandboxes: @sandboxes,
+      selected_sandbox: @sandbox_id
+    ) %>
+  </div>
+
+  <%# Log Stream Container %>
+  <div class="h-[calc(100vh-320px)] min-h-96"
+       data-unified-logs-project-id-value="<%= @project&.id %>"
+       data-unified-logs-sandbox-id-value="<%= @sandbox_id %>">
+    <%= render Logs::LogStreamComponent.new %>
+  </div>
+
+  <%# Keyboard Shortcuts Help %>
+  <div class="mt-4 text-xs text-base-content/50 flex items-center gap-4">
+    <span>
+      <kbd class="kbd kbd-xs">Space</kbd> Pause/Resume
+    </span>
+    <span>
+      <kbd class="kbd kbd-xs">C</kbd> Clear
+    </span>
+    <span>
+      <kbd class="kbd kbd-xs">S</kbd> Toggle auto-scroll
+    </span>
+    <span>
+      <kbd class="kbd kbd-xs">/</kbd> Focus search
+    </span>
+  </div>
+</div>

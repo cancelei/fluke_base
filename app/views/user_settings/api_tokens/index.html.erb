@@ -1,0 +1,59 @@
+<div>
+  <div class="py-5">
+    <h1 class="text-2xl font-bold tracking-tight">API Tokens</h1>
+    <p class="mt-1 text-sm text-base-content/60">
+      Manage API tokens for flukebase_connect and other integrations.
+    </p>
+  </div>
+
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="card-title">Your Tokens</h2>
+        <%= link_to "Create Token", new_user_settings_api_token_path, class: "btn btn-primary btn-sm" %>
+      </div>
+
+      <% if @api_tokens.any? %>
+        <div class="overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Prefix</th>
+                <th>Scopes</th>
+                <th>Last Used</th>
+                <th>Created</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @api_tokens.each do |token| %>
+                <%= render "user_settings/api_tokens/token_row", token: %>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info h-6 w-6 shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>No API tokens yet. Create one to use flukebase_connect.</span>
+        </div>
+      <% end %>
+
+      <div class="divider"></div>
+
+      <div class="prose prose-sm max-w-none">
+        <h3>Using API Tokens</h3>
+        <p>API tokens allow flukebase_connect to sync environment variables and project context. To use a token:</p>
+        <ol>
+          <li>Create a new token above</li>
+          <li>Copy the token (it's only shown once)</li>
+          <li>Set the environment variable: <code>export FLUKEBASE_API_TOKEN=fbk_xxx...</code></li>
+          <li>Run <code>fbc sync</code> in your project directory</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>

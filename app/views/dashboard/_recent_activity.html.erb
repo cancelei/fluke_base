@@ -1,109 +1,107 @@
 <%# Recent Activity Across All Projects %>
-<div class="card bg-base-100 shadow-xl">
-  <div class="card-body">
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-2">
-        <h2 class="card-title text-lg">Recent Activity</h2>
-        <% if @activity_summary[:total_commits_this_week] > 0 %>
-          <span class="badge badge-success badge-sm">
-            <%= @activity_summary[:total_commits_this_week] %> commits this week
-          </span>
-        <% end %>
-      </div>
-      <span class="text-sm text-base-content/60"><%= Date.current.strftime("%B %d, %Y") %></span>
+<%= render Ui::CardComponent.new(variant: :default) do |card| %>
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2">
+      <h2 class="card-title text-lg">Recent Activity</h2>
+      <% if @activity_summary[:total_commits_this_week] > 0 %>
+        <span class="badge badge-success badge-sm">
+          <%= @activity_summary[:total_commits_this_week] %> commits this week
+        </span>
+      <% end %>
     </div>
+    <span class="text-sm text-base-content/60"><%= Date.current.strftime("%B %d, %Y") %></span>
+  </div>
 
-    <%# Activity Stats Summary %>
-    <% if @activity_summary[:projects_with_repos] > 0 %>
-      <div class="flex items-center gap-4 mb-4 text-sm">
-        <div class="flex items-center gap-1.5">
-          <span class="relative flex h-2.5 w-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-success"></span>
-          </span>
-          <span class="text-base-content/70"><%= @activity_summary[:active_projects] %> active</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="relative flex h-2.5 w-2.5">
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-warning"></span>
-          </span>
-          <span class="text-base-content/70"><%= @activity_summary[:moderate_projects] %> moderate</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="relative flex h-2.5 w-2.5">
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-base-content/30"></span>
-          </span>
-          <span class="text-base-content/70"><%= @activity_summary[:stale_projects] %> need attention</span>
-        </div>
+  <%# Activity Stats Summary %>
+  <% if @activity_summary[:projects_with_repos] > 0 %>
+    <div class="flex items-center gap-4 mb-4 text-sm">
+      <div class="flex items-center gap-1.5">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-success"></span>
+        </span>
+        <span class="text-base-content/70"><%= @activity_summary[:active_projects] %> active</span>
       </div>
-    <% end %>
+      <div class="flex items-center gap-1.5">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-warning"></span>
+        </span>
+        <span class="text-base-content/70"><%= @activity_summary[:moderate_projects] %> moderate</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-base-content/30"></span>
+        </span>
+        <span class="text-base-content/70"><%= @activity_summary[:stale_projects] %> need attention</span>
+      </div>
+    </div>
+  <% end %>
 
-    <%# Recent Commits List %>
-    <% if @recent_activity.any? %>
-      <div class="space-y-3">
-        <% @recent_activity.each do |commit| %>
-          <div class="flex items-start gap-3 p-3 rounded-lg bg-base-200/50 hover:bg-base-200 transition-colors">
-            <%# Author Avatar %>
-            <% if commit.user.present? %>
-              <%= render Ui::AvatarComponent.new(user: commit.user, size: :sm, placeholder: :initials) %>
-            <% else %>
-              <div class="avatar placeholder">
-                <div class="bg-neutral text-neutral-content w-8 h-8 rounded-full flex items-center justify-center">
-                  <span class="text-xs"><%= commit.unregistered_user_name&.first(2)&.upcase || "?" %></span>
-                </div>
-              </div>
-            <% end %>
-
-            <div class="flex-1 min-w-0">
-              <%# Project and Author %>
-              <div class="flex items-center gap-2 text-xs text-base-content/60 mb-1">
-                <%= link_to commit.project.name,
-                    project_github_logs_path(commit.project),
-                    class: "font-medium hover:text-primary truncate",
-                    onclick: "event.stopPropagation();" %>
-                <span>&middot;</span>
-                <span class="truncate">
-                  <%= commit.user&.full_name || commit.unregistered_user_name || "Unknown" %>
-                </span>
-                <span>&middot;</span>
-                <span><%= time_ago_in_words(commit.commit_date) %> ago</span>
-              </div>
-
-              <%# Commit Message %>
-              <p class="text-sm text-base-content line-clamp-1">
-                <%= commit.commit_message&.lines&.first&.strip || "No message" %>
-              </p>
-
-              <%# Stats %>
-              <div class="flex items-center gap-3 mt-1 text-xs">
-                <span class="text-success">+<%= commit.lines_added || 0 %></span>
-                <span class="text-error">-<%= commit.lines_removed || 0 %></span>
-                <% if commit.commit_url.present? %>
-                  <%= link_to commit.commit_url,
-                      target: "_blank",
-                      rel: "noopener",
-                      class: "text-base-content/40 hover:text-primary",
-                      onclick: "event.stopPropagation();" do %>
-                    <code class="text-xs"><%= commit.commit_sha&.first(7) %></code>
-                  <% end %>
-                <% end %>
+  <%# Recent Commits List %>
+  <% if @recent_activity.any? %>
+    <div class="space-y-3">
+      <% @recent_activity.each do |commit| %>
+        <div class="flex items-start gap-3 p-3 rounded-lg bg-base-200/50 hover:bg-base-200 transition-colors">
+          <%# Author Avatar %>
+          <% if commit.user.present? %>
+            <%= render Ui::AvatarComponent.new(user: commit.user, size: :sm, placeholder: :initials) %>
+          <% else %>
+            <div class="avatar placeholder">
+              <div class="bg-neutral text-neutral-content w-8 h-8 rounded-full flex items-center justify-center">
+                <span class="text-xs"><%= commit.unregistered_user_name&.first(2)&.upcase || "?" %></span>
               </div>
             </div>
+          <% end %>
+
+          <div class="flex-1 min-w-0">
+            <%# Project and Author %>
+            <div class="flex items-center gap-2 text-xs text-base-content/60 mb-1">
+              <%= link_to commit.project.name,
+                  project_github_logs_path(commit.project),
+                  class: "font-medium hover:text-primary truncate",
+                  onclick: "event.stopPropagation();" %>
+              <span>&middot;</span>
+              <span class="truncate">
+                <%= commit.user&.full_name || commit.unregistered_user_name || "Unknown" %>
+              </span>
+              <span>&middot;</span>
+              <span><%= time_ago_in_words(commit.commit_date) %> ago</span>
+            </div>
+
+            <%# Commit Message %>
+            <p class="text-sm text-base-content line-clamp-1">
+              <%= commit.commit_message&.lines&.first&.strip || "No message" %>
+            </p>
+
+            <%# Stats %>
+            <div class="flex items-center gap-3 mt-1 text-xs">
+              <span class="text-success">+<%= commit.lines_added || 0 %></span>
+              <span class="text-error">-<%= commit.lines_removed || 0 %></span>
+              <% if commit.commit_url.present? %>
+                <%= link_to commit.commit_url,
+                    target: "_blank",
+                    rel: "noopener",
+                    class: "text-base-content/40 hover:text-primary",
+                    onclick: "event.stopPropagation();" do %>
+                  <code class="text-xs"><%= commit.commit_sha&.first(7) %></code>
+                <% end %>
+              <% end %>
+            </div>
           </div>
-        <% end %>
-      </div>
-    <% else %>
-      <div class="text-center py-8">
-        <div class="text-base-content/40 mb-2">
-          <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
         </div>
-        <p class="text-sm text-base-content/60">No recent activity</p>
-        <p class="text-xs text-base-content/40 mt-1">
-          Connect a GitHub repository to your projects to see commits here
-        </p>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-8">
+      <div class="text-base-content/40 mb-2">
+        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
       </div>
-    <% end %>
-  </div>
-</div>
+      <p class="text-sm text-base-content/60">No recent activity</p>
+      <p class="text-xs text-base-content/40 mt-1">
+        Connect a GitHub repository to your projects to see commits here
+      </p>
+    </div>
+  <% end %>
+<% end %>

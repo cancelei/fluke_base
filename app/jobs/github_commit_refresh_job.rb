@@ -6,19 +6,42 @@
 # for Turbo Stream updates.
 #
 # Features:
+# - Rate limit gate: checks token capacity before fetching
 # - Cache-based locking to prevent concurrent processing
 # - SHA-based deduplication for efficient syncing
 # - Automatic branch-log associations
+# - Hybrid mode: fast sync for polling, full stats for manual refresh
+#
+# Usage:
+#   # Background polling (fast mode - no stats, queues enrichment)
+#   GithubCommitRefreshJob.perform_later(project_id, token, branch)
+#
+#   # Manual refresh (full mode - immediate stats)
+#   GithubCommitRefreshJob.perform_later(project_id, token, branch, fetch_stats: true)
 #
 class GithubCommitRefreshJob < ApplicationJob
   queue_as :default
+
+  # Estimated API calls for fast mode (just list endpoint)
+  ESTIMATED_CALLS_FAST = 2
+  # Estimated API calls for full mode (list + individual commits)
+  ESTIMATED_CALLS_FULL = 50
+  # Maximum retry delay when rate limited (10 minutes)
+  MAX_RETRY_DELAY = 10.minutes
+  # Retry attempts for rate limiting
+  MAX_RATE_LIMIT_RETRIES = 3
 
   rescue_from(StandardError) do |exception|
     Rails.logger.error "GithubCommitRefreshJob failed: #{exception.message}\n#{exception.backtrace.join("\n")}"
     raise exception # Re-raise to mark job as failed
   end
 
-  def perform(project_id, access_token, branch = nil)
+  # @param project_id [Integer] Project ID
+  # @param access_token [String] GitHub access token
+  # @param branch [String] Branch name
+  # @param fetch_stats [Boolean] Whether to fetch full commit stats (default: false for polling)
+  # @param retry_count [Integer] Internal retry counter
+  def perform(project_id, access_token, branch = nil, fetch_stats: false, retry_count: 0)
     @project = Project.find_by(id: project_id)
     unless @project
       Rails.logger.error "Project not found with ID: #{project_id}"
@@ -32,10 +55,73 @@ class GithubCommitRefreshJob < ApplicationJob
 
     @access_token = access_token
     @branch = branch
+    @fetch_stats = fetch_stats
+    @retry_count = retry_count
+
+    # Rate limit gate: check before proceeding (different thresholds for fast vs full)
+    unless check_rate_limit_gate
+      handle_rate_limit_exceeded(project_id, access_token, branch, fetch_stats)
+      return
+    end
 
     with_lock(project_id, branch) do
-      fetch_and_store_commits
+      new_commits_count = fetch_and_store_commits
+
+      # If fast mode and we synced new commits, queue stats enrichment
+      if !@fetch_stats && new_commits_count > 0
+        queue_stats_enrichment
+      end
+
+      new_commits_count
     end
+  end
+
+  # Check if we have rate limit capacity to proceed
+  # Uses different thresholds for fast mode vs full mode
+  # @return [Boolean] true if safe to proceed
+  def check_rate_limit_gate
+    rate_tracker = Github::RateLimitTracker.new(@access_token)
+    estimated_calls = @fetch_stats ? ESTIMATED_CALLS_FULL : ESTIMATED_CALLS_FAST
+
+    if rate_tracker.can_make_request?(estimated_calls)
+      true
+    else
+      @rate_tracker_status = {
+        remaining: rate_tracker.current_status[:remaining],
+        limit: rate_tracker.current_status[:limit],
+        consumption: rate_tracker.consumption_percent,
+        wait_time: rate_tracker.wait_time_seconds
+      }
+      false
+    end
+  end
+
+  # Handle rate limit exceeded - reschedule job with delay
+  def handle_rate_limit_exceeded(project_id, access_token, branch, fetch_stats)
+    if @retry_count >= MAX_RATE_LIMIT_RETRIES
+      log_warn "Rate limit exceeded and max retries (#{MAX_RATE_LIMIT_RETRIES}) reached for project #{project_id}, branch '#{branch}'. Giving up."
+      return
+    end
+
+    wait_time = @rate_tracker_status[:wait_time] || 60
+    # Cap the retry delay at MAX_RETRY_DELAY
+    delay = [wait_time.seconds, MAX_RETRY_DELAY].min
+
+    log_warn "Rate limit at #{@rate_tracker_status[:consumption]}% for project #{project_id}, branch '#{branch}'. " \
+             "Rescheduling in #{delay.to_i}s (retry #{@retry_count + 1}/#{MAX_RATE_LIMIT_RETRIES})"
+
+    # Reschedule the job with incremented retry count
+    self.class.set(wait: delay).perform_later(
+      project_id, access_token, branch,
+      fetch_stats: fetch_stats,
+      retry_count: @retry_count + 1
+    )
+  end
+
+  # Queue stats enrichment job to fill in lines_added/removed later
+  def queue_stats_enrichment
+    log_info "Queuing stats enrichment for project #{@project.id}"
+    GithubStatsEnrichmentJob.set(wait: 30.seconds).perform_later(@project.id, @access_token)
   end
 
   private
@@ -66,11 +152,15 @@ class GithubCommitRefreshJob < ApplicationJob
   def fetch_and_store_commits
     return 0 if @project.repository_url.blank?
 
-    # Use the new CommitsFetcher service
+    mode = @fetch_stats ? "full (with stats)" : "fast (no stats)"
+    log_info "Fetching commits in #{mode} mode"
+
+    # Use the CommitsFetcher service with fetch_stats flag
     fetcher = Github::CommitsFetcher.new(
       project: @project,
       access_token: @access_token,
-      branch: @branch
+      branch: @branch,
+      fetch_stats: @fetch_stats
     )
     result = fetcher.call
 

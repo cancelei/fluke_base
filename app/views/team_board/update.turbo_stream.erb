@@ -1,0 +1,6 @@
+<%# Turbo Stream update for task status changes %>
+
+<%# Update the task card in place (frame will handle re-rendering) %>
+<%= turbo_stream.replace dom_id(@task) do %>
+  <%= render "task_card", task: @task %>
+<% end %>

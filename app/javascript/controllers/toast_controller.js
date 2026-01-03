@@ -1,4 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
+import { globalEmitter } from '../utils/emitter';
+import { createLogger } from '../utils/logger';
+import { logConnect, logDisconnect } from '../utils/stimulus_helpers';
+import { fadeOutAndRemove } from '../utils/transitions';
+
+const logger = window.FlukeLogger || createLogger('FlukeBase');
 
 /**
  * DaisyUI Toast Controller
@@ -11,32 +17,30 @@ export default class extends Controller {
   };
 
   connect() {
+    logConnect(logger, 'ToastController', this, {
+      timeout: this.timeoutValue
+    });
+
     this.setupAccessibility();
     this.scheduleRemoval();
     this.addKeyboardSupport();
+    this.subscribeToBus();
   }
 
   disconnect() {
+    logDisconnect(logger, 'ToastController');
+
     if (this.removalTimeout) {
       clearTimeout(this.removalTimeout);
     }
+    this.unsubscribeFns?.forEach(unsub => unsub());
   }
 
   /**
    * Dismiss the toast with fade-out animation
    */
   dismiss() {
-    // Add fade-out animation
-    this.element.classList.add(
-      'opacity-0',
-      'transition-opacity',
-      'duration-300'
-    );
-
-    // Remove element after animation completes
-    setTimeout(() => {
-      this.element.remove();
-    }, 300);
+    fadeOutAndRemove(this.element);
   }
 
   /**
@@ -103,5 +107,18 @@ export default class extends Controller {
     setTimeout(() => {
       announcement.remove();
     }, 1000);
+  }
+
+  subscribeToBus() {
+    const toastId = this.element.id || this.element.dataset.toastId;
+
+    this.unsubscribeFns = [
+      globalEmitter.on('toast:dismiss', payload => {
+        if (!payload || payload === toastId) {
+          this.dismiss();
+        }
+      }),
+      globalEmitter.on('toast:dismiss-all', () => this.dismiss())
+    ];
   }
 }

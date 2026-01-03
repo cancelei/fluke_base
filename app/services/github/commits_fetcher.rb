@@ -9,13 +9,25 @@ module Github
   # - Intelligent SHA-based deduplication
   # - Paginated API fetching
   # - User resolution for commit authors
+  # - **Optimized API usage**: Basic commit info from list (1 call per 100 commits)
+  # - **Optional stats enrichment**: Full commit details fetched only when needed
   # - Returns processed data ready for database insertion
   #
   # Usage:
+  #   # Fast mode - only list API calls (recommended for polling)
   #   result = Github::CommitsFetcher.new(
   #     project: project,
   #     access_token: "ghp_xxx",
-  #     branch: "main"
+  #     branch: "main",
+  #     fetch_stats: false  # Skip individual commit API calls
+  #   ).call
+  #
+  #   # Full mode - includes stats (N additional API calls)
+  #   result = Github::CommitsFetcher.new(
+  #     project: project,
+  #     access_token: "ghp_xxx",
+  #     branch: "main",
+  #     fetch_stats: true
   #   ).call
   #
   #   if result.success?
@@ -24,15 +36,19 @@ module Github
   #   end
   #
   class CommitsFetcher < Base
-    attr_reader :project, :branch, :client, :user_resolver, :repo_path
+    attr_reader :project, :branch, :client, :user_resolver, :repo_path, :fetch_stats
 
     # Initialize the fetcher
     # @param project [Project] The project to fetch commits for
     # @param access_token [String] GitHub personal access token
     # @param branch [String] Branch name to fetch commits from
-    def initialize(project:, access_token:, branch:)
+    # @param fetch_stats [Boolean] Whether to fetch full commit details (stats, files)
+    #   - false (default): Fast mode, only uses list endpoint (1 API call per 100 commits)
+    #   - true: Full mode, fetches each commit individually for stats (N additional calls)
+    def initialize(project:, access_token:, branch:, fetch_stats: false)
       @project = project
       @branch = branch
+      @fetch_stats = fetch_stats
       @client = Client.new(access_token:)
       @user_resolver = UserResolver.new(project)
       @repo_path = extract_repo_path(project.repository_url)
@@ -92,6 +108,10 @@ module Github
       log("Starting commit fetch for branch '#{branch}' (page size: #{per_page})")
 
       loop do
+        # IMPORTANT: Do NOT use GitHub's 'since' parameter here.
+        # Using 'since' prevents fetching older commits after partial fetches.
+        # Instead, we rely on global SHA deduplication for efficiency.
+        # See: docs/GITHUB_SYSTEM_COMPLETE.md for detailed explanation.
         result = client.commits(repo_path, sha: branch, per_page:, page:)
 
         unless result.success?
@@ -132,8 +152,67 @@ module Github
     end
 
     def process_commits(shallow_commits)
+      if fetch_stats
+        process_commits_with_stats(shallow_commits)
+      else
+        process_commits_fast(shallow_commits)
+      end
+    end
+
+    # Fast mode: Process commits using only data from the list endpoint
+    # No additional API calls - uses shallow commit data only
+    # Stats (lines_added, lines_removed, changed_files) will be nil/empty
+    def process_commits_fast(shallow_commits)
+      log("Processing #{shallow_commits.length} commits in fast mode (no stats)")
+
+      shallow_commits.map do |shallow_commit|
+        next if shallow_commit.sha.blank? || shallow_commit.commit.nil?
+
+        # Extract author from shallow commit
+        author_email = shallow_commit.author&.login.presence ||
+                       shallow_commit.commit.author&.email.to_s.downcase
+        next unless author_email.present?
+
+        user_id = user_resolver.find_user_id(author_email, shallow_commit)
+
+        # Find agreement for this user
+        agreement = user_resolver.agreements.find do |a|
+          a.agreement_participants.any? { |p| p.user_id == user_id }
+        end
+
+        {
+          project_id: project.id,
+          agreement_id: agreement&.id,
+          user_id:,
+          commit_sha: shallow_commit.sha,
+          commit_url: shallow_commit.html_url,
+          commit_message: shallow_commit.commit.message,
+          lines_added: 0,        # Not available without full fetch
+          lines_removed: 0,      # Not available without full fetch
+          commit_date: shallow_commit.commit.author.date,
+          changed_files: [],     # Not available without full fetch
+          created_at: Time.current,
+          updated_at: Time.current,
+          unregistered_user_name: author_email,
+          stats_fetched: false   # Flag to indicate stats not yet fetched
+        }
+      end.compact
+    end
+
+    # Full mode: Fetch complete commit details including stats
+    # Makes N additional API calls (one per commit)
+    # Use sparingly - only when stats are required
+    def process_commits_with_stats(shallow_commits)
+      log("Processing #{shallow_commits.length} commits with full stats (#{shallow_commits.length} API calls)")
+
       shallow_commits.each_with_index.map do |shallow_commit, i|
         next if shallow_commit.sha.blank? || shallow_commit.commit.nil?
+
+        # Check rate limit before each commit fetch
+        unless client.can_proceed?
+          log("Rate limit threshold reached at commit #{i + 1}/#{shallow_commits.length}, stopping stats fetch", level: :warn)
+          break
+        end
 
         # Fetch full commit data for diff stats
         result = client.commit(repo_path, shallow_commit.sha)
@@ -179,7 +258,8 @@ module Github
           changed_files:,
           created_at: Time.current,
           updated_at: Time.current,
-          unregistered_user_name: author_email
+          unregistered_user_name: author_email,
+          stats_fetched: true
         }
       end.compact
     end

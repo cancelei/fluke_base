@@ -35,7 +35,7 @@ require "rails_helper"
 
 RSpec.describe ProjectMemory, type: :model do
   let(:user) { create(:user) }
-  let(:project) { create(:project, user: user) }
+  let(:project) { create(:project, user:) }
 
   describe "associations" do
     it { is_expected.to belong_to(:project) }
@@ -59,10 +59,10 @@ RSpec.describe ProjectMemory, type: :model do
   end
 
   describe "scopes" do
-    let!(:fact) { create(:project_memory, project: project, user: user, memory_type: "fact") }
-    let!(:convention) { create(:project_memory, project: project, user: user, memory_type: "convention") }
-    let!(:gotcha) { create(:project_memory, project: project, user: user, memory_type: "gotcha") }
-    let!(:decision) { create(:project_memory, project: project, user: user, memory_type: "decision") }
+    let!(:fact) { create(:project_memory, project:, user:, memory_type: "fact") }
+    let!(:convention) { create(:project_memory, project:, user:, memory_type: "convention") }
+    let!(:gotcha) { create(:project_memory, project:, user:, memory_type: "gotcha") }
+    let!(:decision) { create(:project_memory, project:, user:, memory_type: "decision") }
 
     describe ".facts" do
       it "returns only facts" do
@@ -91,10 +91,10 @@ RSpec.describe ProjectMemory, type: :model do
 
   describe "sync scopes" do
     let!(:synced) do
-      create(:project_memory, project: project, user: user, synced_at: Time.current)
+      create(:project_memory, project:, user:, synced_at: Time.current)
     end
     let!(:unsynced) do
-      create(:project_memory, project: project, user: user, synced_at: nil)
+      create(:project_memory, project:, user:, synced_at: nil)
     end
 
     describe ".synced" do
@@ -112,10 +112,10 @@ RSpec.describe ProjectMemory, type: :model do
 
   describe ".with_tag" do
     let!(:memory_with_tag) do
-      create(:project_memory, project: project, user: user, tags: ["ruby", "rails"])
+      create(:project_memory, project:, user:, tags: ["ruby", "rails"])
     end
     let!(:memory_without_tag) do
-      create(:project_memory, project: project, user: user, tags: ["python"])
+      create(:project_memory, project:, user:, tags: ["python"])
     end
 
     it "returns memories with matching tag" do
@@ -129,10 +129,10 @@ RSpec.describe ProjectMemory, type: :model do
 
   describe ".search" do
     let!(:memory1) do
-      create(:project_memory, project: project, user: user, content: "Use RSpec for testing")
+      create(:project_memory, project:, user:, content: "Use RSpec for testing")
     end
     let!(:memory2) do
-      create(:project_memory, project: project, user: user, content: "Deploy to production")
+      create(:project_memory, project:, user:, content: "Deploy to production")
     end
 
     it "finds memories matching content" do
@@ -146,10 +146,10 @@ RSpec.describe ProjectMemory, type: :model do
 
   describe ".since" do
     let!(:old_memory) do
-      create(:project_memory, project: project, user: user, updated_at: 2.days.ago)
+      create(:project_memory, project:, user:, updated_at: 2.days.ago)
     end
     let!(:new_memory) do
-      create(:project_memory, project: project, user: user, updated_at: 1.hour.ago)
+      create(:project_memory, project:, user:, updated_at: 1.hour.ago)
     end
 
     it "returns memories updated since given time" do
@@ -158,7 +158,7 @@ RSpec.describe ProjectMemory, type: :model do
   end
 
   describe "#mark_synced!" do
-    let(:memory) { create(:project_memory, project: project, user: user, synced_at: nil) }
+    let(:memory) { create(:project_memory, project:, user:, synced_at: nil) }
 
     it "sets synced_at to current time" do
       before_sync = Time.current
@@ -171,8 +171,8 @@ RSpec.describe ProjectMemory, type: :model do
   describe "#to_api_hash" do
     let(:memory) do
       create(:project_memory,
-             project: project,
-             user: user,
+             project:,
+             user:,
              memory_type: "convention",
              content: "Use RuboCop",
              key: "linting",
@@ -201,17 +201,17 @@ RSpec.describe ProjectMemory, type: :model do
   describe "key uniqueness for conventions" do
     let!(:existing) do
       create(:project_memory,
-             project: project,
-             user: user,
+             project:,
+             user:,
              memory_type: "convention",
              key: "testing")
     end
 
     it "allows duplicate keys in different projects" do
-      other_project = create(:project, user: user)
+      other_project = create(:project, user:)
       memory = build(:project_memory,
                      project: other_project,
-                     user: user,
+                     user:,
                      memory_type: "convention",
                      key: "testing")
       expect(memory).to be_valid
@@ -220,8 +220,8 @@ RSpec.describe ProjectMemory, type: :model do
     it "enforces unique keys within same project regardless of type" do
       # Database constraint enforces unique keys per project for all memory types
       memory = build(:project_memory,
-                     project: project,
-                     user: user,
+                     project:,
+                     user:,
                      memory_type: "fact",
                      key: "testing")
       expect(memory).not_to be_valid
@@ -232,22 +232,22 @@ RSpec.describe ProjectMemory, type: :model do
   describe "external_id uniqueness" do
     let!(:existing) do
       create(:project_memory,
-             project: project,
-             user: user,
+             project:,
+             user:,
              external_id: "unique-ext-id")
     end
 
     it "enforces uniqueness at database level" do
       duplicate = build(:project_memory,
-                        project: project,
-                        user: user,
+                        project:,
+                        user:,
                         external_id: "unique-ext-id")
       expect { duplicate.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
     end
 
     it "allows multiple nil external_ids" do
-      memory1 = create(:project_memory, project: project, user: user, external_id: nil)
-      memory2 = build(:project_memory, project: project, user: user, external_id: nil)
+      memory1 = create(:project_memory, project:, user:, external_id: nil)
+      memory2 = build(:project_memory, project:, user:, external_id: nil)
       expect(memory2).to be_valid
     end
   end

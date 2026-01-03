@@ -44,12 +44,14 @@ RSpec.describe 'People Show Page', type: :system do
     end
 
     context 'with avatar' do
-      let(:avatar_blob) { fixture_file_upload('avatar.png', 'image/png') }
+      let(:avatar_blob) { fixture_file_upload(Rails.root.join('spec/fixtures/avatar.png'), 'image/png') }
       let(:user_with_avatar) { create(:user, avatar: avatar_blob) }
 
-      it 'displays user avatar', skip: 'Requires avatar fixture setup' do
+      it 'displays user avatar' do
         visit person_path(user_with_avatar)
-        expect(page).to have_css("img[src*='avatar.png']")
+        # Active Storage serves images via blob URLs, not with original filenames
+        # Check that at least one avatar image is present
+        expect(page).to have_css('.avatar img', minimum: 1)
       end
     end
 
@@ -363,10 +365,10 @@ RSpec.describe 'People Show Page', type: :system do
 
   describe 'error handling' do
     context 'when user not found' do
-      it 'handles missing user gracefully', skip: 'Requires proper error handling' do
-        expect {
-          visit person_path(999999) # Non-existent user
-        }.to raise_error(ActiveRecord::RecordNotFound)
+      it 'returns 404 status for missing user' do
+        # Rails rescues RecordNotFound and renders a 404 error page
+        visit person_path(id: 999_999)
+        expect(page.status_code).to eq(404)
       end
     end
 

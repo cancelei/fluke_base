@@ -1,9 +1,24 @@
 /**
- * Intelligent logging utility for FlukeBase
- * Provides structured, contextual logging for AI agents and developers
+ * Intelligent logging utility for FlukeBase.
+ * Provides structured, contextual logging for AI agents and developers.
+ * Automatically disabled in production environments.
+ * @module utils/logger
  */
 
+/**
+ * Logger class for structured console logging.
+ * Logs are automatically styled and disabled in production.
+ * @class
+ * @example
+ * const logger = new Logger('MyController');
+ * logger.controllerLifecycle('MyController', 'connected');
+ * logger.error('submit', new Error('Network failed'));
+ */
 class Logger {
+  /**
+   * Create a new Logger instance.
+   * @param {string} [context='FlukeBase'] - Context prefix for log messages
+   */
   constructor(context = 'FlukeBase') {
     this.context = context;
     // Check environment from meta tag or fallback to hostname
@@ -19,7 +34,10 @@ class Logger {
   }
 
   /**
-   * Log controller lifecycle events
+   * Log Stimulus controller lifecycle events (connect/disconnect).
+   * @param {string} controllerName - Name of the controller
+   * @param {string} action - Lifecycle action ('connected', 'disconnected')
+   * @param {Object} [details={}] - Additional context to log
    */
   controllerLifecycle(controllerName, action, details = {}) {
     if (this.isProduction) {
@@ -33,7 +51,10 @@ class Logger {
   }
 
   /**
-   * Log WebSocket connection events
+   * Log ActionCable WebSocket connection events.
+   * @param {string} channelName - Name of the ActionCable channel
+   * @param {string} event - Event type ('subscribed', 'received', 'disconnected')
+   * @param {Object} [details={}] - Additional context to log
    */
   websocketEvent(channelName, event, details = {}) {
     if (this.isProduction) {
@@ -47,7 +68,9 @@ class Logger {
   }
 
   /**
-   * Log audio/media events
+   * Log audio/media player events.
+   * @param {string} action - Media action ('play', 'pause', 'ended', 'error')
+   * @param {Object} [details={}] - Additional context (duration, currentTime)
    */
   mediaEvent(action, details = {}) {
     if (this.isProduction) {
@@ -61,7 +84,9 @@ class Logger {
   }
 
   /**
-   * Log form validation and submission events
+   * Log form validation and submission events.
+   * @param {string} action - Form action ('submit', 'validate', 'error')
+   * @param {Object} [details={}] - Additional context (form name, field errors)
    */
   formEvent(action, details = {}) {
     if (this.isProduction) {
@@ -75,7 +100,10 @@ class Logger {
   }
 
   /**
-   * Log errors with context
+   * Log errors with context and stack trace.
+   * @param {string} context - Where the error occurred
+   * @param {Error|string} error - The error object or message
+   * @param {Object} [details={}] - Additional context
    */
   error(context, error, details = {}) {
     if (this.isProduction) {
@@ -94,7 +122,10 @@ class Logger {
   }
 
   /**
-   * Log warnings with context
+   * Log warnings with context.
+   * @param {string} context - Where the warning occurred
+   * @param {string} message - Warning message
+   * @param {Object} [details={}] - Additional context
    */
   warning(context, message, details = {}) {
     if (this.isProduction) {
@@ -108,7 +139,10 @@ class Logger {
   }
 
   /**
-   * Log performance metrics
+   * Log performance metrics for operations.
+   * @param {string} operation - Name of the operation being measured
+   * @param {number} duration - Duration in milliseconds
+   * @param {Object} [details={}] - Additional context
    */
   performance(operation, duration, details = {}) {
     if (this.isProduction) {
@@ -122,7 +156,10 @@ class Logger {
   }
 
   /**
-   * Log user interactions
+   * Log user interaction events.
+   * @param {string} action - Interaction type ('click', 'focus', 'scroll')
+   * @param {HTMLElement|string} element - Element interacted with
+   * @param {Object} [details={}] - Additional context
    */
   userInteraction(action, element, details = {}) {
     if (this.isProduction) {
@@ -136,8 +173,22 @@ class Logger {
   }
 }
 
-// Create global logger instance
-window.FlukeLogger = new Logger();
+/**
+ * Factory function to create a new Logger instance.
+ * @param {string} [context='FlukeBase'] - Context prefix for log messages
+ * @returns {Logger} New Logger instance
+ * @example
+ * import { createLogger } from './utils/logger';
+ * const logger = createLogger('MyController');
+ */
+export const createLogger = (context = 'FlukeBase') => new Logger(context);
+
+// Create global logger instance for backward compatibility
+/** @type {Logger} */
+const globalLogger = createLogger();
+
+window.FlukeLogger = globalLogger;
 
 // Export for module usage
 export default Logger;
+export { globalLogger };

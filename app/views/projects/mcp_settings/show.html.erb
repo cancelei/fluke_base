@@ -1,0 +1,135 @@
+<div>
+  <div class="py-5">
+    <h1 class="text-2xl font-bold tracking-tight">MCP Settings</h1>
+    <p class="mt-1 text-sm text-base-content/60">
+      Configure AI agent access for <strong><%= @project.name %></strong>
+    </p>
+  </div>
+
+  <div class="space-y-8">
+    <!-- Preset Selection -->
+    <section class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">Quick Setup Presets</h2>
+        <p class="text-sm text-base-content/60 mb-4">
+          Choose a preset configuration optimized for your role. You can customize individual settings below.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <% @presets.each do |preset| %>
+            <%= render "preset_card", preset:, selected: @configuration.preset == preset.slug %>
+          <% end %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Plugin Configuration -->
+    <section class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">Available Plugins</h2>
+        <p class="text-sm text-base-content/60 mb-4">
+          Select which plugins to enable for this project. Each plugin provides different AI agent capabilities.
+        </p>
+
+        <%= form_with model: @configuration, url: project_mcp_settings_path(@project), method: :patch, class: "space-y-6" do |f| %>
+          <% @grouped_plugins.each do |type, plugins| %>
+            <div class="mb-6">
+              <h3 class="text-lg font-medium mb-3 flex items-center gap-2">
+                <%= heroicon plugins.first&.type_icon || "cube", variant: :outline, class: "w-5 h-5" %>
+                <%= type.to_s.titleize.gsub("_", " ") %>
+              </h3>
+              <div class="space-y-3">
+                <% plugins.each do |plugin| %>
+                  <%= render "plugin_toggle", plugin:, f:, enabled: @configuration.enabled_plugins&.include?(plugin.slug) %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="flex justify-end mt-6">
+            <%= f.submit "Save Configuration", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <!-- Context Optimization -->
+    <section class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">Context Optimization</h2>
+        <p class="text-sm text-base-content/60 mb-4">
+          Control what project information is sent to AI agents. Less context = faster responses and lower token usage.
+        </p>
+
+        <%= form_with model: @configuration, url: project_mcp_settings_path(@project), method: :patch do |f| %>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="project_mcp_configuration[context_options][include_milestones]"
+                     value="true"
+                     <%= "checked" if @configuration.context_level[:include_milestones] %>
+                     class="checkbox checkbox-primary checkbox-sm">
+              <span class="text-sm">Milestones</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="project_mcp_configuration[context_options][include_team]"
+                     value="true"
+                     <%= "checked" if @configuration.context_level[:include_team] %>
+                     class="checkbox checkbox-primary checkbox-sm">
+              <span class="text-sm">Team Info</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="project_mcp_configuration[context_options][include_agreements]"
+                     value="true"
+                     <%= "checked" if @configuration.context_level[:include_agreements] %>
+                     class="checkbox checkbox-primary checkbox-sm">
+              <span class="text-sm">Agreements</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="project_mcp_configuration[context_options][include_environment]"
+                     value="true"
+                     <%= "checked" if @configuration.context_level[:include_environment] %>
+                     class="checkbox checkbox-primary checkbox-sm">
+              <span class="text-sm">Environment</span>
+            </label>
+          </div>
+
+          <div class="form-control w-full max-w-xs">
+            <label class="label">
+              <span class="label-text">Max Context Tokens</span>
+            </label>
+            <input type="number"
+                   name="project_mcp_configuration[context_options][max_context_tokens]"
+                   value="<%= @configuration.context_level[:max_context_tokens] || 2000 %>"
+                   min="100" max="10000" step="100"
+                   autocomplete="off"
+                   class="input input-bordered w-32">
+            <label class="label">
+              <span class="label-text-alt text-base-content/60">Lower = faster, higher = more context</span>
+            </label>
+          </div>
+
+          <%= f.submit "Save Context Settings", class: "btn btn-primary mt-4" %>
+        <% end %>
+      </div>
+    </section>
+
+    <!-- Token Generation -->
+    <section class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title">Generate MCP Token</h2>
+        <p class="text-sm text-base-content/60 mb-4">
+          Generate a pre-configured API token with scopes matching your selected plugins.
+          Perfect for quickly onboarding contractors or setting up new environments.
+        </p>
+
+        <%= turbo_frame_tag "token_display" do %>
+          <%= button_to "Generate Token",
+              generate_token_project_mcp_settings_path(@project),
+              method: :post,
+              class: "btn btn-secondary",
+              data: { turbo_frame: "token_display" } %>
+        <% end %>
+      </div>
+    </section>
+  </div>
+</div>

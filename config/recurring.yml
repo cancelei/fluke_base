@@ -4,6 +4,11 @@ production:
     queue: default
     schedule: every 60 seconds
 
+  pattern_analysis:
+    class: PatternAnalyzerJob
+    queue: default
+    schedule: every 6 hours
+
   # clear_solid_queue_finished_jobs:
   #   class: SolidQueue::Jobs::ClearFinishedJobsJob
   #   queue: default
@@ -25,3 +30,8 @@ development:
     class: GithubPollingJob
     queue: default
     schedule: every 60 seconds
+
+  pattern_analysis:
+    class: PatternAnalyzerJob
+    queue: default
+    schedule: every 6 hours

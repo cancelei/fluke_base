@@ -1,0 +1,47 @@
+<%= turbo_frame_tag "api_token_form" do %>
+  <div class="alert alert-warning mb-6">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+    <span><strong>Important:</strong> Copy this token now. You won't be able to see it again!</span>
+  </div>
+
+  <div class="mb-6">
+    <label class="text-sm font-medium mb-2 block">Your API Token</label>
+    <div class="flex gap-2">
+      <input
+        type="text"
+        value="<%= raw_token %>"
+        readonly
+        autocomplete="off"
+        class="input input-bordered w-full font-mono text-sm"
+        id="api-token-value">
+      <button
+        type="button"
+        class="btn btn-outline"
+        onclick="navigator.clipboard.writeText(document.getElementById('api-token-value').value); this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy', 2000);">
+        Copy
+      </button>
+    </div>
+  </div>
+
+  <div class="bg-base-200 rounded-lg p-4 mb-6">
+    <h3 class="font-medium mb-2">Quick Setup</h3>
+    <p class="text-sm text-base-content/70 mb-3">Add this to your shell profile (.bashrc, .zshrc, etc.):</p>
+    <pre class="bg-base-300 p-3 rounded text-sm overflow-x-auto"><code>export FLUKEBASE_API_TOKEN=<%= raw_token %></code></pre>
+  </div>
+
+  <div class="prose prose-sm max-w-none mb-6">
+    <h4>Token Details</h4>
+    <ul>
+      <li><strong>Name:</strong> <%= api_token.name %></li>
+      <li><strong>Prefix:</strong> <code><%= api_token.prefix %></code></li>
+      <li><strong>Scopes:</strong> <%= api_token.scopes.join(", ") %></li>
+      <li><strong>Expires:</strong> <%= api_token.expires_at ? api_token.expires_at.strftime("%B %d, %Y") : "Never" %></li>
+    </ul>
+  </div>
+
+  <div class="flex justify-end">
+    <%= link_to "Done", user_settings_api_tokens_path, class: "btn btn-primary" %>
+  </div>
+<% end %>

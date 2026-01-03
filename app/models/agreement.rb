@@ -31,6 +31,52 @@
 #
 #  fk_rails_...  (project_id => projects.id)
 #
+
+# Agreement model representing collaboration agreements between users.
+#
+# Agreements formalize working relationships on projects, supporting
+# mentorship and co-founder arrangements with various payment types.
+# Uses AASM state machine for status transitions.
+#
+# @example Creating a mentorship agreement
+#   agreement = Agreement.create!(
+#     project: project,
+#     agreement_type: Agreement::MENTORSHIP,
+#     payment_type: Agreement::HOURLY,
+#     hourly_rate: 150,
+#     start_date: Date.today,
+#     end_date: 3.months.from_now,
+#     tasks: 'Code reviews and architecture guidance'
+#   )
+#
+# @example State transitions
+#   agreement.accept!  # Pending -> Accepted
+#   agreement.complete! # Accepted -> Completed
+#
+# == Agreement Types
+# - +MENTORSHIP+ - One user mentors another on a project
+# - +CO_FOUNDER+ - Users collaborate as co-founders
+#
+# == Payment Types
+# - +HOURLY+ - Paid by hourly rate
+# - +EQUITY+ - Compensated with equity percentage
+# - +HYBRID+ - Combination of hourly and equity
+#
+# == Status Flow (AASM)
+#   Pending -> Accepted -> Completed
+#          -> Rejected
+#          -> Cancelled
+#          -> Countered (counter offer created)
+#
+# == Associations
+# - +project+ - The project this agreement is for
+# - +agreement_participants+ - Join table linking users to agreement
+# - +meetings+ - Scheduled meetings between participants
+# - +time_logs+ - Time tracked against this agreement
+#
+# @see AgreementParticipant
+# @see Project
+# @see TimeLog
 class Agreement < ApplicationRecord
   include AASM
 
@@ -164,8 +210,16 @@ class Agreement < ApplicationRecord
     participant&.accept_or_counter_turn_id == user.id
   end
 
+  def is_initiator?(user)
+    agreement_participants.find_by(user_id: user.id)&.is_initiator?
+  end
+
+  def other_party_for(user)
+    agreement_participants.where.not(user_id: user.id).first&.user
+  end
+
   def whose_turn?
-    turn_user_id = agreement_participants.first&.accept_or_counter_turn_id
+    turn_user_id = agreement_participants.take&.accept_or_counter_turn_id
     User.find_by(id: turn_user_id) if turn_user_id
   end
 
@@ -189,7 +243,7 @@ class Agreement < ApplicationRecord
   end
 
   def pass_turn_to_other_party(current_user)
-    other_participant = agreement_participants.where.not(user_id: current_user.id).first
+    other_participant = agreement_participants.where.not(user_id: current_user.id).take
     pass_turn_to_user(other_participant.user) if other_participant
   end
 
@@ -232,7 +286,7 @@ class Agreement < ApplicationRecord
   def calculate_total_cost = calculations_service.total_cost
   def duration_in_weeks = calculations_service.duration_in_weeks
   def is_counter_offer? = agreement_participants.any?(&:counter_agreement_id)
-  def counter_to_id = agreement_participants.first&.counter_agreement_id
+  def counter_to_id = agreement_participants.take&.counter_agreement_id
 
   def counter_to
     counter_agreement_id = counter_to_id

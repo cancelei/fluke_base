@@ -27,6 +27,7 @@
 #
 class Milestone < ApplicationRecord
   extend FriendlyId
+  include WebhookDispatchable
 
   belongs_to :project
   has_many :time_logs, dependent: :destroy
@@ -41,6 +42,14 @@ class Milestone < ApplicationRecord
   IN_PROGRESS = "in_progress"
   COMPLETED = "completed"
   CANCELLED = "cancelled"
+
+  # Webhook configuration
+  webhook_events create: "milestone.created",
+                 update: "milestone.updated",
+                 destroy: "milestone.deleted"
+
+  # Dispatch special event when milestone is completed
+  after_commit :dispatch_completed_webhook, on: :update, if: :became_completed?
 
   scope :pending, -> { where(status: PENDING) }
   scope :in_progress, -> { where(status: IN_PROGRESS) }
@@ -100,5 +109,35 @@ class Milestone < ApplicationRecord
   # FriendlyId: regenerate slug when title changes
   def should_generate_new_friendly_id?
     title_changed? || slug.blank?
+  end
+
+  # Webhook payload for API
+  def webhook_payload
+    {
+      id:,
+      title:,
+      description:,
+      status:,
+      due_date: due_date&.iso8601,
+      slug:,
+      project_id:
+    }
+  end
+
+  private
+
+  def became_completed?
+    status == COMPLETED && status_previously_was != COMPLETED
+  end
+
+  def dispatch_completed_webhook
+    dispatcher = WebhookDispatcherService.new(project)
+    dispatcher.dispatch(
+      "milestone.completed",
+      payload: webhook_payload,
+      resource_id: id
+    )
+  rescue StandardError => e
+    Rails.logger.error("Webhook dispatch failed: #{e.message}")
   end
 end

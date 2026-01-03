@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import { createRevealObserver } from '../utils/observers';
 
 export default class extends Controller {
   static targets = ['card', 'number'];
@@ -14,20 +15,12 @@ export default class extends Controller {
   }
 
   setupIntersectionObserver() {
-    const options = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.3
-    };
-
-    this.observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          this.animateCards();
-          this.observer.unobserve(entry.target);
-        }
-      });
-    }, options);
+    this.observer = createRevealObserver(
+      () => {
+        this.animateCards();
+      },
+      { rootMargin: '0px', threshold: 0.3 }
+    );
 
     this.observer.observe(this.element);
   }

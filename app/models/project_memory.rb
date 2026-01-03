@@ -106,14 +106,14 @@ class ProjectMemory < ApplicationRecord
   # Convert to hash for API response
   def to_api_hash
     {
-      id: id,
-      memory_type: memory_type,
-      content: content,
-      key: key,
-      rationale: rationale,
+      id:,
+      memory_type:,
+      content:,
+      key:,
+      rationale:,
       tags: tags || [],
       references: references || {},
-      external_id: external_id,
+      external_id:,
       synced_at: synced_at&.iso8601,
       created_at: created_at.iso8601,
       updated_at: updated_at.iso8601,

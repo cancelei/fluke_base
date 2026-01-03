@@ -177,13 +177,15 @@ jobs:
           path: coverage/
           retention-days: 7
 
-  # E2E tests
+  # E2E tests - Local Playwright (default)
   e2e:
     name: 🎭 E2E Tests
     permissions:
       contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Skip local E2E if using Cloudflare Browser Rendering
+    if: ${{ vars.USE_CF_BROWSER != 'true' }}
 
     services:
       postgres:
@@ -248,11 +250,54 @@ jobs:
             test-results/
           retention-days: 7
 
+  # E2E tests - Cloudflare Browser Rendering (optional)
+  e2e-cloudflare:
+    name: ☁️ E2E Tests (Cloudflare)
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only run if Cloudflare Browser is configured
+    if: ${{ vars.USE_CF_BROWSER == 'true' && vars.CF_BROWSER_WORKER_URL != '' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run E2E tests via Cloudflare Worker
+        env:
+          USE_CF_BROWSER: "1"
+          CF_BROWSER_WORKER_URL: ${{ vars.CF_BROWSER_WORKER_URL }}
+          CF_BROWSER_AUTH_TOKEN: ${{ secrets.CF_BROWSER_AUTH_TOKEN }}
+          PLAYWRIGHT_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL || 'https://dev.flukebase.me' }}
+        run: npm run test:e2e:cf
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-cf-artifacts
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
   # Summary
   summary:
     name: 📊 Summary
     runs-on: ubuntu-latest
-    needs: [security, lint, test, e2e]
+    needs: [security, lint, test, e2e, e2e-cloudflare]
     if: always()
 
     steps:
@@ -265,15 +310,37 @@ jobs:
           echo "| 🔒 Security | ${{ needs.security.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔍 Linting | ${{ needs.lint.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🧪 Tests | ${{ needs.test.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🎭 E2E | ${{ needs.e2e.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+
+          # Show appropriate E2E result based on which job ran
+          if [[ "${{ needs.e2e-cloudflare.result }}" == "success" ]]; then
+            echo "| ☁️ E2E (Cloudflare) | ✅ Pass |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.e2e-cloudflare.result }}" == "failure" ]]; then
+            echo "| ☁️ E2E (Cloudflare) | ❌ Fail |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.e2e.result }}" == "success" ]]; then
+            echo "| 🎭 E2E (Local) | ✅ Pass |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.e2e.result }}" == "failure" ]]; then
+            echo "| 🎭 E2E (Local) | ❌ Fail |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 🎭 E2E | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
+          fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [[ "${{ needs.security.result }}" != "success" || "${{ needs.lint.result }}" != "success" || "${{ needs.test.result }}" != "success" || "${{ needs.e2e.result }}" != "success" ]]; then
+          # Determine E2E success (either job passing, or both skipped is ok)
+          E2E_OK="false"
+          if [[ "${{ needs.e2e.result }}" == "success" || "${{ needs.e2e-cloudflare.result }}" == "success" ]]; then
+            E2E_OK="true"
+          elif [[ "${{ needs.e2e.result }}" == "skipped" && "${{ needs.e2e-cloudflare.result }}" == "skipped" ]]; then
+            E2E_OK="true"
+          fi
+
+          if [[ "${{ needs.security.result }}" != "success" || "${{ needs.lint.result }}" != "success" || "${{ needs.test.result }}" != "success" || "$E2E_OK" != "true" ]]; then
             echo "**🔧 Quick Fixes:**" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
             echo "./bin/lint --fix    # Auto-fix linting issues" >> $GITHUB_STEP_SUMMARY
             echo "bundle exec rspec  # Run tests locally" >> $GITHUB_STEP_SUMMARY
             echo "npm run test:e2e   # Run E2E tests locally" >> $GITHUB_STEP_SUMMARY
+            echo "npm run test:e2e:cf # Run E2E via Cloudflare" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             exit 1
           else

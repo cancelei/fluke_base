@@ -8,6 +8,15 @@ module Rack
     # Use Rails cache store (Solid Cache)
     Rack::Attack.cache.store = Rails.cache
 
+    ### Development/Test Bypass ###
+
+    # Completely disable rate limiting in development and test environments
+    # This prevents issues with MCP tools, rapid testing, and local development
+    if Rails.env.development? || Rails.env.test?
+      Rack::Attack.enabled = false
+      Rails.logger.info "[Rack::Attack] Disabled in #{Rails.env} environment"
+    end
+
     ### Safelist ###
 
     # Always allow requests from localhost (development/testing)
@@ -18,6 +27,11 @@ module Rack
     # Allow health checks
     Rack::Attack.safelist("allow-healthchecks") do |req|
       req.path == "/up" || req.path.start_with?("/test/")
+    end
+
+    # Allow API requests with valid API token (for MCP tools/CLI)
+    Rack::Attack.safelist("allow-api-with-token") do |req|
+      req.path.start_with?("/api/") && req.env["HTTP_AUTHORIZATION"].present?
     end
 
     ### Throttles ###

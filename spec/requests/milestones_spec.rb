@@ -1,6 +1,5 @@
 require 'rails_helper'
 
-# TODO: Rewrite this test - milestones are nested under projects
 RSpec.describe "Milestones", type: :request do
   let(:owner) { create(:user) }
   let(:project) { create(:project, user: owner) }

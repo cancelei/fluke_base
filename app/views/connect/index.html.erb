@@ -1,0 +1,191 @@
+<% content_for :title, "Connect Portal" %>
+
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+      FlukeBase Connect
+    </h1>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">
+      Integrate AI assistants with your development workflow
+    </p>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="text-2xl font-bold text-blue-600"><%= @stats[:total_syncs] %></div>
+      <div class="text-gray-500 dark:text-gray-400">Total Syncs</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="text-2xl font-bold text-green-600"><%= @stats[:active_projects] %></div>
+      <div class="text-gray-500 dark:text-gray-400">Active Projects</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="text-2xl font-bold text-purple-600"><%= @stats[:api_tokens] %></div>
+      <div class="text-gray-500 dark:text-gray-400">API Tokens</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="text-2xl font-bold text-orange-600"><%= @stats[:this_week_syncs] %></div>
+      <div class="text-gray-500 dark:text-gray-400">Syncs This Week</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Quick Start -->
+    <div class="lg:col-span-2">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Quick Start
+          </h2>
+        </div>
+        <div class="p-6">
+          <div class="space-y-4">
+            <div>
+              <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+                1. Install FlukeBase Connect
+              </h3>
+              <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400">
+                <code>curl -sSL https://flukebase.com/install | sh</code>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+                2. Authenticate
+              </h3>
+              <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400">
+                <code>fbc login</code>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="font-medium text-gray-900 dark:text-white mb-2">
+                3. Sync your project
+              </h3>
+              <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400">
+                <code>cd your-project && fbc sync</code>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex space-x-4">
+            <%= link_to "Download Options", connect_download_path,
+                class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" %>
+            <%= link_to "View Documentation", "https://docs.flukebase.com/connect",
+                target: "_blank",
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow mt-8">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Recent Syncs
+          </h2>
+        </div>
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+          <% @recent_syncs.each do |sync| %>
+            <div class="p-4 flex items-center justify-between">
+              <div>
+                <div class="font-medium text-gray-900 dark:text-white">
+                  <%= sync.project.name %>
+                </div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                  <%= sync.environment %> environment
+                </div>
+              </div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                <%= time_ago_in_words(sync.created_at) %> ago
+              </div>
+            </div>
+          <% end %>
+          <% if @recent_syncs.empty? %>
+            <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+              No syncs yet. Run <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">fbc sync</code> to get started.
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- API Tokens -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            API Tokens
+          </h2>
+          <%= link_to user_settings_api_tokens_path, class: "text-blue-600 hover:text-blue-800 text-sm" do %>
+            Manage →
+          <% end %>
+        </div>
+        <div class="p-6">
+          <% @api_tokens.limit(3).each do |token| %>
+            <div class="flex items-center justify-between py-2">
+              <div>
+                <div class="font-medium text-gray-900 dark:text-white text-sm">
+                  <%= token.name %>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  Last used: <%= token.last_used_at ? time_ago_in_words(token.last_used_at) + " ago" : "Never" %>
+                </div>
+              </div>
+              <% if token.active? %>
+                <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Active</span>
+              <% else %>
+                <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">Expired</span>
+              <% end %>
+            </div>
+          <% end %>
+          <% if @api_tokens.empty? %>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">
+              No API tokens yet.
+            </p>
+          <% end %>
+          <%= link_to "Create New Token", new_user_settings_api_token_path,
+              class: "mt-4 block text-center px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm" %>
+        </div>
+      </div>
+
+      <!-- Supported Clients -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Supported AI Clients
+          </h2>
+        </div>
+        <div class="p-6 space-y-3">
+          <% [
+            { name: "Claude Code", icon: "🤖" },
+            { name: "Claude Desktop", icon: "💻" },
+            { name: "Cursor", icon: "📝" },
+            { name: "Windsurf", icon: "🏄" },
+            { name: "Cline", icon: "⚡" },
+            { name: "Gemini CLI", icon: "✨" }
+          ].each do |client| %>
+            <div class="flex items-center space-x-3">
+              <span class="text-xl"><%= client[:icon] %></span>
+              <span class="text-gray-700 dark:text-gray-300"><%= client[:name] %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Help -->
+      <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow text-white p-6">
+        <h3 class="font-semibold text-lg mb-2">Need Help?</h3>
+        <p class="text-blue-100 text-sm mb-4">
+          Check our documentation or run the doctor command to diagnose issues.
+        </p>
+        <div class="bg-white/10 rounded p-3 font-mono text-sm">
+          fbc doctor
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

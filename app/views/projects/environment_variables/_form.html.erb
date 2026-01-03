@@ -1,0 +1,139 @@
+<%= form_with model: [@project, @environment_variable], class: "space-y-6" do |f| %>
+  <%= render Ui::FormErrorsComponent.new(object: @environment_variable) if @environment_variable.errors.any? %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <%# Key %>
+    <div class="form-control w-full">
+      <label class="label">
+        <span class="label-text font-medium">Variable Key <span class="text-error">*</span></span>
+      </label>
+      <%= f.text_field :key,
+                       class: "input input-bordered w-full font-mono uppercase #{@environment_variable.errors[:key].any? ? 'input-error' : ''}",
+                       placeholder: "DATABASE_URL",
+                       required: true,
+                       pattern: "[A-Z][A-Z0-9_]*",
+                       title: "Uppercase letters, numbers, and underscores, starting with a letter" %>
+      <label class="label">
+        <span class="label-text-alt text-base-content/60">
+          Must be uppercase letters, numbers, and underscores (e.g., API_KEY, DATABASE_URL)
+        </span>
+      </label>
+    </div>
+
+    <%# Environment %>
+    <div class="form-control w-full">
+      <label class="label">
+        <span class="label-text font-medium">Environment <span class="text-error">*</span></span>
+      </label>
+      <%= f.select :environment,
+                   options_for_select(EnvironmentVariable::ENVIRONMENTS.map { |e| [e.capitalize, e] }, @environment_variable.environment),
+                   {},
+                   class: "select select-bordered w-full" %>
+      <label class="label">
+        <span class="label-text-alt text-base-content/60">
+          Which environment this variable applies to
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <%# Value %>
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text font-medium">Value</span>
+      <% if @environment_variable.persisted? && @environment_variable.is_secret && @environment_variable.value.present? %>
+        <span class="label-text-alt text-warning">Current value is hidden for security</span>
+      <% end %>
+    </label>
+    <%= f.text_area :value,
+                    class: "textarea textarea-bordered w-full font-mono",
+                    rows: 2,
+                    placeholder: @environment_variable.is_secret ? "Enter new value to update (leave blank to keep current)" : "postgres://localhost:5432/mydb" %>
+    <label class="label">
+      <span class="label-text-alt text-base-content/60">
+        The actual value of the environment variable
+      </span>
+    </label>
+  </div>
+
+  <%# Description %>
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text font-medium">Description</span>
+    </label>
+    <%= f.text_area :description,
+                    class: "textarea textarea-bordered w-full",
+                    rows: 2,
+                    placeholder: "What this variable is used for..." %>
+    <label class="label">
+      <span class="label-text-alt text-base-content/60">
+        Help other team members understand the purpose of this variable
+      </span>
+    </label>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <%# Example Value %>
+    <div class="form-control w-full">
+      <label class="label">
+        <span class="label-text font-medium">Example Value</span>
+      </label>
+      <%= f.text_field :example_value,
+                       class: "input input-bordered w-full font-mono",
+                       placeholder: "postgres://user:pass@host:5432/db" %>
+      <label class="label">
+        <span class="label-text-alt text-base-content/60">
+          A safe example value to show in documentation
+        </span>
+      </label>
+    </div>
+
+    <%# Validation Regex %>
+    <div class="form-control w-full">
+      <label class="label">
+        <span class="label-text font-medium">Validation Pattern</span>
+      </label>
+      <%= f.text_field :validation_regex,
+                       class: "input input-bordered w-full font-mono",
+                       placeholder: "^postgres://.*" %>
+      <label class="label">
+        <span class="label-text-alt text-base-content/60">
+          Optional regex pattern to validate the value format
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <%# Flags %>
+  <div class="card bg-base-200/50">
+    <div class="card-body py-4">
+      <h3 class="font-medium mb-3">Variable Options</h3>
+      <div class="flex flex-wrap gap-6">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <%= f.check_box :is_secret, class: "checkbox checkbox-warning" %>
+          <div>
+            <span class="font-medium">Secret Value</span>
+            <p class="text-sm text-base-content/60">Mark this as a secret (value will be hidden in UI and logs)</p>
+          </div>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer">
+          <%= f.check_box :is_required, class: "checkbox checkbox-error" %>
+          <div>
+            <span class="font-medium">Required</span>
+            <p class="text-sm text-base-content/60">Mark this variable as required for the application to run</p>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <%# Actions %>
+  <div class="flex items-center gap-3 pt-4">
+    <%= f.submit @environment_variable.persisted? ? "Update Variable" : "Create Variable",
+                 class: "btn btn-primary" %>
+    <%= link_to "Cancel",
+                project_environment_variables_path(@project, environment: @environment_variable.environment || "development"),
+                class: "btn btn-ghost" %>
+  </div>
+<% end %>

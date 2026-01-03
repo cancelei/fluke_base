@@ -1,0 +1,156 @@
+<%# Suggested Gotcha Detail - Edit and Approve %>
+<div class="max-w-2xl mx-auto">
+  <%# Breadcrumb %>
+  <div class="text-sm breadcrumbs mb-6">
+    <ul>
+      <li><%= link_to @project.name, project_path(@project) %></li>
+      <li><%= link_to "Suggested Gotchas", project_suggested_gotchas_path(@project) %></li>
+      <li><%= @suggested_gotcha.suggested_title || "Suggestion ##{@suggested_gotcha.id}" %></li>
+    </ul>
+  </div>
+
+  <%# Status badge %>
+  <div class="mb-4">
+    <% if @suggested_gotcha.pending? %>
+      <span class="badge badge-warning gap-1">
+        <%= render Ui::IconComponent.new(name: :clock, size: :xs) %>
+        Pending Review
+      </span>
+    <% elsif @suggested_gotcha.approved? || @suggested_gotcha.edited? %>
+      <span class="badge badge-success gap-1">
+        <%= render Ui::IconComponent.new(name: :check, size: :xs) %>
+        Approved
+      </span>
+    <% elsif @suggested_gotcha.dismissed? %>
+      <span class="badge badge-ghost gap-1">
+        <%= render Ui::IconComponent.new(name: :x_mark, size: :xs) %>
+        Dismissed
+      </span>
+    <% end %>
+  </div>
+
+  <%# Pattern Info Card %>
+  <div class="card bg-base-200 mb-6">
+    <div class="card-body">
+      <h3 class="card-title text-sm text-base-content/60">
+        <%= trigger_type_icon(@suggested_gotcha.trigger_type) %>
+        <%= @suggested_gotcha.trigger_type_label %>
+      </h3>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+        <% if @suggested_gotcha.tool_name.present? %>
+          <div>
+            <div class="text-xs text-base-content/60">Tool</div>
+            <div class="font-mono text-sm"><%= @suggested_gotcha.tool_name %></div>
+          </div>
+        <% end %>
+
+        <div>
+          <div class="text-xs text-base-content/60">Occurrences</div>
+          <div class="font-semibold"><%= @suggested_gotcha.occurrence_count %></div>
+        </div>
+
+        <% if @suggested_gotcha.error_category.present? %>
+          <div>
+            <div class="text-xs text-base-content/60">Category</div>
+            <div class="badge badge-outline badge-sm"><%= @suggested_gotcha.error_category %></div>
+          </div>
+        <% end %>
+
+        <% if @suggested_gotcha.failure_rate.present? %>
+          <div>
+            <div class="text-xs text-base-content/60">Failure Rate</div>
+            <div class="font-semibold text-error"><%= number_to_percentage(@suggested_gotcha.failure_rate * 100, precision: 1) %></div>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Sample error messages %>
+      <% if @suggested_gotcha.sample_messages.any? %>
+        <div class="mt-4">
+          <div class="text-xs text-base-content/60 mb-2">Sample Errors</div>
+          <div class="space-y-2">
+            <% @suggested_gotcha.sample_messages.first(3).each do |msg| %>
+              <div class="bg-base-100 rounded px-3 py-2 text-xs font-mono text-error/80 overflow-x-auto">
+                <%= truncate(msg, length: 200) %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @suggested_gotcha.reviewable? %>
+    <%# Edit Form %>
+    <%= form_with model: [@project, @suggested_gotcha], class: "space-y-4" do |f| %>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Title (optional)</span>
+        </label>
+        <%= f.text_field :suggested_title,
+            class: "input input-bordered w-full",
+            placeholder: "Short descriptive title..." %>
+      </div>
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Gotcha Content</span>
+          <span class="label-text-alt text-base-content/60">Edit if needed before approving</span>
+        </label>
+        <%= f.text_area :suggested_content,
+            class: "textarea textarea-bordered w-full h-32",
+            placeholder: "Describe the gotcha..." %>
+      </div>
+
+      <%# Actions %>
+      <div class="flex flex-col sm:flex-row gap-3 pt-4">
+        <%= link_to "Cancel", project_suggested_gotchas_path(@project), class: "btn btn-ghost" %>
+
+        <div class="flex-1"></div>
+
+        <%= button_to dismiss_project_suggested_gotcha_path(@project, @suggested_gotcha),
+            method: :post,
+            class: "btn btn-outline",
+            data: { turbo_confirm: "Dismiss this suggestion?" } do %>
+          <%= render Ui::IconComponent.new(name: :x_mark, size: :sm) %>
+          Dismiss
+        <% end %>
+
+        <%= f.submit "Save & Approve", class: "btn btn-primary", data: { turbo: false } %>
+      </div>
+    <% end %>
+  <% else %>
+    <%# Already reviewed - show readonly %>
+    <div class="card bg-base-100">
+      <div class="card-body">
+        <% if @suggested_gotcha.suggested_title.present? %>
+          <h2 class="card-title"><%= @suggested_gotcha.suggested_title %></h2>
+        <% end %>
+        <p class="whitespace-pre-wrap"><%= @suggested_gotcha.suggested_content %></p>
+
+        <% if @suggested_gotcha.approved? || @suggested_gotcha.edited? %>
+          <div class="divider"></div>
+          <div class="text-sm text-base-content/60">
+            Approved by <%= @suggested_gotcha.reviewed_by&.full_name || 'Unknown' %>
+            <%= time_ago_in_words(@suggested_gotcha.reviewed_at) %> ago
+            <% if @suggested_gotcha.approved_memory.present? %>
+              &bull;
+              <%= link_to "View Gotcha", "#", class: "link link-primary" %>
+            <% end %>
+          </div>
+        <% elsif @suggested_gotcha.dismissed? %>
+          <div class="divider"></div>
+          <div class="text-sm text-base-content/60">
+            Dismissed by <%= @suggested_gotcha.reviewed_by&.full_name || 'Unknown' %>
+            <%= time_ago_in_words(@suggested_gotcha.reviewed_at) %> ago
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <%= link_to "Back to Suggestions", project_suggested_gotchas_path(@project), class: "btn btn-ghost" %>
+    </div>
+  <% end %>
+</div>

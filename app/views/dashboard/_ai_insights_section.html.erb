@@ -1,0 +1,58 @@
+<%# AI Productivity Insights Section %>
+<%# Shows high-value insights about AI agent productivity and project health %>
+
+<% if @ai_insights.present? %>
+  <div class="mb-6" data-controller="ai-insights">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <div class="p-2 rounded-lg bg-primary/10 text-primary">
+          <%= heroicon "sparkles", class: "w-5 h-5" %>
+        </div>
+        <h2 class="text-lg font-semibold">AI Productivity Insights</h2>
+      </div>
+
+      <%# Onboarding progress indicator %>
+      <% if onboarding_progress&.progress_percentage.to_i < 100 %>
+        <div class="flex items-center gap-2 text-sm text-base-content/60">
+          <span>Setup progress:</span>
+          <div class="w-24 h-2 bg-base-200 rounded-full overflow-hidden">
+            <div class="h-full bg-primary rounded-full transition-all duration-500"
+                 style="width: <%= onboarding_progress.progress_percentage %>%"></div>
+          </div>
+          <span class="font-medium"><%= onboarding_progress.progress_percentage %>%</span>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <% @ai_insights.each do |insight| %>
+        <%= render AiInsights::InsightCardComponent.new(
+          type: insight[:type],
+          title: insight[:title],
+          value: format_insight_value(insight),
+          description: insight[:description],
+          detail_path: insight[:detail_path],
+          intro_key: insight[:intro_key],
+          dismissible: !insight[:seen]
+        ) %>
+      <% end %>
+    </div>
+
+    <%# Empty state if no insights yet %>
+    <% if @ai_insights.empty? %>
+      <div class="card bg-base-100 shadow-md">
+        <div class="card-body text-center py-8">
+          <div class="mx-auto p-3 rounded-full bg-base-200 w-fit mb-4">
+            <%= heroicon "chart-bar", class: "w-8 h-8 text-base-content/50" %>
+          </div>
+          <h3 class="font-medium mb-2">No AI activity yet</h3>
+          <p class="text-sm text-base-content/60 max-w-md mx-auto">
+            Connect flukebase_connect to start tracking your AI-assisted development.
+            You'll see insights about time saved, code contributions, and more.
+          </p>
+          <%= link_to "Learn more", "#", class: "btn btn-primary btn-sm mt-4" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

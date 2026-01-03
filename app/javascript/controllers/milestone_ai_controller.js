@@ -1,18 +1,49 @@
 import { Controller } from '@hotwired/stimulus';
 import { Turbo } from '@hotwired/turbo-rails';
+import { createLogger } from '../utils/logger';
+import { fetchWithCsrf, jsonFetch } from '../utils/network';
+import {
+  logConnect,
+  logDisconnect,
+  safeAsync,
+  withLoadingState
+} from '../utils/stimulus_helpers';
 
+const logger = window.FlukeLogger || createLogger('FlukeBase');
+
+/**
+ * Stimulus controller for AI-enhanced milestone editing.
+ *
+ * Provides AI-powered enhancement of milestone titles and descriptions,
+ * with real-time streaming updates and polling for job completion.
+ */
 export default class MilestoneAiController extends Controller {
+  /**
+   * Stimulus targets for DOM element references.
+   * @static
+   */
   static targets = ['title', 'description', 'enhanceButton', 'styleSelect'];
+
+  /**
+   * Stimulus values for configuration.
+   * @static
+   */
   static values = {
     projectId: Number,
     milestoneId: Number
   };
 
   connect() {
+    logConnect(logger, 'MilestoneAiController', this, {
+      projectId: this.projectIdValue,
+      milestoneId: this.milestoneIdValue
+    });
+
     this.pollingInterval = null;
   }
 
   disconnect() {
+    logDisconnect(logger, 'MilestoneAiController');
     this.stopPolling();
   }
 
@@ -29,14 +60,10 @@ export default class MilestoneAiController extends Controller {
     }
 
     // Show processing status
-    this.enhanceButtonTarget.disabled = true;
-    this.originalButtonHTML = this.enhanceButtonTarget.innerHTML;
-    this.enhanceButtonTarget.innerHTML = `
+    const spinnerMarkup = `
       <span class="loading loading-spinner loading-sm"></span>
       Processing...
     `;
-
-    // Call the backend using Turbo's fetch
     const url = `/projects/${this.projectIdValue}/milestones/ai_enhance`;
     const formData = new FormData();
 
@@ -52,54 +79,54 @@ export default class MilestoneAiController extends Controller {
     }
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-CSRF-Token': document
-            .querySelector('meta[name="csrf-token"]')
-            .getAttribute('content'),
-          'Accept': 'text/vnd.turbo-stream.html'
-        }
-      });
+      await withLoadingState(
+        this.enhanceButtonTarget,
+        async () => {
+          this.enhanceButtonTarget.innerHTML = spinnerMarkup;
 
-      if (response.ok) {
-        const turboStream = await response.text();
+          const response = await fetchWithCsrf(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              Accept: 'text/vnd.turbo-stream.html'
+            }
+          });
 
-        Turbo.renderStreamMessage(turboStream);
+          if (response.ok) {
+            const turboStream = await response.text();
 
-        // For existing milestones, start polling
-        if (this.milestoneIdValue) {
-          // Start polling for completion since Turbo Streams may not work
-          // Wait a bit for the Turbo Stream to update the DOM with milestone ID
-          setTimeout(() => {
-            this.startPollingForCompletion();
-          }, 500);
-        }
-        // For new milestones, the DirectMilestoneEnhancementJob will broadcast directly
-      } else {
-        this.showError('AI enhancement failed. Please try again.');
-        window.FlukeLogger?.error(
-          'MilestoneAI',
-          new Error('AI enhancement failed'),
-          {
-            action: 'enhanceMilestone',
-            status: response.status
+            Turbo.renderStreamMessage(turboStream);
+
+            // For existing milestones, start polling
+            if (this.milestoneIdValue) {
+              // Start polling for completion since Turbo Streams may not work
+              // Wait a bit for the Turbo Stream to update the DOM with milestone ID
+              setTimeout(() => {
+                this.startPollingForCompletion();
+              }, 500);
+            }
+            // For new milestones, the DirectMilestoneEnhancementJob will broadcast directly
+          } else {
+            this.showError('AI enhancement failed. Please try again.');
+            logger?.error('MilestoneAI', new Error('AI enhancement failed'), {
+              action: 'enhanceMilestone',
+              status: response.status
+            });
           }
-        );
-      }
-    } catch (error) {
-      window.FlukeLogger?.error('MilestoneAI', error, {
-        action: 'enhanceMilestone'
-      });
-      this.showError(
-        'AI enhancement failed. Please check your connection and try again.'
+        },
+        {
+          onError: _error => {
+            logger?.error('MilestoneAI', _error, {
+              action: 'enhanceMilestone'
+            });
+            this.showError(
+              'AI enhancement failed. Please check your connection and try again.'
+            );
+          }
+        }
       );
-    } finally {
-      this.enhanceButtonTarget.disabled = false;
-      if (this.originalButtonHTML) {
-        this.enhanceButtonTarget.innerHTML = this.originalButtonHTML;
-      }
+    } catch {
+      // Already handled in onError
     }
   }
 
@@ -272,39 +299,37 @@ export default class MilestoneAiController extends Controller {
       formData.append(this.toSnakeCase(key), value);
     });
 
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-CSRF-Token': document
-            .querySelector('meta[name="csrf-token"]')
-            .getAttribute('content'),
-          'Accept': 'text/vnd.turbo-stream.html'
-        }
-      });
+    await safeAsync(
+      async () => {
+        const response = await fetchWithCsrf(url, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Accept: 'text/vnd.turbo-stream.html'
+          }
+        });
 
-      if (response.ok) {
-        const turboStream = await response.text();
+        if (response.ok) {
+          const turboStream = await response.text();
 
-        Turbo.renderStreamMessage(turboStream);
-      } else {
-        this.showError('Action failed. Please try again.');
-        window.FlukeLogger?.error(
-          'MilestoneAI',
-          new Error(`${action} failed`),
-          {
+          Turbo.renderStreamMessage(turboStream);
+        } else {
+          this.showError('Action failed. Please try again.');
+          logger?.error('MilestoneAI', new Error(`${action} failed`), {
             action,
             status: response.status
-          }
-        );
+          });
+        }
+      },
+      {
+        onError: _error => {
+          logger?.error('MilestoneAI', _error, { action });
+          this.showError(
+            'Action failed. Please check your connection and try again.'
+          );
+        }
       }
-    } catch (error) {
-      window.FlukeLogger?.error('MilestoneAI', error, { action });
-      this.showError(
-        'Action failed. Please check your connection and try again.'
-      );
-    }
+    );
   }
 
   showError(message) {
@@ -390,22 +415,21 @@ export default class MilestoneAiController extends Controller {
       return;
     }
 
-    try {
-      const url = `/projects/${this.projectIdValue}/milestones/${this.milestoneIdValue}/enhancement_status`;
+    await safeAsync(
+      async () => {
+        const url = `/projects/${this.projectIdValue}/milestones/${this.milestoneIdValue}/enhancement_status`;
 
-      const response = await fetch(url, {
-        headers: {
-          'X-CSRF-Token': document
-            .querySelector('meta[name="csrf-token"]')
-            .getAttribute('content'),
-          'Accept': 'application/json'
-        }
-      });
+        const data = await jsonFetch(url, {
+          headers: {
+            Accept: 'application/json'
+          }
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data.enhancement && data.enhancement.status !== 'processing') {
+        if (
+          data &&
+          data.enhancement &&
+          data.enhancement.status !== 'processing'
+        ) {
           // Enhancement completed or failed, stop polling and update UI
           this.stopPolling();
 
@@ -415,14 +439,20 @@ export default class MilestoneAiController extends Controller {
             this.showError('Enhancement failed. Please try again.');
           }
         }
-      } else if (response.status === 404) {
-        this.stopPolling();
+      },
+      {
+        onError: error => {
+          if (error.status === 404) {
+            this.stopPolling();
+          } else {
+            logger?.error('MilestoneAI', error, {
+              action: 'checkEnhancementStatus',
+              milestoneId: this.milestoneIdValue
+            });
+          }
+        }
       }
-    } catch (error) {
-      window.FlukeLogger?.error('MilestoneAI', error, {
-        action: 'checkEnhancementStatus'
-      });
-    }
+    );
   }
 
   async refreshEnhancementDisplay() {
@@ -430,27 +460,29 @@ export default class MilestoneAiController extends Controller {
       return;
     }
 
-    try {
-      const url = `/projects/${this.projectIdValue}/milestones/${this.milestoneIdValue}/enhancement_display`;
-      const response = await fetch(url, {
-        headers: {
-          'X-CSRF-Token': document
-            .querySelector('meta[name="csrf-token"]')
-            .getAttribute('content'),
-          'Accept': 'text/vnd.turbo-stream.html'
+    await safeAsync(
+      async () => {
+        const url = `/projects/${this.projectIdValue}/milestones/${this.milestoneIdValue}/enhancement_display`;
+        const response = await fetchWithCsrf(url, {
+          headers: {
+            Accept: 'text/vnd.turbo-stream.html'
+          }
+        });
+
+        if (response.ok) {
+          const turboStream = await response.text();
+
+          Turbo.renderStreamMessage(turboStream);
         }
-      });
-
-      if (response.ok) {
-        const turboStream = await response.text();
-
-        Turbo.renderStreamMessage(turboStream);
+      },
+      {
+        onError: _error => {
+          logger?.error('MilestoneAI', _error, {
+            action: 'refreshEnhancementDisplay'
+          });
+        }
       }
-    } catch (error) {
-      window.FlukeLogger?.error('MilestoneAI', error, {
-        action: 'refreshEnhancementDisplay'
-      });
-    }
+    );
   }
 
   // Parse enhanced content to extract title and description

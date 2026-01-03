@@ -4,6 +4,8 @@ module Api
   module V1
     module FlukebaseConnect
       class ProjectsController < BaseController
+        include BatchProjectResolvable
+
         before_action :require_read_projects_scope, except: [:create]
         before_action :require_write_projects_scope, only: [:create]
         before_action :set_project, only: [:show, :context]
@@ -75,6 +77,46 @@ module Api
           context_service = ::FlukebaseConnect::ProjectContextService.new(@project, current_user)
 
           render_success({ context: context_service.generate })
+        end
+
+        # GET /api/v1/flukebase_connect/projects/batch_context
+        # Get context for multiple projects at once
+        # Params: project_ids (array) or all=true for all accessible projects
+        def batch_context
+          require_scope!("read:context")
+
+          projects = resolve_batch_projects
+
+          if projects.empty?
+            return render_success({
+              contexts: [],
+              meta: { count: 0, requested: params[:project_ids]&.size || 0 }
+            })
+          end
+
+          contexts = projects.map do |project|
+            context_service = ::FlukebaseConnect::ProjectContextService.new(project, current_user)
+            {
+              project_id: project.id,
+              project_name: project.name,
+              context: context_service.generate
+            }
+          rescue StandardError => e
+            {
+              project_id: project.id,
+              project_name: project.name,
+              error: e.message
+            }
+          end
+
+          render_success({
+            contexts: contexts,
+            meta: {
+              count: contexts.count,
+              successful: contexts.count { |c| !c[:error] },
+              failed: contexts.count { |c| c[:error] }
+            }
+          })
         end
 
         private

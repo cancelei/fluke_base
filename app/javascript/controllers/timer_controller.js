@@ -1,4 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
+import { formatDuration } from '../utils/format';
+import { createLogger } from '../utils/logger';
+import { logConnect, logDisconnect } from '../utils/stimulus_helpers';
+
+const logger = window.FlukeLogger || createLogger('FlukeBase');
 
 export default class extends Controller {
   static targets = ['timer', 'playButton', 'stopButton'];
@@ -11,12 +16,19 @@ export default class extends Controller {
   connect() {
     this.interval = null;
     this.tick = 0;
-    window.FlukeLogger?.controllerLifecycle('TimerController', 'connected', {
+    logConnect(logger, 'TimerController', this, {
       hasStartedAt: !!this.startedAtValue,
       usedHours: this.usedHoursValue
     });
     if (this.startedAtValue) {
       this.startTimer();
+    }
+  }
+
+  disconnect() {
+    logDisconnect(logger, 'TimerController');
+    if (this.interval) {
+      clearInterval(this.interval);
     }
   }
 
@@ -57,10 +69,6 @@ export default class extends Controller {
     const totalUsedSeconds =
       Math.floor(this.usedHoursValue * 3600) + elapsedSeconds;
 
-    const hours = Math.floor(totalUsedSeconds / 3600);
-    const minutes = Math.floor((totalUsedSeconds % 3600) / 60);
-    const seconds = totalUsedSeconds % 60;
-
-    this.timerTarget.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    this.timerTarget.textContent = formatDuration(totalUsedSeconds);
   }
 }

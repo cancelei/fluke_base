@@ -63,6 +63,6 @@ class AgreementCalculationsService < ApplicationService
     # This method is used by the presenter, so we need to determine the context
     # For now, we'll show all participants' time logs, but this could be made more specific
     agreement_participant_ids = @agreement.agreement_participants.pluck(:user_id)
-    @agreement.project.time_logs.where(user_id: agreement_participant_ids).in_progress.last
+    @agreement.project.time_logs.where(user_id: agreement_participant_ids).in_progress.order(:created_at).last
   end
 end

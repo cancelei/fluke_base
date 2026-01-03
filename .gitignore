@@ -45,12 +45,19 @@
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
+yarn.lock
+bun.lock
 
 # Ignore .byebug_history
 .byebug_history
 
 # Ignore Mac system files
 .DS_Store
+
+# Ignore debug and test artifacts
+*.cjs
+dynamic/
+opencodetmp/
 
 # Ignore RubyMine files
 .idea/
@@ -70,3 +77,6 @@ test-results/
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+# Added by flukebase_connect
+.flukebase-connect/

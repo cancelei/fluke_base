@@ -57,8 +57,8 @@ class WebhookDispatcherService
     begin
       response = self.class.post(
         subscription.callback_url,
-        headers: headers,
-        body: body,
+        headers:,
+        body:,
         timeout: DEFAULT_TIMEOUT,
         open_timeout: OPEN_TIMEOUT
       )
@@ -101,19 +101,19 @@ class WebhookDispatcherService
   def create_delivery(subscription, event_type, payload, resource_id)
     idempotency_key = WebhookDelivery.generate_idempotency_key(
       subscription_id: subscription.id,
-      event_type: event_type,
-      resource_id: resource_id,
+      event_type:,
+      resource_id:,
       timestamp: Time.current
     )
 
     # Check for duplicate (idempotency)
-    existing = subscription.webhook_deliveries.find_by(idempotency_key: idempotency_key)
+    existing = subscription.webhook_deliveries.find_by(idempotency_key:)
     return existing if existing
 
     subscription.webhook_deliveries.create!(
-      event_type: event_type,
+      event_type:,
       payload: build_payload(event_type, payload),
-      idempotency_key: idempotency_key
+      idempotency_key:
     )
   end
 
@@ -122,7 +122,7 @@ class WebhookDispatcherService
       event: event_type,
       timestamp: Time.current.iso8601,
       project_id: @project.id,
-      data: data
+      data:
     }
   end
 

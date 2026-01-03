@@ -1,5 +1,38 @@
 # frozen_string_literal: true
 
+# == Schema Information
+#
+# Table name: environment_variables
+#
+#  id               :bigint           not null, primary key
+#  description      :text
+#  environment      :string           default("development"), not null
+#  example_value    :text
+#  is_required      :boolean          default(FALSE), not null
+#  is_secret        :boolean          default(FALSE), not null
+#  key              :string           not null
+#  validation_regex :string
+#  value_ciphertext :text
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  created_by_id    :bigint           not null
+#  project_id       :bigint           not null
+#  updated_by_id    :bigint
+#
+# Indexes
+#
+#  idx_env_vars_project_env_key                               (project_id,environment,key) UNIQUE
+#  index_environment_variables_on_created_by_id               (created_by_id)
+#  index_environment_variables_on_project_id                  (project_id)
+#  index_environment_variables_on_project_id_and_environment  (project_id,environment)
+#  index_environment_variables_on_updated_by_id               (updated_by_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (created_by_id => users.id)
+#  fk_rails_...  (project_id => projects.id)
+#  fk_rails_...  (updated_by_id => users.id)
+#
 FactoryBot.define do
   factory :environment_variable do
     association :project

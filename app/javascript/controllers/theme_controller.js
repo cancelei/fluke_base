@@ -1,4 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
+import { qs, qsa } from '../utils/dom';
+import { createLogger } from '../utils/logger';
+import { jsonFetch } from '../utils/network';
+import { logConnect, logDisconnect } from '../utils/stimulus_helpers';
+
+const logger = window.FlukeLogger || createLogger('FlukeBase');
 
 /**
  * Theme Controller
@@ -15,17 +21,25 @@ export default class extends Controller {
   };
 
   connect() {
+    logConnect(logger, 'ThemeController', this, {
+      current: this.currentValue
+    });
+
     // Initialize current theme from HTML attribute
     this.currentValue =
       document.documentElement.getAttribute('data-theme') || 'nord';
     this.updateUI();
   }
 
+  disconnect() {
+    logDisconnect(logger, 'ThemeController');
+  }
+
   /**
    * Get the theme modal element (rendered globally in layout)
    */
   get modal() {
-    return document.getElementById('theme-modal');
+    return qs(document, '#theme-modal');
   }
 
   /**
@@ -87,21 +101,15 @@ export default class extends Controller {
    */
   async persistTheme(theme) {
     try {
-      const response = await fetch(this.endpointValue, {
+      await jsonFetch(this.endpointValue, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': this.csrfToken,
-          'Accept': 'application/json'
-        },
         body: JSON.stringify({ theme })
       });
-
-      if (!response.ok) {
-        console.warn('Failed to persist theme preference');
-      }
     } catch (error) {
-      console.warn('Error persisting theme:', error);
+      logger?.warning('ThemeController', 'Failed to persist theme preference', {
+        error: error.message,
+        theme
+      });
       // Theme is already applied via localStorage, so graceful degradation
     }
   }
@@ -111,7 +119,7 @@ export default class extends Controller {
    */
   updateUI() {
     // Find all theme cards in the modal (which is outside controller scope)
-    const themeCards = document.querySelectorAll('[data-theme-card]');
+    const themeCards = qsa(document, '[data-theme-card]');
 
     themeCards.forEach(card => {
       const cardTheme = card.dataset.themeValue;
@@ -139,15 +147,11 @@ export default class extends Controller {
       }
 
       // Update checkmark visibility
-      const checkmark = card.querySelector('[data-checkmark]');
+      const checkmark = qs(card, '[data-checkmark]');
 
       if (checkmark) {
         checkmark.classList.toggle('hidden', !isSelected);
       }
     });
-  }
-
-  get csrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content || '';
   }
 }

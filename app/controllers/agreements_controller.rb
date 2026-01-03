@@ -151,7 +151,7 @@ class AgreementsController < ApplicationController
       hourly_rate: @agreement.hourly_rate,
       equity_percentage: @agreement.equity_percentage,
       milestone_ids: @agreement.milestone_ids,
-      counter_agreement_id: @agreement.agreement_participants.first&.counter_agreement_id,
+      counter_agreement_id: @agreement.agreement_participants.take&.counter_agreement_id,
       status: @agreement.status
     )
 
@@ -173,10 +173,10 @@ class AgreementsController < ApplicationController
       # Determine success message based on whether it's a counter offer
       if @agreement_form.is_counter_offer?
         notice_message = "Counter offer was successfully created and sent to #{@agreement.other_party&.full_name || 'the other party'}. They'll be notified to review your proposal."
-        notify_and_message_other_party(:counter_offer)
+        AgreementNotificationService.call(@agreement, current_user, :counter_offer)
       else
         notice_message = "Agreement proposal sent to #{@agreement.other_party&.full_name || 'the other party'}! They'll be notified to review and respond."
-        notify_and_message_other_party(:create)
+        AgreementNotificationService.call(@agreement, current_user, :create)
       end
 
       # Redirect to the agreement show page for better context
@@ -204,7 +204,7 @@ class AgreementsController < ApplicationController
     @agreement_form = AgreementForm.new(form_params)
 
     if @agreement_form.update_agreement(@agreement)
-      notify_and_message_other_party(:update)
+      AgreementNotificationService.call(@agreement, current_user, :update)
       redirect_to @agreement, notice: "Agreement was successfully updated."
     else
       # Ensure @project is set for the form partial
@@ -229,7 +229,7 @@ class AgreementsController < ApplicationController
         hourly_rate: @agreement.hourly_rate,
         equity_percentage: @agreement.equity_percentage,
         milestone_ids: @agreement.milestone_ids,
-        counter_agreement_id: @agreement.agreement_participants.first&.counter_agreement_id,
+        counter_agreement_id: @agreement.agreement_participants.take&.counter_agreement_id,
         status: @agreement.status
       )
 
@@ -361,40 +361,24 @@ class AgreementsController < ApplicationController
       return false if params[:counter_to_id].present? # Counter offers are allowed
       return false unless params[:other_party_id].present? && params[:project_id].present?
 
-      # Check for existing agreements using the new AgreementParticipants structure
-      query = Agreement.joins(:agreement_participants)
-        .where(project_id: params[:project_id], status: [Agreement::ACCEPTED, Agreement::PENDING])
-        .where(agreement_participants: { user_id: [current_user.id, params[:other_party_id]] })
-        .group("agreements.id")
-        .having("COUNT(agreement_participants.id) = 2")
-
-      # Exclude current agreement if editing
-      if params[:id].present?
-        query = query.where.not(id: params[:id])
-      end
-
-      query.exists?
+      duplicate_checker.exists?
     end
 
     def duplicate_agreement_flash
-      # Find existing agreement using AgreementParticipants structure
-      agreement = Agreement.joins(:agreement_participants)
-        .where(project_id: params[:project_id], status: [Agreement::ACCEPTED, Agreement::PENDING])
-        .where(agreement_participants: { user_id: [current_user.id, params[:other_party_id]] })
-        .group("agreements.id")
-        .having("COUNT(agreement_participants.id) = 2")
-        .first
+      duplicate_checker.flash_message(link_helper: self)
+    end
 
-      "You currently have an agreement with this mentor for this project. View agreement <b><a href='#{agreement_path(agreement.id)}'>here</a></b>".html_safe
+    def duplicate_checker
+      @duplicate_checker ||= AgreementDuplicateChecker.new(
+        user1_id: current_user.id,
+        user2_id: params[:other_party_id],
+        project_id: params[:project_id],
+        exclude_agreement_id: params[:id]
+      )
     end
 
     def set_project_from_params_or_session
-      if params[:project_id].present?
-        @project = Project.find(params[:project_id])
-        session[:selected_project_id] = @project.id if @project
-      elsif current_user.selected_project.present?
-        @project = current_user.selected_project
-      end
+      @project = ProjectResolutionService.new(current_user, params, session).call
     end
 
     def handle_edit_counter_offer
@@ -430,81 +414,7 @@ class AgreementsController < ApplicationController
       end
     end
 
-    # Centralized notification and message logic
-    def notify_and_message_other_party(action)
-      other_party = if @original_agreement&.present? && [:create].include?(action)
-        current_user.id == @original_agreement.initiator&.id ? @original_agreement.other_party : @original_agreement.initiator
-      else
-        current_user.id == @agreement.initiator&.id ? @agreement.other_party : @agreement.initiator
-      end
-      case action
-      when :create
-        if @original_agreement&.present?
-          notify_and_message(
-            other_party,
-            "New Counter Offer",
-            "#{current_user.full_name} has made a counter offer for project #{@agreement.project.name}",
-            "[Automated] #{current_user.full_name} has made a counter offer for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
-          )
-        else
-          notify_and_message(
-            other_party,
-            "New Agreement Proposal",
-            "#{current_user.full_name} has proposed an agreement for project #{@agreement.project.name}",
-            "[Automated] #{current_user.full_name} has proposed an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
-          )
-        end
-      when :update
-        notify_and_message(
-          other_party,
-          "New Agreement Proposal",
-          "#{current_user.full_name} has changed the terms for an agreement for project #{@agreement.project.name}",
-          "[Automated] #{current_user.full_name} has changed the terms for an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
-        )
-      when :accept
-        notify_and_message(
-          other_party,
-          "New Agreement Proposal",
-          "#{current_user.full_name} has accepted an agreement for project #{@agreement.project.name}",
-          "[Automated] #{current_user.full_name} has accepted an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
-        )
-      when :reject
-        notify_and_message(
-          other_party,
-          "New Agreement Proposal",
-          "#{current_user.full_name} has rejected an agreement for project #{@agreement.project.name}",
-          "[Automated] #{current_user.full_name} has rejected an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
-        )
-      when :complete
-        notify_and_message(
-          other_party,
-          "New Agreement Proposal",
-          "#{current_user.full_name} has marked the agreement for project #{@agreement.project.name} as completed",
-          "[Automated] #{current_user.full_name} has marked the agreement for project '#{@agreement.project.name}' as completed. Please review the new terms. #{details_link}"
-        )
-      when :cancel
-        notify_and_message(
-          other_party,
-          "New Agreement Proposal",
-          "#{current_user.full_name} has canceled an agreement for project #{@agreement.project.name}",
-          "[Automated] #{current_user.full_name} has canceled an agreement for project '#{@agreement.project.name}'. Please review the new terms. #{details_link}"
-        )
-      end
-    end
 
-    def notify_and_message(other_party, title, message, body)
-      NotificationService.new(other_party).notify(
-        title:,
-        message:,
-        url: agreement_path(@agreement)
-      )
-      conversation = Conversation.between(current_user.id, other_party.id)
-      Message.create!(
-        conversation:,
-        user: current_user,
-        body:
-      )
-    end
 
     def set_agreement
       @agreement = Agreement.includes(
@@ -611,7 +521,7 @@ class AgreementsController < ApplicationController
     handle_result(result) do |type, value|
       case type
       when :success
-        notify_and_message_other_party(action)
+        AgreementNotificationService.call(@agreement, current_user, action)
         respond_to do |format|
           format.turbo_stream do
             flash.now[:notice] = success_message

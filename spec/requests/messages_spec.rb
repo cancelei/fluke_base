@@ -1,6 +1,5 @@
 require 'rails_helper'
 
-# TODO: Rewrite this test - messages are nested under conversations
 RSpec.describe "Messages", type: :request do
   describe "POST /conversations/:conversation_id/messages" do
     it "creates a message and redirects" do

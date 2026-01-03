@@ -17,10 +17,15 @@ RailsCloudflareTurnstile.configure do |c|
     # Test environment: disable Turnstile entirely
     c.enabled = false
     c.fail_open = true
+  elsif Rails.env.development?
+    # Development: disable Turnstile to avoid domain whitelist issues
+    # To enable in dev, add dev.flukebase.me to Cloudflare Turnstile widget
+    c.enabled = false
+    c.fail_open = true
   else
-    # Development, staging, and production: enable if keys are configured
+    # Staging and production: enable if keys are configured
     keys_configured = site_key.present? && secret_key.present?
     c.enabled = keys_configured
-    c.fail_open = Rails.env.development? # Graceful degradation only in development
+    c.fail_open = false
   end
 end

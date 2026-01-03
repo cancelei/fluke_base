@@ -1,0 +1,205 @@
+<% content_for :title, "Plugins - FlukeBase Connect" %>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        Plugins
+      </h1>
+      <p class="mt-2 text-gray-600 dark:text-gray-400">
+        Extend FlukeBase Connect with powerful plugins
+      </p>
+    </div>
+
+    <!-- Installed Plugins -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+          Core Plugins
+        </h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Included with every FlukeBase Connect installation
+        </p>
+      </div>
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @installed_plugins.each do |plugin| %>
+          <div class="p-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                <%= plugin[:name].first.upcase %>
+              </div>
+              <div>
+                <div class="font-medium text-gray-900 dark:text-white">
+                  <%= plugin[:name].titleize %>
+                </div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                  <%= plugin[:description] %>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-3">
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                v<%= plugin[:version] %>
+              </span>
+              <span class="px-2 py-1 text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded">
+                Active
+              </span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Plugin Features -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <!-- FlukeBase Core -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white">FlukeBase Core</h3>
+        </div>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Project management</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Environment sync</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Authentication</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>MCP client configuration</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Memory -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white">Memory</h3>
+        </div>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Persistent knowledge storage</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Cross-session recall</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Convention tracking</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Decision logging</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- WeDo -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white">WeDo</h3>
+        </div>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Task management</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Milestone tracking</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Time synchronization</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Progress reporting</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Analyzer -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center space-x-3 mb-4">
+          <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 dark:text-white">Analyzer</h3>
+        </div>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Framework detection</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Token counting</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Secret scanning</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <span class="text-green-500">&#10003;</span>
+            <span>Dependency analysis</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Coming Soon -->
+    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
+      <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-4">
+        Coming Soon
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 opacity-60">
+          <div class="font-medium text-gray-900 dark:text-white">GitHub Integration</div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Direct PR and issue access</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 opacity-60">
+          <div class="font-medium text-gray-900 dark:text-white">OpenAI Provider</div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">GPT model integration</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 opacity-60">
+          <div class="font-medium text-gray-900 dark:text-white">Anthropic Provider</div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Claude API integration</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-8">
+      <%= link_to connect_path, class: "text-blue-600 hover:text-blue-800" do %>
+        &larr; Back to Connect Portal
+      <% end %>
+    </div>
+  </div>
+</div>

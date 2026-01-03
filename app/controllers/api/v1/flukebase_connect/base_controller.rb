@@ -82,13 +82,13 @@ module Api
 
         # Helper methods for consistent response format
         def render_success(data, status: :ok)
-          render json: data, status: status
+          render json: data, status:
         end
 
         def render_error(message, status: :unprocessable_entity, errors: nil)
-          response = { error: "error", message: message }
+          response = { error: "error", message: }
           response[:errors] = errors if errors
-          render json: response, status: status
+          render json: response, status:
         end
       end
     end

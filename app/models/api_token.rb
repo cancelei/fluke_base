@@ -45,6 +45,12 @@ class ApiToken < ApplicationRecord
     write:memories
     read:webhooks
     write:webhooks
+    read:metrics
+    write:metrics
+    read:tasks
+    write:tasks
+    read:agents
+    write:agents
   ].freeze
 
   # Default scopes for new tokens (read-only access)
@@ -70,29 +76,32 @@ class ApiToken < ApplicationRecord
 
   # Scopes
   scope :active, -> { where(revoked_at: nil).where("expires_at IS NULL OR expires_at > ?", Time.current) }
-  scope :for_user, ->(user) { where(user: user) }
+  scope :for_user, ->(user) { where(user:) }
+
+  # Result struct returned by generate_for
+  GenerateResult = Struct.new(:token, :raw_token, :prefix, keyword_init: true)
 
   # Generate a new token for a user
-  # Returns an OpenStruct with :token (the model), :raw_token (shown once), :prefix
+  # Returns a GenerateResult with :token (the model), :raw_token (shown once), :prefix
   def self.generate_for(user, name:, scopes: DEFAULT_SCOPES, expires_in: nil)
     # Generate secure token: fbk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
     raw_token = "#{TOKEN_PREFIX}#{SecureRandom.urlsafe_base64(32)}"
     prefix = raw_token[0, 8] # "fbk_xxxx"
 
     token = create!(
-      user: user,
-      name: name,
+      user:,
+      name:,
       token_digest: Digest::SHA256.hexdigest(raw_token),
-      prefix: prefix,
-      scopes: scopes,
+      prefix:,
+      scopes:,
       expires_at: expires_in ? Time.current + expires_in : nil
     )
 
     # Return the raw token (only shown once)
-    OpenStruct.new(
-      token: token,
-      raw_token: raw_token,
-      prefix: prefix
+    GenerateResult.new(
+      token:,
+      raw_token:,
+      prefix:
     )
   end
 

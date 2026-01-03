@@ -1,0 +1,159 @@
+<% content_for :title, "Download FlukeBase Connect" %>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 text-center">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        Download FlukeBase Connect
+      </h1>
+      <p class="mt-2 text-gray-600 dark:text-gray-400">
+        Choose your installation method
+      </p>
+    </div>
+
+    <!-- Recommended: One-Line Install -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-8 mb-8 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="px-2 py-1 bg-white/20 rounded text-sm">Recommended</span>
+          <h2 class="text-2xl font-bold mt-2">One-Line Install</h2>
+          <p class="text-blue-100 mt-1">Works on macOS, Linux, and WSL</p>
+        </div>
+      </div>
+      <div class="mt-6 bg-black/30 rounded-lg p-4 font-mono text-green-300 flex items-center justify-between">
+        <code id="install-command">curl -sSL https://flukebase.com/install | sh</code>
+        <button onclick="copyCommand()" class="ml-4 px-3 py-1 bg-white/20 rounded hover:bg-white/30">
+          Copy
+        </button>
+      </div>
+    </div>
+
+    <!-- Alternative Methods -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <!-- pipx -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+          Using pipx
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          Isolated Python environment (recommended for Python users)
+        </p>
+        <div class="bg-gray-900 rounded p-3 font-mono text-sm text-green-400">
+          pipx install flukebase-connect
+        </div>
+      </div>
+
+      <!-- pip -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+          Using pip
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          Standard Python package installation
+        </p>
+        <div class="bg-gray-900 rounded p-3 font-mono text-sm text-green-400">
+          pip install --user flukebase-connect
+        </div>
+      </div>
+
+      <!-- uv -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+          Using uv
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          Fast Python package manager
+        </p>
+        <div class="bg-gray-900 rounded p-3 font-mono text-sm text-green-400">
+          uv tool install flukebase-connect
+        </div>
+      </div>
+
+      <!-- Homebrew (Future) -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 opacity-50">
+        <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+          Using Homebrew
+          <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded ml-2">Coming Soon</span>
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          macOS package manager
+        </p>
+        <div class="bg-gray-900 rounded p-3 font-mono text-sm text-gray-500">
+          brew install flukebase-connect
+        </div>
+      </div>
+    </div>
+
+    <!-- Pre-built Binaries -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+          Pre-built Binaries
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">
+          No Python required - standalone executables
+        </p>
+      </div>
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @platforms.each do |platform| %>
+          <div class="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700">
+            <div class="flex items-center space-x-3">
+              <span class="text-2xl">
+                <%= case platform[:icon]
+                    when "apple" then "🍎"
+                    when "linux" then "🐧"
+                    when "windows" then "🪟"
+                    end %>
+              </span>
+              <span class="font-medium text-gray-900 dark:text-white">
+                <%= platform[:name] %>
+              </span>
+            </div>
+            <%= link_to "Download",
+                "https://github.com/flukebase/flukebase-connect/releases/latest/download/#{platform[:file]}",
+                class: "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- After Install -->
+    <div class="mt-8 bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
+      <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-4">
+        After Installation
+      </h3>
+      <div class="space-y-4">
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">1</span>
+          <div>
+            <div class="font-medium text-gray-900 dark:text-white">Authenticate</div>
+            <code class="text-sm text-gray-600 dark:text-gray-400">fbc login</code>
+          </div>
+        </div>
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">2</span>
+          <div>
+            <div class="font-medium text-gray-900 dark:text-white">Verify installation</div>
+            <code class="text-sm text-gray-600 dark:text-gray-400">fbc doctor</code>
+          </div>
+        </div>
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">3</span>
+          <div>
+            <div class="font-medium text-gray-900 dark:text-white">Sync a project</div>
+            <code class="text-sm text-gray-600 dark:text-gray-400">cd your-project && fbc sync</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyCommand() {
+  const command = document.getElementById('install-command').textContent;
+  navigator.clipboard.writeText(command);
+  alert('Copied to clipboard!');
+}
+</script>

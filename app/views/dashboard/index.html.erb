@@ -1,3 +1,6 @@
+<%# AI Productivity Insights (shown at top for progressive disclosure) %>
+<%= render "ai_insights_section" %>
+
 <%# Activity Overview Section %>
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
   <%# My Projects (ordered by activity) %>
@@ -28,28 +31,7 @@
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <% @explorable_projects.each do |project| %>
-            <div class="card card-compact bg-base-200 hover:shadow-md transition-shadow">
-              <div class="card-body">
-                <div class="flex items-start justify-between gap-2">
-                  <h3 class="font-medium text-sm truncate">
-                    <%= display_project_name(project, current_user) %>
-                  </h3>
-                  <%= display_project_stage_badge(project, current_user) %>
-                </div>
-
-                <p class="text-xs text-base-content/60 line-clamp-2">
-                  <%= display_project_description(project, current_user, truncate: true) %>
-                </p>
-
-                <div class="flex items-center justify-between mt-2 pt-2 border-t border-base-300">
-                  <div class="flex items-center gap-2">
-                    <%= render Ui::AvatarComponent.new(user: project.user, size: :xs, placeholder: :initials) %>
-                    <span class="text-xs text-base-content/60"><%= project.user.first_name %></span>
-                  </div>
-                  <%= link_to "View", project_path(project), class: "btn btn-primary btn-xs" %>
-                </div>
-              </div>
-            </div>
+            <%= render ProjectCardComponent.new(project: project, current_user: current_user, variant: :compact) %>
           <% end %>
         </div>
       </div>

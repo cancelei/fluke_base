@@ -1,0 +1,173 @@
+<div>
+  <%# Breadcrumbs %>
+  <div class="breadcrumbs text-sm mb-4">
+    <ul>
+      <li>
+        <%= link_to project_path(@project) do %>
+          <%= render Ui::IconComponent.new(name: :folder, size: :sm) %>
+          <%= @project.name %>
+        <% end %>
+      </li>
+      <li>
+        <%= link_to project_environment_variables_path(@project, environment: @environment_variable.environment) do %>
+          <%= render Ui::IconComponent.new(name: :cog_6_tooth, size: :sm) %>
+          Environment Variables
+        <% end %>
+      </li>
+      <li class="font-semibold"><%= @environment_variable.key %></li>
+    </ul>
+  </div>
+
+  <div class="py-5">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight font-mono"><%= @environment_variable.key %></h1>
+        <p class="mt-1 text-sm text-base-content/60">
+          <span class="capitalize"><%= @environment_variable.environment %></span> environment variable
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <%= link_to edit_project_environment_variable_path(@project, @environment_variable),
+                    class: "btn btn-ghost gap-2" do %>
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit
+        <% end %>
+        <%= button_to project_environment_variable_path(@project, @environment_variable),
+                      method: :delete,
+                      class: "btn btn-error btn-outline gap-2",
+                      form: { data: { turbo_confirm: "Are you sure you want to delete '#{@environment_variable.key}'?" } } do %>
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Delete
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body p-0">
+      <div class="divide-y divide-base-200">
+        <%# Value %>
+        <div class="px-6 py-4">
+          <div class="sm:grid sm:grid-cols-3 sm:gap-6">
+            <dt class="text-sm font-semibold">Value</dt>
+            <dd class="mt-2 text-sm sm:mt-0 sm:col-span-2">
+              <% if @environment_variable.is_secret %>
+                <span class="text-base-content/50 italic">***REDACTED*** (secret value)</span>
+              <% elsif @environment_variable.value.present? %>
+                <code class="font-mono bg-base-200 px-2 py-1 rounded break-all"><%= @environment_variable.value %></code>
+              <% else %>
+                <span class="text-base-content/40 italic">Not set</span>
+              <% end %>
+            </dd>
+          </div>
+        </div>
+
+        <%# Environment %>
+        <div class="px-6 py-4">
+          <div class="sm:grid sm:grid-cols-3 sm:gap-6">
+            <dt class="text-sm font-semibold">Environment</dt>
+            <dd class="mt-2 text-sm sm:mt-0 sm:col-span-2">
+              <span class="badge badge-neutral capitalize"><%= @environment_variable.environment %></span>
+            </dd>
+          </div>
+        </div>
+
+        <%# Description %>
+        <div class="px-6 py-4">
+          <div class="sm:grid sm:grid-cols-3 sm:gap-6">
+            <dt class="text-sm font-semibold">Description</dt>
+            <dd class="mt-2 text-sm sm:mt-0 sm:col-span-2">
+              <% if @environment_variable.description.present? %>
+                <%= @environment_variable.description %>
+              <% else %>
+                <span class="text-base-content/40 italic">No description</span>
+              <% end %>
+            </dd>
+          </div>
+        </div>
+
+        <%# Example Value %>
+        <div class="px-6 py-4">
+          <div class="sm:grid sm:grid-cols-3 sm:gap-6">
+            <dt class="text-sm font-semibold">Example Value</dt>
+            <dd class="mt-2 text-sm sm:mt-0 sm:col-span-2">
+              <% if @environment_variable.example_value.present? %>
+                <code class="font-mono bg-base-200 px-2 py-1 rounded"><%= @environment_variable.example_value %></code>
+              <% else %>
+                <span class="text-base-content/40 italic">Not specified</span>
+              <% end %>
+            </dd>
+          </div>
+        </div>
+
+        <%# Validation Pattern %>
+        <div class="px-6 py-4">
+          <div class="sm:grid sm:grid-cols-3 sm:gap-6">
+            <dt class="text-sm font-semibold">Validation Pattern</dt>
+            <dd class="mt-2 text-sm sm:mt-0 sm:col-span-2">
+              <% if @environment_variable.validation_regex.present? %>
+                <code class="font-mono bg-base-200 px-2 py-1 rounded"><%= @environment_variable.validation_regex %></code>
+              <% else %>
+                <span class="text-base-content/40 italic">No validation</span>
+              <% end %>
+            </dd>
+          </div>
+        </div>
+
+        <%# Flags %>
+        <div class="px-6 py-4">
+          <div class="sm:grid sm:grid-cols-3 sm:gap-6">
+            <dt class="text-sm font-semibold">Flags</dt>
+            <dd class="mt-2 text-sm sm:mt-0 sm:col-span-2">
+              <div class="flex gap-2">
+                <% if @environment_variable.is_secret %>
+                  <span class="badge badge-warning gap-1">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Secret
+                  </span>
+                <% end %>
+                <% if @environment_variable.is_required %>
+                  <span class="badge badge-error gap-1">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Required
+                  </span>
+                <% end %>
+                <% unless @environment_variable.is_secret || @environment_variable.is_required %>
+                  <span class="text-base-content/40 italic">None</span>
+                <% end %>
+              </div>
+            </dd>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Metadata %>
+  <div class="mt-6 card bg-base-200/50">
+    <div class="card-body py-4">
+      <div class="flex flex-wrap gap-6 text-sm text-base-content/60">
+        <div>
+          <span class="font-medium">Created:</span>
+          <%= @environment_variable.created_at.strftime("%b %d, %Y at %H:%M") %>
+          by <%= @environment_variable.created_by&.full_name || "Unknown" %>
+        </div>
+        <% if @environment_variable.updated_by.present? %>
+          <div>
+            <span class="font-medium">Last updated:</span>
+            <%= @environment_variable.updated_at.strftime("%b %d, %Y at %H:%M") %>
+            by <%= @environment_variable.updated_by.full_name %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

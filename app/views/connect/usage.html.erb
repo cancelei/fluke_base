@@ -1,0 +1,128 @@
+<% content_for :title, "Usage Stats - FlukeBase Connect" %>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        Usage Statistics
+      </h1>
+      <p class="mt-2 text-gray-600 dark:text-gray-400">
+        Track your FlukeBase Connect activity
+      </p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="text-3xl font-bold text-blue-600"><%= @usage_stats[:total_syncs] %></div>
+        <div class="text-gray-500 dark:text-gray-400 text-sm">Total Syncs</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="text-3xl font-bold text-green-600"><%= @usage_stats[:syncs_this_month] %></div>
+        <div class="text-gray-500 dark:text-gray-400 text-sm">Syncs This Month</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="text-3xl font-bold text-purple-600"><%= @usage_stats[:memories_stored] %></div>
+        <div class="text-gray-500 dark:text-gray-400 text-sm">Memories Stored</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="text-3xl font-bold text-orange-600"><%= @usage_stats[:time_tracked_minutes] %></div>
+        <div class="text-gray-500 dark:text-gray-400 text-sm">Minutes Tracked</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Recent Time Entries -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Recent Time Entries
+          </h2>
+        </div>
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+          <% if @time_entries.any? %>
+            <% @time_entries.each do |entry| %>
+              <div class="p-4">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="font-medium text-gray-900 dark:text-white">
+                      <%= entry.try(:content) || "Time entry" %>
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                      <%= entry.try(:created_at)&.strftime("%b %d, %Y at %I:%M %p") %>
+                    </div>
+                  </div>
+                  <div class="text-sm font-medium text-blue-600">
+                    <%= entry.try(:references)&.dig("duration_minutes") || 0 %> min
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+              <p>No time entries yet.</p>
+              <p class="text-sm mt-2">
+                Use <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">wedo_sync_time</code> to track time.
+              </p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Usage Tips -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Usage Tips
+          </h2>
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="flex items-start space-x-3">
+            <span class="text-2xl">💡</span>
+            <div>
+              <div class="font-medium text-gray-900 dark:text-white">Sync frequently</div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Run <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">fbc sync</code> at the start of each session
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-3">
+            <span class="text-2xl">🧠</span>
+            <div>
+              <div class="font-medium text-gray-900 dark:text-white">Store knowledge</div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Use <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">remember</code> to save important decisions
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-3">
+            <span class="text-2xl">⏱️</span>
+            <div>
+              <div class="font-medium text-gray-900 dark:text-white">Track time</div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Use WeDo tasks and sync time for accurate billing
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-3">
+            <span class="text-2xl">🔍</span>
+            <div>
+              <div class="font-medium text-gray-900 dark:text-white">Run diagnostics</div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Use <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">fbc doctor</code> if something seems off
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-8">
+      <%= link_to connect_path, class: "text-blue-600 hover:text-blue-800" do %>
+        &larr; Back to Connect Portal
+      <% end %>
+    </div>
+  </div>
+</div>

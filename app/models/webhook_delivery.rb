@@ -65,7 +65,7 @@ class WebhookDelivery < ApplicationRecord
   # Record a successful delivery
   def record_success!(status_code:, response_body: nil)
     update!(
-      status_code: status_code,
+      status_code:,
       response_body: response_body&.truncate(10_000),
       delivered_at: Time.current,
       attempt_count: attempt_count + 1
@@ -79,7 +79,7 @@ class WebhookDelivery < ApplicationRecord
     next_delay = RETRY_DELAYS[[new_attempt_count - 1, RETRY_DELAYS.length - 1].min]
 
     update!(
-      status_code: status_code,
+      status_code:,
       response_body: response_body&.truncate(10_000),
       attempt_count: new_attempt_count,
       next_retry_at: new_attempt_count < MAX_ATTEMPTS ? Time.current + next_delay : nil

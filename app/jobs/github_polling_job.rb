@@ -4,6 +4,11 @@
 # Runs every 60 seconds via Solid Queue recurring jobs.
 # Uses the existing GithubCommitRefreshJob for commit fetching and Github::BranchesFetcher for branch discovery.
 #
+# Rate Limit Protection:
+# - Checks rate limit status before polling each project
+# - Skips projects whose tokens are at/near 85% threshold
+# - Tracks rate limit consumption per token to prevent exhaustion
+#
 # Token Strategy (per GitHub best practices):
 # - Prefers Installation Access Tokens for background tasks (app-attributed, higher rate limits)
 # - Falls back to User Access Tokens if no installation is available
@@ -12,6 +17,9 @@
 # See: https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app
 class GithubPollingJob < ApplicationJob
   queue_as :default
+
+  # Estimated API calls per branch poll (commits list + potential new commit details)
+  ESTIMATED_CALLS_PER_BRANCH = 5
 
   def perform
     Rails.logger.info "[GithubPolling] Starting scheduled poll cycle"
@@ -24,11 +32,18 @@ class GithubPollingJob < ApplicationJob
 
     Rails.logger.info "[GithubPolling] Found #{eligible_projects.count} eligible projects"
 
+    polled_count = 0
+    skipped_rate_limit = 0
+
     eligible_projects.each do |project|
-      poll_project(project)
+      if poll_project(project)
+        polled_count += 1
+      else
+        skipped_rate_limit += 1
+      end
     end
 
-    Rails.logger.info "[GithubPolling] Completed poll cycle for #{eligible_projects.count} projects"
+    Rails.logger.info "[GithubPolling] Completed poll cycle: #{polled_count} polled, #{skipped_rate_limit} skipped (rate limit)"
   end
 
   private
@@ -51,6 +66,7 @@ class GithubPollingJob < ApplicationJob
   end
 
   # Poll a single project for new commits and new branches
+  # @return [Boolean] true if polled, false if skipped due to rate limit
   def poll_project(project)
     # Get the best available token for this project
     # Prefers installation tokens for background tasks per GitHub best practices
@@ -58,13 +74,25 @@ class GithubPollingJob < ApplicationJob
 
     if token_info.nil?
       Rails.logger.warn "[GithubPolling] No valid token available for project #{project.id}"
-      return
+      return false
     end
 
     token = token_info[:token]
     token_type = token_info[:type]
 
-    Rails.logger.debug "[GithubPolling] Using #{token_type} token for project #{project.id}"
+    # Check rate limit before proceeding
+    rate_tracker = Github::RateLimitTracker.new(token)
+
+    # Estimate cost: 1 for branch check + (3 branches * ESTIMATED_CALLS_PER_BRANCH)
+    estimated_cost = 1 + (3 * ESTIMATED_CALLS_PER_BRANCH)
+
+    unless rate_tracker.can_make_request?(estimated_cost)
+      log_rate_limit_skip(project, token_type, rate_tracker)
+      return false
+    end
+
+    Rails.logger.debug "[GithubPolling] Using #{token_type} token for project #{project.id} " \
+                       "(rate limit: #{rate_tracker.consumption_percent}% consumed)"
 
     # Update polling timestamp before starting to prevent concurrent polls
     project.update_column(:github_last_polled_at, Time.current)
@@ -86,8 +114,20 @@ class GithubPollingJob < ApplicationJob
     end
 
     Rails.logger.info "[GithubPolling] Enqueued refresh for project #{project.id} (#{branches.count} branches, using #{token_type})"
+    true
   rescue => e
     Rails.logger.error "[GithubPolling] Error polling project #{project.id}: #{e.message}"
+    false
+  end
+
+  # Log when a project is skipped due to rate limiting
+  def log_rate_limit_skip(project, token_type, rate_tracker)
+    status = rate_tracker.current_status
+    wait_time = rate_tracker.wait_time_seconds
+
+    Rails.logger.warn "[GithubPolling] Skipping project #{project.id} - #{token_type} token at " \
+                      "#{rate_tracker.consumption_percent}% rate limit " \
+                      "(#{status[:remaining]}/#{status[:limit]} remaining, resets in #{wait_time}s)"
   end
 
   # Get the best available access token for a project
